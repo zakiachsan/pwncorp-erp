@@ -1,0 +1,141 @@
+/* ============================================================
+   SLDS 2 Design Tokens — pwncorp erp
+   Salesforce Lightning Design System inspired token set
+   ============================================================ */
+
+:root {
+  /* ---------------------------------------------------------
+     COLOR TOKENS
+     --------------------------------------------------------- */
+
+  /* Brand */
+  --slds-color-brand:            #0176d3;
+  --slds-color-brand-dark:       #014486;
+  --slds-color-brand-light:      #eef4ff;
+  --slds-color-brand-lighter:    #f3f8ff;
+  --slds-color-brand-dark-hover: #013772;
+
+  /* Text */
+  --slds-color-text:             #001526;
+  --slds-color-text-secondary:   #444746;
+  --slds-color-text-inverse:     #ffffff;
+  --slds-color-text-placeholder:  #939393;
+  --slds-color-text-link:        #0176d3;
+  --slds-color-text-link-hover:  #014486;
+
+  /* Status */
+  --slds-color-success:          #2e844a;
+  --slds-color-success-light:    #e3f6e9;
+  --slds-color-success-dark:     #1e5f34;
+  --slds-color-warning:          #fe9339;
+  --slds-color-warning-light:    #fff3e0;
+  --slds-color-warning-dark:     #d47a1f;
+  --slds-color-error:            #ea001e;
+  --slds-color-error-light:      #fde4e4;
+  --slds-color-error-dark:       #b30016;
+  --slds-color-info:             #0176d3;
+  --slds-color-info-light:       #eef4ff;
+
+  /* Neutral / Background */
+  --slds-color-background:       #f3f3f3;
+  --slds-color-background-alt:   #ffffff;
+  --slds-color-background-row:   #f3f3f3;
+  --slds-color-background-row-hover: #e8e8e8;
+  --slds-color-background-inverse: #001526;
+  --slds-color-background-surface: #ffffff;
+  --slds-color-border:           #c9c9c9;
+  --slds-color-border-light:     #e5e5e5;
+  --slds-color-border-input:     #c9c9c9;
+  --slds-color-border-input-focus: #0176d3;
+
+  /* Dividers */
+  --slds-color-divider:          #e5e5e5;
+
+  /* ---------------------------------------------------------
+     SPACING TOKENS (4 px grid)
+     --------------------------------------------------------- */
+  --slds-spacing-xs:   4px;
+  --slds-spacing-sm:   8px;
+  --slds-spacing-md:   12px;
+  --slds-spacing-lg:   16px;
+  --slds-spacing-xl:   24px;
+  --slds-spacing-2xl:  32px;
+  --slds-spacing-3xl:  48px;
+
+  /* ---------------------------------------------------------
+     TYPOGRAPHY TOKENS
+     --------------------------------------------------------- */
+
+  /* Font stacks */
+  --slds-font-family:    'Salesforce Sans', -apple-system, BlinkMacSystemFont,
+                          'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --slds-font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono',
+                            Menlo, monospace;
+
+  /* Font sizes */
+  --slds-font-size-body:   14px;
+  --slds-font-size-small:  12px;
+  --slds-font-size-large:  16px;
+  --slds-font-size-xlarge: 18px;
+  --slds-font-size-heading-1:   32px;
+  --slds-font-size-heading-2:   24px;
+  --slds-font-size-heading-3:   20px;
+  --slds-font-size-heading-4:   16px;
+  --slds-font-size-caption:     12px;
+
+  /* Font weights */
+  --slds-font-weight-normal:   400;
+  --slds-font-weight-bold:     700;
+  --slds-font-weight-light:    300;
+  --slds-font-weight-semibold: 600;
+
+  /* Line heights */
+  --slds-line-height-body:    1.5;
+  --slds-line-height-heading: 1.25;
+  --slds-line-height-caption: 1.375;
+
+  /* ---------------------------------------------------------
+     BORDER RADIUS TOKENS
+     --------------------------------------------------------- */
+  --slds-border-radius-sm:   4px;
+  --slds-border-radius-md:   8px;
+  --slds-border-radius-lg:   12px;
+  --slds-border-radius-pill: 1000px;
+  --slds-border-radius-full: 50%;
+
+  /* ---------------------------------------------------------
+     SHADOW TOKENS
+     --------------------------------------------------------- */
+  --slds-shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.1);
+  --slds-shadow-md:  0 2px 8px rgba(0, 0, 0, 0.12);
+  --slds-shadow-lg:  0 4px 16px rgba(0, 0, 0, 0.16);
+
+  /* Overlay / dropdown shadow */
+  --slds-shadow-overlay: 0 2px 12px rgba(0, 0, 0, 0.18);
+
+  /* ---------------------------------------------------------
+     TRANSITION TOKENS
+     --------------------------------------------------------- */
+  --slds-transition-duration:   200ms;
+  --slds-transition-easing:     cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------------------------------------------------------
+     Z-INDEX SCALE
+     --------------------------------------------------------- */
+  --slds-z-base:        1;
+  --slds-z-dropdown:    1000;
+  --slds-z-sticky:      1020;
+  --slds-z-fixed:       1030;
+  --slds-z-overlay:     1040;
+  --slds-z-modal:       1050;
+  --slds-z-popover:     1060;
+  --slds-z-tooltip:     1070;
+
+  /* ---------------------------------------------------------
+     LAYOUT-LEVEL CONVENIENCE TOKENS
+     --------------------------------------------------------- */
+  --slds-sidebar-width:        260px;
+  --slds-sidebar-width-collapsed: 64px;
+  --slds-header-height:        56px;
+  --slds-mobile-breakpoint:    768px;
+}

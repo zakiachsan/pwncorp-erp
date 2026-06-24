@@ -1,0 +1,1384 @@
+<!-- ============================================================
+     MODULE 6 — DASHBOARD & REPORTS
+     Operational Dashboard + Financial Dashboard
+     ============================================================ -->
+<style>
+  /* ---------------------------------------------------------
+     MODULE 6 — Dashboard & Reports
+     Additional component styles
+     --------------------------------------------------------- */
+
+  /* ---------------------------------------------------------
+     DASHBOARD METRIC CARDS (top row)
+     --------------------------------------------------------- */
+  .dash-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--slds-spacing-lg);
+    margin-bottom: var(--slds-spacing-xl);
+  }
+
+  .dash-metric {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    padding: var(--slds-spacing-lg);
+    box-shadow: var(--slds-shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-metric::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .dash-metric--blue::before    { background: var(--slds-color-brand); }
+  .dash-metric--green::before   { background: var(--slds-color-success); }
+  .dash-metric--orange::before  { background: var(--slds-color-warning); }
+  .dash-metric--red::before     { background: var(--slds-color-error); }
+
+  .dash-metric__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--slds-border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: var(--slds-spacing-sm);
+  }
+
+  .dash-metric__icon--blue   { background: var(--slds-color-info-light); color: var(--slds-color-brand); }
+  .dash-metric__icon--green  { background: var(--slds-color-success-light); color: var(--slds-color-success); }
+  .dash-metric__icon--orange { background: var(--slds-color-warning-light); color: var(--slds-color-warning-dark); }
+  .dash-metric__icon--red    { background: var(--slds-color-error-light); color: var(--slds-color-error); }
+
+  .dash-metric__label {
+    font-size: var(--slds-font-size-small);
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .dash-metric__value {
+    font-size: var(--slds-font-size-heading-2);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    margin-top: var(--slds-spacing-xs);
+    line-height: 1.2;
+  }
+
+  .dash-metric__delta {
+    font-size: var(--slds-font-size-small);
+    margin-top: var(--slds-spacing-xs);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dash-metric__delta--up   { color: var(--slds-color-success); }
+  .dash-metric__delta--down { color: var(--slds-color-error); }
+
+  /* ---------------------------------------------------------
+     DASHBOARD GRID ROWS
+     --------------------------------------------------------- */
+  .dash-row {
+    display: grid;
+    gap: var(--slds-spacing-lg);
+    margin-bottom: var(--slds-spacing-xl);
+  }
+
+  .dash-row--2col  { grid-template-columns: 3fr 2fr; }
+  .dash-row--1fr   { grid-template-columns: 1fr; }
+
+  .dash-card {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    box-shadow: var(--slds-shadow-sm);
+    padding: var(--slds-spacing-lg);
+  }
+
+  .dash-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--slds-spacing-lg);
+    padding-bottom: var(--slds-spacing-md);
+    border-bottom: 1px solid var(--slds-color-border-light);
+  }
+
+  .dash-card__title {
+    font-size: var(--slds-font-size-heading-4);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+  }
+
+  .dash-card__subtitle {
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ---------------------------------------------------------
+     CSS-ONLY BAR CHART
+     --------------------------------------------------------- */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--slds-spacing-sm);
+    height: 180px;
+    padding-top: var(--slds-spacing-md);
+    border-bottom: 1px solid var(--slds-color-border-light);
+    position: relative;
+  }
+
+  .bar-chart__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-spacing-xs);
+    position: relative;
+  }
+
+  .bar-chart__bar {
+    width: 100%;
+    max-width: 40px;
+    border-radius: var(--slds-border-radius-sm) var(--slds-border-radius-sm) 0 0;
+    background: var(--slds-color-brand);
+    transition: background var(--slds-transition-duration) var(--slds-transition-easing);
+    position: relative;
+  }
+
+  .bar-chart__bar:hover {
+    background: var(--slds-color-brand-dark);
+  }
+
+  .bar-chart__label {
+    font-size: var(--slds-font-size-caption);
+    color: var(--slds-color-text-secondary);
+    text-align: center;
+    padding-top: var(--slds-spacing-xs);
+  }
+
+  .bar-chart__value {
+    font-size: 11px;
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ---------------------------------------------------------
+     CSS-ONLY PIE / DONUT CHART
+     --------------------------------------------------------- */
+  .pie-chart-container {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-spacing-xl);
+  }
+
+  .pie-chart {
+    width: 160px;
+    height: 160px;
+    border-radius: var(--slds-border-radius-full);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .pie-chart__center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70px;
+    height: 70px;
+    background: var(--slds-color-background-surface);
+    border-radius: var(--slds-border-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .pie-chart__center-value {
+    font-size: var(--slds-font-size-heading-4);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    line-height: 1;
+  }
+
+  .pie-chart__center-label {
+    font-size: 10px;
+    color: var(--slds-color-text-secondary);
+  }
+
+  .pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-spacing-sm);
+  }
+
+  .pie-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-spacing-sm);
+    font-size: var(--slds-font-size-body);
+  }
+
+  .pie-legend__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--slds-border-radius-full);
+    flex-shrink: 0;
+  }
+
+  .pie-legend__label {
+    color: var(--slds-color-text-secondary);
+    flex: 1;
+  }
+
+  .pie-legend__value {
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text);
+  }
+
+  /* Donut chart: conic-gradient pie + white center */
+  .donut-chart {
+    width: 180px;
+    height: 180px;
+    border-radius: var(--slds-border-radius-full);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .donut-chart__center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: var(--slds-color-background-surface);
+    border-radius: var(--slds-border-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .donut-chart__center-value {
+    font-size: var(--slds-font-size-heading-4);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    line-height: 1;
+  }
+
+  .donut-chart__center-label {
+    font-size: 10px;
+    color: var(--slds-color-text-secondary);
+  }
+
+  /* ---------------------------------------------------------
+     CSS-ONLY LINE CHART
+     --------------------------------------------------------- */
+  .line-chart {
+    position: relative;
+    height: 200px;
+    padding: var(--slds-spacing-md) 0;
+  }
+
+  .line-chart__grid {
+    position: absolute;
+    top: var(--slds-spacing-md);
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .line-chart__gridline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed var(--slds-color-border-light);
+  }
+
+  .line-chart__labels {
+    display: flex;
+    justify-content: space-between;
+    padding-top: var(--slds-spacing-sm);
+  }
+
+  .line-chart__label {
+    font-size: var(--slds-font-size-caption);
+    color: var(--slds-color-text-secondary);
+    text-align: center;
+  }
+
+  /* Stacked bar representation for line chart */
+  .line-chart__series {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    height: 160px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .line-chart__point-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .line-chart__point-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 4px;
+  }
+
+  .line-chart__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--slds-border-radius-full);
+    border: 2px solid var(--slds-color-background-surface);
+    position: relative;
+    z-index: 2;
+  }
+
+  .line-chart__line-segment {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .line-chart__tooltip {
+    font-size: 11px;
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text-secondary);
+    white-space: nowrap;
+  }
+
+  /* Simple stacked bar approach for line chart data */
+  .line-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--slds-spacing-lg);
+    height: 170px;
+    position: relative;
+  }
+
+  .line-bars::before {
+    content: '';
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--slds-color-border-light);
+  }
+
+  .line-bars__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-spacing-xs);
+    position: relative;
+  }
+
+  .line-bars__pair {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+  }
+
+  .line-bars__bar {
+    width: 18px;
+    border-radius: 3px 3px 0 0;
+    transition: opacity var(--slds-transition-duration) var(--slds-transition-easing);
+  }
+
+  .line-bars__bar:hover {
+    opacity: 0.8;
+  }
+
+  .line-bars__bar--revenue {
+    background: var(--slds-color-brand);
+  }
+
+  .line-bars__bar--expense {
+    background: var(--slds-color-warning);
+  }
+
+  .line-bars__labels {
+    display: flex;
+    gap: var(--slds-spacing-lg);
+    padding-top: var(--slds-spacing-sm);
+  }
+
+  .line-bars__label {
+    flex: 1;
+    text-align: center;
+    font-size: var(--slds-font-size-caption);
+    color: var(--slds-color-text-secondary);
+  }
+
+  /* ---------------------------------------------------------
+     MECHANIC PERFORMANCE CARDS
+     --------------------------------------------------------- */
+  .mech-perf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--slds-spacing-lg);
+  }
+
+  .mech-card {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    padding: var(--slds-spacing-lg);
+    box-shadow: var(--slds-shadow-sm);
+    display: flex;
+    gap: var(--slds-spacing-lg);
+    align-items: flex-start;
+  }
+
+  .mech-card__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--slds-border-radius-full);
+    background: var(--slds-color-brand-light);
+    color: var(--slds-color-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--slds-font-weight-bold);
+    font-size: var(--slds-font-size-large);
+    flex-shrink: 0;
+  }
+
+  .mech-card__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mech-card__name {
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text);
+    margin-bottom: 2px;
+  }
+
+  .mech-card__role {
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+    margin-bottom: var(--slds-spacing-sm);
+  }
+
+  .mech-card__stats {
+    display: flex;
+    gap: var(--slds-spacing-lg);
+  }
+
+  .mech-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mech-stat__value {
+    font-size: var(--slds-font-size-large);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    line-height: 1;
+  }
+
+  .mech-stat__label {
+    font-size: var(--slds-font-size-caption);
+    color: var(--slds-color-text-secondary);
+    margin-top: 2px;
+  }
+
+  .mech-card__bar-wrap {
+    margin-top: var(--slds-spacing-sm);
+    width: 100%;
+  }
+
+  .mech-card__bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--slds-font-size-caption);
+    color: var(--slds-color-text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .mech-card__bar-track {
+    width: 100%;
+    height: 6px;
+    background: var(--slds-color-background);
+    border-radius: var(--slds-border-radius-pill);
+    overflow: hidden;
+  }
+
+  .mech-card__bar-fill {
+    height: 100%;
+    border-radius: var(--slds-border-radius-pill);
+    background: var(--slds-color-success);
+  }
+
+  /* ---------------------------------------------------------
+     CASH FLOW SUMMARY CARDS
+     --------------------------------------------------------- */
+  .cashflow-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--slds-spacing-lg);
+  }
+
+  .cashflow-card {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    padding: var(--slds-spacing-lg);
+    box-shadow: var(--slds-shadow-sm);
+    text-align: center;
+  }
+
+  .cashflow-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--slds-border-radius-full);
+    margin: 0 auto var(--slds-spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .cashflow-card__icon--in   { background: var(--slds-color-success-light); }
+  .cashflow-card__icon--out  { background: var(--slds-color-error-light); }
+  .cashflow-card__icon--net  { background: var(--slds-color-info-light); }
+  .cashflow-card__icon--bal  { background: var(--slds-color-warning-light); }
+
+  .cashflow-card__label {
+    font-size: var(--slds-font-size-small);
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .cashflow-card__value {
+    font-size: var(--slds-font-size-heading-3);
+    font-weight: var(--slds-font-weight-bold);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  .cashflow-card__value--green { color: var(--slds-color-success); }
+  .cashflow-card__value--red   { color: var(--slds-color-error); }
+  .cashflow-card__value--blue  { color: var(--slds-color-brand); }
+
+  .cashflow-card__sub {
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  /* ---------------------------------------------------------
+     CHART LEGEND (horizontal)
+     --------------------------------------------------------- */
+  .chart-legend {
+    display: flex;
+    gap: var(--slds-spacing-xl);
+    justify-content: center;
+    margin-top: var(--slds-spacing-md);
+  }
+
+  .chart-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-spacing-xs);
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+  }
+
+  .chart-legend__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--slds-border-radius-full);
+    flex-shrink: 0;
+  }
+
+  /* ---------------------------------------------------------
+     RESPONSIVE — TABLETS & MOBILE
+     --------------------------------------------------------- */
+  @media (max-width: 1024px) {
+    .dash-metrics {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dash-row--2col {
+      grid-template-columns: 1fr;
+    }
+
+    .mech-perf-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cashflow-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dash-metrics {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mech-perf-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cashflow-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pie-chart-container,
+    .pie-chart-container--donut {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .bar-chart {
+      height: 140px;
+    }
+
+    .line-bars {
+      gap: var(--slds-spacing-md);
+      height: 150px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .dash-metrics {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<!-- ============================================================
+     VIEW: OPERATIONAL DASHBOARD
+     id="ops-dashboard"
+     ============================================================ -->
+<div class="view" id="ops-dashboard" hidden>
+
+  <!-- PAGE HEADER -->
+  <div class="view-header">
+    <div class="view-title">
+      <span class="view-title__icon" style="background: var(--slds-color-brand);">📊</span>
+      Operational Dashboard
+    </div>
+    <div class="view-actions">
+      <span style="font-size: var(--slds-font-size-small); color: var(--slds-color-text-secondary);">Last updated: 24 Jun 2026, 14:32 WIB</span>
+      <button class="btn btn--sm">⟳ Refresh</button>
+      <button class="btn btn--sm">⬇ Export</button>
+    </div>
+  </div>
+
+  <!-- ROW 1: METRIC CARDS -->
+  <div class="dash-metrics">
+    <div class="dash-metric dash-metric--blue">
+      <div class="dash-metric__icon dash-metric__icon--blue">📋</div>
+      <div class="dash-metric__label">Total WO Today</div>
+      <div class="dash-metric__value">12</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +3 vs yesterday</div>
+    </div>
+    <div class="dash-metric dash-metric--orange">
+      <div class="dash-metric__icon dash-metric__icon--orange">🔧</div>
+      <div class="dash-metric__label">WO In Progress</div>
+      <div class="dash-metric__value">8</div>
+      <div class="dash-metric__delta dash-metric__delta--down">▼ -1 vs yesterday</div>
+    </div>
+    <div class="dash-metric dash-metric--green">
+      <div class="dash-metric__icon dash-metric__icon--green">✅</div>
+      <div class="dash-metric__label">WO Completed Today</div>
+      <div class="dash-metric__value">4</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +2 vs yesterday</div>
+    </div>
+    <div class="dash-metric dash-metric--green">
+      <div class="dash-metric__icon dash-metric__icon--green">💰</div>
+      <div class="dash-metric__label">Revenue Today</div>
+      <div class="dash-metric__value">Rp 15.2M</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +Rp 3.1M vs yesterday</div>
+    </div>
+    <div class="dash-metric dash-metric--red">
+      <div class="dash-metric__icon dash-metric__icon--red">📦</div>
+      <div class="dash-metric__label">Low Stock Items</div>
+      <div class="dash-metric__value">6</div>
+      <div class="dash-metric__delta dash-metric__delta--down">▲ +2 new alerts</div>
+    </div>
+    <div class="dash-metric dash-metric--orange">
+      <div class="dash-metric__icon dash-metric__icon--orange">📄</div>
+      <div class="dash-metric__label">Pending Invoices</div>
+      <div class="dash-metric__value">5</div>
+      <div class="dash-metric__delta dash-metric__delta--down">▼ -2 vs yesterday</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: BAR CHART + PIE CHART -->
+  <div class="dash-row dash-row--2col">
+    <!-- Bar Chart: WO Count per Day -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div>
+          <div class="dash-card__title">Work Orders per Day</div>
+          <div class="dash-card__subtitle">Last 7 days</div>
+        </div>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 55%;"><span class="bar-chart__value">11</span></div>
+          <div class="bar-chart__label">Mon</div>
+        </div>
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 70%;"><span class="bar-chart__value">14</span></div>
+          <div class="bar-chart__label">Tue</div>
+        </div>
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 45%;"><span class="bar-chart__value">9</span></div>
+          <div class="bar-chart__label">Wed</div>
+        </div>
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 80%;"><span class="bar-chart__value">16</span></div>
+          <div class="bar-chart__label">Thu</div>
+        </div>
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 65%;"><span class="bar-chart__value">13</span></div>
+          <div class="bar-chart__label">Fri</div>
+        </div>
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 90%;"><span class="bar-chart__value">18</span></div>
+          <div class="bar-chart__label">Sat</div>
+        </div>
+        <div class="bar-chart__item">
+          <div class="bar-chart__bar" style="height: 60%; background: var(--slds-color-success);"><span class="bar-chart__value">12</span></div>
+          <div class="bar-chart__label"><strong>Today</strong></div>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <div class="chart-legend__item"><span class="chart-legend__dot" style="background: var(--slds-color-brand);"></span> Past days</div>
+        <div class="chart-legend__item"><span class="chart-legend__dot" style="background: var(--slds-color-success);"></span> Today</div>
+      </div>
+    </div>
+
+    <!-- Pie Chart: WO by Status -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div>
+          <div class="dash-card__title">WO by Status</div>
+          <div class="dash-card__subtitle">Current active orders</div>
+        </div>
+      </div>
+      <div class="pie-chart-container">
+        <!-- Pie: conic-gradient
+             Waiting: 20% → #9ca3af
+             In Progress: 35% → #0176d3
+             QC: 15% → #fe9339
+             Completed: 30% → #2e844a
+             Stop points: 0 20% 55% 70%
+        -->
+        <div class="pie-chart" style="background: conic-gradient(
+          #9ca3af 0deg 72deg,
+          #0176d3 72deg 198deg,
+          #fe9339 198deg 252deg,
+          #2e844a 252deg 360deg
+        );">
+          <div class="pie-chart__center">
+            <div class="pie-chart__center-value">20</div>
+            <div class="pie-chart__center-label">Total</div>
+          </div>
+        </div>
+        <div class="pie-legend">
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: #9ca3af;"></span>
+            <span class="pie-legend__label">Waiting</span>
+            <span class="pie-legend__value">4 (20%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: #0176d3;"></span>
+            <span class="pie-legend__label">In Progress</span>
+            <span class="pie-legend__value">7 (35%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: #fe9339;"></span>
+            <span class="pie-legend__label">QC</span>
+            <span class="pie-legend__value">3 (15%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: #2e844a;"></span>
+            <span class="pie-legend__label">Completed</span>
+            <span class="pie-legend__value">6 (30%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: TABLES -->
+  <div class="dash-row dash-row--2col">
+    <!-- Recent Work Orders Table -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div class="dash-card__title">Recent Work Orders</div>
+        <button class="btn btn--sm btn--link">View All →</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>WO #</th>
+              <th>Customer</th>
+              <th>Vehicle</th>
+              <th>Status</th>
+              <th class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-link"><a href="#">WO-20260624-001</a></td>
+              <td>Budi Santoso</td>
+              <td>Toyota Avanza</td>
+              <td><span class="pill pill--in-progress">In Progress</span></td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums;">Rp 2.450.000</td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">WO-20260624-002</a></td>
+              <td>Dewi Lestari</td>
+              <td>Honda Brio</td>
+              <td><span class="pill pill--in-progress">In Progress</span></td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums;">Rp 1.875.000</td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">WO-20260624-003</a></td>
+              <td>Andi Pratama</td>
+              <td>Suzuki Ertiga</td>
+              <td><span class="pill pill--waiting">Waiting</span></td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums;">Rp 3.200.000</td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">WO-20260624-004</a></td>
+              <td>Sari Purnama</td>
+              <td>Daihatsu Xenia</td>
+              <td><span class="pill pill--approved">QC</span></td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums;">Rp 950.000</td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">WO-20260624-005</a></td>
+              <td>Rizky Firmansyah</td>
+              <td>Mitsubishi Xpander</td>
+              <td><span class="pill pill--approved">Completed</span></td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums;">Rp 4.750.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Low Stock Alert Table -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div class="dash-card__title">Low Stock Alert</div>
+        <button class="btn btn--sm btn--link">Manage Stock →</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>SKU</th>
+              <th class="text-center">Stock</th>
+              <th class="text-center">Min.</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Oil Filter 10891</td>
+              <td style="font-family: var(--slds-font-family-mono); font-size: var(--slds-font-size-small);">OF-10891</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-bold); color: var(--slds-color-error);">2</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">10</td>
+              <td><span class="pill" style="background: var(--slds-color-error); color: #fff;">Out of Stock Risk</span></td>
+            </tr>
+            <tr>
+              <td>Brake Pad Set A</td>
+              <td style="font-family: var(--slds-font-family-mono); font-size: var(--slds-font-size-small);">BP-SET-A</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-bold); color: var(--slds-color-warning);">4</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">8</td>
+              <td><span class="pill pill--low-stock">Low Stock</span></td>
+            </tr>
+            <tr>
+              <td>Spark Plug NGK</td>
+              <td style="font-family: var(--slds-font-family-mono); font-size: var(--slds-font-size-small);">SP-NGK-BP6</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-bold); color: var(--slds-color-warning);">5</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">12</td>
+              <td><span class="pill pill--low-stock">Low Stock</span></td>
+            </tr>
+            <tr>
+              <td>Transmission Fluid 4L</td>
+              <td style="font-family: var(--slds-font-family-mono); font-size: var(--slds-font-size-small);">TF-ATF-4L</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-bold); color: var(--slds-color-warning);">3</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">6</td>
+              <td><span class="pill pill--low-stock">Low Stock</span></td>
+            </tr>
+            <tr>
+              <td>Air Filter Element</td>
+              <td style="font-family: var(--slds-font-family-mono); font-size: var(--slds-font-size-small);">AF-ELEM-02</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-bold); color: var(--slds-color-error);">1</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">5</td>
+              <td><span class="pill" style="background: var(--slds-color-error); color: #fff;">Out of Stock Risk</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: MECHANIC PERFORMANCE CARDS -->
+  <div class="dash-row dash-row--1fr">
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div class="dash-card__title">Mechanic Performance</div>
+        <div class="dash-card__subtitle">This month</div>
+      </div>
+      <div class="mech-perf-grid">
+        <!-- Mechanic 1 -->
+        <div class="mech-card">
+          <div class="mech-card__avatar">BS</div>
+          <div class="mech-card__info">
+            <div class="mech-card__name">Bambang S.</div>
+            <div class="mech-card__role">Senior Mechanic</div>
+            <div class="mech-card__stats">
+              <div class="mech-stat">
+                <div class="mech-stat__value">28</div>
+                <div class="mech-stat__label">WO Completed</div>
+              </div>
+              <div class="mech-stat">
+                <div class="mech-stat__value">2.5h</div>
+                <div class="mech-stat__label">Avg Time</div>
+              </div>
+            </div>
+            <div class="mech-card__bar-wrap">
+              <div class="mech-card__bar-label">
+                <span>Efficiency</span>
+                <span>92%</span>
+              </div>
+              <div class="mech-card__bar-track">
+                <div class="mech-card__bar-fill" style="width: 92%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mechanic 2 -->
+        <div class="mech-card">
+          <div class="mech-card__avatar" style="background: var(--slds-color-success-light); color: var(--slds-color-success);">AR</div>
+          <div class="mech-card__info">
+            <div class="mech-card__name">Agus R.</div>
+            <div class="mech-card__role">Mechanic</div>
+            <div class="mech-card__stats">
+              <div class="mech-stat">
+                <div class="mech-stat__value">22</div>
+                <div class="mech-stat__label">WO Completed</div>
+              </div>
+              <div class="mech-stat">
+                <div class="mech-stat__value">3.1h</div>
+                <div class="mech-stat__label">Avg Time</div>
+              </div>
+            </div>
+            <div class="mech-card__bar-wrap">
+              <div class="mech-card__bar-label">
+                <span>Efficiency</span>
+                <span>85%</span>
+              </div>
+              <div class="mech-card__bar-track">
+                <div class="mech-card__bar-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mechanic 3 -->
+        <div class="mech-card">
+          <div class="mech-card__avatar" style="background: var(--slds-color-warning-light); color: var(--slds-color-warning-dark);">DW</div>
+          <div class="mech-card__info">
+            <div class="mech-card__name">Dwi W.</div>
+            <div class="mech-card__role">Junior Mechanic</div>
+            <div class="mech-card__stats">
+              <div class="mech-stat">
+                <div class="mech-stat__value">18</div>
+                <div class="mech-stat__label">WO Completed</div>
+              </div>
+              <div class="mech-stat">
+                <div class="mech-stat__value">3.8h</div>
+                <div class="mech-stat__label">Avg Time</div>
+              </div>
+            </div>
+            <div class="mech-card__bar-wrap">
+              <div class="mech-card__bar-label">
+                <span>Efficiency</span>
+                <span>78%</span>
+              </div>
+              <div class="mech-card__bar-track">
+                <div class="mech-card__bar-fill" style="width: 78%; background: var(--slds-color-warning);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- /#ops-dashboard -->
+
+
+<!-- ============================================================
+     VIEW: FINANCIAL DASHBOARD
+     id="fin-dashboard"
+     ============================================================ -->
+<div class="view" id="fin-dashboard" hidden>
+
+  <!-- PAGE HEADER -->
+  <div class="view-header">
+    <div class="view-title">
+      <span class="view-title__icon" style="background: var(--slds-color-success);">📈</span>
+      Financial Dashboard
+    </div>
+    <div class="view-actions">
+      <select class="form-select" style="width: auto; height: 32px; font-size: var(--slds-font-size-small);">
+        <option>June 2026</option>
+        <option>May 2026</option>
+        <option>April 2026</option>
+      </select>
+      <button class="btn btn--sm">⬇ Export</button>
+    </div>
+  </div>
+
+  <!-- ROW 1: METRIC CARDS -->
+  <div class="dash-metrics">
+    <div class="dash-metric dash-metric--green">
+      <div class="dash-metric__icon dash-metric__icon--green">📈</div>
+      <div class="dash-metric__label">Monthly Revenue</div>
+      <div class="dash-metric__value">Rp 145M</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +12% vs last month</div>
+    </div>
+    <div class="dash-metric dash-metric--red">
+      <div class="dash-metric__icon dash-metric__icon--red">📉</div>
+      <div class="dash-metric__label">Monthly Expense</div>
+      <div class="dash-metric__value">Rp 87M</div>
+      <div class="dash-metric__delta dash-metric__delta--down">▲ +5% vs last month</div>
+    </div>
+    <div class="dash-metric dash-metric--green">
+      <div class="dash-metric__icon dash-metric__icon--green">💵</div>
+      <div class="dash-metric__label">Net Profit</div>
+      <div class="dash-metric__value">Rp 58M</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +18% vs last month</div>
+    </div>
+    <div class="dash-metric dash-metric--orange">
+      <div class="dash-metric__icon dash-metric__icon--orange">📤</div>
+      <div class="dash-metric__label">AR Outstanding</div>
+      <div class="dash-metric__value">Rp 14.8M</div>
+      <div class="dash-metric__delta dash-metric__delta--down">▼ -Rp 2.1M vs last month</div>
+    </div>
+    <div class="dash-metric dash-metric--orange">
+      <div class="dash-metric__icon dash-metric__icon--orange">📥</div>
+      <div class="dash-metric__label">AP Outstanding</div>
+      <div class="dash-metric__value">Rp 8.9M</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +Rp 1.2M vs last month</div>
+    </div>
+    <div class="dash-metric dash-metric--blue">
+      <div class="dash-metric__icon dash-metric__icon--blue">🏦</div>
+      <div class="dash-metric__label">Cash Balance</div>
+      <div class="dash-metric__value">Rp 32.5M</div>
+      <div class="dash-metric__delta dash-metric__delta--up">▲ +Rp 4.3M vs last month</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: LINE CHART (Revenue vs Expense) + DONUT CHART -->
+  <div class="dash-row dash-row--2col">
+    <!-- Bar chart showing revenue vs expense per month -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div>
+          <div class="dash-card__title">Revenue vs Expense</div>
+          <div class="dash-card__subtitle">Last 6 months (Rp Million)</div>
+        </div>
+      </div>
+      <div class="line-bars">
+        <div class="line-bars__item">
+          <div class="line-bars__pair">
+            <div class="line-bars__bar line-bars__bar--revenue" style="height: 95px;" title="Revenue: Rp 118M"></div>
+            <div class="line-bars__bar line-bars__bar--expense" style="height: 68px;" title="Expense: Rp 78M"></div>
+          </div>
+          <div class="line-bars__label">Jan</div>
+        </div>
+        <div class="line-bars__item">
+          <div class="line-bars__pair">
+            <div class="line-bars__bar line-bars__bar--revenue" style="height: 105px;" title="Revenue: Rp 128M"></div>
+            <div class="line-bars__bar line-bars__bar--expense" style="height: 72px;" title="Expense: Rp 82M"></div>
+          </div>
+          <div class="line-bars__label">Feb</div>
+        </div>
+        <div class="line-bars__item">
+          <div class="line-bars__pair">
+            <div class="line-bars__bar line-bars__bar--revenue" style="height: 90px;" title="Revenue: Rp 110M"></div>
+            <div class="line-bars__bar line-bars__bar--expense" style="height: 76px;" title="Expense: Rp 86M"></div>
+          </div>
+          <div class="line-bars__label">Mar</div>
+        </div>
+        <div class="line-bars__item">
+          <div class="line-bars__pair">
+            <div class="line-bars__bar line-bars__bar--revenue" style="height: 112px;" title="Revenue: Rp 135M"></div>
+            <div class="line-bars__bar line-bars__bar--expense" style="height: 70px;" title="Expense: Rp 80M"></div>
+          </div>
+          <div class="line-bars__label">Apr</div>
+        </div>
+        <div class="line-bars__item">
+          <div class="line-bars__pair">
+            <div class="line-bars__bar line-bars__bar--revenue" style="height: 108px;" title="Revenue: Rp 130M"></div>
+            <div class="line-bars__bar line-bars__bar--expense" style="height: 75px;" title="Expense: Rp 85M"></div>
+          </div>
+          <div class="line-bars__label">May</div>
+        </div>
+        <div class="line-bars__item">
+          <div class="line-bars__pair">
+            <div class="line-bars__bar line-bars__bar--revenue" style="height: 118px;" title="Revenue: Rp 145M"></div>
+            <div class="line-bars__bar line-bars__bar--expense" style="height: 70px;" title="Expense: Rp 87M"></div>
+          </div>
+          <div class="line-bars__label"><strong>Jun</strong></div>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <div class="chart-legend__item"><span class="chart-legend__dot" style="background: var(--slds-color-brand);"></span> Revenue</div>
+        <div class="chart-legend__item"><span class="chart-legend__dot" style="background: var(--slds-color-warning);"></span> Expense</div>
+      </div>
+    </div>
+
+    <!-- Donut Chart: Expense Breakdown -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div>
+          <div class="dash-card__title">Expense Breakdown</div>
+          <div class="dash-card__subtitle">Current month</div>
+        </div>
+      </div>
+      <div class="pie-chart-container">
+        <!-- Donut: Spareparts 35%, Labor 25%, Rent 20%, Utilities 12%, Other 8%
+             Conic gradient: 0 126deg 216deg 288deg 331.2deg
+        -->
+        <div class="donut-chart" style="background: conic-gradient(
+          var(--slds-color-brand) 0deg 126deg,
+          var(--slds-color-success) 126deg 216deg,
+          var(--slds-color-warning) 216deg 288deg,
+          #7c3aed 288deg 331.2deg,
+          #6b7280 331.2deg 360deg
+        );">
+          <div class="donut-chart__center">
+            <div class="donut-chart__center-value">Rp 87M</div>
+            <div class="donut-chart__center-label">Total</div>
+          </div>
+        </div>
+        <div class="pie-legend">
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: var(--slds-color-brand);"></span>
+            <span class="pie-legend__label">Spareparts</span>
+            <span class="pie-legend__value">Rp 30.5M (35%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: var(--slds-color-success);"></span>
+            <span class="pie-legend__label">Labor Cost</span>
+            <span class="pie-legend__value">Rp 21.8M (25%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: var(--slds-color-warning);"></span>
+            <span class="pie-legend__label">Rent & Facility</span>
+            <span class="pie-legend__value">Rp 17.4M (20%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: #7c3aed;"></span>
+            <span class="pie-legend__label">Utilities</span>
+            <span class="pie-legend__value">Rp 10.4M (12%)</span>
+          </div>
+          <div class="pie-legend__item">
+            <span class="pie-legend__dot" style="background: #6b7280;"></span>
+            <span class="pie-legend__label">Other</span>
+            <span class="pie-legend__value">Rp 6.9M (8%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: TABLES -->
+  <div class="dash-row dash-row--2col">
+    <!-- Top Customers by Revenue -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div class="dash-card__title">Top Customers by Revenue</div>
+        <button class="btn btn--sm btn--link">View All →</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer</th>
+              <th class="text-center">WO Count</th>
+              <th class="text-right">Total Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: var(--slds-font-weight-bold); color: var(--slds-color-text-secondary);">1</td>
+              <td><strong>PT Mobil Sejahtera</strong></td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">24</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 28.500.000</td>
+            </tr>
+            <tr>
+              <td style="font-weight: var(--slds-font-weight-bold); color: var(--slds-color-text-secondary);">2</td>
+              <td><strong>Ahmad Wijaya</strong></td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">18</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 19.200.000</td>
+            </tr>
+            <tr>
+              <td style="font-weight: var(--slds-font-weight-bold); color: var(--slds-color-text-secondary);">3</td>
+              <td><strong>CV Logistik Utama</strong></td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">15</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 16.800.000</td>
+            </tr>
+            <tr>
+              <td style="font-weight: var(--slds-font-weight-bold); color: var(--slds-color-text-secondary);">4</td>
+              <td><strong>Rina Sari</strong></td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">12</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 12.400.000</td>
+            </tr>
+            <tr>
+              <td style="font-weight: var(--slds-font-weight-bold); color: var(--slds-color-text-secondary);">5</td>
+              <td><strong>PT Transport Bersama</strong></td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">10</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 9.800.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Upcoming Payments -->
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div class="dash-card__title">Upcoming Payments</div>
+        <button class="btn btn--sm btn--link">View All →</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Customer</th>
+              <th class="text-center">Due Date</th>
+              <th class="text-right">Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-link"><a href="#">INV-20260620-008</a></td>
+              <td>PT Mobil Sejahtera</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">26 Jun</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 3.200.000</td>
+              <td><span class="pill" style="background: var(--slds-color-error); color: #fff;">Overdue</span></td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">INV-20260621-011</a></td>
+              <td>Ahmad Wijaya</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">28 Jun</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 4.500.000</td>
+              <td><span class="pill pill--in-progress">Due Soon</span></td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">INV-20260622-014</a></td>
+              <td>CV Logistik Utama</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">30 Jun</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 2.800.000</td>
+              <td><span class="pill pill--in-progress">Due Soon</span></td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">INV-20260623-017</a></td>
+              <td>Rina Sari</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">5 Jul</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 1.950.000</td>
+              <td><span class="pill pill--draft">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="col-link"><a href="#">INV-20260623-019</a></td>
+              <td>PT Transport Bersama</td>
+              <td class="text-center" style="font-variant-numeric: tabular-nums;">8 Jul</td>
+              <td class="text-right" style="font-variant-numeric: tabular-nums; font-weight: var(--slds-font-weight-semibold);">Rp 2.350.000</td>
+              <td><span class="pill pill--draft">Pending</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: CASH FLOW SUMMARY CARDS -->
+  <div class="dash-row dash-row--1fr">
+    <div class="dash-card">
+      <div class="dash-card__header">
+        <div class="dash-card__title">Cash Flow Summary</div>
+        <div class="dash-card__subtitle">This month</div>
+      </div>
+      <div class="cashflow-grid">
+        <div class="cashflow-card">
+          <div class="cashflow-card__icon cashflow-card__icon--in">📥</div>
+          <div class="cashflow-card__label">Cash In</div>
+          <div class="cashflow-card__value cashflow-card__value--green">Rp 132.4M</div>
+          <div class="cashflow-card__sub">42 transactions</div>
+        </div>
+        <div class="cashflow-card">
+          <div class="cashflow-card__icon cashflow-card__icon--out">📤</div>
+          <div class="cashflow-card__label">Cash Out</div>
+          <div class="cashflow-card__value cashflow-card__value--red">Rp 104.7M</div>
+          <div class="cashflow-card__sub">38 transactions</div>
+        </div>
+        <div class="cashflow-card">
+          <div class="cashflow-card__icon cashflow-card__icon--net">⚖️</div>
+          <div class="cashflow-card__label">Net Cash Flow</div>
+          <div class="cashflow-card__value cashflow-card__value--green">+Rp 27.7M</div>
+          <div class="cashflow-card__sub">Positive cash flow</div>
+        </div>
+        <div class="cashflow-card">
+          <div class="cashflow-card__icon cashflow-card__icon--bal">🏦</div>
+          <div class="cashflow-card__label">Ending Balance</div>
+          <div class="cashflow-card__value cashflow-card__value--blue">Rp 32.5M</div>
+          <div class="cashflow-card__sub">As of 24 Jun 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- /#fin-dashboard -->

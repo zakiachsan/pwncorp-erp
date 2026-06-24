@@ -1,0 +1,1640 @@
+<!-- ============================================================
+     MODULE 7 — BONUS: Anggaran vs Realisasi + Customer Portal
+     ============================================================ -->
+
+<!-- ============================================================
+     VIEW 1: ANGARAN VS REALISASI
+     ============================================================ -->
+<div class="view" id="anggaran" hidden>
+  <style>
+    /* ---------------------------------------------------------
+       ANGARAN MODULE STYLES
+       --------------------------------------------------------- */
+    .ang-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--slds-spacing-lg);
+      margin-bottom: var(--slds-spacing-xl);
+    }
+
+    .ang-summary-card {
+      background: var(--slds-color-background-surface);
+      border: 1px solid var(--slds-color-border-light);
+      border-radius: var(--slds-border-radius-md);
+      padding: var(--slds-spacing-lg);
+      box-shadow: var(--slds-shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ang-summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .ang-summary-card--anggaran::before { background: var(--slds-color-brand); }
+    .ang-summary-card--realisasi::before { background: var(--slds-color-success); }
+    .ang-summary-card--selisih::before { background: var(--slds-color-warning); }
+    .ang-summary-card--persen::before { background: #6b5ce7; }
+
+    .ang-summary-card__label {
+      font-size: var(--slds-font-size-caption);
+      font-weight: var(--slds-font-weight-semibold);
+      color: var(--slds-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ang-summary-card__value {
+      font-size: var(--slds-font-size-heading-2);
+      font-weight: var(--slds-font-weight-bold);
+      color: var(--slds-color-text);
+      margin-top: var(--slds-spacing-xs);
+    }
+
+    .ang-summary-card__delta {
+      font-size: var(--slds-font-size-small);
+      margin-top: var(--slds-spacing-xs);
+      color: var(--slds-color-text-secondary);
+    }
+
+    .ang-summary-card__icon {
+      position: absolute;
+      top: var(--slds-spacing-lg);
+      right: var(--slds-spacing-lg);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--slds-border-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .ang-summary-card--anggaran .ang-summary-card__icon {
+      background: var(--slds-color-brand-light);
+    }
+    .ang-summary-card--realisasi .ang-summary-card__icon {
+      background: var(--slds-color-success-light);
+    }
+    .ang-summary-card--selisih .ang-summary-card__icon {
+      background: var(--slds-color-warning-light);
+    }
+    .ang-summary-card--persen .ang-summary-card__icon {
+      background: #f0ecff;
+    }
+
+    /* Progress bar in table */
+    .ang-progress {
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-sm);
+      min-width: 160px;
+    }
+
+    .ang-progress__bar {
+      flex: 1;
+      height: 8px;
+      background: var(--slds-color-background);
+      border-radius: var(--slds-border-radius-pill);
+      overflow: hidden;
+    }
+
+    .ang-progress__fill {
+      height: 100%;
+      border-radius: var(--slds-border-radius-pill);
+      transition: width 600ms var(--slds-transition-easing);
+    }
+
+    .ang-progress__fill--on-track { background: var(--slds-color-success); }
+    .ang-progress__fill--over { background: var(--slds-color-error); }
+    .ang-progress__fill--under { background: var(--slds-color-brand); }
+
+    .ang-progress__label {
+      font-size: var(--slds-font-size-small);
+      font-weight: var(--slds-font-weight-semibold);
+      min-width: 42px;
+      text-align: right;
+    }
+
+    /* Status pills for budget */
+    .pill--on-track {
+      background: var(--slds-color-success-light);
+      color: var(--slds-color-success-dark);
+    }
+
+    .pill--over-budget {
+      background: var(--slds-color-error-light);
+      color: var(--slds-color-error-dark);
+    }
+
+    .pill--under-budget {
+      background: var(--slds-color-info-light);
+      color: var(--slds-color-brand-dark);
+    }
+
+    /* Detail view */
+    .ang-detail-back {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--slds-spacing-xs);
+      color: var(--slds-color-text-secondary);
+      font-size: var(--slds-font-size-body);
+      margin-bottom: var(--slds-spacing-lg);
+      cursor: pointer;
+      transition: color var(--slds-transition-duration) var(--slds-transition-easing);
+      background: none;
+      border: none;
+      font-family: var(--slds-font-family);
+    }
+
+    .ang-detail-back:hover {
+      color: var(--slds-color-brand);
+    }
+
+    .ang-detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: var(--slds-spacing-xl);
+      gap: var(--slds-spacing-lg);
+    }
+
+    .ang-detail-title {
+      font-size: var(--slds-font-size-heading-2);
+      font-weight: var(--slds-font-weight-bold);
+      color: var(--slds-color-text);
+    }
+
+    .ang-detail-customer {
+      font-size: var(--slds-font-size-body);
+      color: var(--slds-color-text-secondary);
+      margin-top: var(--slds-spacing-xs);
+    }
+
+    .ang-detail-stats {
+      display: flex;
+      gap: var(--slds-spacing-lg);
+      flex-shrink: 0;
+    }
+
+    .ang-detail-stat {
+      text-align: center;
+      padding: var(--slds-spacing-md) var(--slds-spacing-lg);
+      background: var(--slds-color-background-surface);
+      border: 1px solid var(--slds-color-border-light);
+      border-radius: var(--slds-border-radius-md);
+      min-width: 120px;
+    }
+
+    .ang-detail-stat__label {
+      font-size: var(--slds-font-size-caption);
+      color: var(--slds-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .ang-detail-stat__value {
+      font-size: var(--slds-font-size-heading-3);
+      font-weight: var(--slds-font-weight-bold);
+      margin-top: var(--slds-spacing-xs);
+    }
+
+    /* Bar chart */
+    .ang-chart {
+      background: var(--slds-color-background-surface);
+      border: 1px solid var(--slds-color-border-light);
+      border-radius: var(--slds-border-radius-md);
+      padding: var(--slds-spacing-xl);
+      margin-bottom: var(--slds-spacing-xl);
+      box-shadow: var(--slds-shadow-sm);
+    }
+
+    .ang-chart__title {
+      font-size: var(--slds-font-size-heading-4);
+      font-weight: var(--slds-font-weight-bold);
+      margin-bottom: var(--slds-spacing-lg);
+    }
+
+    .ang-chart__legend {
+      display: flex;
+      gap: var(--slds-spacing-xl);
+      margin-bottom: var(--slds-spacing-lg);
+    }
+
+    .ang-chart__legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-xs);
+      font-size: var(--slds-font-size-small);
+      color: var(--slds-color-text-secondary);
+    }
+
+    .ang-chart__legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: var(--slds-border-radius-sm);
+    }
+
+    .ang-chart__legend-dot--anggaran { background: var(--slds-color-brand); }
+    .ang-chart__legend-dot--realisasi { background: var(--slds-color-success); }
+
+    .ang-bars {
+      display: flex;
+      flex-direction: column;
+      gap: var(--slds-spacing-lg);
+    }
+
+    .ang-bar-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--slds-spacing-xs);
+    }
+
+    .ang-bar-group__label {
+      font-size: var(--slds-font-size-body);
+      font-weight: var(--slds-font-weight-semibold);
+      color: var(--slds-color-text);
+    }
+
+    .ang-bar-row {
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-sm);
+    }
+
+    .ang-bar-row__type {
+      font-size: var(--slds-font-size-small);
+      color: var(--slds-color-text-secondary);
+      min-width: 70px;
+    }
+
+    .ang-bar-row__track {
+      flex: 1;
+      height: 24px;
+      background: var(--slds-color-background);
+      border-radius: var(--slds-border-radius-sm);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ang-bar-row__fill {
+      height: 100%;
+      border-radius: var(--slds-border-radius-sm);
+      display: flex;
+      align-items: center;
+      padding-left: var(--slds-spacing-sm);
+      font-size: var(--slds-font-size-small);
+      font-weight: var(--slds-font-weight-semibold);
+      color: #fff;
+      min-width: 60px;
+      transition: width 600ms var(--slds-transition-easing);
+    }
+
+    .ang-bar-row__fill--anggaran { background: var(--slds-color-brand); }
+    .ang-bar-row__fill--realisasi { background: var(--slds-color-success); }
+
+    .ang-bar-row__amount {
+      font-size: var(--slds-font-size-small);
+      color: var(--slds-color-text-secondary);
+      min-width: 100px;
+      text-align: right;
+    }
+
+    .ang-bar-row__selisih {
+      font-size: var(--slds-font-size-small);
+      font-weight: var(--slds-font-weight-semibold);
+      min-width: 90px;
+      text-align: right;
+    }
+
+    .ang-bar-row__selisih--positive { color: var(--slds-color-success); }
+    .ang-bar-row__selisih--negative { color: var(--slds-color-error); }
+
+    /* Category breakdown table */
+    .ang-breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ang-breakdown-table th {
+      padding: var(--slds-spacing-md) var(--slds-spacing-lg);
+      text-align: left;
+      font-size: var(--slds-font-size-caption);
+      font-weight: var(--slds-font-weight-semibold);
+      color: var(--slds-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      background: var(--slds-color-background);
+      border-bottom: 1px solid var(--slds-color-border-light);
+    }
+
+    .ang-breakdown-table td {
+      padding: var(--slds-spacing-md) var(--slds-spacing-lg);
+      border-bottom: 1px solid var(--slds-color-border-light);
+      font-size: var(--slds-font-size-body);
+    }
+
+    .ang-breakdown-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ang-breakdown-table .text-right {
+      text-align: right;
+    }
+
+    .ang-breakdown-table .font-bold {
+      font-weight: var(--slds-font-weight-bold);
+    }
+
+    .ang-breakdown-table .text-success {
+      color: var(--slds-color-success);
+    }
+
+    .ang-breakdown-table .text-error {
+      color: var(--slds-color-error);
+    }
+
+    .ang-breakdown-table .text-brand {
+      color: var(--slds-color-brand);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .ang-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .ang-detail-header {
+        flex-direction: column;
+      }
+
+      .ang-detail-stats {
+        flex-wrap: wrap;
+      }
+
+      .ang-chart__legend {
+        flex-wrap: wrap;
+        gap: var(--slds-spacing-sm);
+      }
+
+      .ang-bar-row__type {
+        min-width: 50px;
+        font-size: var(--slds-font-size-caption);
+      }
+
+      .ang-bar-row__amount,
+      .ang-bar-row__selisih {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ang-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <!-- MAIN LIST VIEW -->
+  <div id="anggaran-list">
+    <!-- View Header -->
+    <div class="view-header">
+      <div class="view-title">
+        <div class="view-title__icon">📑</div>
+        Anggaran vs Realisasi
+      </div>
+      <div class="view-actions">
+        <button class="btn btn--sm">📥 Export</button>
+        <button class="btn btn--brand btn--sm">+ Tambah Anggaran</button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="ang-summary-grid">
+      <div class="ang-summary-card ang-summary-card--anggaran">
+        <div class="ang-summary-card__icon">💰</div>
+        <div class="ang-summary-card__label">Total Anggaran</div>
+        <div class="ang-summary-card__value">Rp 500M</div>
+        <div class="ang-summary-card__delta">8 proyek aktif</div>
+      </div>
+      <div class="ang-summary-card ang-summary-card--realisasi">
+        <div class="ang-summary-card__icon">✅</div>
+        <div class="ang-summary-card__label">Total Realisasi</div>
+        <div class="ang-summary-card__value">Rp 387M</div>
+        <div class="ang-summary-card__delta">77.4% dari anggaran</div>
+      </div>
+      <div class="ang-summary-card ang-summary-card--selisih">
+        <div class="ang-summary-card__icon">📊</div>
+        <div class="ang-summary-card__label">Selisih</div>
+        <div class="ang-summary-card__value">Rp 113M</div>
+        <div class="ang-summary-card__delta">22.6% tersisa</div>
+      </div>
+      <div class="ang-summary-card ang-summary-card--persen">
+        <div class="ang-summary-card__icon">📈</div>
+        <div class="ang-summary-card__label">Persentase</div>
+        <div class="ang-summary-card__value">77.4%</div>
+        <div class="ang-summary-card__delta">Realisasi / Anggaran</div>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <button class="btn filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+        🔍 Filter &nbsp;<span style="margin-left:auto;">▼</span>
+      </button>
+      <div class="filter-inner">
+        <div class="filter-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="form-group">
+            <label class="form-label">Project / Customer</label>
+            <input type="text" class="form-input" placeholder="Cari project atau customer...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Periode</label>
+            <select class="form-select">
+              <option>Semua Periode</option>
+              <option>Q1 2026</option>
+              <option>Q2 2026</option>
+              <option>Q3 2026</option>
+              <option>Q4 2026</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-select">
+              <option>Semua Status</option>
+              <option>On Track</option>
+              <option>Over Budget</option>
+              <option>Under Budget</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer</label>
+            <select class="form-select">
+              <option>Semua Customer</option>
+              <option>PT Transportasi Jaya</option>
+              <option>Sedaya Logam</option>
+              <option>CV Maju Bersama</option>
+              <option>PT Konstruksi Mandiri</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn--brand btn--sm">Terapkan Filter</button>
+          <button class="btn btn--sm">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Project Name</th>
+            <th>Customer</th>
+            <th class="text-right">Anggaran</th>
+            <th class="text-right">Realisasi</th>
+            <th class="text-right">Selisih</th>
+            <th>Persentase</th>
+            <th class="text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(0); return false;">Servis Berkala — Toyota Avanza</a></td>
+            <td>PT Transportasi Jaya</td>
+            <td class="text-right">Rp 85.000.000</td>
+            <td class="text-right">Rp 72.500.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-success);">Rp 12.500.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--on-track" style="width:85.3%"></div></div>
+                <span class="ang-progress__label">85.3%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--on-track">On Track</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(1); return false;">Ganti Mesin — Mitsubishi Colt Diesel</a></td>
+            <td>Sedaya Logam</td>
+            <td class="text-right">Rp 120.000.000</td>
+            <td class="text-right">Rp 135.000.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-error);">-Rp 15.000.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--over" style="width:100%"></div></div>
+                <span class="ang-progress__label" style="color:var(--slds-color-error);">112.5%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--over-budget">Over Budget</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(2); return false;">Body Repair — Honda CR-V</a></td>
+            <td>CV Maju Bersama</td>
+            <td class="text-right">Rp 75.000.000</td>
+            <td class="text-right">Rp 58.000.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-success);">Rp 17.000.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--under" style="width:77.3%"></div></div>
+                <span class="ang-progress__label">77.3%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--under-budget">Under Budget</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(3); return false;">Overhaul Transmisi — Isuzu Elf</a></td>
+            <td>PT Konstruksi Mandiri</td>
+            <td class="text-right">Rp 95.000.000</td>
+            <td class="text-right">Rp 89.000.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-success);">Rp 6.000.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--on-track" style="width:93.7%"></div></div>
+                <span class="ang-progress__label">93.7%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--on-track">On Track</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(4); return false;">Ganti Cat Full — Toyota Hilux</a></td>
+            <td>PT Transportasi Jaya</td>
+            <td class="text-right">Rp 45.000.000</td>
+            <td class="text-right">Rp 48.500.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-error);">-Rp 3.500.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--over" style="width:100%"></div></div>
+                <span class="ang-progress__label" style="color:var(--slds-color-error);">107.8%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--over-budget">Over Budget</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(5); return false;">Servis AC — Daihatsu Xenia</a></td>
+            <td>Sedaya Logam</td>
+            <td class="text-right">Rp 25.000.000</td>
+            <td class="text-right">Rp 18.500.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-success);">Rp 6.500.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--under" style="width:74%"></div></div>
+                <span class="ang-progress__label">74.0%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--under-budget">Under Budget</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(6); return false;">Perbaikan Kaki-Kaki — Mitsubishi Pajero</a></td>
+            <td>CV Maju Bersama</td>
+            <td class="text-right">Rp 35.000.000</td>
+            <td class="text-right">Rp 31.000.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-success);">Rp 4.000.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--on-track" style="width:88.6%"></div></div>
+                <span class="ang-progress__label">88.6%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--on-track">On Track</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#" onclick="showAnggaranDetail(7); return false;">Tune Up Mesin — Suzuki Ertiga</a></td>
+            <td>PT Konstruksi Mandiri</td>
+            <td class="text-right">Rp 20.000.000</td>
+            <td class="text-right">Rp 14.500.000</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-success);">Rp 5.500.000</td>
+            <td>
+              <div class="ang-progress">
+                <div class="ang-progress__bar"><div class="ang-progress__fill ang-progress__fill--under" style="width:72.5%"></div></div>
+                <span class="ang-progress__label">72.5%</span>
+              </div>
+            </td>
+            <td class="text-center"><span class="pill pill--under-budget">Under Budget</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <div class="pagination__info">Menampilkan 1–8 dari 8 proyek</div>
+        <div class="pagination__controls">
+          <button class="pagination__btn" disabled>◀</button>
+          <button class="pagination__btn is-active">1</button>
+          <button class="pagination__btn" disabled>▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL VIEW (hidden by default) -->
+  <div id="anggaran-detail" style="display:none;">
+    <button class="ang-detail-back" onclick="hideAnggaranDetail()">◀ Kembali ke Daftar</button>
+
+    <div class="ang-detail-header">
+      <div>
+        <div class="ang-detail-title" id="detail-project-name">Servis Berkala — Toyota Avanza</div>
+        <div class="ang-detail-customer" id="detail-project-customer">PT Transportasi Jaya &nbsp;·&nbsp; Kontrak #SO-2026-0042</div>
+      </div>
+      <div class="ang-detail-stats">
+        <div class="ang-detail-stat">
+          <div class="ang-detail-stat__label">Anggaran</div>
+          <div class="ang-detail-stat__value" id="detail-anggaran" style="color:var(--slds-color-brand);">Rp 85M</div>
+        </div>
+        <div class="ang-detail-stat">
+          <div class="ang-detail-stat__label">Realisasi</div>
+          <div class="ang-detail-stat__value" id="detail-realisasi" style="color:var(--slds-color-success);">Rp 72.5M</div>
+        </div>
+        <div class="ang-detail-stat">
+          <div class="ang-detail-stat__label">Selisih</div>
+          <div class="ang-detail-stat__value" id="detail-selisih" style="color:var(--slds-color-success);">+Rp 12.5M</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar Chart: Anggaran vs Realisasi per Category -->
+    <div class="ang-chart">
+      <div class="ang-chart__title">Perbandingan Anggaran vs Realisasi per Kategori</div>
+      <div class="ang-chart__legend">
+        <div class="ang-chart__legend-item">
+          <div class="ang-chart__legend-dot ang-chart__legend-dot--anggaran"></div>
+          Anggaran
+        </div>
+        <div class="ang-chart__legend-item">
+          <div class="ang-chart__legend-dot ang-chart__legend-dot--realisasi"></div>
+          Realisasi
+        </div>
+      </div>
+      <div class="ang-bars" id="anggaran-chart-bars">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- Category Breakdown Table -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__title">Detail per Kategori</div>
+      </div>
+      <div class="table-wrap" style="border:none; box-shadow:none;">
+        <table class="ang-breakdown-table" id="anggaran-breakdown-table">
+          <thead>
+            <tr>
+              <th>Kategori</th>
+              <th class="text-right">Anggaran</th>
+              <th class="text-right">Realisasi</th>
+              <th class="text-right">Selisih</th>
+              <th class="text-right">Persentase</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="anggaran-breakdown-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     VIEW 2: CUSTOMER PORTAL (standalone public page)
+     ============================================================ -->
+<div class="view" id="customer-portal" hidden>
+  <style>
+    /* ---------------------------------------------------------
+       CUSTOMER PORTAL — Standalone Public Page Styles
+       Uses a completely different layout from the main app.
+       Centered content, no sidebar, max-width 800px.
+       --------------------------------------------------------- */
+    .portal-wrapper {
+      min-height: 100vh;
+      background: #f5f7fa;
+      font-family: var(--slds-font-family);
+      color: var(--slds-color-text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Portal Header */
+    .portal-header {
+      background: linear-gradient(135deg, #001526 0%, #014486 100%);
+      color: #fff;
+      padding: var(--slds-spacing-xl) var(--slds-spacing-2xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--slds-shadow-md);
+    }
+
+    .portal-header__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-md);
+    }
+
+    .portal-header__logo {
+      width: 48px;
+      height: 48px;
+      background: var(--slds-color-brand);
+      border-radius: var(--slds-border-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: var(--slds-font-weight-bold);
+      color: #fff;
+    }
+
+    .portal-header__text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portal-header__title {
+      font-size: var(--slds-font-size-heading-3);
+      font-weight: var(--slds-font-weight-bold);
+      letter-spacing: -0.3px;
+    }
+
+    .portal-header__subtitle {
+      font-size: var(--slds-font-size-small);
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+    }
+
+    .portal-header__nav {
+      display: flex;
+      gap: var(--slds-spacing-md);
+    }
+
+    .portal-header__nav-link {
+      color: rgba(255,255,255,0.8);
+      font-size: var(--slds-font-size-body);
+      text-decoration: none;
+      padding: var(--slds-spacing-xs) var(--slds-spacing-sm);
+      border-radius: var(--slds-border-radius-sm);
+      transition: all var(--slds-transition-duration) var(--slds-transition-easing);
+    }
+
+    .portal-header__nav-link:hover,
+    .portal-header__nav-link.is-active {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Portal Content */
+    .portal-content {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--slds-spacing-xl) var(--slds-spacing-lg);
+    }
+
+    /* Portal Footer */
+    .portal-footer {
+      text-align: center;
+      padding: var(--slds-spacing-lg);
+      color: var(--slds-color-text-secondary);
+      font-size: var(--slds-font-size-small);
+      border-top: 1px solid var(--slds-color-border-light);
+      background: #fff;
+    }
+
+    /* Portal Cards */
+    .portal-card {
+      background: #fff;
+      border: 1px solid var(--slds-color-border-light);
+      border-radius: var(--slds-border-radius-md);
+      box-shadow: var(--slds-shadow-sm);
+      padding: var(--slds-spacing-xl);
+      margin-bottom: var(--slds-spacing-xl);
+    }
+
+    .portal-card__title {
+      font-size: var(--slds-font-size-heading-4);
+      font-weight: var(--slds-font-weight-bold);
+      color: var(--slds-color-text);
+      margin-bottom: var(--slds-spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-sm);
+    }
+
+    .portal-card__title-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--slds-color-brand-light);
+      border-radius: var(--slds-border-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    /* Customer Info Card */
+    .portal-customer-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--slds-spacing-xl);
+    }
+
+    .portal-customer-field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--slds-spacing-xs);
+    }
+
+    .portal-customer-field__label {
+      font-size: var(--slds-font-size-caption);
+      font-weight: var(--slds-font-weight-semibold);
+      color: var(--slds-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .portal-customer-field__value {
+      font-size: var(--slds-font-size-large);
+      font-weight: var(--slds-font-weight-semibold);
+      color: var(--slds-color-text);
+    }
+
+    /* Service Status Timeline */
+    .portal-timeline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+      padding: var(--slds-spacing-lg) 0;
+    }
+
+    .portal-timeline::before {
+      content: '';
+      position: absolute;
+      top: 38px;
+      left: 40px;
+      right: 40px;
+      height: 3px;
+      background: var(--slds-color-border-light);
+      z-index: 0;
+    }
+
+    .portal-timeline__progress {
+      position: absolute;
+      top: 38px;
+      left: 40px;
+      height: 3px;
+      background: var(--slds-color-brand);
+      z-index: 1;
+      transition: width 600ms var(--slds-transition-easing);
+    }
+
+    .portal-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--slds-spacing-sm);
+      position: relative;
+      z-index: 2;
+      flex: 1;
+    }
+
+    .portal-step__dot {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--slds-border-radius-full);
+      background: var(--slds-color-background);
+      border: 3px solid var(--slds-color-border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--slds-color-text-placeholder);
+      transition: all var(--slds-transition-duration) var(--slds-transition-easing);
+    }
+
+    .portal-step.is-completed .portal-step__dot {
+      background: var(--slds-color-success);
+      border-color: var(--slds-color-success);
+      color: #fff;
+    }
+
+    .portal-step.is-current .portal-step__dot {
+      background: var(--slds-color-brand);
+      border-color: var(--slds-color-brand);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(1, 118, 211, 0.2);
+    }
+
+    .portal-step__label {
+      font-size: var(--slds-font-size-caption);
+      font-weight: var(--slds-font-weight-semibold);
+      color: var(--slds-color-text-secondary);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .portal-step.is-current .portal-step__label {
+      color: var(--slds-color-brand);
+      font-weight: var(--slds-font-weight-bold);
+    }
+
+    .portal-step.is-completed .portal-step__label {
+      color: var(--slds-color-success);
+    }
+
+    .portal-step__date {
+      font-size: var(--slds-font-size-caption);
+      color: var(--slds-color-text-placeholder);
+      text-align: center;
+    }
+
+    /* Portal Table */
+    .portal-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--slds-font-size-body);
+    }
+
+    .portal-table thead {
+      background: var(--slds-color-background);
+    }
+
+    .portal-table th {
+      padding: var(--slds-spacing-md) var(--slds-spacing-lg);
+      text-align: left;
+      font-weight: var(--slds-font-weight-semibold);
+      font-size: var(--slds-font-size-caption);
+      color: var(--slds-color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--slds-color-border-light);
+      white-space: nowrap;
+    }
+
+    .portal-table td {
+      padding: var(--slds-spacing-md) var(--slds-spacing-lg);
+      border-bottom: 1px solid var(--slds-color-border-light);
+      color: var(--slds-color-text);
+      vertical-align: middle;
+    }
+
+    .portal-table tbody tr:hover {
+      background: var(--slds-color-background-row);
+    }
+
+    .portal-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .portal-table .text-right {
+      text-align: right;
+    }
+
+    .portal-table .text-center {
+      text-align: center;
+    }
+
+    .portal-invoice-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--slds-spacing-xs);
+      padding: var(--slds-spacing-xs) var(--slds-spacing-md);
+      background: var(--slds-color-brand);
+      color: #fff;
+      border: none;
+      border-radius: var(--slds-border-radius-sm);
+      font-size: var(--slds-font-size-small);
+      font-weight: var(--slds-font-weight-semibold);
+      cursor: pointer;
+      transition: background var(--slds-transition-duration) var(--slds-transition-easing);
+      font-family: var(--slds-font-family);
+    }
+
+    .portal-invoice-btn:hover {
+      background: var(--slds-color-brand-dark);
+    }
+
+    /* Portal Status Pills */
+    .portal-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: var(--slds-border-radius-pill);
+      font-size: var(--slds-font-size-small);
+      font-weight: var(--slds-font-weight-semibold);
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+
+    .portal-pill--completed {
+      background: var(--slds-color-success-light);
+      color: var(--slds-color-success-dark);
+    }
+
+    .portal-pill--in-progress {
+      background: var(--slds-color-warning-light);
+      color: var(--slds-color-warning-dark);
+    }
+
+    .portal-pill--waiting {
+      background: var(--slds-color-info-light);
+      color: var(--slds-color-brand-dark);
+    }
+
+    .portal-pill--delivered {
+      background: var(--slds-color-success-light);
+      color: var(--slds-color-success-dark);
+    }
+
+    /* Welcome Banner */
+    .portal-welcome {
+      background: linear-gradient(135deg, var(--slds-color-brand-light) 0%, #e3f6e9 100%);
+      border-radius: var(--slds-border-radius-md);
+      padding: var(--slds-spacing-xl);
+      margin-bottom: var(--slds-spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-xl);
+    }
+
+    .portal-welcome__icon {
+      width: 56px;
+      height: 56px;
+      background: var(--slds-color-brand);
+      border-radius: var(--slds-border-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .portal-welcome__text {
+      flex: 1;
+    }
+
+    .portal-welcome__title {
+      font-size: var(--slds-font-size-heading-3);
+      font-weight: var(--slds-font-weight-bold);
+      color: var(--slds-color-text);
+    }
+
+    .portal-welcome__subtitle {
+      font-size: var(--slds-font-size-body);
+      color: var(--slds-color-text-secondary);
+      margin-top: var(--slds-spacing-xs);
+    }
+
+    /* Active Service Banner */
+    .portal-active-service {
+      background: var(--slds-color-warning-light);
+      border: 1px solid rgba(254, 147, 57, 0.3);
+      border-radius: var(--slds-border-radius-md);
+      padding: var(--slds-spacing-md) var(--slds-spacing-lg);
+      margin-bottom: var(--slds-spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--slds-spacing-md);
+      font-size: var(--slds-font-size-body);
+    }
+
+    .portal-active-service__icon {
+      font-size: 20px;
+    }
+
+    .portal-active-service__text {
+      flex: 1;
+    }
+
+    .portal-active-service__text strong {
+      color: var(--slds-color-text);
+    }
+
+    .portal-active-service__text span {
+      color: var(--slds-color-text-secondary);
+    }
+
+    /* Mobile responsive for portal */
+    @media (max-width: 768px) {
+      .portal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--slds-spacing-md);
+        padding: var(--slds-spacing-lg);
+      }
+
+      .portal-header__nav {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .portal-content {
+        padding: var(--slds-spacing-lg) var(--slds-spacing-md);
+      }
+
+      .portal-customer-info {
+        grid-template-columns: 1fr;
+        gap: var(--slds-spacing-md);
+      }
+
+      .portal-timeline {
+        flex-direction: column;
+        gap: var(--slds-spacing-md);
+        padding: 0;
+      }
+
+      .portal-timeline::before {
+        top: 0;
+        bottom: 0;
+        left: 14px;
+        right: auto;
+        width: 3px;
+        height: auto;
+      }
+
+      .portal-timeline__progress {
+        top: 0;
+        left: 14px;
+        width: 3px !important;
+        height: var(--progress-height, 100%);
+      }
+
+      .portal-step {
+        flex-direction: row;
+        gap: var(--slds-spacing-md);
+        padding-left: var(--slds-spacing-xl);
+      }
+
+      .portal-step__label {
+        text-align: left;
+      }
+
+      .portal-step__date {
+        text-align: left;
+      }
+
+      .portal-welcome {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .portal-table {
+        font-size: var(--slds-font-size-small);
+      }
+
+      .portal-table th,
+      .portal-table td {
+        padding: var(--slds-spacing-sm) var(--slds-spacing-md);
+      }
+
+      /* Hide less important columns on mobile */
+      .portal-table .hide-mobile {
+        display: none;
+      }
+    }
+  </style>
+
+  <!-- Standalone Portal Content (rendered inline within the view) -->
+  <div class="portal-wrapper">
+
+    <!-- Portal Header -->
+    <div class="portal-header">
+      <div class="portal-header__brand">
+        <div class="portal-header__logo">🔧</div>
+        <div class="portal-header__text">
+          <div class="portal-header__title">pwncorp Service Portal</div>
+          <div class="portal-header__subtitle">Bengkel &amp; Service Management</div>
+        </div>
+      </div>
+      <div class="portal-header__nav">
+        <a href="#" class="portal-header__nav-link is-active">🏠 Beranda</a>
+        <a href="#" class="portal-header__nav-link">📋 Riwayat Servis</a>
+        <a href="#" class="portal-header__nav-link">📞 Hubungi Kami</a>
+      </div>
+    </div>
+
+    <!-- Portal Main Content -->
+    <div class="portal-content">
+
+      <!-- Welcome Banner -->
+      <div class="portal-welcome">
+        <div class="portal-welcome__icon">👋</div>
+        <div class="portal-welcome__text">
+          <div class="portal-welcome__title">Selamat Datang, Budi Santoso!</div>
+          <div class="portal-welcome__subtitle">Status terkini kendaraan Anda dan riwayat servis tersedia di bawah ini.</div>
+        </div>
+      </div>
+
+      <!-- Active Service Alert -->
+      <div class="portal-active-service">
+        <div class="portal-active-service__icon">🔧</div>
+        <div class="portal-active-service__text">
+          <strong>Sedang Dikerjakan:</strong> <span>Overhaul Transmisi — Isuzu Elf (WO-2026-0187) &nbsp;·&nbsp; Estimasi Selesai: 26 Juni 2026</span>
+        </div>
+      </div>
+
+      <!-- Customer Info Card -->
+      <div class="portal-card">
+        <div class="portal-card__title">
+          <div class="portal-card__title-icon">👤</div>
+          Informasi Pelanggan
+        </div>
+        <div class="portal-customer-info">
+          <div class="portal-customer-field">
+            <div class="portal-customer-field__label">Nama</div>
+            <div class="portal-customer-field__value">Budi Santoso</div>
+          </div>
+          <div class="portal-customer-field">
+            <div class="portal-customer-field__label">Telepon</div>
+            <div class="portal-customer-field__value">0812-3456-7890</div>
+          </div>
+          <div class="portal-customer-field">
+            <div class="portal-customer-field__label">Kendaraan</div>
+            <div class="portal-customer-field__value">Isuzu Elf NHR · B 1234 CD</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Status Tracker -->
+      <div class="portal-card">
+        <div class="portal-card__title">
+          <div class="portal-card__title-icon">📍</div>
+          Status Servis Aktif — WO-2026-0187
+        </div>
+        <div style="position:relative; padding: var(--slds-spacing-lg) 0;">
+          <div class="portal-timeline">
+            <!-- Progress bar connecting completed steps -->
+            <div class="portal-timeline__progress" style="width: calc((100% - 80px) * 0.5);"></div>
+
+            <div class="portal-step is-completed">
+              <div class="portal-step__dot">✓</div>
+              <div class="portal-step__label">Registered</div>
+              <div class="portal-step__date">20 Jun</div>
+            </div>
+            <div class="portal-step is-completed">
+              <div class="portal-step__dot">✓</div>
+              <div class="portal-step__label">Estimasi</div>
+              <div class="portal-step__date">20 Jun</div>
+            </div>
+            <div class="portal-step is-current">
+              <div class="portal-step__dot">3</div>
+              <div class="portal-step__label">In Progress</div>
+              <div class="portal-step__date">21 Jun</div>
+            </div>
+            <div class="portal-step">
+              <div class="portal-step__dot">4</div>
+              <div class="portal-step__label">QC</div>
+              <div class="portal-step__date">—</div>
+            </div>
+            <div class="portal-step">
+              <div class="portal-step__dot">5</div>
+              <div class="portal-step__label">Completed</div>
+              <div class="portal-step__date">—</div>
+            </div>
+            <div class="portal-step">
+              <div class="portal-step__dot">6</div>
+              <div class="portal-step__label">Delivered</div>
+              <div class="portal-step__date">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service History Table -->
+      <div class="portal-card">
+        <div class="portal-card__title">
+          <div class="portal-card__title-icon">📋</div>
+          Riwayat Servis
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="portal-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Jenis Servis</th>
+                <th class="hide-mobile">Kendaraan</th>
+                <th>Status</th>
+                <th class="text-center">Invoice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>21 Jun 2026</td>
+                <td>Overhaul Transmisi</td>
+                <td class="hide-mobile">Isuzu Elf NHR</td>
+                <td><span class="portal-pill portal-pill--in-progress">In Progress</span></td>
+                <td class="text-center">—</td>
+              </tr>
+              <tr>
+                <td>15 Jun 2026</td>
+                <td>Servis Berkala 10K</td>
+                <td class="hide-mobile">Isuzu Elf NHR</td>
+                <td><span class="portal-pill portal-pill--delivered">Delivered</span></td>
+                <td class="text-center">
+                  <button class="portal-invoice-btn" onclick="alert('Download INV-2026-0892.pdf')">📥 INV-0892</button>
+                </td>
+              </tr>
+              <tr>
+                <td>02 Jun 2026</td>
+                <td>Ganti Oli + Filter</td>
+                <td class="hide-mobile">Isuzu Elf NHR</td>
+                <td><span class="portal-pill portal-pill--delivered">Delivered</span></td>
+                <td class="text-center">
+                  <button class="portal-invoice-btn" onclick="alert('Download INV-2026-0871.pdf')">📥 INV-0871</button>
+                </td>
+              </tr>
+              <tr>
+                <td>20 May 2026</td>
+                <td>Perbaikan Rem</td>
+                <td class="hide-mobile">Isuzu Elf NHR</td>
+                <td><span class="portal-pill portal-pill--delivered">Delivered</span></td>
+                <td class="text-center">
+                  <button class="portal-invoice-btn" onclick="alert('Download INV-2026-0845.pdf')">📥 INV-0845</button>
+                </td>
+              </tr>
+              <tr>
+                <td>08 Apr 2026</td>
+                <td>Servis AC</td>
+                <td class="hide-mobile">Isuzu Elf NHR</td>
+                <td><span class="portal-pill portal-pill--delivered">Delivered</span></td>
+                <td class="text-center">
+                  <button class="portal-invoice-btn" onclick="alert('Download INV-2026-0798.pdf')">📥 INV-0798</button>
+                </td>
+              </tr>
+              <tr>
+                <td>15 Mar 2026</td>
+                <td>Tune Up Mesin</td>
+                <td class="hide-mobile">Isuzu Elf NHR</td>
+                <td><span class="portal-pill portal-pill--delivered">Delivered</span></td>
+                <td class="text-center">
+                  <button class="portal-invoice-btn" onclick="alert('Download INV-2026-0754.pdf')">📥 INV-0754</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Portal Footer -->
+    <div class="portal-footer">
+      © 2026 pwncorp — Bengkel &amp; Service Management &nbsp;·&nbsp; Dibuat dengan ❤️ untuk pelanggan setia kami
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     JAVASCRIPT — Anggaran Module Interactions
+     ============================================================ -->
+<script>
+  (function() {
+    'use strict';
+
+    // ---- MOCK DATA ----
+    var projects = [
+      {
+        name: 'Servis Berkala — Toyota Avanza',
+        customer: 'PT Transportasi Jaya',
+        contract: 'SO-2026-0042',
+        anggaran: 85000000,
+        realisasi: 72500000,
+        status: 'on-track',
+        categories: [
+          { name: 'Sparepart', anggaran: 40000000, realisasi: 35000000 },
+          { name: 'Jasa', anggaran: 30000000, realisasi: 26500000 },
+          { name: 'Lain-lain', anggaran: 15000000, realisasi: 11000000 }
+        ]
+      },
+      {
+        name: 'Ganti Mesin — Mitsubishi Colt Diesel',
+        customer: 'Sedaya Logam',
+        contract: 'SO-2026-0038',
+        anggaran: 120000000,
+        realisasi: 135000000,
+        status: 'over-budget',
+        categories: [
+          { name: 'Sparepart', anggaran: 70000000, realisasi: 82000000 },
+          { name: 'Jasa', anggaran: 40000000, realisasi: 43000000 },
+          { name: 'Lain-lain', anggaran: 10000000, realisasi: 10000000 }
+        ]
+      },
+      {
+        name: 'Body Repair — Honda CR-V',
+        customer: 'CV Maju Bersama',
+        contract: 'SO-2026-0035',
+        anggaran: 75000000,
+        realisasi: 58000000,
+        status: 'under-budget',
+        categories: [
+          { name: 'Sparepart', anggaran: 30000000, realisasi: 22000000 },
+          { name: 'Jasa', anggaran: 35000000, realisasi: 28000000 },
+          { name: 'Lain-lain', anggaran: 10000000, realisasi: 8000000 }
+        ]
+      },
+      {
+        name: 'Overhaul Transmisi — Isuzu Elf',
+        customer: 'PT Konstruksi Mandiri',
+        contract: 'SO-2026-0041',
+        anggaran: 95000000,
+        realisasi: 89000000,
+        status: 'on-track',
+        categories: [
+          { name: 'Sparepart', anggaran: 55000000, realisasi: 52000000 },
+          { name: 'Jasa', anggaran: 30000000, realisasi: 28000000 },
+          { name: 'Lain-lain', anggaran: 10000000, realisasi: 9000000 }
+        ]
+      },
+      {
+        name: 'Ganti Cat Full — Toyota Hilux',
+        customer: 'PT Transportasi Jaya',
+        contract: 'SO-2026-0039',
+        anggaran: 45000000,
+        realisasi: 48500000,
+        status: 'over-budget',
+        categories: [
+          { name: 'Sparepart', anggaran: 20000000, realisasi: 22000000 },
+          { name: 'Jasa', anggaran: 20000000, realisasi: 21500000 },
+          { name: 'Lain-lain', anggaran: 5000000, realisasi: 5000000 }
+        ]
+      },
+      {
+        name: 'Servis AC — Daihatsu Xenia',
+        customer: 'Sedaya Logam',
+        contract: 'SO-2026-0036',
+        anggaran: 25000000,
+        realisasi: 18500000,
+        status: 'under-budget',
+        categories: [
+          { name: 'Sparepart', anggaran: 15000000, realisasi: 11000000 },
+          { name: 'Jasa', anggaran: 8000000, realisasi: 6000000 },
+          { name: 'Lain-lain', anggaran: 2000000, realisasi: 1500000 }
+        ]
+      },
+      {
+        name: 'Perbaikan Kaki-Kaki — Mitsubishi Pajero',
+        customer: 'CV Maju Bersama',
+        contract: 'SO-2026-0040',
+        anggaran: 35000000,
+        realisasi: 31000000,
+        status: 'on-track',
+        categories: [
+          { name: 'Sparepart', anggaran: 18000000, realisasi: 16000000 },
+          { name: 'Jasa', anggaran: 12000000, realisasi: 10500000 },
+          { name: 'Lain-lain', anggaran: 5000000, realisasi: 4500000 }
+        ]
+      },
+      {
+        name: 'Tune Up Mesin — Suzuki Ertiga',
+        customer: 'PT Konstruksi Mandiri',
+        contract: 'SO-2026-0037',
+        anggaran: 20000000,
+        realisasi: 14500000,
+        status: 'under-budget',
+        categories: [
+          { name: 'Sparepart', anggaran: 10000000, realisasi: 7000000 },
+          { name: 'Jasa', anggaran: 7000000, realisasi: 5500000 },
+          { name: 'Lain-lain', anggaran: 3000000, realisasi: 2000000 }
+        ]
+      }
+    ];
+
+    function formatRupiah(val) {
+      if (val >= 1000000) {
+        return 'Rp ' + (val / 1000000).toFixed(1) + 'M';
+      }
+      return 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    function formatFullRupiah(val) {
+      return 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    function getPercent(real, ang) {
+      return ((real / ang) * 100).toFixed(1);
+    }
+
+    // Show detail view
+    window.showAnggaranDetail = function(index) {
+      var p = projects[index];
+      var view = document.getElementById('anggaran');
+      var listView = view.querySelector('#anggaran-list');
+      var detailView = view.querySelector('#anggaran-detail');
+
+      listView.style.display = 'none';
+      detailView.style.display = 'block';
+
+      // Populate header
+      document.getElementById('detail-project-name').textContent = p.name;
+      document.getElementById('detail-project-customer').textContent = p.customer + '  ·  Kontrak #' + p.contract;
+
+      var selisih = p.anggaran - p.realisasi;
+      var selisihStr = selisih >= 0 ? '+' + formatRupiah(selisih) : '-' + formatRupiah(Math.abs(selisih));
+      var selisihColor = selisih >= 0 ? 'var(--slds-color-success)' : 'var(--slds-color-error)';
+
+      document.getElementById('detail-anggaran').textContent = formatRupiah(p.anggaran);
+      document.getElementById('detail-realisasi').textContent = formatRupiah(p.realisasi);
+      document.getElementById('detail-selisih').textContent = selisihStr;
+      document.getElementById('detail-selisih').style.color = selisihColor;
+
+      // Render bar chart
+      var maxVal = 0;
+      p.categories.forEach(function(cat) {
+        if (cat.anggaran > maxVal) maxVal = cat.anggaran;
+        if (cat.realisasi > maxVal) maxVal = cat.realisasi;
+      });
+
+      var chartBars = document.getElementById('anggaran-chart-bars');
+      chartBars.innerHTML = '';
+
+      p.categories.forEach(function(cat) {
+        var angW = (cat.anggaran / maxVal * 100).toFixed(1);
+        var realW = (cat.realisasi / maxVal * 100).toFixed(1);
+        var catSel = cat.anggaran - cat.realisasi;
+        var catSelStr = catSel >= 0 ? '+' + formatRupiah(catSel) : '-' + formatRupiah(Math.abs(catSel));
+        var catSelClass = catSel >= 0 ? 'ang-bar-row__selisih--positive' : 'ang-bar-row__selisih--negative';
+
+        var html = '<div class="ang-bar-group">';
+        html += '<div class="ang-bar-group__label">' + cat.name + '</div>';
+        html += '<div class="ang-bar-row">';
+        html += '<div class="ang-bar-row__type">Anggaran</div>';
+        html += '<div class="ang-bar-row__track"><div class="ang-bar-row__fill ang-bar-row__fill--anggaran" style="width:' + angW + '%">' + formatRupiah(cat.anggaran) + '</div></div>';
+        html += '<div class="ang-bar-row__amount">' + formatFullRupiah(cat.anggaran) + '</div>';
+        html += '</div>';
+        html += '<div class="ang-bar-row">';
+        html += '<div class="ang-bar-row__type">Realisasi</div>';
+        html += '<div class="ang-bar-row__track"><div class="ang-bar-row__fill ang-bar-row__fill--realisasi" style="width:' + realW + '%">' + formatRupiah(cat.realisasi) + '</div></div>';
+        html += '<div class="ang-bar-row__amount">' + formatFullRupiah(cat.realisasi) + '</div>';
+        html += '</div>';
+        html += '<div style="text-align:right; margin-top: 2px;">';
+        html += '<span class="ang-bar-row__selisih ' + catSelClass + '">Selisih: ' + catSelStr + '</span>';
+        html += '</div>';
+        html += '</div>';
+        chartBars.innerHTML += html;
+      });
+
+      // Render breakdown table
+      var tbody = document.getElementById('anggaran-breakdown-body');
+      tbody.innerHTML = '';
+
+      p.categories.forEach(function(cat) {
+        var catSel = cat.anggaran - cat.realisasi;
+        var catSelStr = catSel >= 0 ? '+' + formatFullRupiah(catSel) : '-' + formatFullRupiah(Math.abs(catSel));
+        var catPct = getPercent(cat.realisasi, cat.anggaran);
+        var pctNum = parseFloat(catPct);
+        var pctClass = pctNum > 100 ? 'text-error' : (pctNum < 80 ? 'text-brand' : 'text-success');
+        var statusText = pctNum > 100 ? 'Over Budget' : (pctNum < 80 ? 'Under Budget' : 'On Track');
+        var statusClass = pctNum > 100 ? 'pill--over-budget' : (pctNum < 80 ? 'pill--under-budget' : 'pill--on-track');
+
+        var row = '<tr>';
+        row += '<td class="font-bold">' + cat.name + '</td>';
+        row += '<td class="text-right">' + formatFullRupiah(cat.anggaran) + '</td>';
+        row += '<td class="text-right">' + formatFullRupiah(cat.realisasi) + '</td>';
+        row += '<td class="text-right ' + (catSel >= 0 ? 'text-success' : 'text-error') + ' font-bold">' + catSelStr + '</td>';
+        row += '<td class="text-right ' + pctClass + ' font-bold">' + catPct + '%</td>';
+        row += '<td><span class="pill ' + statusClass + '">' + statusText + '</span></td>';
+        row += '</tr>';
+        tbody.innerHTML += row;
+      });
+
+      // Add totals row
+      var totalAng = 0, totalReal = 0;
+      p.categories.forEach(function(cat) {
+        totalAng += cat.anggaran;
+        totalReal += cat.realisasi;
+      });
+      var totalSel = totalAng - totalReal;
+      var totalSelStr = totalSel >= 0 ? '+' + formatFullRupiah(totalSel) : '-' + formatFullRupiah(Math.abs(totalSel));
+      var totalPct = getPercent(totalReal, totalAng);
+
+      var totalRow = '<tr style="background:var(--slds-color-background); font-weight:var(--slds-font-weight-bold);">';
+      totalRow += '<td class="font-bold">TOTAL</td>';
+      totalRow += '<td class="text-right font-bold">' + formatFullRupiah(totalAng) + '</td>';
+      totalRow += '<td class="text-right font-bold">' + formatFullRupiah(totalReal) + '</td>';
+      totalRow += '<td class="text-right ' + (totalSel >= 0 ? 'text-success' : 'text-error') + ' font-bold">' + totalSelStr + '</td>';
+      totalRow += '<td class="text-right font-bold">' + totalPct + '%</td>';
+      totalRow += '<td></td>';
+      totalRow += '</tr>';
+      tbody.innerHTML += totalRow;
+
+      // Scroll to top
+      window.scrollTo(0, 0);
+    };
+
+    window.hideAnggaranDetail = function() {
+      var view = document.getElementById('anggaran');
+      var listView = view.querySelector('#anggaran-list');
+      var detailView = view.querySelector('#anggaran-detail');
+
+      detailView.style.display = 'none';
+      listView.style.display = 'block';
+    };
+
+  })();
+</script>

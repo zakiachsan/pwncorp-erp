@@ -1,0 +1,1325 @@
+<!-- ============================================================
+     MODULE 2 — INVENTORY & STOCK
+     Spareparts / Purchase Orders / Stock Opname
+     ============================================================ -->
+<style>
+  /* ---------------------------------------------------------
+     MODULE 2 — Inventory & Stock
+     Additional component styles
+     --------------------------------------------------------- */
+
+  /* Status pills specific to inventory */
+  .pill--in-stock {
+    background: var(--slds-color-success);
+    color: #fff;
+  }
+
+  .pill--low-stock {
+    background: var(--slds-color-warning);
+    color: #fff;
+  }
+
+  .pill--out-of-stock {
+    background: var(--slds-color-error);
+    color: #fff;
+  }
+
+  .pill--partial-received {
+    background: var(--slds-color-warning);
+    color: #fff;
+  }
+
+  .pill--received {
+    background: var(--slds-color-success);
+    color: #fff;
+  }
+
+  .pill--approved-so {
+    background: var(--slds-color-success);
+    color: #fff;
+  }
+
+  /* Stock indicator dot */
+  .stock-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-spacing-xs);
+  }
+
+  .stock-indicator__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--slds-border-radius-full);
+    flex-shrink: 0;
+  }
+
+  .stock-indicator__dot--green {
+    background: var(--slds-color-success);
+  }
+
+  .stock-indicator__dot--orange {
+    background: var(--slds-color-warning);
+  }
+
+  .stock-indicator__dot--red {
+    background: var(--slds-color-error);
+  }
+
+  /* Category badge */
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--slds-border-radius-sm);
+    font-size: var(--slds-font-size-small);
+    font-weight: var(--slds-font-weight-semibold);
+    background: var(--slds-color-brand-light);
+    color: var(--slds-color-brand);
+  }
+
+  /* Price formatting */
+  .price {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .price--buy {
+    color: var(--slds-color-text-secondary);
+  }
+
+  .price--sell {
+    color: var(--slds-color-text);
+    font-weight: var(--slds-font-weight-semibold);
+  }
+
+  /* Summary cards for overview */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--slds-spacing-lg);
+    margin-bottom: var(--slds-spacing-lg);
+  }
+
+  .summary-card {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    padding: var(--slds-spacing-lg);
+    box-shadow: var(--slds-shadow-sm);
+  }
+
+  .summary-card__label {
+    font-size: var(--slds-font-size-caption);
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: var(--slds-spacing-xs);
+  }
+
+  .summary-card__value {
+    font-size: var(--slds-font-size-heading-2);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+  }
+
+  .summary-card__value--success {
+    color: var(--slds-color-success);
+  }
+
+  .summary-card__value--warning {
+    color: var(--slds-color-warning);
+  }
+
+  .summary-card__value--error {
+    color: var(--slds-color-error);
+  }
+
+  .summary-card__sub {
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .summary-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<!-- ============================================================
+     VIEW: SPAREPARTS LIST
+     ============================================================ -->
+<div class="view" id="spareparts">
+  <div class="view-header">
+    <div class="view-title">
+      <div class="view-title__icon">📦</div>
+      <h2>Spareparts</h2>
+    </div>
+    <div class="view-actions">
+      <button class="btn">📥 Import</button>
+      <button class="btn btn--brand">+ New Sparepart</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-card__label">Total Items</div>
+      <div class="summary-card__value">156</div>
+      <div class="summary-card__sub">Across 12 categories</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">In Stock</div>
+      <div class="summary-card__value summary-card__value--success">132</div>
+      <div class="summary-card__sub">84.6% availability</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Low Stock</div>
+      <div class="summary-card__value summary-card__value--warning">18</div>
+      <div class="summary-card__sub">Needs reorder attention</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Out of Stock</div>
+      <div class="summary-card__value summary-card__value--error">6</div>
+      <div class="summary-card__sub">Urgent restock required</div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-section">
+    <button class="btn btn--icon btn--link filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+      <span>▼</span> <span>Filters</span>
+    </button>
+    <div class="filter-inner">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">Search</label>
+          <input type="text" class="form-input" placeholder="Code or name...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select">
+            <option value="">All Categories</option>
+            <option>Engine Oil</option>
+            <option>Filter</option>
+            <option>Brake</option>
+            <option>Bearing</option>
+            <option>Belt & Chain</option>
+            <option>Spark Plug</option>
+            <option>Battery</option>
+            <option>Coolant</option>
+            <option>Transmission</option>
+            <option>Suspension</option>
+            <option>Lighting</option>
+            <option>Electrical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Brand</label>
+          <select class="form-select">
+            <option value="">All Brands</option>
+            <option>Toyota Genuine</option>
+            <option>Honda Genuine</option>
+            <option>Denso</option>
+            <option>NGK</option>
+            <option>Bosch</option>
+            <option>AISIN</option>
+            <option>Gates</option>
+            <option>Koyo</option>
+            <option>Falken</option>
+            <option>Prestone</option>
+            <option>Osram</option>
+            <option>GS Astra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Status</label>
+          <select class="form-select">
+            <option value="">All Status</option>
+            <option>In Stock</option>
+            <option>Low Stock</option>
+            <option>Out of Stock</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <select class="form-select">
+            <option value="">All Locations</option>
+            <option>Rak A1 - A5</option>
+            <option>Rak B1 - B5</option>
+            <option>Rak C1 - C5</option>
+            <option>Rak D1 - D5</option>
+            <option>Gudang Utama</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn--brand">🔍 Search</button>
+        <button class="btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab is-active" onclick="switchTab(this, 'spareparts-all')">All Items</div>
+    <div class="tab" onclick="switchTab(this, 'spareparts-low')">Low Stock Alert (18)</div>
+    <div class="tab" onclick="switchTab(this, 'spareparts-oos')">Out of Stock (6)</div>
+  </div>
+
+  <!-- Tab: All Items -->
+  <div class="tab-content is-active" id="spareparts-all">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th class="text-right">Buy Price</th>
+            <th class="text-right">Sell Price</th>
+            <th class="text-right">Min Stock</th>
+            <th class="text-right">Current Stock</th>
+            <th>Location</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">SP-OLM-001</a></td>
+            <td>Oli Mesin Toyota 5W-30 4L</td>
+            <td><span class="category-badge">Engine Oil</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 320.000</td>
+            <td class="text-right price price--sell">Rp 450.000</td>
+            <td class="text-right">10</td>
+            <td class="text-right font-bold">24</td>
+            <td>Rak A1</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-OLM-002</a></td>
+            <td>Oli Mesin Honda 10W-30 4L</td>
+            <td><span class="category-badge">Engine Oil</span></td>
+            <td>Honda Genuine</td>
+            <td class="text-right price price--buy">Rp 285.000</td>
+            <td class="text-right price price--sell">Rp 400.000</td>
+            <td class="text-right">10</td>
+            <td class="text-right font-bold">18</td>
+            <td>Rak A1</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-FLT-001</a></td>
+            <td>Filter Udara Toyota Avanza/Xenia</td>
+            <td><span class="category-badge">Filter</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 55.000</td>
+            <td class="text-right price price--sell">Rp 85.000</td>
+            <td class="text-right">15</td>
+            <td class="text-right font-bold">32</td>
+            <td>Rak B2</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-FLT-002</a></td>
+            <td>Filter Oli Toyota 90915-YZZD4</td>
+            <td><span class="category-badge">Filter</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 42.000</td>
+            <td class="text-right price price--sell">Rp 65.000</td>
+            <td class="text-right">20</td>
+            <td class="text-right font-bold">45</td>
+            <td>Rak B2</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-FLT-003</a></td>
+            <td>Filter Kabin Honda Jazz/Brio</td>
+            <td><span class="category-badge">Filter</span></td>
+            <td>Honda Genuine</td>
+            <td class="text-right price price--buy">Rp 65.000</td>
+            <td class="text-right price price--sell">Rp 98.000</td>
+            <td class="text-right">12</td>
+            <td class="text-right font-bold">8</td>
+            <td>Rak B2</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BRM-001</a></td>
+            <td>Kampas Rem Depan Toyota Fortuner</td>
+            <td><span class="category-badge">Brake</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 420.000</td>
+            <td class="text-right price price--sell">Rp 620.000</td>
+            <td class="text-right">6</td>
+            <td class="text-right font-bold">12</td>
+            <td>Rak C1</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BRM-002</a></td>
+            <td>Kampas Rem Belakang Honda HR-V</td>
+            <td><span class="category-badge">Brake</span></td>
+            <td>Honda Genuine</td>
+            <td class="text-right price price--buy">Rp 285.000</td>
+            <td class="text-right price price--sell">Rp 420.000</td>
+            <td class="text-right">6</td>
+            <td class="text-right font-bold">4</td>
+            <td>Rak C1</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BRG-001</a></td>
+            <td>Bearing Roda Depan Toyota Koyo</td>
+            <td><span class="category-badge">Bearing</span></td>
+            <td>Koyo</td>
+            <td class="text-right price price--buy">Rp 350.000</td>
+            <td class="text-right price price--sell">Rp 520.000</td>
+            <td class="text-right">8</td>
+            <td class="text-right font-bold">15</td>
+            <td>Rak C3</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BLT-001</a></td>
+            <td>V-Belt Toyota Avanza 1.3</td>
+            <td><span class="category-badge">Belt & Chain</span></td>
+            <td>Gates</td>
+            <td class="text-right price price--buy">Rp 75.000</td>
+            <td class="text-right price price--sell">Rp 120.000</td>
+            <td class="text-right">10</td>
+            <td class="text-right font-bold">22</td>
+            <td>Rak D2</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BLT-002</a></td>
+            <td>Timing Belt Honda Civic 1.8</td>
+            <td><span class="category-badge">Belt & Chain</span></td>
+            <td>Gates</td>
+            <td class="text-right price price--buy">Rp 185.000</td>
+            <td class="text-right price price--sell">Rp 280.000</td>
+            <td class="text-right">8</td>
+            <td class="text-right font-bold">5</td>
+            <td>Rak D2</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-SPK-001</a></td>
+            <td>Spark Plug NGK Iridium CR7HSA</td>
+            <td><span class="category-badge">Spark Plug</span></td>
+            <td>NGK</td>
+            <td class="text-right price price--buy">Rp 45.000</td>
+            <td class="text-right price price--sell">Rp 72.000</td>
+            <td class="text-right">20</td>
+            <td class="text-right font-bold">56</td>
+            <td>Rak A4</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-SPK-002</a></td>
+            <td>Spark Plug Denso Iridium IK20TT</td>
+            <td><span class="category-badge">Spark Plug</span></td>
+            <td>Denso</td>
+            <td class="text-right price price--buy">Rp 58.000</td>
+            <td class="text-right price price--sell">Rp 89.000</td>
+            <td class="text-right">20</td>
+            <td class="text-right font-bold">35</td>
+            <td>Rak A4</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BTR-001</a></td>
+            <td>Baterai GS Astra 60L MF</td>
+            <td><span class="category-badge">Battery</span></td>
+            <td>GS Astra</td>
+            <td class="text-right price price--buy">Rp 780.000</td>
+            <td class="text-right price price--sell">Rp 1.050.000</td>
+            <td class="text-right">5</td>
+            <td class="text-right font-bold">8</td>
+            <td>Gudang Utama</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-CLT-001</a></td>
+            <td>Coolant Toyota Super Long Life 4L</td>
+            <td><span class="category-badge">Coolant</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 165.000</td>
+            <td class="text-right price price--sell">Rp 245.000</td>
+            <td class="text-right">8</td>
+            <td class="text-right font-bold">3</td>
+            <td>Rak D4</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-TRN-001</a></td>
+            <td>Filter Transmisi CVT Honda</td>
+            <td><span class="category-badge">Transmission</span></td>
+            <td>Honda Genuine</td>
+            <td class="text-right price price--buy">Rp 225.000</td>
+            <td class="text-right price price--sell">Rp 340.000</td>
+            <td class="text-right">6</td>
+            <td class="text-right font-bold">0</td>
+            <td>Rak C4</td>
+            <td><span class="pill pill--out-of-stock">OUT OF STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-SUS-001</a></td>
+            <td>Shock Absorber Depan Toyota Kijang</td>
+            <td><span class="category-badge">Suspension</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 680.000</td>
+            <td class="text-right price price--sell">Rp 950.000</td>
+            <td class="text-right">4</td>
+            <td class="text-right font-bold">6</td>
+            <td>Gudang Utama</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-LGT-001</a></td>
+            <td>Lampu Depan LED Osram H4</td>
+            <td><span class="category-badge">Lighting</span></td>
+            <td>Osram</td>
+            <td class="text-right price price--buy">Rp 320.000</td>
+            <td class="text-right price price--sell">Rp 475.000</td>
+            <td class="text-right">8</td>
+            <td class="text-right font-bold">14</td>
+            <td>Rak D1</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-ELC-001</a></td>
+            <td>Kampas Kopling AISIN Toyota</td>
+            <td><span class="category-badge">Clutch</span></td>
+            <td>AISIN</td>
+            <td class="text-right price price--buy">Rp 520.000</td>
+            <td class="text-right price price--sell">Rp 750.000</td>
+            <td class="text-right">4</td>
+            <td class="text-right font-bold">0</td>
+            <td>Gudang Utama</td>
+            <td><span class="pill pill--out-of-stock">OUT OF STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-FLT-004</a></td>
+            <td>Filter AC Mobil Bosch</td>
+            <td><span class="category-badge">Filter</span></td>
+            <td>Bosch</td>
+            <td class="text-right price price--buy">Rp 85.000</td>
+            <td class="text-right price price--sell">Rp 130.000</td>
+            <td class="text-right">10</td>
+            <td class="text-right font-bold">16</td>
+            <td>Rak B3</td>
+            <td><span class="pill pill--in-stock">IN STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-OLM-003</a></td>
+            <td>Oli Transmisi ATF Toyota WS</td>
+            <td><span class="category-badge">Transmission</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right price price--buy">Rp 125.000</td>
+            <td class="text-right price price--sell">Rp 185.000</td>
+            <td class="text-right">12</td>
+            <td class="text-right font-bold">0</td>
+            <td>Rak A2</td>
+            <td><span class="pill pill--out-of-stock">OUT OF STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BRM-003</a></td>
+            <td>Disc Brake Depan Mitsubishi Xpander</td>
+            <td><span class="category-badge">Brake</span></td>
+            <td>Mitsubishi Genuine</td>
+            <td class="text-right price price--buy">Rp 380.000</td>
+            <td class="text-right price price--sell">Rp 550.000</td>
+            <td class="text-right">6</td>
+            <td class="text-right font-bold">2</td>
+            <td>Rak C2</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-21 of 156 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">3</button>
+        <button class="pagination__btn">4</button>
+        <button class="pagination__btn">5</button>
+        <button class="pagination__btn">6</button>
+        <button class="pagination__btn">7</button>
+        <button class="pagination__btn">8</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Low Stock -->
+  <div class="tab-content" id="spareparts-low">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th class="text-right">Min Stock</th>
+            <th class="text-right">Current Stock</th>
+            <th class="text-right">Deficit</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">SP-FLT-003</a></td>
+            <td>Filter Kabin Honda Jazz/Brio</td>
+            <td><span class="category-badge">Filter</span></td>
+            <td class="text-right">12</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-warning);">8</td>
+            <td class="text-right" style="color:var(--slds-color-error);">-4</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BRM-002</a></td>
+            <td>Kampas Rem Belakang Honda HR-V</td>
+            <td><span class="category-badge">Brake</span></td>
+            <td class="text-right">6</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-warning);">4</td>
+            <td class="text-right" style="color:var(--slds-color-error);">-2</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BLT-002</a></td>
+            <td>Timing Belt Honda Civic 1.8</td>
+            <td><span class="category-badge">Belt & Chain</span></td>
+            <td class="text-right">8</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-warning);">5</td>
+            <td class="text-right" style="color:var(--slds-color-error);">-3</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-CLT-001</a></td>
+            <td>Coolant Toyota Super Long Life 4L</td>
+            <td><span class="category-badge">Coolant</span></td>
+            <td class="text-right">8</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-warning);">3</td>
+            <td class="text-right" style="color:var(--slds-color-error);">-5</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-BRM-003</a></td>
+            <td>Disc Brake Depan Mitsubishi Xpander</td>
+            <td><span class="category-badge">Brake</span></td>
+            <td class="text-right">6</td>
+            <td class="text-right font-bold" style="color:var(--slds-color-warning);">2</td>
+            <td class="text-right" style="color:var(--slds-color-error);">-4</td>
+            <td><span class="pill pill--low-stock">LOW STOCK</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-5 of 18 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">3</button>
+        <button class="pagination__btn">4</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Out of Stock -->
+  <div class="tab-content" id="spareparts-oos">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th class="text-right">Min Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">SP-TRN-001</a></td>
+            <td>Filter Transmisi CVT Honda</td>
+            <td><span class="category-badge">Transmission</span></td>
+            <td>Honda Genuine</td>
+            <td class="text-right">6</td>
+            <td><span class="pill pill--out-of-stock">OUT OF STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-ELC-001</a></td>
+            <td>Kampas Kopling AISIN Toyota</td>
+            <td><span class="category-badge">Clutch</span></td>
+            <td>AISIN</td>
+            <td class="text-right">4</td>
+            <td><span class="pill pill--out-of-stock">OUT OF STOCK</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SP-OLM-003</a></td>
+            <td>Oli Transmisi ATF Toyota WS</td>
+            <td><span class="category-badge">Transmission</span></td>
+            <td>Toyota Genuine</td>
+            <td class="text-right">12</td>
+            <td><span class="pill pill--out-of-stock">OUT OF STOCK</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-3 of 6 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VIEW: PURCHASE ORDERS LIST
+     ============================================================ -->
+<div class="view" id="po" hidden>
+  <div class="view-header">
+    <div class="view-title">
+      <div class="view-title__icon">📋</div>
+      <h2>Purchase Orders</h2>
+    </div>
+    <div class="view-actions">
+      <button class="btn">📥 Import</button>
+      <button class="btn btn--brand">+ New Purchase Order</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-card__label">Total POs</div>
+      <div class="summary-card__value">42</div>
+      <div class="summary-card__sub">This quarter</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Draft</div>
+      <div class="summary-card__value">5</div>
+      <div class="summary-card__sub">Pending submission</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">In Transit</div>
+      <div class="summary-card__value summary-card__value--warning">8</div>
+      <div class="summary-card__sub">Awaiting delivery</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Total Value</div>
+      <div class="summary-card__value">Rp 87.5M</div>
+      <div class="summary-card__sub">This quarter</div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-section">
+    <button class="btn btn--icon btn--link filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+      <span>▼</span> <span>Filters</span>
+    </button>
+    <div class="filter-inner">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">PO Number</label>
+          <input type="text" class="form-input" placeholder="PO-2026-XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <select class="form-select">
+            <option value="">All Suppliers</option>
+            <option>PT Toyota Astra Motor</option>
+            <option>PT Honda Prospect Motor</option>
+            <option>PT Denso Indonesia</option>
+            <option>PT NGK Spark Plugs</option>
+            <option>PT GS Astra Battery</option>
+            <option>PT Bosch Indonesia</option>
+            <option>PT Gates Rubber Indonesia</option>
+            <option>PT Aisin Indonesia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select">
+            <option value="">All Status</option>
+            <option>Draft</option>
+            <option>Sent</option>
+            <option>Partial Received</option>
+            <option>Received</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input type="date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input type="date" class="form-input">
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn--brand">🔍 Search</button>
+        <button class="btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab is-active" onclick="switchTab(this, 'po-all')">All POs</div>
+    <div class="tab" onclick="switchTab(this, 'po-pending')">Pending Delivery (4)</div>
+    <div class="tab" onclick="switchTab(this, 'po-partial')">Partial Received (3)</div>
+  </div>
+
+  <!-- Tab: All POs -->
+  <div class="tab-content is-active" id="po-all">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>PO Number</th>
+            <th>Supplier</th>
+            <th class="text-right">Total Amount</th>
+            <th>Order Date</th>
+            <th>Expected Delivery</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0001</a></td>
+            <td>PT Toyota Astra Motor</td>
+            <td class="text-right price">Rp 12.500.000</td>
+            <td>02 Jan 2026</td>
+            <td>15 Jan 2026</td>
+            <td><span class="pill pill--received">RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0002</a></td>
+            <td>PT Honda Prospect Motor</td>
+            <td class="text-right price">Rp 8.750.000</td>
+            <td>05 Jan 2026</td>
+            <td>20 Jan 2026</td>
+            <td><span class="pill pill--received">RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0003</a></td>
+            <td>PT Denso Indonesia</td>
+            <td class="text-right price">Rp 5.200.000</td>
+            <td>08 Jan 2026</td>
+            <td>22 Jan 2026</td>
+            <td><span class="pill pill--sent">SENT</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0004</a></td>
+            <td>PT NGK Spark Plugs</td>
+            <td class="text-right price">Rp 3.850.000</td>
+            <td>10 Jan 2026</td>
+            <td>24 Jan 2026</td>
+            <td><span class="pill pill--partial-received">PARTIAL RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0005</a></td>
+            <td>PT GS Astra Battery</td>
+            <td class="text-right price">Rp 7.800.000</td>
+            <td>12 Jan 2026</td>
+            <td>26 Jan 2026</td>
+            <td><span class="pill pill--sent">SENT</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0006</a></td>
+            <td>PT Toyota Astra Motor</td>
+            <td class="text-right price">Rp 15.200.000</td>
+            <td>15 Jan 2026</td>
+            <td>30 Jan 2026</td>
+            <td><span class="pill pill--partial-received">PARTIAL RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0007</a></td>
+            <td>PT Bosch Indonesia</td>
+            <td class="text-right price">Rp 4.350.000</td>
+            <td>18 Jan 2026</td>
+            <td>02 Feb 2026</td>
+            <td><span class="pill pill--draft">DRAFT</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0008</a></td>
+            <td>PT Gates Rubber Indonesia</td>
+            <td class="text-right price">Rp 2.900.000</td>
+            <td>20 Jan 2026</td>
+            <td>04 Feb 2026</td>
+            <td><span class="pill pill--partial-received">PARTIAL RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0009</a></td>
+            <td>PT Aisin Indonesia</td>
+            <td class="text-right price">Rp 6.500.000</td>
+            <td>22 Jan 2026</td>
+            <td>06 Feb 2026</td>
+            <td><span class="pill pill--draft">DRAFT</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0010</a></td>
+            <td>PT Honda Prospect Motor</td>
+            <td class="text-right price">Rp 9.100.000</td>
+            <td>25 Jan 2026</td>
+            <td>08 Feb 2026</td>
+            <td><span class="pill pill--sent">SENT</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-10 of 42 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">3</button>
+        <button class="pagination__btn">4</button>
+        <button class="pagination__btn">5</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Pending Delivery -->
+  <div class="tab-content" id="po-pending">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>PO Number</th>
+            <th>Supplier</th>
+            <th class="text-right">Total Amount</th>
+            <th>Order Date</th>
+            <th>Expected Delivery</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0003</a></td>
+            <td>PT Denso Indonesia</td>
+            <td class="text-right price">Rp 5.200.000</td>
+            <td>08 Jan 2026</td>
+            <td>22 Jan 2026</td>
+            <td><span class="pill pill--sent">SENT</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0005</a></td>
+            <td>PT GS Astra Battery</td>
+            <td class="text-right price">Rp 7.800.000</td>
+            <td>12 Jan 2026</td>
+            <td>26 Jan 2026</td>
+            <td><span class="pill pill--sent">SENT</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0010</a></td>
+            <td>PT Honda Prospect Motor</td>
+            <td class="text-right price">Rp 9.100.000</td>
+            <td>25 Jan 2026</td>
+            <td>08 Feb 2026</td>
+            <td><span class="pill pill--sent">SENT</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-3 of 4 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Partial Received -->
+  <div class="tab-content" id="po-partial">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>PO Number</th>
+            <th>Supplier</th>
+            <th class="text-right">Total Amount</th>
+            <th>Order Date</th>
+            <th>Expected Delivery</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0004</a></td>
+            <td>PT NGK Spark Plugs</td>
+            <td class="text-right price">Rp 3.850.000</td>
+            <td>10 Jan 2026</td>
+            <td>24 Jan 2026</td>
+            <td><span class="pill pill--partial-received">PARTIAL RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0006</a></td>
+            <td>PT Toyota Astra Motor</td>
+            <td class="text-right price">Rp 15.200.000</td>
+            <td>15 Jan 2026</td>
+            <td>30 Jan 2026</td>
+            <td><span class="pill pill--partial-received">PARTIAL RECEIVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">PO-2026-0008</a></td>
+            <td>PT Gates Rubber Indonesia</td>
+            <td class="text-right price">Rp 2.900.000</td>
+            <td>20 Jan 2026</td>
+            <td>04 Feb 2026</td>
+            <td><span class="pill pill--partial-received">PARTIAL RECEIVED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-3 of 3 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VIEW: STOCK OPNAME LIST
+     ============================================================ -->
+<div class="view" id="stock-opname" hidden>
+  <div class="view-header">
+    <div class="view-title">
+      <div class="view-title__icon">📊</div>
+      <h2>Stock Opname</h2>
+    </div>
+    <div class="view-actions">
+      <button class="btn btn--brand">+ New Stock Opname</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-card__label">Total Opname</div>
+      <div class="summary-card__value">24</div>
+      <div class="summary-card__sub">This year</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Completed</div>
+      <div class="summary-card__value summary-card__value--success">18</div>
+      <div class="summary-card__sub">75% completion rate</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">In Progress</div>
+      <div class="summary-card__value summary-card__value--warning">3</div>
+      <div class="summary-card__sub">Active opname</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Avg Discrepancy</div>
+      <div class="summary-card__value summary-card__value--error">2.3%</div>
+      <div class="summary-card__sub">Last 6 months</div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-section">
+    <button class="btn btn--icon btn--link filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+      <span>▼</span> <span>Filters</span>
+    </button>
+    <div class="filter-inner">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">Opname Number</label>
+          <input type="text" class="form-input" placeholder="SO-2026-XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Conducted By</label>
+          <select class="form-select">
+            <option value="">All Staff</option>
+            <option>Ahmad Ridwan</option>
+            <option>Budi Santoso</option>
+            <option>Dimas Aditya</option>
+            <option>Eko Prasetyo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select">
+            <option value="">All Status</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+            <option>Approved</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input type="date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input type="date" class="form-input">
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn--brand">🔍 Search</button>
+        <button class="btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab is-active" onclick="switchTab(this, 'so-all')">All Opnames</div>
+    <div class="tab" onclick="switchTab(this, 'so-progress')">In Progress (3)</div>
+    <div class="tab" onclick="switchTab(this, 'so-completed')">Completed (5)</div>
+  </div>
+
+  <!-- Tab: All Opnames -->
+  <div class="tab-content is-active" id="so-all">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Opname Number</th>
+            <th>Date</th>
+            <th>Conducted By</th>
+            <th class="text-right">Total Items Checked</th>
+            <th class="text-right">Discrepancies Found</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0001</a></td>
+            <td>05 Jan 2026</td>
+            <td>Ahmad Ridwan</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">3</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0002</a></td>
+            <td>12 Jan 2026</td>
+            <td>Budi Santoso</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">1</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0003</a></td>
+            <td>19 Jan 2026</td>
+            <td>Dimas Aditya</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-warning);">5</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0004</a></td>
+            <td>26 Jan 2026</td>
+            <td>Eko Prasetyo</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">2</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0005</a></td>
+            <td>02 Feb 2026</td>
+            <td>Ahmad Ridwan</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">0</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0006</a></td>
+            <td>09 Feb 2026</td>
+            <td>Budi Santoso</td>
+            <td class="text-right">—</td>
+            <td class="text-right text-muted">—</td>
+            <td><span class="pill pill--in-progress">IN PROGRESS</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0007</a></td>
+            <td>16 Feb 2026</td>
+            <td>Dimas Aditya</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-error);">8</td>
+            <td><span class="pill pill--completed">COMPLETED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0008</a></td>
+            <td>23 Feb 2026</td>
+            <td>Eko Prasetyo</td>
+            <td class="text-right">—</td>
+            <td class="text-right text-muted">—</td>
+            <td><span class="pill pill--in-progress">IN PROGRESS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-8 of 24 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">3</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: In Progress -->
+  <div class="tab-content" id="so-progress">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Opname Number</th>
+            <th>Date</th>
+            <th>Conducted By</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0006</a></td>
+            <td>09 Feb 2026</td>
+            <td>Budi Santoso</td>
+            <td><span class="pill pill--in-progress">IN PROGRESS</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0008</a></td>
+            <td>23 Feb 2026</td>
+            <td>Eko Prasetyo</td>
+            <td><span class="pill pill--in-progress">IN PROGRESS</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0009</a></td>
+            <td>02 Mar 2026</td>
+            <td>Ahmad Ridwan</td>
+            <td><span class="pill pill--in-progress">IN PROGRESS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-3 of 3 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Completed -->
+  <div class="tab-content" id="so-completed">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Opname Number</th>
+            <th>Date</th>
+            <th>Conducted By</th>
+            <th class="text-right">Total Items Checked</th>
+            <th class="text-right">Discrepancies Found</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0001</a></td>
+            <td>05 Jan 2026</td>
+            <td>Ahmad Ridwan</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">3</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0002</a></td>
+            <td>12 Jan 2026</td>
+            <td>Budi Santoso</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">1</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0003</a></td>
+            <td>19 Jan 2026</td>
+            <td>Dimas Aditya</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-warning);">5</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0004</a></td>
+            <td>26 Jan 2026</td>
+            <td>Eko Prasetyo</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">2</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0005</a></td>
+            <td>02 Feb 2026</td>
+            <td>Ahmad Ridwan</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-success);">0</td>
+            <td><span class="pill pill--approved-so">APPROVED</span></td>
+          </tr>
+          <tr>
+            <td class="col-link"><a href="#">SO-2026-0007</a></td>
+            <td>16 Feb 2026</td>
+            <td>Dimas Aditya</td>
+            <td class="text-right">156</td>
+            <td class="text-right" style="color:var(--slds-color-error);">8</td>
+            <td><span class="pill pill--completed">COMPLETED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination__info">Showing 1-6 of 6 records</div>
+      <div class="pagination__controls">
+        <button class="pagination__btn" disabled>«</button>
+        <button class="pagination__btn is-active">1</button>
+        <button class="pagination__btn">»</button>
+      </div>
+    </div>
+  </div>
+</div>

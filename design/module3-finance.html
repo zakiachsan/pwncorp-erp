@@ -1,0 +1,1281 @@
+<!-- ============================================================
+     MODULE 3 — Finance & Accounting
+     Accounts Receivable · Accounts Payable · Journal · Reports
+     ============================================================ -->
+
+<style>
+  /* ==========================================================
+     MODULE 3 — Finance & Accounting
+     Component-specific styles
+     ========================================================== */
+
+  /* ---------------------------------------------------------
+     SUMMARY CARDS
+     --------------------------------------------------------- */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--slds-spacing-lg);
+    margin-bottom: var(--slds-spacing-xl);
+  }
+
+  .summary-card {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    padding: var(--slds-spacing-xl);
+    box-shadow: var(--slds-shadow-sm);
+    transition: box-shadow var(--slds-transition-duration) var(--slds-transition-easing);
+  }
+
+  .summary-card:hover {
+    box-shadow: var(--slds-shadow-md);
+  }
+
+  .summary-card__label {
+    font-size: var(--slds-font-size-caption);
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--slds-spacing-sm);
+  }
+
+  .summary-card__value {
+    font-size: var(--slds-font-size-heading-2);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    line-height: var(--slds-line-height-heading);
+  }
+
+  .summary-card__value--brand {
+    color: var(--slds-color-brand);
+  }
+
+  .summary-card__value--success {
+    color: var(--slds-color-success);
+  }
+
+  .summary-card__value--warning {
+    color: var(--slds-color-warning);
+  }
+
+  .summary-card__value--error {
+    color: var(--slds-color-error);
+  }
+
+  .summary-card__detail {
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  /* ---------------------------------------------------------
+     STATUS PILLS (Module 3 specific)
+     --------------------------------------------------------- */
+  .pill--unpaid {
+    background: var(--slds-color-warning);
+    color: #fff;
+  }
+
+  .pill--overdue {
+    background: var(--slds-color-error);
+    color: #fff;
+  }
+
+  .pill--pending {
+    background: var(--slds-color-warning);
+    color: #fff;
+  }
+
+  .pill--posted {
+    background: var(--slds-color-success);
+    color: #fff;
+  }
+
+  /* ---------------------------------------------------------
+     ZEBRA STRIPING
+     --------------------------------------------------------- */
+  .data-table tbody tr:nth-child(even) {
+    background: var(--slds-color-background-row);
+  }
+
+  .data-table tbody tr:nth-child(even):hover {
+    background: var(--slds-color-background-row-hover);
+  }
+
+  /* ---------------------------------------------------------
+     REPORTS DASHBOARD
+     --------------------------------------------------------- */
+  .report-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--slds-spacing-lg);
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    padding: var(--slds-spacing-lg) var(--slds-spacing-xl);
+    margin-bottom: var(--slds-spacing-xl);
+    box-shadow: var(--slds-shadow-sm);
+    flex-wrap: wrap;
+  }
+
+  .report-toolbar .form-group {
+    min-width: 180px;
+  }
+
+  .report-preview {
+    background: var(--slds-color-background-surface);
+    border: 1px solid var(--slds-color-border-light);
+    border-radius: var(--slds-border-radius-md);
+    box-shadow: var(--slds-shadow-sm);
+    overflow: hidden;
+  }
+
+  .report-preview__header {
+    background: var(--slds-color-background);
+    padding: var(--slds-spacing-xl) var(--slds-spacing-2xl);
+    border-bottom: 1px solid var(--slds-color-border-light);
+    text-align: center;
+  }
+
+  .report-preview__company {
+    font-size: var(--slds-font-size-heading-3);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+  }
+
+  .report-preview__title {
+    font-size: var(--slds-font-size-heading-4);
+    font-weight: var(--slds-font-weight-normal);
+    color: var(--slds-color-text-secondary);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  .report-preview__period {
+    font-size: var(--slds-font-size-body);
+    color: var(--slds-color-text-secondary);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  .report-preview__body {
+    padding: var(--slds-spacing-xl) var(--slds-spacing-2xl);
+  }
+
+  /* ---------------------------------------------------------
+     BALANCE SHEET LAYOUT
+     --------------------------------------------------------- */
+  .balance-sheet {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--slds-spacing-2xl);
+  }
+
+  .bs-section {
+    margin-bottom: var(--slds-spacing-xl);
+  }
+
+  .bs-section__title {
+    font-size: var(--slds-font-size-heading-4);
+    font-weight: var(--slds-font-weight-bold);
+    color: var(--slds-color-text);
+    padding-bottom: var(--slds-spacing-sm);
+    border-bottom: 2px solid var(--slds-color-brand);
+    margin-bottom: var(--slds-spacing-md);
+  }
+
+  .bs-group {
+    margin-bottom: var(--slds-spacing-md);
+  }
+
+  .bs-group__label {
+    font-size: var(--slds-font-size-body);
+    font-weight: var(--slds-font-weight-semibold);
+    color: var(--slds-color-text-secondary);
+    padding: var(--slds-spacing-xs) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: var(--slds-font-size-small);
+  }
+
+  .bs-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--slds-spacing-xs) 0;
+    font-size: var(--slds-font-size-body);
+    color: var(--slds-color-text);
+  }
+
+  .bs-row--sub {
+    padding-left: var(--slds-spacing-lg);
+    font-size: var(--slds-font-size-small);
+    color: var(--slds-color-text-secondary);
+  }
+
+  .bs-row--total {
+    font-weight: var(--slds-font-weight-bold);
+    border-top: 1px solid var(--slds-color-border);
+    padding-top: var(--slds-spacing-sm);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  .bs-row--grand {
+    font-weight: var(--slds-font-weight-bold);
+    font-size: var(--slds-font-size-heading-4);
+    border-top: 2px solid var(--slds-color-brand);
+    padding-top: var(--slds-spacing-sm);
+    margin-top: var(--slds-spacing-xs);
+  }
+
+  .bs-row--indent {
+    padding-left: var(--slds-spacing-lg);
+  }
+
+  /* ---------------------------------------------------------
+     RESPONSIVE
+     --------------------------------------------------------- */
+  @media (max-width: 768px) {
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .report-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .report-toolbar .form-group {
+      min-width: 100%;
+    }
+
+    .balance-sheet {
+      grid-template-columns: 1fr;
+    }
+
+    .view-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--slds-spacing-md);
+    }
+
+    .view-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .filter-row {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-fields {
+      grid-template-columns: 1fr;
+    }
+
+    .report-preview__body {
+      padding: var(--slds-spacing-lg);
+    }
+  }
+</style>
+
+<!-- ============================================================
+     VIEW: ACCOUNTS RECEIVABLE (id="ar")
+     ============================================================ -->
+<div class="view" id="ar" hidden>
+  <div class="view-header">
+    <div class="view-title">
+      <span class="view-title__icon">💰</span>
+      Accounts Receivable
+    </div>
+    <div class="view-actions">
+      <button class="btn">📥 Export</button>
+      <button class="btn btn--brand">+ New Invoice</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-card__label">Total Accounts Receivable</div>
+      <div class="summary-card__value summary-card__value--brand">Rp 14.850.000</div>
+      <div class="summary-card__detail">Across 12 invoices</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Overdue Amount</div>
+      <div class="summary-card__value summary-card__value--error">Rp 3.475.000</div>
+      <div class="summary-card__detail">3 invoices past due date</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Collected This Month</div>
+      <div class="summary-card__value summary-card__value--success">Rp 5.280.000</div>
+      <div class="summary-card__detail">June 2026 collections</div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <button class="btn filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+      ⚙ Filters ▼
+    </button>
+    <div class="filter-inner">
+      <div class="filter-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select">
+            <option value="">All Status</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="partial">Partial</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Customer</label>
+          <select class="form-select">
+            <option value="">All Customers</option>
+            <option>Budi Santoso</option>
+            <option>Rina Wijaya</option>
+            <option>Dedi Kurniawan</option>
+            <option>Sari Dewi</option>
+            <option>Andi Pratama</option>
+            <option>Maya Putri</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date From</label>
+          <input type="date" class="form-input" value="2026-01-01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date To</label>
+          <input type="date" class="form-input" value="2026-06-30">
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn--brand">Apply Filter</button>
+        <button class="btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-link">Invoice #</th>
+          <th>Customer</th>
+          <th class="text-right">Amount</th>
+          <th>Due Date</th>
+          <th class="text-center">Days Overdue</th>
+          <th class="text-center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00047</a></td>
+          <td>Budi Santoso</td>
+          <td class="text-right font-bold">Rp 1.820.000</td>
+          <td>20 Jan 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00052</a></td>
+          <td>Rina Wijaya</td>
+          <td class="text-right font-bold">Rp 2.150.000</td>
+          <td>15 Feb 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00058</a></td>
+          <td>Dedi Kurniawan</td>
+          <td class="text-right font-bold">Rp 875.000</td>
+          <td>28 Feb 2026</td>
+          <td class="text-center"><span style="color:var(--slds-color-error);font-weight:var(--slds-font-weight-semibold);">117</span></td>
+          <td class="text-center"><span class="pill pill--overdue">OVERDUE</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00063</a></td>
+          <td>Sari Dewi</td>
+          <td class="text-right font-bold">Rp 3.200.000</td>
+          <td>10 Mar 2026</td>
+          <td class="text-center"><span style="color:var(--slds-color-error);font-weight:var(--slds-font-weight-semibold);">107</span></td>
+          <td class="text-center"><span class="pill pill--overdue">OVERDUE</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00071</a></td>
+          <td>Andi Pratama</td>
+          <td class="text-right font-bold">Rp 1.450.000</td>
+          <td>05 Apr 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00079</a></td>
+          <td>Maya Putri</td>
+          <td class="text-right font-bold">Rp 960.000</td>
+          <td>20 Apr 2026</td>
+          <td class="text-center"><span style="color:var(--slds-color-error);font-weight:var(--slds-font-weight-semibold);">65</span></td>
+          <td class="text-center"><span class="pill pill--overdue">OVERDUE</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00085</a></td>
+          <td>Budi Santoso</td>
+          <td class="text-right font-bold">Rp 1.350.000</td>
+          <td>05 May 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--unpaid">UNPAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00091</a></td>
+          <td>Dedi Kurniawan</td>
+          <td class="text-right font-bold">Rp 2.480.000</td>
+          <td>15 May 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--unpaid">UNPAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00098</a></td>
+          <td>Rina Wijaya</td>
+          <td class="text-right font-bold">Rp 780.000</td>
+          <td>01 Jun 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00103</a></td>
+          <td>Andi Pratama</td>
+          <td class="text-right font-bold">Rp 650.000</td>
+          <td>10 Jun 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--partial-paid">PARTIAL</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00108</a></td>
+          <td>Sari Dewi</td>
+          <td class="text-right font-bold">Rp 1.135.000</td>
+          <td>15 Jun 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--unpaid">UNPAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">INV-2026-00112</a></td>
+          <td>Maya Putri</td>
+          <td class="text-right font-bold">Rp 950.000</td>
+          <td>20 Jun 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--partial-paid">PARTIAL</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <div class="pagination__info">Showing 1-12 of 12 invoices</div>
+    <div class="pagination__controls">
+      <button class="pagination__btn" disabled>◀</button>
+      <button class="pagination__btn is-active">1</button>
+      <button class="pagination__btn" disabled>▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VIEW: ACCOUNTS PAYABLE (id="ap")
+     ============================================================ -->
+<div class="view" id="ap" hidden>
+  <div class="view-header">
+    <div class="view-title">
+      <span class="view-title__icon">💳</span>
+      Accounts Payable
+    </div>
+    <div class="view-actions">
+      <button class="btn">📥 Export</button>
+      <button class="btn btn--brand">+ New Purchase</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="summary-card__label">Total Accounts Payable</div>
+      <div class="summary-card__value summary-card__value--brand">Rp 8.925.000</div>
+      <div class="summary-card__detail">Across 10 purchase orders</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Due This Month</div>
+      <div class="summary-card__value summary-card__value--warning">Rp 2.340.000</div>
+      <div class="summary-card__detail">4 invoices due in June 2026</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card__label">Paid This Month</div>
+      <div class="summary-card__value summary-card__value--success">Rp 3.150.000</div>
+      <div class="summary-card__detail">June 2026 payments</div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <button class="btn filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+      ⚙ Filters ▼
+    </button>
+    <div class="filter-inner">
+      <div class="filter-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <select class="form-select">
+            <option value="">All Suppliers</option>
+            <option>Astra Otoparts</option>
+            <option>Toyota Genuine Parts</option>
+            <option>Surya Pratama Motor</option>
+            <option>Berkah sparepart</option>
+            <option>Makmur Jaya Motor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date From</label>
+          <input type="date" class="form-input" value="2026-01-01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date To</label>
+          <input type="date" class="form-input" value="2026-06-30">
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn--brand">Apply Filter</button>
+        <button class="btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-link">PO #</th>
+          <th>Supplier</th>
+          <th class="text-right">Amount</th>
+          <th>Due Date</th>
+          <th class="text-center">Days Overdue</th>
+          <th class="text-center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00031</a></td>
+          <td>Astra Otoparts</td>
+          <td class="text-right font-bold">Rp 1.250.000</td>
+          <td>15 Jan 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00038</a></td>
+          <td>Toyota Genuine Parts</td>
+          <td class="text-right font-bold">Rp 2.800.000</td>
+          <td>28 Jan 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00045</a></td>
+          <td>Surya Pratama Motor</td>
+          <td class="text-right font-bold">Rp 680.000</td>
+          <td>10 Feb 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00052</a></td>
+          <td>Berkah sparepart</td>
+          <td class="text-right font-bold">Rp 1.450.000</td>
+          <td>28 Feb 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00059</a></td>
+          <td>Astra Otoparts</td>
+          <td class="text-right font-bold">Rp 920.000</td>
+          <td>15 Mar 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00067</a></td>
+          <td>Toyota Genuine Parts</td>
+          <td class="text-right font-bold">Rp 3.100.000</td>
+          <td>10 Apr 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--approved">APPROVED</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00074</a></td>
+          <td>Surya Pratama Motor</td>
+          <td class="text-right font-bold">Rp 540.000</td>
+          <td>25 Apr 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--paid">PAID</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00081</a></td>
+          <td>Makmur Jaya Motor</td>
+          <td class="text-right font-bold">Rp 1.680.000</td>
+          <td>20 May 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--approved">APPROVED</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00088</a></td>
+          <td>Berkah sparepart</td>
+          <td class="text-right font-bold">Rp 875.000</td>
+          <td>10 Jun 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--pending">PENDING</span></td>
+        </tr>
+        <tr>
+          <td class="col-link"><a href="#">PO-2026-00095</a></td>
+          <td>Astra Otoparts</td>
+          <td class="text-right font-bold">Rp 1.230.000</td>
+          <td>25 Jun 2026</td>
+          <td class="text-center text-muted">—</td>
+          <td class="text-center"><span class="pill pill--pending">PENDING</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <div class="pagination__info">Showing 1-10 of 10 purchase orders</div>
+    <div class="pagination__controls">
+      <button class="pagination__btn" disabled>◀</button>
+      <button class="pagination__btn is-active">1</button>
+      <button class="pagination__btn" disabled>▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VIEW: JOURNAL (id="journal")
+     ============================================================ -->
+<div class="view" id="journal" hidden>
+  <div class="view-header">
+    <div class="view-title">
+      <span class="view-title__icon">📒</span>
+      General Journal
+    </div>
+    <div class="view-actions">
+      <button class="btn">📥 Export</button>
+      <button class="btn btn--brand">+ New Entry</button>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <button class="btn filter-toggle-mobile" onclick="this.closest('.filter-section').classList.toggle('is-open')">
+      ⚙ Filters ▼
+    </button>
+    <div class="filter-inner">
+      <div class="filter-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="form-group">
+          <label class="form-label">Date From</label>
+          <input type="date" class="form-input" value="2026-01-01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date To</label>
+          <input type="date" class="form-input" value="2026-06-30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account</label>
+          <select class="form-select">
+            <option value="">All Accounts</option>
+            <option>1001 - Kas</option>
+            <option>1002 - Bank BCA</option>
+            <option>1101 - Piutang Usaha</option>
+            <option>1201 - Persediaan Sparepart</option>
+            <option>2001 - Utang Usaha</option>
+            <option>4001 - Pendapatan Jasa</option>
+            <option>4002 - Pendapatan Sparepart</option>
+            <option>5001 - HPP Sparepart</option>
+            <option>6001 - Beban Gaji</option>
+            <option>6002 - Beban Sewa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select">
+            <option value="">All Status</option>
+            <option value="posted">Posted</option>
+            <option value="draft">Draft</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn--brand">Apply Filter</button>
+        <button class="btn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th class="col-link">Journal #</th>
+          <th>Description</th>
+          <th class="col-link text-right">Debit</th>
+          <th class="col-link text-right">Credit</th>
+          <th>Created By</th>
+          <th class="text-center">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>03 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-001</a></td>
+          <td>Cash sales — service labor (Budi Santoso)<br><span class="text-sm text-muted">1001 Kas ↔ 4001 Pendapatan Jasa</span></td>
+          <td class="text-right font-bold">Rp 350.000</td>
+          <td class="text-right font-bold">Rp 350.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>05 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-002</a></td>
+          <td>Cash sales — spareparts (Budi Santoso)<br><span class="text-sm text-muted">1001 Kas ↔ 4002 Pendapatan Sparepart</span></td>
+          <td class="text-right font-bold">Rp 1.270.000</td>
+          <td class="text-right font-bold">Rp 1.270.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>08 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-003</a></td>
+          <td>Invoice on credit — Rina Wijaya<br><span class="text-sm text-muted">1101 Piutang Usaha ↔ 4002 Pendapatan Sparepart</span></td>
+          <td class="text-right font-bold">Rp 2.150.000</td>
+          <td class="text-right font-bold">Rp 2.150.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>12 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-004</a></td>
+          <td>Purchase sparepart — Astra Otoparts<br><span class="text-sm text-muted">1201 Persediaan ↔ 2001 Utang Usaha</span></td>
+          <td class="text-right font-bold">Rp 1.250.000</td>
+          <td class="text-right font-bold">Rp 1.250.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>15 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-005</a></td>
+          <td>Salary payment — January 2026<br><span class="text-sm text-muted">6001 Beban Gaji ↔ 1001 Kas</span></td>
+          <td class="text-right font-bold">Rp 8.500.000</td>
+          <td class="text-right font-bold">Rp 8.500.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>20 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-006</a></td>
+          <td>Payment received — Budi Santoso INV-2026-00047<br><span class="text-sm text-muted">1001 Kas ↔ 1101 Piutang Usaha</span></td>
+          <td class="text-right font-bold">Rp 1.820.000</td>
+          <td class="text-right font-bold">Rp 1.820.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>25 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-007</a></td>
+          <td>Rent payment — January<br><span class="text-sm text-muted">6002 Beban Sewa ↔ 1002 Bank BCA</span></td>
+          <td class="text-right font-bold">Rp 5.000.000</td>
+          <td class="text-right font-bold">Rp 5.000.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>28 Jan 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-008</a></td>
+          <td>Payment to supplier — Toyota Genuine Parts<br><span class="text-sm text-muted">2001 Utang Usaha ↔ 1002 Bank BCA</span></td>
+          <td class="text-right font-bold">Rp 2.800.000</td>
+          <td class="text-right font-bold">Rp 2.800.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>02 Feb 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-009</a></td>
+          <td>Cash sales — service + parts (Rina Wijaya)<br><span class="text-sm text-muted">1001 Kas ↔ 4001 Pend. Jasa + 4002 Pend. Sparepart</span></td>
+          <td class="text-right font-bold">Rp 2.350.000</td>
+          <td class="text-right font-bold">Rp 2.350.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>05 Feb 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-010</a></td>
+          <td>Invoice on credit — Dedi Kurniawan<br><span class="text-sm text-muted">1101 Piutang Usaha ↔ 4001 Pend. Jasa</span></td>
+          <td class="text-right font-bold">Rp 875.000</td>
+          <td class="text-right font-bold">Rp 875.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>10 Feb 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-011</a></td>
+          <td>Purchase sparepart — Surya Pratama Motor<br><span class="text-sm text-muted">1201 Persediaan ↔ 1001 Kas</span></td>
+          <td class="text-right font-bold">Rp 680.000</td>
+          <td class="text-right font-bold">Rp 680.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>15 Feb 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-012</a></td>
+          <td>Salary payment — February 2026<br><span class="text-sm text-muted">6001 Beban Gaji ↔ 1002 Bank BCA</span></td>
+          <td class="text-right font-bold">Rp 8.500.000</td>
+          <td class="text-right font-bold">Rp 8.500.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>20 Feb 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-013</a></td>
+          <td>Electricity & water bill — February<br><span class="text-sm text-muted">6003 Beban Utilitas ↔ 1002 Bank BCA</span></td>
+          <td class="text-right font-bold">Rp 1.200.000</td>
+          <td class="text-right font-bold">Rp 1.200.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>28 Feb 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-014</a></td>
+          <td>Payment received — Rina Wijaya INV-2026-00052<br><span class="text-sm text-muted">1002 Bank BCA ↔ 1101 Piutang Usaha</span></td>
+          <td class="text-right font-bold">Rp 2.150.000</td>
+          <td class="text-right font-bold">Rp 2.150.000</td>
+          <td>Adi (Admin)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+        <tr>
+          <td>01 Mar 2026</td>
+          <td class="col-link"><a href="#">JRN-2026-015</a></td>
+          <td>Depreciation — workshop equipment (March)<br><span class="text-sm text-muted">6004 Beban Penyusutan ↔ 1301 Akum. Penyusutan</span></td>
+          <td class="text-right font-bold">Rp 2.500.000</td>
+          <td class="text-right font-bold">Rp 2.500.000</td>
+          <td>Rina (Finance)</td>
+          <td class="text-center"><span class="pill pill--posted">POSTED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <div class="pagination__info">Showing 1-15 of 15 journal entries</div>
+    <div class="pagination__controls">
+      <button class="pagination__btn" disabled>◀</button>
+      <button class="pagination__btn is-active">1</button>
+      <button class="pagination__btn" disabled>▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     VIEW: REPORTS (id="reports")
+     ============================================================ -->
+<div class="view" id="reports" hidden>
+  <div class="view-header">
+    <div class="view-title">
+      <span class="view-title__icon">📈</span>
+      Financial Reports
+    </div>
+    <div class="view-actions">
+      <button class="btn">🖨 Print</button>
+      <button class="btn">📥 Export PDF</button>
+    </div>
+  </div>
+
+  <!-- Report Toolbar -->
+  <div class="report-toolbar">
+    <div class="form-group" style="flex:2;">
+      <label class="form-label">Report Type</label>
+      <select class="form-select" id="report-type-select" onchange="switchReport(this.value)">
+        <option value="balance-sheet">Balance Sheet</option>
+        <option value="income-statement">Income Statement</option>
+        <option value="cash-flow">Cash Flow Statement</option>
+        <option value="ar-aging">AR Aging Report</option>
+        <option value="ap-aging">AP Aging Report</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Period Start</label>
+      <input type="date" class="form-input" value="2026-01-01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Period End</label>
+      <input type="date" class="form-input" value="2026-06-30">
+    </div>
+    <div class="form-group" style="flex:0;">
+      <label class="form-label">&nbsp;</label>
+      <button class="btn btn--brand" onclick="generateReport()">Generate Report</button>
+    </div>
+  </div>
+
+  <!-- Report Preview: Balance Sheet -->
+  <div class="report-preview" id="report-balance-sheet">
+    <div class="report-preview__header">
+      <div class="report-preview__company">PT. PwnCorp Bengkel</div>
+      <div class="report-preview__title">Balance Sheet</div>
+      <div class="report-preview__period">As of 30 June 2026</div>
+    </div>
+    <div class="report-preview__body">
+      <div class="balance-sheet">
+        <!-- LEFT: Assets -->
+        <div>
+          <div class="bs-section">
+            <div class="bs-section__title">ASSETS</div>
+
+            <div class="bs-group">
+              <div class="bs-group__label">Current Assets</div>
+              <div class="bs-row"><span>Kas</span><span>Rp 12.450.000</span></div>
+              <div class="bs-row"><span>Bank BCA</span><span>Rp 28.750.000</span></div>
+              <div class="bs-row"><span>Piutang Usaha</span><span>Rp 3.475.000</span></div>
+              <div class="bs-row"><span>Persediaan Sparepart</span><span>Rp 8.200.000</span></div>
+              <div class="bs-row bs-row--total"><span>Total Current Assets</span><span>Rp 52.875.000</span></div>
+            </div>
+
+            <div class="bs-group">
+              <div class="bs-group__label">Fixed Assets</div>
+              <div class="bs-row"><span>Workshop Equipment</span><span>Rp 75.000.000</span></div>
+              <div class="bs-row bs-row--sub"><span>Accumulated Depreciation</span><span>(Rp 15.000.000)</span></div>
+              <div class="bs-row"><span>Office Equipment</span><span>Rp 12.000.000</span></div>
+              <div class="bs-row bs-row--sub"><span>Accumulated Depreciation</span><span>(Rp 2.400.000)</span></div>
+              <div class="bs-row"><span>Building & Land</span><span>Rp 250.000.000</span></div>
+              <div class="bs-row bs-row--total"><span>Total Fixed Assets</span><span>Rp 319.600.000</span></div>
+            </div>
+
+            <div class="bs-row bs-row--grand"><span>TOTAL ASSETS</span><span>Rp 372.475.000</span></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Liabilities & Equity -->
+        <div>
+          <div class="bs-section">
+            <div class="bs-section__title">LIABILITIES</div>
+
+            <div class="bs-group">
+              <div class="bs-group__label">Current Liabilities</div>
+              <div class="bs-row"><span>Utang Usaha</span><span>Rp 3.975.000</span></div>
+              <div class="bs-row"><span>Utang Gaji</span><span>Rp 1.500.000</span></div>
+              <div class="bs-row"><span>Utang Pajak (PPN)</span><span>Rp 2.800.000</span></div>
+              <div class="bs-row bs-row--total"><span>Total Current Liabilities</span><span>Rp 8.275.000</span></div>
+            </div>
+
+            <div class="bs-group">
+              <div class="bs-group__label">Long-term Liabilities</div>
+              <div class="bs-row"><span>Utang Bank (Kredit Usaha)</span><span>Rp 45.000.000</span></div>
+              <div class="bs-row bs-row--total"><span>Total Long-term Liabilities</span><span>Rp 45.000.000</span></div>
+            </div>
+
+            <div class="bs-row bs-row--total"><span>TOTAL LIABILITIES</span><span>Rp 53.275.000</span></div>
+          </div>
+
+          <div class="bs-section">
+            <div class="bs-section__title">EQUITY</div>
+
+            <div class="bs-group">
+              <div class="bs-row"><span>Modal Disetor</span><span>Rp 150.000.000</span></div>
+              <div class="bs-row"><span>Laba Ditahan</span><span>Rp 98.200.000</span></div>
+              <div class="bs-row"><span>Laba Bersih Tahun Berjalan</span><span>Rp 71.000.000</span></div>
+              <div class="bs-row bs-row--total"><span>Total Equity</span><span>Rp 319.200.000</span></div>
+            </div>
+
+            <div class="bs-row bs-row--grand"><span>TOTAL LIABILITIES & EQUITY</span><span>Rp 372.475.000</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Preview: Income Statement (hidden by default) -->
+  <div class="report-preview" id="report-income-statement" style="display:none;">
+    <div class="report-preview__header">
+      <div class="report-preview__company">PT. PwnCorp Bengkel</div>
+      <div class="report-preview__title">Income Statement (Laba Rugi)</div>
+      <div class="report-preview__period">For the Period 1 Jan 2026 — 30 Jun 2026</div>
+    </div>
+    <div class="report-preview__body">
+      <div style="max-width:600px;margin:0 auto;">
+        <div class="bs-group">
+          <div class="bs-group__label">Revenue</div>
+          <div class="bs-row bs-row--indent"><span>Pendapatan Jasa Bengkel</span><span>Rp 42.500.000</span></div>
+          <div class="bs-row bs-row--indent"><span>Pendapatan Sparepart</span><span>Rp 68.200.000</span></div>
+          <div class="bs-row bs-row--total"><span>Total Revenue</span><span>Rp 110.700.000</span></div>
+        </div>
+
+        <div class="bs-group" style="margin-top:var(--slds-spacing-xl);">
+          <div class="bs-group__label">Cost of Goods Sold</div>
+          <div class="bs-row bs-row--indent"><span>HPP Sparepart</span><span>(Rp 40.800.000)</span></div>
+          <div class="bs-row bs-row--total"><span>Gross Profit</span><span>Rp 69.900.000</span></div>
+        </div>
+
+        <div class="bs-group" style="margin-top:var(--slds-spacing-xl);">
+          <div class="bs-group__label">Operating Expenses</div>
+          <div class="bs-row bs-row--indent"><span>Beban Gaji Karyawan</span><span>(Rp 51.000.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Beban Sewa</span><span>(Rp 30.000.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Beban Utilitas (Listrik, Air)</span><span>(Rp 7.200.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Beban Penyusutan</span><span>(Rp 15.000.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Beban Lain-lain</span><span>(Rp 1.700.000)</span></div>
+          <div class="bs-row bs-row--total"><span>Total Operating Expenses</span><span>(Rp 104.900.000)</span></div>
+        </div>
+
+        <div class="bs-row bs-row--grand" style="margin-top:var(--slds-spacing-xl);"><span>Net Income (Laba Bersih)</span><span style="color:var(--slds-color-success);">Rp 5.800.000</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Preview: Cash Flow (hidden by default) -->
+  <div class="report-preview" id="report-cash-flow" style="display:none;">
+    <div class="report-preview__header">
+      <div class="report-preview__company">PT. PwnCorp Bengkel</div>
+      <div class="report-preview__title">Cash Flow Statement (Arus Kas)</div>
+      <div class="report-preview__period">For the Period 1 Jan 2026 — 30 Jun 2026</div>
+    </div>
+    <div class="report-preview__body">
+      <div style="max-width:600px;margin:0 auto;">
+        <div class="bs-group">
+          <div class="bs-group__label">Cash Flows from Operating Activities</div>
+          <div class="bs-row bs-row--indent"><span>Cash received from customers</span><span>Rp 85.200.000</span></div>
+          <div class="bs-row bs-row--indent"><span>Cash paid to suppliers</span><span>(Rp 38.500.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Cash paid for salaries</span><span>(Rp 51.000.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Cash paid for rent</span><span>(Rp 30.000.000)</span></div>
+          <div class="bs-row bs-row--indent"><span>Cash paid for utilities</span><span>(Rp 7.200.000)</span></div>
+          <div class="bs-row bs-row--total"><span>Net Cash from Operations</span><span style="color:var(--slds-color-success);">(Rp 41.500.000)</span></div>
+        </div>
+
+        <div class="bs-group" style="margin-top:var(--slds-spacing-xl);">
+          <div class="bs-group__label">Cash Flows from Investing Activities</div>
+          <div class="bs-row bs-row--indent"><span>Purchase of equipment</span><span>(Rp 5.000.000)</span></div>
+          <div class="bs-row bs-row--total"><span>Net Cash from Investing</span><span style="color:var(--slds-color-error);">(Rp 5.000.000)</span></div>
+        </div>
+
+        <div class="bs-group" style="margin-top:var(--slds-spacing-xl);">
+          <div class="bs-group__label">Cash Flows from Financing Activities</div>
+          <div class="bs-row bs-row--indent"><span>Bank loan received</span><span>Rp 45.000.000</span></div>
+          <div class="bs-row bs-row--indent"><span>Loan repayment</span><span>(Rp 12.000.000)</span></div>
+          <div class="bs-row bs-row--total"><span>Net Cash from Financing</span><span style="color:var(--slds-color-success);">Rp 33.000.000</span></div>
+        </div>
+
+        <div class="bs-row bs-row--grand" style="margin-top:var(--slds-spacing-xl);"><span>Net Change in Cash</span><span>(Rp 13.500.000)</span></div>
+        <div class="bs-row" style="margin-top:var(--slds-spacing-sm);"><span>Beginning Cash Balance</span><span>Rp 25.950.000</span></div>
+        <div class="bs-row bs-row--grand"><span>Ending Cash Balance</span><span>Rp 12.450.000</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Preview: AR Aging (hidden by default) -->
+  <div class="report-preview" id="report-ar-aging" style="display:none;">
+    <div class="report-preview__header">
+      <div class="report-preview__company">PT. PwnCorp Bengkel</div>
+      <div class="report-preview__title">Accounts Receivable Aging Report</div>
+      <div class="report-preview__period">As of 30 June 2026</div>
+    </div>
+    <div class="report-preview__body">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th class="text-right">Current</th>
+              <th class="text-right">1-30 Days</th>
+              <th class="text-right">31-60 Days</th>
+              <th class="text-right">61-90 Days</th>
+              <th class="text-right">90+ Days</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Budi Santoso</td>
+              <td class="text-right">Rp 1.350.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold">Rp 1.350.000</td>
+            </tr>
+            <tr>
+              <td>Rina Wijaya</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold text-muted">Rp 0</td>
+            </tr>
+            <tr>
+              <td>Dedi Kurniawan</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right" style="color:var(--slds-color-error);">Rp 875.000</td>
+              <td class="text-right font-bold">Rp 875.000</td>
+            </tr>
+            <tr>
+              <td>Sari Dewi</td>
+              <td class="text-right">Rp 1.135.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right" style="color:var(--slds-color-error);">Rp 3.200.000</td>
+              <td class="text-right font-bold">Rp 4.335.000</td>
+            </tr>
+            <tr>
+              <td>Andi Pratama</td>
+              <td class="text-right">Rp 650.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold">Rp 650.000</td>
+            </tr>
+            <tr>
+              <td>Maya Putri</td>
+              <td class="text-right">Rp 950.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right" style="color:var(--slds-color-warning);">Rp 960.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold">Rp 1.910.000</td>
+            </tr>
+            <tr style="background:var(--slds-color-brand-light);">
+              <td class="font-bold">TOTAL</td>
+              <td class="text-right font-bold">Rp 4.085.000</td>
+              <td class="text-right font-bold">Rp 0</td>
+              <td class="text-right font-bold">Rp 0</td>
+              <td class="text-right font-bold">Rp 960.000</td>
+              <td class="text-right font-bold" style="color:var(--slds-color-error);">Rp 4.075.000</td>
+              <td class="text-right font-bold" style="color:var(--slds-color-brand);">Rp 9.120.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Preview: AP Aging (hidden by default) -->
+  <div class="report-preview" id="report-ap-aging" style="display:none;">
+    <div class="report-preview__header">
+      <div class="report-preview__company">PT. PwnCorp Bengkel</div>
+      <div class="report-preview__title">Accounts Payable Aging Report</div>
+      <div class="report-preview__period">As of 30 June 2026</div>
+    </div>
+    <div class="report-preview__body">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Supplier</th>
+              <th class="text-right">Current</th>
+              <th class="text-right">1-30 Days</th>
+              <th class="text-right">31-60 Days</th>
+              <th class="text-right">61-90 Days</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Astra Otoparts</td>
+              <td class="text-right">Rp 1.230.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold">Rp 1.230.000</td>
+            </tr>
+            <tr>
+              <td>Toyota Genuine Parts</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold text-muted">Rp 0</td>
+            </tr>
+            <tr>
+              <td>Surya Pratama Motor</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold text-muted">Rp 0</td>
+            </tr>
+            <tr>
+              <td>Berkah sparepart</td>
+              <td class="text-right">Rp 875.000</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold">Rp 875.000</td>
+            </tr>
+            <tr>
+              <td>Makmur Jaya Motor</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right">—</td>
+              <td class="text-right font-bold text-muted">Rp 0</td>
+            </tr>
+            <tr style="background:var(--slds-color-brand-light);">
+              <td class="font-bold">TOTAL</td>
+              <td class="text-right font-bold">Rp 2.105.000</td>
+              <td class="text-right font-bold">Rp 0</td>
+              <td class="text-right font-bold">Rp 0</td>
+              <td class="text-right font-bold">Rp 0</td>
+              <td class="text-right font-bold" style="color:var(--slds-color-brand);">Rp 2.105.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 3 — REPORT SWITCHING SCRIPT
+     ============================================================ -->
+<script>
+  /**
+   * Switch between report previews
+   */
+  function switchReport(reportType) {
+    var reports = ['balance-sheet', 'income-statement', 'cash-flow', 'ar-aging', 'ap-aging'];
+    reports.forEach(function(r) {
+      var el = document.getElementById('report-' + r);
+      if (el) el.style.display = (r === reportType) ? '' : 'none';
+    });
+  }
+
+  /**
+   * Generate report (placeholder action)
+   */
+  function generateReport() {
+    var select = document.getElementById('report-type-select');
+    if (select) {
+      switchReport(select.value);
+    }
+  }
+</script>
