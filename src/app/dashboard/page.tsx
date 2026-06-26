@@ -46,9 +46,6 @@ export default function DashboardPage() {
           <LayoutDashboardIcon />
           Dashboard
         </div>
-        <div className="flex gap-2">
-          <button className="btn btn--brand">+ New Service Order</button>
-        </div>
       </div>
 
       {/* Stats Cards */}

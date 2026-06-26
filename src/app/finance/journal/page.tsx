@@ -68,7 +68,7 @@ export default function JournalPage() {
           </thead>
           <tbody>
             {journals.map((j, i) => (
-              <tr key={j.id} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${j.id}`)}>
+              <tr key={j.ref} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${j.ref}`)}>
                 <td className="text-[--color-text-secondary]">{j.date}</td>
                 <td className="font-medium text-[--color-brand]">{j.ref}</td>
                 <td>{j.account}</td>

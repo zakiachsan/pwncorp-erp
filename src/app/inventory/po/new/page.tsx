@@ -211,7 +211,7 @@ export default function NewPOPage() {
                     <th>Nama Item</th>
                     <th className="text-right">Qty</th>
                     <th>Satuan</th>
-                    <th width={40}></th>
+                    <th style={{ width: 40 }}></th>
                   </tr>
                 </thead>
                 <tbody>

@@ -120,9 +120,9 @@ export default function PODetailPage() {
 
   if (!po) {
     return (
-      <div style={{ padding: 24 }}>
-        <button onClick={() => router.push("/inventory/po")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {poNo}</p></div>
+      <div className="p-6">
+        <button onClick={() => router.push("/inventory/po")} className="btn btn--sm mb-4"><ArrowLeft size={16} /> Kembali</button>
+        <div className="card-slds"><p className="text-sm text-[--color-text-secondary]">Data tidak ditemukan: {poNo}</p></div>
       </div>
     );
   }
