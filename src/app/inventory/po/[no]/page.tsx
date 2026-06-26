@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Printer, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Printer, CheckCircle, Plus, Trash2 } from "lucide-react";
 
 const poData: Record<string, any> = {
   "PO-001": {
@@ -24,6 +24,11 @@ const poData: Record<string, any> = {
       { code: "SP-001", name: "Oli Mesin 10W-40", ordered: 20, received: 20, date: "27 Jun 2026" },
       { code: "SP-002", name: "Filter Oli", ordered: 10, received: 10, date: "27 Jun 2026" },
     ],
+    vendors: [
+      { id: "V1", name: "PT Auto Parts", status: "Dipilih", prices: [75000, 50000, 35000, 90000] },
+      { id: "V2", name: "CV Suku Cadang Jaya", status: "Alternatif", prices: [72000, 48000, 38000, 85000] },
+      { id: "V3", name: "UD Oli Jaya", status: "Alternatif", prices: [70000, 52000, 36000, 95000] },
+    ],
   },
   "PO-002": {
     no: "PO-002",
@@ -41,6 +46,10 @@ const poData: Record<string, any> = {
     receivedItems: [
       { code: "SP-005", name: "Aki GS 45Ah", ordered: 5, received: 3, date: "26 Jun 2026" },
     ],
+    vendors: [
+      { id: "V1", name: "CV Ban Sehat", status: "Dipilih", prices: [700000, 150000] },
+      { id: "V2", name: "PT Aki Jaya", status: "Alternatif", prices: [720000, 160000] },
+    ],
   },
   "PO-003": {
     no: "PO-003",
@@ -56,6 +65,9 @@ const poData: Record<string, any> = {
     ],
     receivedItems: [
       { code: "SP-001", name: "Oli Mesin 10W-40", ordered: 30, received: 30, date: "24 Jun 2026" },
+    ],
+    vendors: [
+      { id: "V1", name: "UD Oli Jaya", status: "Dipilih", prices: [72000] },
     ],
   },
   "PO-004": {
@@ -73,163 +85,194 @@ const poData: Record<string, any> = {
       { code: "SP-006", name: "V-Belt", qty: 10, unit: "Pcs", price: 90000, subtotal: 900000 },
     ],
     receivedItems: [],
+    vendors: [
+      { id: "V1", name: "PT Auto Parts", status: "Alternatif", prices: [150000, 700000, 90000] },
+      { id: "V2", name: "CV Sparepart Murah", status: "Alternatif", prices: [140000, 680000, 85000] },
+    ],
   },
 };
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
+const formatIDR = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function PODetailPage() {
   const params = useParams();
   const router = useRouter();
   const poNo = params.no as string;
-  const [activeTab, setActiveTab] = useState<"details" | "items" | "received">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "items" | "vendors" | "received">("details");
+  const [vendors, setVendors] = useState<any[]>([]);
 
   const po = poData[poNo];
-
   const workflowSteps = ["DRAFT", "SENT", "PARTIAL RECEIVED", "RECEIVED"];
-
   const getStepIndex = (status: string) => {
-    const map: Record<string, number> = {
-      "DRAFT": 0,
-      "SENT": 1,
-      "PARTIAL RECEIVED": 2,
-      "RECEIVED": 3,
-    };
+    const map: Record<string, number> = { "DRAFT": 0, "SENT": 1, "PARTIAL RECEIVED": 2, "RECEIVED": 3 };
     return map[status] ?? 0;
   };
-
   const currentStepIndex = getStepIndex(po?.status || "DRAFT");
+
+  // Init vendors from PO data
+  useState(() => {
+    if (po?.vendors) setVendors([...po.vendors]);
+  });
+
+  const totalQty = po?.items?.reduce((s: number, x: any) => s + x.qty, 0) || 0;
+  const grandTotal = po?.items?.reduce((s: number, x: any) => s + x.subtotal, 0) || 0;
 
   if (!po) {
     return (
       <div style={{ padding: 24 }}>
-        <button onClick={() => router.push("/inventory/po")} style={S.backBtn}>
-          <ArrowLeft size={16} /> Kembali
-        </button>
+        <button onClick={() => router.push("/inventory/po")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button>
         <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {poNo}</p></div>
       </div>
     );
   }
 
-  const totalQty = po.items.reduce((s: number, x: any) => s + x.qty, 0);
-  const grandTotal = po.items.reduce((s: number, x: any) => s + x.subtotal, 0);
+  const selectVendor = (vendorIdx: number) => {
+    setVendors((prev) => prev.map((v: any, i: number) => ({
+      ...v,
+      status: i === vendorIdx ? "Dipilih" : "Alternatif",
+    })));
+  };
+
+  const getLowest = (itemIdx: number) => {
+    const prices = vendors.map((v: any) => v.prices[itemIdx] || Infinity);
+    return Math.min(...prices);
+  };
+
+  const selectedVendor = vendors.find((v: any) => v.status === "Dipilih");
+
+  const tabs = ["details", "items", "vendors", "received"] as const;
 
   return (
-    <div style={{ padding: "0 24px 24px" }}>
+    <div>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <button onClick={() => router.push("/inventory/po")} style={S.backBtn}>
-          <ArrowLeft size={16} />
-        </button>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Purchase Order</h1>
-          <div style={{ fontSize: 13, color: "#0176d3", marginTop: 2 }}>{po.no}</div>
+      <div className="view-header">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/inventory/po")} className="btn btn--sm"><ArrowLeft size={16} /></button>
+          <div>
+            <div className="view-title">Purchase Order</div>
+            <div className="text-sm text-[--color-brand]">{po.no}</div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {po.status === "DRAFT" && <button className="btn btn--brand btn--sm"><CheckCircle size={14} /> Send PO</button>}
+          <button className="btn btn--sm"><Printer size={14} /> Print</button>
         </div>
       </div>
 
       {/* Workflow Bar */}
-      <div style={S.workflowBar}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
-          <div style={{ display: "flex", gap: 4 }}>
-            {workflowSteps.map((step, i) => {
-              const isActive = i === currentStepIndex;
-              const isCompleted = i < currentStepIndex;
-              return (
-                <span key={step} style={{
-                  padding: "4px 12px", borderRadius: 6, fontSize: 11, fontWeight: 600,
-                  background: isActive ? "#032d47" : isCompleted ? "#e5e7eb" : "#f3f4f6",
-                  color: isActive ? "#fff" : isCompleted ? "#6b7280" : "#9ca3af",
-                  border: `1px solid ${isActive ? "#032d47" : isCompleted ? "#d1d5db" : "#e5e7eb"}`,
-                }}>
-                  {step}
-                </span>
-              );
-            })}
+      <div className="card-slds mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-[--color-text-secondary]">Workflow</span>
+            <div className="flex items-center gap-2">
+              {workflowSteps.map((step, i) => (
+                <span key={step} className="px-3 py-1 rounded-md text-xs font-semibold" style={{
+                  background: i === currentStepIndex ? "#032d47" : i < currentStepIndex ? "#e5e7eb" : "#f3f4f6",
+                  color: i === currentStepIndex ? "#fff" : i < currentStepIndex ? "#6b7280" : "#9ca3af",
+                }}>{step}</span>
+              ))}
+            </div>
           </div>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {po.status === "DRAFT" && (
-            <button style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
-              <CheckCircle size={14} /> Send PO
-            </button>
-          )}
-          <button style={S.actionBtn}><Printer size={14} /> Print</button>
+          <div>
+            <span className="text-xs text-[--color-text-secondary]">Supplier: </span>
+            <span className="text-xs font-semibold">{selectedVendor?.name || po.supplier}</span>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={S.tabBar}>
-        {(["details", "items", "received"] as const).map((t) => (
-          <button key={t} onClick={() => setActiveTab(t)} style={{
-            ...S.tab,
+      <div className="flex gap-0 mb-4 bg-[--color-border-light] rounded-lg p-1 w-fit">
+        {tabs.map((t) => (
+          <button key={t} onClick={() => setActiveTab(t)} className="px-4 py-2 text-sm rounded-md transition-all" style={{
+            background: activeTab === t ? "#0176d3" : "transparent",
             color: activeTab === t ? "#fff" : "#444746",
-            background: activeTab === t ? "#0176d3" : "#ecebea",
             fontWeight: activeTab === t ? 600 : 400,
           }}>
-            {t === "details" ? "Details" : t === "items" ? "Items" : "Received"}
+            {t === "details" ? "Details" : t === "items" ? "Items" : t === "vendors" ? "Vendor Comparison" : "Received"}
           </button>
         ))}
       </div>
 
       {/* Details Tab */}
       {activeTab === "details" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
-          <div>
-            <F label="PO NUMBER" value={po.no} />
-            <F label="SUPPLIER" value={po.supplier} link />
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, marginTop: -4 }}>
-              <span style={{ fontSize: 13, color: "#444746" }}>{po.supplierPhone}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="card-slds">
+            <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">PO Information</div>
+            <div className="space-y-3">
+              {[
+                ["PO Number", po.no],
+                ["Supplier", po.supplier],
+                ["Phone", po.supplierPhone],
+                ["Address", po.supplierAddress],
+                ["Date", po.date],
+                ["Expected Date", po.expectedDate],
+              ].map(([label, value]) => (
+                <div key={label} className="flex justify-between py-2 border-b border-[--color-border]">
+                  <span className="text-sm text-[--color-text-secondary]">{label}</span>
+                  <span className="font-medium text-sm">{value}</span>
+                </div>
+              ))}
             </div>
-            <F label="ADDRESS" value={po.supplierAddress} />
-            <F label="DATE" value={po.date} />
-            <F label="EXPECTED DATE" value={po.expectedDate} />
           </div>
-          <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-            <F label="TOTAL ITEMS" value={`${po.items.length} items`} />
-            <F label="TOTAL QTY" value={`${totalQty}`} />
-            <F label="GRAND TOTAL" value={`Rp ${fmt(grandTotal)}`} />
-            <F label="NOTES" value={po.notes || "-"} />
+          <div className="card-slds">
+            <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">Summary</div>
+            <div className="space-y-3">
+              {[
+                ["Total Items", `${po.items.length} items`],
+                ["Total Qty", `${totalQty}`],
+                ["Notes", po.notes || "-"],
+              ].map(([label, value]) => (
+                <div key={label} className="flex justify-between py-2 border-b border-[--color-border]">
+                  <span className="text-sm text-[--color-text-secondary]">{label}</span>
+                  <span className="font-medium text-sm">{value}</span>
+                </div>
+              ))}
+              <div className="flex justify-between py-2 font-bold text-lg border-t-2 border-[--color-text-primary] pt-3">
+                <span>Grand Total</span>
+                <span className="text-[--color-brand]">{formatIDR(grandTotal)}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Items Tab */}
       {activeTab === "items" && (
-        <div>
-          <div style={S.tableWrap}>
-            <table style={S.table}>
+        <div className="card-slds">
+          <div className="table-wrap">
+            <table className="data-table">
               <thead>
                 <tr>
-                  <th style={{ ...S.th, width: 36 }}>No.</th>
-                  <th style={S.th}>Code</th>
-                  <th style={S.th}>Name</th>
-                  <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-                  <th style={S.th}>Unit</th>
-                  <th style={{ ...S.th, textAlign: "right" }}>Price</th>
-                  <th style={{ ...S.th, textAlign: "right" }}>Subtotal</th>
+                  <th style={{ width: 36 }}>No.</th>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th className="text-right">Qty</th>
+                  <th>Unit</th>
+                  <th className="text-right">Price</th>
+                  <th className="text-right">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 {po.items.map((item: any, i: number) => (
-                  <tr key={i} style={S.tr}>
-                    <td style={S.td}>{i + 1}</td>
-                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{item.code}</td>
-                    <td style={S.td}>{item.name}</td>
-                    <td style={{ ...S.td, textAlign: "right" }}>{item.qty}</td>
-                    <td style={S.td}>{item.unit}</td>
-                    <td style={{ ...S.td, textAlign: "right" }}>{fmt(item.price)}</td>
-                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(item.subtotal)}</td>
+                  <tr key={i}>
+                    <td>{i + 1}</td>
+                    <td className="font-medium text-[--color-brand]">{item.code}</td>
+                    <td>{item.name}</td>
+                    <td className="text-right">{item.qty}</td>
+                    <td>{item.unit}</td>
+                    <td className="text-right">{formatIDR(item.price)}</td>
+                    <td className="text-right font-semibold">{formatIDR(item.subtotal)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-                  <td colSpan={3} style={S.td}></td>
-                  <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalQty}</td>
-                  <td style={S.td}></td>
-                  <td style={S.td}></td>
-                  <td style={{ ...S.td, textAlign: "right", fontWeight: 700, fontSize: 13 }}>{fmt(grandTotal)}</td>
+                <tr className="font-bold border-t-2 border-[--color-text-primary]">
+                  <td colSpan={3}></td>
+                  <td className="text-right">{totalQty}</td>
+                  <td></td>
+                  <td></td>
+                  <td className="text-right text-[--color-brand]">{formatIDR(grandTotal)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -237,107 +280,126 @@ export default function PODetailPage() {
         </div>
       )}
 
-      {/* Received Tab */}
-      {activeTab === "received" && (
-        <div>
-          {po.receivedItems.length > 0 ? (
-            <div style={S.tableWrap}>
-              <table style={S.table}>
+      {/* Vendor Comparison Tab */}
+      {activeTab === "vendors" && (
+        <div className="card-slds">
+          <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">Perbandingan Harga Vendor</div>
+          {vendors.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="data-table" style={{ minWidth: 500 }}>
                 <thead>
                   <tr>
-                    <th style={{ ...S.th, width: 36 }}>No.</th>
-                    <th style={S.th}>Code</th>
-                    <th style={S.th}>Name</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Ordered</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Received</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Remaining</th>
-                    <th style={S.th}>Date</th>
+                    <th style={{ minWidth: 130 }}>Item</th>
+                    <th className="text-right" style={{ width: 50 }}>Qty</th>
+                    {vendors.map((v: any) => (
+                      <th key={v.id} className="text-center" style={{ minWidth: 120 }}>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-xs">{v.name}</span>
+                          {v.status === "Dipilih" ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[--color-success] text-white">Dipilih</span>
+                          ) : (
+                            <button onClick={() => selectVendor(vendors.indexOf(v))} className="px-2 py-0.5 rounded text-[10px] font-medium bg-[--color-brand] text-white hover:bg-[--color-brand-dark]">
+                              Pilih
+                            </button>
+                          )}
+                        </div>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {po.receivedItems.map((item: any, i: number) => (
-                    <tr key={i} style={S.tr}>
-                      <td style={S.td}>{i + 1}</td>
-                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{item.code}</td>
-                      <td style={S.td}>{item.name}</td>
-                      <td style={{ ...S.td, textAlign: "right" }}>{item.ordered}</td>
-                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{item.received}</td>
-                      <td style={{ ...S.td, textAlign: "right", color: item.ordered - item.received > 0 ? "#f59e0b" : "#2e844a" }}>
-                        {item.ordered - item.received}
-                      </td>
-                      <td style={S.td}>{item.date}</td>
-                    </tr>
-                  ))}
+                  {po.items.map((item: any, itemIdx: number) => {
+                    const lowest = getLowest(itemIdx);
+                    return (
+                      <tr key={itemIdx}>
+                        <td className="text-xs">{item.name}</td>
+                        <td className="text-right text-xs">{item.qty}</td>
+                        {vendors.map((v: any, vIdx: number) => {
+                          const price = v.prices[itemIdx] || 0;
+                          const isLowest = price === lowest && price > 0;
+                          return (
+                            <td key={v.id} className="text-center" style={{ background: isLowest ? "#f0fdf4" : undefined }}>
+                              <div className="flex flex-col items-center">
+                                <span className="text-xs font-medium">{formatIDR(price)}</span>
+                                <span className="text-[10px] text-[--color-text-secondary]">{formatIDR(price * item.qty)}</span>
+                                {isLowest && <span className="text-[9px] text-[--color-success] font-bold">TERENDAH</span>}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                  {/* Total row */}
+                  <tr className="font-bold border-t-2 border-[--color-text-primary]">
+                    <td className="text-xs">TOTAL</td>
+                    <td></td>
+                    {vendors.map((v: any) => {
+                      const total = v.prices.reduce((s: number, p: number, i: number) => s + p * (po.items[i]?.qty || 0), 0);
+                      const cheapest = vendors.reduce((min: any, cur: any) => {
+                        const curTotal = cur.prices.reduce((s: number, p: number, i: number) => s + p * (po.items[i]?.qty || 0), 0);
+                        const minTotal = min.prices.reduce((s: number, p: number, i: number) => s + p * (po.items[i]?.qty || 0), 0);
+                        return curTotal < minTotal ? cur : min;
+                      }, vendors[0]);
+                      const isCheapest = v.id === cheapest?.id;
+                      return (
+                        <td key={v.id} className="text-center text-xs" style={{ background: v.status === "Dipilih" ? "#f0fdf4" : undefined }}>
+                          <span className={isCheapest ? "text-[--color-success] font-bold" : ""}>{formatIDR(total)}</span>
+                          {isCheapest && <div className="text-[9px] text-[--color-success]">TERMURAH</div>}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 </tbody>
               </table>
             </div>
           ) : (
-            <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada item yang diterima</p></div>
+            <p className="text-sm text-[--color-text-secondary]">Belum ada data vendor</p>
+          )}
+        </div>
+      )}
+
+      {/* Received Tab */}
+      {activeTab === "received" && (
+        <div>
+          {po.receivedItems.length > 0 ? (
+            <div className="card-slds">
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 36 }}>No.</th>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th className="text-right">Ordered</th>
+                      <th className="text-right">Received</th>
+                      <th className="text-right">Remaining</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {po.receivedItems.map((item: any, i: number) => (
+                      <tr key={i}>
+                        <td>{i + 1}</td>
+                        <td className="font-medium text-[--color-brand]">{item.code}</td>
+                        <td>{item.name}</td>
+                        <td className="text-right">{item.ordered}</td>
+                        <td className="text-right font-semibold">{item.received}</td>
+                        <td className="text-right" style={{ color: item.ordered - item.received > 0 ? "#f59e0b" : "#2e844a" }}>
+                          {item.ordered - item.received}
+                        </td>
+                        <td>{item.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="card-slds"><p className="text-sm text-[--color-text-secondary]">Belum ada item yang diterima</p></div>
           )}
         </div>
       )}
     </div>
   );
 }
-
-function F({ label, value, link = false }: { label: string; value: string; link?: boolean }) {
-  return (
-    <div style={{ marginBottom: 10 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 500, color: link ? "#0176d3" : "#001526", display: "inline-flex", alignItems: "center", gap: 4 }}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-const S: Record<string, React.CSSProperties> = {
-  backBtn: {
-    display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px",
-    fontSize: 13, fontWeight: 500, color: "#444746", background: "#fff",
-    border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer",
-  },
-  card: {
-    background: "#fff", border: "1px solid #ecebea", borderRadius: 8,
-    padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-  },
-  workflowBar: {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "8px 14px", background: "#f9f9f9", border: "1px solid #ecebea",
-    borderRadius: 8, marginBottom: 16,
-  },
-  badge: {
-    display: "inline-flex", alignItems: "center", padding: "3px 10px",
-    borderRadius: 4, fontSize: 10, fontWeight: 700, letterSpacing: "0.03em" as const,
-  },
-  actionBtn: {
-    display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px",
-    fontSize: 12, fontWeight: 500, color: "#001526", background: "#fff",
-    border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer",
-  },
-  tabBar: {
-    display: "flex", gap: 0, marginBottom: 16, background: "#ecebea",
-    borderRadius: 8, padding: 3, width: "fit-content",
-  },
-  tab: {
-    padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6,
-    cursor: "pointer", transition: "all 150ms", whiteSpace: "nowrap" as const,
-  },
-  tableWrap: {
-    border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden",
-    background: "#fff",
-  },
-  table: {
-    width: "100%", borderCollapse: "collapse" as const, fontSize: 13,
-  },
-  th: {
-    padding: "8px 10px", textAlign: "left" as const, fontWeight: 600,
-    fontSize: 11, color: "#444746", textTransform: "uppercase" as const,
-    letterSpacing: "0.04em", background: "#fff", borderBottom: "1px solid #ecebea",
-  },
-  td: {
-    padding: "8px 10px", borderBottom: "1px solid #f0f0f0", color: "#001526",
-    background: "#fff",
-  },
-  tr: { transition: "background 100ms" },
-};

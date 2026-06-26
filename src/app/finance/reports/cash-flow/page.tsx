@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Search, Download, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 
 const cashFlowData = [
@@ -12,6 +13,7 @@ const cashFlowData = [
 ];
 
 export default function CashFlowPage() {
+  const router = useRouter();
   return (
     <div>
       <div className="view-header">
@@ -81,7 +83,7 @@ export default function CashFlowPage() {
           </thead>
           <tbody>
             {cashFlowData.map((cf, i) => (
-              <tr key={i} className="hover:bg-[#f8f8f8]">
+              <tr key={i} className="hover:bg-[#f8f8f8] cursor-pointer">
                 <td className="text-[--color-text-secondary]">{cf.date}</td>
                 <td>{cf.description}</td>
                 <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: cf.category === "Piutang" ? "#2e844a" : cf.category === "Hutang" ? "#ea001e" : "#6b7280", color: "#fff" }}>{cf.category}</span></td>

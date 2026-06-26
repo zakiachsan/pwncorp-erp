@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, Download } from "lucide-react";
+import { Search, BookOpen, Download } from "lucide-react";
 
 const journals = [
   { date: "26 Jun 2026", ref: "INV-001", account: "Kas", description: "Pembayaran Invoice INV-001", debit: "Rp 2.500.000", credit: "-" },
@@ -13,6 +13,7 @@ const journals = [
 ];
 
 export default function JournalPage() {
+  const router = useRouter();
   return (
     <div>
       <div className="view-header">
@@ -67,7 +68,7 @@ export default function JournalPage() {
           </thead>
           <tbody>
             {journals.map((j, i) => (
-              <tr key={i} className="hover:bg-[#f8f8f8]">
+              <tr key={j.id} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${j.id}`)}>
                 <td className="text-[--color-text-secondary]">{j.date}</td>
                 <td className="font-medium text-[--color-brand]">{j.ref}</td>
                 <td>{j.account}</td>

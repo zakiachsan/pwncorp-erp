@@ -73,7 +73,7 @@ export default function PaymentsPage() {
           </thead>
           <tbody>
             {payments.map((p) => (
-              <tr key={p.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+              <tr key={p.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${p.no}`)}>
                 <td className="font-medium text-[--color-brand]">{p.no}</td>
                 <td className="text-[--color-text-secondary]">{p.invoice}</td>
                 <td>{p.customer}</td>

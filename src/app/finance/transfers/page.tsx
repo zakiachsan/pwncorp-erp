@@ -47,7 +47,7 @@ export default function TransfersPage() {
           </thead>
           <tbody>
             {transfers.map((t) => (
-              <tr key={t.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+              <tr key={t.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/transfers/${t.no}`)}>
                 <td className="font-medium text-[--color-brand]">{t.no}</td>
                 <td className="text-[--color-text-secondary]">{t.date}</td>
                 <td>{t.from}</td>

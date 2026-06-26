@@ -14,6 +14,7 @@ const statusPill = (status: string) => {
 };
 
 export default function ARPage() {
+  const router = useRouter();
   return (
     <div>
       <div className="view-header">
@@ -59,7 +60,7 @@ export default function ARPage() {
           </thead>
           <tbody>
             {arData.map((ar) => (
-              <tr key={ar.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+              <tr key={ar.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/${ar.no}`)}>
                 <td className="font-medium text-[--color-brand]">{ar.no}</td>
                 <td>{ar.customer}</td>
                 <td className="text-right font-medium">{ar.amount}</td>

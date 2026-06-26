@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Upload, Search, CheckCircle, XCircle } from "lucide-react";
 
 const reconData = [
@@ -16,6 +17,7 @@ const statusPill = (status: string) => {
 };
 
 export default function BankReconPage() {
+  const router = useRouter();
   return (
     <div>
       <div className="view-header">
@@ -66,7 +68,7 @@ export default function BankReconPage() {
           </thead>
           <tbody>
             {reconData.map((r, i) => (
-              <tr key={i} className="hover:bg-[#f8f8f8]">
+              <tr key={i} className="hover:bg-[#f8f8f8] cursor-pointer">
                 <td className="text-[--color-text-secondary]">{r.date}</td>
                 <td className="font-medium">{r.bankRef}</td>
                 <td>{r.description}</td>

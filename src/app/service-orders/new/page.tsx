@@ -50,8 +50,8 @@ export default function NewServiceOrderPage() {
           <FCreatable label="STORE" placeholder="Pilih store" presets={["Wijaya Motor - One Stop Service", "Wijaya Motor - Branch A", "Wijaya Motor - Branch B"]} />
           <FCreatable label="CUSTOMER" placeholder="Pilih / ketik customer" presets={["Budi Santoso", "PT Maju Jaya", "Siti Rahmawati", "CV Berkah Abadi", "Ahmad Fauzi", "PT Transport Jaya"]} />
           <FInput label="REGISTRATION NO" placeholder="Contoh: B 1234 CD" />
-          <FInput label="PLAN SERVICE DATE" type="date" />
-          <FInput label="PLAN SERVICE TIME" type="time" />
+          <FInput label="PLAN SERVICE DATE" type="date" placeholder="Pilih tanggal" />
+          <FInput label="PLAN SERVICE TIME" type="time" placeholder="Pilih waktu" />
           <FCreatable label="SERVICE ADVISOR" placeholder="Pilih SA" presets={["Rudi", "Ani", "Budi", "Nanda Salsa"]} />
           <FCreatable label="SALESPERSON" placeholder="Pilih / ketik nama" presets={["-", "Andi", "Budi", "Citra"]} />
           <FCreatable label="BOOKING SOURCE" placeholder="Pilih / ketik sumber" presets={["WhatsApp", "Telepon", "Walk-in", "Website", "Instagram"]} />

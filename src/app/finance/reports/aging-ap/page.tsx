@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 
 const agingData = [
@@ -8,6 +9,7 @@ const agingData = [
 ];
 
 export default function AgingAPPage() {
+  const router = useRouter();
   return (
     <div>
       <div className="view-header">
@@ -48,7 +50,7 @@ export default function AgingAPPage() {
           </thead>
           <tbody>
             {agingData.map((a) => (
-              <tr key={a.supplier} className="hover:bg-[#f8f8f8]">
+              <tr key={a.supplier} className="hover:bg-[#f8f8f8] cursor-pointer">
                 <td className="font-medium">{a.supplier}</td>
                 <td className="text-right font-medium">{a.total}</td>
                 <td className="text-right">{a.current}</td>

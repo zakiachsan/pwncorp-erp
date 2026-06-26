@@ -14,6 +14,7 @@ const statusPill = (status: string) => {
 };
 
 export default function APPage() {
+  const router = useRouter();
   return (
     <div>
       <div className="view-header">
@@ -59,7 +60,7 @@ export default function APPage() {
           </thead>
           <tbody>
             {apData.map((ap) => (
-              <tr key={ap.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+              <tr key={ap.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${ap.no}`)}>
                 <td className="font-medium text-[--color-brand]">{ap.no}</td>
                 <td>{ap.supplier}</td>
                 <td className="text-right font-medium">{ap.amount}</td>

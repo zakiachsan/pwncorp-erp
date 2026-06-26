@@ -89,7 +89,7 @@ export default function InvoiceCreatePage() {
                     <th className="text-right">Qty</th>
                     <th className="text-right">Harga</th>
                     <th className="text-right">Subtotal</th>
-                    <th width={40}></th>
+                    <th style={{ width: 40 }}></th>
                   </tr>
                 </thead>
                 <tbody>

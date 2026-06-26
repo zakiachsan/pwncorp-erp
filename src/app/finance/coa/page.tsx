@@ -146,7 +146,7 @@ export default function COAPage() {
           </thead>
           <tbody>
             {filtered.map((acc) => (
-              <tr key={acc.id} className="hover:bg-[#f8f8f8] cursor-pointer">
+              <tr key={acc.id} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/coa/${acc.code}`)}>
                 <td className="font-medium">{acc.code}</td>
                 <td>{acc.name}</td>
                 <td>

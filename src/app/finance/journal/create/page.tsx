@@ -85,7 +85,7 @@ export default function JournalCreatePage() {
                     <th>Nama Akun</th>
                     <th className="text-right">Debit</th>
                     <th className="text-right">Credit</th>
-                    <th width={40}></th>
+                    <th style={{ width: 40 }}></th>
                   </tr>
                 </thead>
                 <tbody>

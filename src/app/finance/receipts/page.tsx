@@ -80,7 +80,7 @@ export default function ReceiptsPage() {
           </thead>
           <tbody>
             {receipts.map((r) => (
-              <tr key={r.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+              <tr key={r.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/receipts/${r.no}`)}>
                 <td className="font-medium text-[--color-brand]">{r.no}</td>
                 <td className="text-[--color-text-secondary]">{r.date}</td>
                 <td>{r.cashBank}</td>

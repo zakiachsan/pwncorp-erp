@@ -110,7 +110,7 @@ export default function InventoryDetailPage() {
 
       {/* Tabs */}
       <div style={S.tabBar}>
-        {(["product", "stock", "history"] as const).map((t) => (
+        {(["product", "stock", "price"] as const).map((t) => (
           <button key={t} onClick={() => setActiveTab(t)} style={{
             ...S.tab,
             color: activeTab === t ? "#fff" : "#444746",
