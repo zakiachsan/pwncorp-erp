@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ArrowLeft, Printer, FileText, Phone, ChevronRight, CheckCircle, Wrench, ExternalLink } from "lucide-react";
 
 const initialOrdersData: Record<string, any> = {
-  "SO-001": {
+  "SRO/001/26060149": {
     documentNumber: "SRO/001/26060149",
     type: "General",
     store: "Wijaya Motor - One Stop Service",
@@ -31,7 +31,7 @@ const initialOrdersData: Record<string, any> = {
     ],
     workOrders: [],
   },
-  "SO-002": {
+  "SRO/002/26060150": {
     documentNumber: "SRO/002/26060150",
     type: "General",
     store: "Wijaya Motor - One Stop Service",
@@ -54,10 +54,10 @@ const initialOrdersData: Record<string, any> = {
       { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
     ],
     workOrders: [
-      { documentNumber: "WO-002", createdDate: "26-Jun-2026 10:45 AM", status: "IN PROGRESS" },
+      { documentNumber: "SWO/002/26060151", createdDate: "26-Jun-2026 10:45 AM", status: "IN PROGRESS" },
     ],
   },
-  "SO-003": {
+  "SRO/003/26060152": {
     documentNumber: "SRO/003/26060152",
     type: "General",
     store: "Wijaya Motor - One Stop Service",
@@ -80,6 +80,104 @@ const initialOrdersData: Record<string, any> = {
       { item: "C1 - Service Berkala 10K", description: "Service Umum", estimatedTime: "90 menit", quantity: 1, priceExTax: 450000, discount: "-", subtotal: 450000, tax: 0, otherTax: 0, total: 450000 },
       { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
     ],
+    workOrders: [
+      { documentNumber: "SWO/003/26060152", createdDate: "26-Jun-2026 09:00 AM", status: "COMPLETED" },
+    ],
+  },
+  "SRO/004/26060153": {
+    documentNumber: "SRO/004/26060153",
+    type: "General",
+    store: "Wijaya Motor - One Stop Service",
+    customer: { name: "CV Berkah Abadi", phone: "021-777-8888" },
+    registrationNo: "B 3456 IJ",
+    planServiceDate: "Sabtu, 24 Juni 2026",
+    planServiceTime: "08:00",
+    serviceAdvisor: "Budi",
+    salesperson: "-",
+    bookingSource: "Walk-in",
+    referenceNumber: "-",
+    vehicleType: "CAR",
+    vehicleMake: "SUZUKI",
+    vehicleModel: "ERTIGA",
+    odometer: "15.200",
+    year: "2023",
+    color: "MERAH",
+    status: "DRAFT",
+    services: [
+      { item: "D1 - Tune Up", description: "Tune Up Mesin", estimatedTime: "120 menit", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, tax: 0, otherTax: 0, total: 350000 },
+    ],
+    workOrders: [],
+  },
+  "SRO/005/26060154": {
+    documentNumber: "SRO/005/26060154",
+    type: "General",
+    store: "Wijaya Motor - One Stop Service",
+    customer: { name: "Ahmad Fauzi", phone: "0812-999-0000" },
+    registrationNo: "B 7890 KL",
+    planServiceDate: "Senin, 26 Juni 2026",
+    planServiceTime: "09:30",
+    serviceAdvisor: "Ani",
+    salesperson: "-",
+    bookingSource: "WhatsApp",
+    referenceNumber: "-",
+    vehicleType: "CAR",
+    vehicleMake: "DAIHATSU",
+    vehicleModel: "XENIA",
+    odometer: "33.500",
+    year: "2022",
+    color: "ABU-ABU",
+    status: "CANCELLED",
+    services: [
+      { item: "E1 - Rem Mobil", description: "Ganti Kampas Rem", estimatedTime: "45 menit", quantity: 1, priceExTax: 280000, discount: "-", subtotal: 280000, tax: 0, otherTax: 0, total: 280000 },
+    ],
+    workOrders: [],
+  },
+  "SRO/006/26060155": {
+    documentNumber: "SRO/006/26060155",
+    type: "General",
+    store: "Wijaya Motor - One Stop Service",
+    customer: { name: "PT Transport Jaya", phone: "021-333-4444" },
+    registrationNo: "B 1112 MN",
+    planServiceDate: "Minggu, 25 Juni 2026",
+    planServiceTime: "07:30",
+    serviceAdvisor: "Budi",
+    salesperson: "-",
+    bookingSource: "Phone",
+    referenceNumber: "-",
+    vehicleType: "TRUCK",
+    vehicleMake: "ISUZU",
+    vehicleModel: "ELF",
+    odometer: "120.000",
+    year: "2019",
+    color: "BIRU",
+    status: "DRAFT",
+    services: [
+      { item: "F1 - Overhaul", description: "Overhaul Mesin", estimatedTime: "480 menit", quantity: 1, priceExTax: 2500000, discount: "5%", subtotal: 2375000, tax: 0, otherTax: 0, total: 2375000 },
+    ],
+    workOrders: [],
+  },
+  "SRO/007/26060143": {
+    documentNumber: "SRO/007/26060143",
+    type: "General",
+    store: "Wijaya Motor - One Stop Service",
+    customer: { name: "CV Berkah Abadi", phone: "021-777-8888" },
+    registrationNo: "B 1314 OP",
+    planServiceDate: "Jumat, 23 Juni 2026",
+    planServiceTime: "14:00",
+    serviceAdvisor: "Rudi",
+    salesperson: "-",
+    bookingSource: "Walk-in",
+    referenceNumber: "-",
+    vehicleType: "CAR",
+    vehicleMake: "MITSUBISHI",
+    vehicleModel: "L300",
+    odometer: "89.000",
+    year: "2018",
+    color: "PUTIH",
+    status: "CANCELLED",
+    services: [
+      { item: "G1 - Service AC", description: "Service AC Mobil", estimatedTime: "60 menit", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, tax: 0, otherTax: 0, total: 350000 },
+    ],
     workOrders: [],
   },
 };
@@ -89,7 +187,7 @@ const fmt = (n: number) => n.toLocaleString("id-ID");
 export default function ServiceOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const orderNo = params.no as string;
+  const orderNo = Array.isArray(params.no) ? params.no.join("/") : (params.no as string);
   const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
   const [orders, setOrders] = useState(initialOrdersData);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);

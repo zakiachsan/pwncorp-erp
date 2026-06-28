@@ -51,13 +51,33 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         href: "/work-orders",
       },
       {
-        label: "Inventory",
+        label: "Stock Workflow",
         icon: <Package size={18} />,
         children: [
-          { label: "Sparepart", href: "/inventory" },
-          { label: "Purchase Orders", href: "/inventory/po" },
-          { label: "Stock Opname", href: "/inventory/stock-opname" },
+          { label: "Stock Orders", href: "/stock-workflow/stock-orders" },
+          { label: "Stock Returns", href: "/stock-workflow/stock-returns" },
+
         ],
+      },
+      {
+        label: "Warehouse",
+        icon: <Package size={18} />,
+        children: [
+          { label: "Purchase Request", href: "/warehouse/purchase-request" },
+          { label: "Purchase Orders", href: "/warehouse/purchase-orders" },
+          { label: "Purchase Deliveries", href: "/warehouse/purchase-deliveries" },
+          { label: "Purchase Invoices", href: "/warehouse/purchase-invoices" },
+          { label: "Purchase Returns", href: "/warehouse/purchase-returns" },
+          { label: "Warehouse Stock Transfer", href: "/warehouse/stock-transfer" },
+          { label: "Warehouse Stock Opname", href: "/warehouse/stock-opname" },
+          { label: "Warehouse Stock Histories", href: "/warehouse/stock-histories" },
+
+        ],
+      },
+      {
+        label: "Anggaran",
+        icon: <BarChart3 size={18} />,
+        href: "/warehouse/anggaran",
       },
     ],
   },
@@ -65,15 +85,29 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
     title: "Data Master",
     items: [
       {
-        label: "Master Data",
+        label: "Product",
+        icon: <Package size={18} />,
+        href: "/products",
+      },
+      {
+        label: "Customers",
+        icon: <Users size={18} />,
+        href: "/master-data/customers",
+      },
+      {
+        label: "Vehicles",
+        icon: <Package size={18} />,
+        href: "/master-data/vehicles",
+      },
+      {
+        label: "Suppliers",
         icon: <Database size={18} />,
-        children: [
-          { label: "Customers", href: "/master-data/customers" },
-          { label: "Vehicles", href: "/master-data/vehicles" },
-          { label: "Suppliers", href: "/master-data/suppliers" },
-          { label: "Sparepart", href: "/master-data/sparepart" },
-          { label: "Services", href: "/master-data/services" },
-        ],
+        href: "/master-data/suppliers",
+      },
+      {
+        label: "Services",
+        icon: <Wrench size={18} />,
+        href: "/master-data/services",
       },
       {
         label: "Users",

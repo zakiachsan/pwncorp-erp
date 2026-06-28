@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { Plus, Search, Filter, Download } from "lucide-react";
 
 const orders = [
-  { no: "SO-007", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SO-006", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Draft", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SO-005", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SO-004", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SO-003", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
-  { no: "SO-002", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026", hasWO: true, hasInvoice: true },
-  { no: "SO-001", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/007/26060143", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/006/26060155", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Draft", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/005/26060154", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/004/26060153", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/003/26060152", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
+  { no: "SRO/002/26060150", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026", hasWO: true, hasInvoice: true },
+  { no: "SRO/001/26060149", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026", hasWO: false, hasInvoice: false },
 ];
 
 const statusPill = (status: string) => {
@@ -109,7 +109,7 @@ export default function ServiceOrdersPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>No. SO</th>
+              <th>No. SRO</th>
               <th>Customers</th>
               <th>Vehicle No</th>
               <th>Service Advisor</th>

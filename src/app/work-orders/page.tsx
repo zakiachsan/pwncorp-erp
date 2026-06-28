@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
 const wos = [
-  { no: "WO-006", so: "SO-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", mekanik: "Bambang", status: "In Progress", start: "25 Jun 2026", target: "27 Jun 2026", hasInvoice: false },
-  { no: "WO-005", so: "SO-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", mekanik: "Agus", status: "Draft", start: "26 Jun 2026", target: "28 Jun 2026", hasInvoice: false },
-  { no: "WO-004", so: "SO-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", mekanik: "Bambang", status: "Completed", start: "24 Jun 2026", target: "25 Jun 2026", hasInvoice: true },
-  { no: "WO-003", so: "SO-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", mekanik: "Hendra", status: "QC", start: "25 Jun 2026", target: "26 Jun 2026", hasInvoice: false },
-  { no: "WO-002", so: "SO-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", mekanik: "Agus", status: "Waiting Stock", start: "26 Jun 2026", target: "28 Jun 2026", hasInvoice: true },
-  { no: "WO-001", so: "SO-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", mekanik: "Hendra", status: "In Progress", start: "26 Jun 2026", target: "27 Jun 2026", hasInvoice: false },
+  { no: "SWO/006/26060155", so: "SRO/006/26060155", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", mekanik: "Bambang", status: "In Progress", start: "25 Jun 2026", target: "27 Jun 2026", hasInvoice: false },
+  { no: "SWO/005/26060154", so: "SRO/005/26060154", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", mekanik: "Agus", status: "Draft", start: "26 Jun 2026", target: "28 Jun 2026", hasInvoice: false },
+  { no: "SWO/004/26060153", so: "SRO/004/26060153", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", mekanik: "Bambang", status: "Completed", start: "24 Jun 2026", target: "25 Jun 2026", hasInvoice: true },
+  { no: "SWO/003/26060152", so: "SRO/003/26060152", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", mekanik: "Hendra", status: "QC", start: "25 Jun 2026", target: "26 Jun 2026", hasInvoice: false },
+  { no: "SWO/002/26060151", so: "SRO/002/26060150", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", mekanik: "Agus", status: "Waiting Stock", start: "26 Jun 2026", target: "28 Jun 2026", hasInvoice: true },
+  { no: "SWO/001/26060149", so: "SRO/001/26060149", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", mekanik: "Hendra", status: "In Progress", start: "26 Jun 2026", target: "27 Jun 2026", hasInvoice: false },
 ];
 
 const statusPill = (status: string) => {
@@ -85,14 +85,14 @@ export default function WorkOrdersPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>No. WO</th>
+              <th>No. SWO</th>
               <th>Customers</th>
               <th>Vehicle No</th>
               <th>Mekanik</th>
               <th>Status</th>
               <th>Mulai</th>
               <th>Target</th>
-              <th>No. SO</th>
+              <th>No. SRO</th>
               <th>Linked Docs</th>
             </tr>
           </thead>
