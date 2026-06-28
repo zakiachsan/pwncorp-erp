@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { Plus, Search, Filter, Download } from "lucide-react";
 
 const orders = [
-  { no: "SO-001", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026" },
-  { no: "SO-002", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026" },
-  { no: "SO-003", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026" },
-  { no: "SO-004", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026" },
-  { no: "SO-005", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026" },
-  { no: "SO-006", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Draft", total: "Rp 4.800.000", date: "24 Jun 2026" },
-  { no: "SO-007", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026" },
+  { no: "SO-007", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SO-006", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Draft", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SO-005", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SO-004", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SO-003", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
+  { no: "SO-002", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026", hasWO: true, hasInvoice: true },
+  { no: "SO-001", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026", hasWO: false, hasInvoice: false },
 ];
 
 const statusPill = (status: string) => {
@@ -58,6 +58,22 @@ export default function ServiceOrdersPage() {
             </select>
           </div>
           <div className="form-group">
+            <label className="form-label">Work Order</label>
+            <select className="form-select">
+              <option>All</option>
+              <option>Sudah dibuat</option>
+              <option>Belum dibuat</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Invoice</label>
+            <select className="form-select">
+              <option>All</option>
+              <option>Sudah dibuat</option>
+              <option>Belum dibuat</option>
+            </select>
+          </div>
+          <div className="form-group">
             <label className="form-label">Service Advisor</label>
             <select className="form-select">
               <option>All SA</option>
@@ -95,32 +111,42 @@ export default function ServiceOrdersPage() {
             <tr>
               <th>No. SO</th>
               <th>Customers</th>
-              <th>Merk Mobil</th>
+              <th>Vehicle No</th>
               <th>Service Advisor</th>
               <th>Status</th>
               <th>Total</th>
               <th>Tanggal</th>
+              <th>Linked Docs</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr
-                key={order.no}
-                onClick={() => router.push(`/service-orders/${order.no}`)}
-                className="cursor-pointer hover:bg-[#f0f7ff] transition-colors"
-              >
-                <td className="font-medium text-[--color-brand]">{order.no}</td>
+              <tr key={order.no}>
+                <td
+                  className="font-medium cursor-pointer"
+                  style={{ color: "var(--color-brand)" }}
+                  onClick={() => router.push(`/service-orders/${order.no}`)}
+                >{order.no}</td>
                 <td>
                   <div className="font-medium">{order.customerName}</div>
                 </td>
-                <td>
-                  <div className="font-medium">{order.merkMobil}</div>
-                  <div className="text-xs text-[--color-text-secondary]">{order.platNo}</div>
+                <td
+                  className="cursor-pointer"
+                  onClick={(e) => { e.stopPropagation(); router.push(`/master-data/vehicles/${encodeURIComponent(order.platNo)}`); }}
+                >
+                  <div className="font-medium" style={{ color: "var(--color-brand)" }}>{order.platNo}</div>
+                  <div className="text-xs text-[--color-text-secondary]">{order.merkMobil}</div>
                 </td>
                 <td>{order.sa}</td>
                 <td><span className={statusPill(order.status)}>{order.status}</span></td>
                 <td className="font-medium">{order.total}</td>
                 <td className="text-[--color-text-secondary]">{order.date}</td>
+                <td>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <span title={order.hasWO ? "Work Order sudah dibuat" : "Belum ada Work Order"} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 4, fontSize: 11, fontWeight: 700, background: order.hasWO ? "#2e844a" : "#d8d8d8", color: order.hasWO ? "#fff" : "#8e8f8e", cursor: "default" }}>WO</span>
+                    <span title={order.hasInvoice ? "Invoice sudah dibuat" : "Belum ada Invoice"} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 4, fontSize: 11, fontWeight: 700, background: order.hasInvoice ? "#0176d3" : "#d8d8d8", color: order.hasInvoice ? "#fff" : "#8e8f8e", cursor: "default" }}>INV</span>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

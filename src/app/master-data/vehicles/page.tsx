@@ -9,6 +9,8 @@ const vehicles = [
   { plate: "B 9012 GH", brand: "Mitsubishi", model: "Pajero", year: "2020", color: "Putih", customer: "Siti Rahmawati" },
   { plate: "B 3456 IJ", brand: "Suzuki", model: "Ertiga", year: "2022", color: "Silver", customer: "CV Berkah Abadi" },
   { plate: "B 7890 KL", brand: "Daihatsu", model: "Xenia", year: "2021", color: "Merah", customer: "Ahmad Fauzi" },
+  { plate: "B 1112 MN", brand: "Isuzu", model: "Elf", year: "2019", color: "Biru", customer: "PT Transport Jaya" },
+  { plate: "B 1314 OP", brand: "Mitsubishi", model: "L300", year: "2020", color: "Putih", customer: "CV Berkah Abadi" },
 ];
 
 export default function VehiclesPage() {

@@ -29,7 +29,7 @@ export default function ReceiptsPage() {
         </div>
         <div className="flex gap-2">
           <button className="btn btn--sm"><Download size={14} /> Export</button>
-          <button className="btn btn--brand btn--sm"><Plus size={14} /> New Receipt</button>
+          <button className="btn btn--brand btn--sm" onClick={() => router.push("/finance/receipts/create")}><Plus size={14} /> New Receipt</button>
         </div>
       </div>
 

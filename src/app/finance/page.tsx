@@ -5,78 +5,185 @@ import { useRouter } from "next/navigation";
 export default function FinancePage() {
   const router = useRouter();
 
-  const menuItems = [
-    { title: "Invoices", desc: "Kelola invoice dan pembayaran", icon: "📄", href: "/finance/invoices", color: "#0176d3" },
-    { title: "Payments", desc: "Histori pembayaran masuk & keluar", icon: "💰", href: "/finance/payments", color: "#2e844a" },
-    { title: "Accounts Receivable", desc: "Piutang dari customer", icon: "📋", href: "/finance/ar", color: "#f59e0b" },
-    { title: "Accounts Payable", desc: "Hutang ke supplier", icon: "📑", href: "/finance/ap", color: "#8b5cf6" },
-    { title: "General Ledger", desc: "Jurnal & buku besar", icon: "📒", href: "/finance/journal", color: "#0176d3" },
-    { title: "Cash Flow", desc: "Arus kas masuk & keluar", icon: "💵", href: "/finance/reports/cash-flow", color: "#2e844a" },
-    { title: "Balance Sheet", desc: "Neraca keuangan", icon: "📊", href: "/finance/reports/balance-sheet", color: "#0176d3" },
-    { title: "Profit & Loss", desc: "Laba rugi", icon: "📈", href: "/finance/reports/profit-loss", color: "#2e844a" },
-    { title: "Bank Reconciliation", desc: "Rekonsiliasi bank", icon: "🏦", href: "/finance/bank-reconciliation", color: "#8b5cf6" },
-    { title: "Aging AR", desc: "Piutang jatuh tempo", icon: "⏰", href: "/finance/reports/aging-ar", color: "#f59e0b" },
-    { title: "Aging AP", desc: "Hutang jatuh tempo", icon: "⏰", href: "/finance/reports/aging-ap", color: "#8b5cf6" },
-  ];
-
   return (
     <div>
-      <div className="view-header">
-        <div className="view-title">
-          <FinanceIcon className="w-6 h-6 text-[--color-brand-secondary]" />
-          Finance & Accounting
+      {/* Page Title */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0176d3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" x2="12" y1="2" y2="22" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Finance & Accounting</h1>
+      </div>
+
+      {/* Section 1: Inventory Invoices */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0176d3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+            <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+          </svg>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: "#0176d3", margin: 0 }}>Inventory Invoices (Purchases/Sales)</h2>
+        </div>
+
+        <div style={S.tableWrap}>
+          <table style={S.table}>
+            <thead>
+              <tr>
+                <th style={S.th}>Document</th>
+                <th style={S.th}>Workflow</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                style={{ ...S.tr, cursor: "pointer" }}
+                onClick={() => router.push("/finance/invoices/purchase")}
+                onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
+              >
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>Purchase Invoices</td>
+                <td style={S.td}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                    <span style={{ color: "#444746" }}>Company</span>
+                    <ArrowLeft />
+                    <DocIcon />
+                    <ArrowLeft />
+                    <span style={{ color: "#444746" }}>Supplier</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="card-slds">
-          <div className="text-sm text-[--color-text-secondary]">Total Piutang (AR)</div>
-          <div className="text-xl font-bold text-[--color-warning]">Rp 6.150.000</div>
+      {/* Section 2: General Invoice */}
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0176d3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+            <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+          </svg>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: "#0176d3", margin: 0 }}>General Invoice</h2>
         </div>
-        <div className="card-slds">
-          <div className="text-sm text-[--color-text-secondary]">Total Hutang (AP)</div>
-          <div className="text-xl font-bold text-[--color-error]">Rp 4.250.000</div>
-        </div>
-        <div className="card-slds">
-          <div className="text-sm text-[--color-text-secondary]">Cash Flow Bulan Ini</div>
-          <div className="text-xl font-bold text-[--color-success]">+ Rp 12.500.000</div>
-        </div>
-        <div className="card-slds">
-          <div className="text-sm text-[--color-text-secondary]">Laba Bersih Bulan Ini</div>
-          <div className="text-xl font-bold text-[--color-brand]">Rp 8.250.000</div>
-        </div>
-      </div>
 
-      {/* Menu Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {menuItems.map((item) => (
-          <div
-            key={item.title}
-            onClick={() => router.push(item.href)}
-            className="card-slds cursor-pointer hover:shadow-slds-md transition-shadow"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div style={{ width: 40, height: 40, borderRadius: 8, background: item.color + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
-                {item.icon}
-              </div>
-              <div>
-                <div className="font-semibold text-[--color-text-primary]">{item.title}</div>
-                <div className="text-xs text-[--color-text-secondary]">{item.desc}</div>
-              </div>
-            </div>
-          </div>
-        ))}
+        <div style={S.tableWrap}>
+          <table style={S.table}>
+            <thead>
+              <tr>
+                <th style={S.th}>Document</th>
+                <th style={S.th}>Workflow</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                style={{ ...S.tr, cursor: "pointer" }}
+                onClick={() => router.push("/finance/invoices/payables")}
+                onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
+              >
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>Invoice Payables</td>
+                <td style={S.td}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                    <span style={{ color: "#444746" }}>Company/Store</span>
+                    <ArrowLeft />
+                    <DocIcon />
+                    <ArrowLeft />
+                    <span style={{ color: "#444746" }}>Supplier</span>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                style={{ ...S.tr, cursor: "pointer" }}
+                onClick={() => router.push("/finance/invoices/receivables")}
+                onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
+              >
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>Invoice Receivables</td>
+                <td style={S.td}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                    <span style={{ color: "#444746" }}>Company/Store</span>
+                    <ArrowRight />
+                    <DocIcon />
+                    <ArrowRight />
+                    <span style={{ color: "#444746" }}>Customer</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
 
-function FinanceIcon({ className }: { className?: string }) {
+function DocIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    <div style={{
+      width: 28,
+      height: 28,
+      borderRadius: 6,
+      background: "#f0f7ff",
+      border: "1px solid #d0e5f5",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0176d3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      </svg>
+    </div>
+  );
+}
+
+function ArrowLeft() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 19-7-7 7-7" />
+      <path d="M19 12H5" />
     </svg>
   );
 }
+
+function ArrowRight() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </svg>
+  );
+}
+
+const S: Record<string, React.CSSProperties> = {
+  tableWrap: {
+    border: "1px solid #ecebea",
+    borderRadius: 8,
+    overflow: "hidden",
+    background: "#fff",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: 13,
+  },
+  th: {
+    padding: "10px 16px",
+    textAlign: "left",
+    fontWeight: 600,
+    fontSize: 11,
+    color: "#444746",
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    background: "#f9f9f9",
+    borderBottom: "1px solid #ecebea",
+  },
+  td: {
+    padding: "14px 16px",
+    borderBottom: "1px solid #f0f0f0",
+    color: "#001526",
+    background: "#fff",
+  },
+  tr: { transition: "background 100ms" },
+};

@@ -27,7 +27,7 @@ export default function TransfersPage() {
         </div>
         <div className="flex gap-2">
           <button className="btn btn--sm"><Download size={14} /> Export</button>
-          <button className="btn btn--brand btn--sm"><Plus size={14} /> New Transfer</button>
+          <button className="btn btn--brand btn--sm" onClick={() => router.push("/finance/transfers/create")}><Plus size={14} /> New Transfer</button>
         </div>
       </div>
 

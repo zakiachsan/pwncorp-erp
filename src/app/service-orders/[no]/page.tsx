@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Printer, FileText, Phone, ChevronRight, CheckCircle } from "lucide-react";
+import { ArrowLeft, Printer, FileText, Phone, ChevronRight, CheckCircle, Wrench, ExternalLink } from "lucide-react";
 
 const initialOrdersData: Record<string, any> = {
   "SO-001": {
@@ -54,8 +54,33 @@ const initialOrdersData: Record<string, any> = {
       { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
     ],
     workOrders: [
-      { documentNumber: "SWO/002/26060151", createdDate: "26-Jun-2026 10:45 AM", status: "IN PROGRESS" },
+      { documentNumber: "WO-002", createdDate: "26-Jun-2026 10:45 AM", status: "IN PROGRESS" },
     ],
+  },
+  "SO-003": {
+    documentNumber: "SRO/003/26060152",
+    type: "General",
+    store: "Wijaya Motor - One Stop Service",
+    customer: { name: "Siti Rahmawati", phone: "0813-5678-9012" },
+    registrationNo: "B 9012 GH",
+    planServiceDate: "Kamis, 27 Juni 2026",
+    planServiceTime: "08:00",
+    serviceAdvisor: "Rudi",
+    salesperson: "-",
+    bookingSource: "Walk-in",
+    referenceNumber: "-",
+    vehicleType: "CAR",
+    vehicleMake: "MITSUBISHI",
+    vehicleModel: "PAJERO",
+    odometer: "62.100",
+    year: "2020",
+    color: "PUTIH",
+    status: "APPROVED",
+    services: [
+      { item: "C1 - Service Berkala 10K", description: "Service Umum", estimatedTime: "90 menit", quantity: 1, priceExTax: 450000, discount: "-", subtotal: 450000, tax: 0, otherTax: 0, total: 450000 },
+      { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
+    ],
+    workOrders: [],
   },
 };
 
@@ -68,6 +93,7 @@ export default function ServiceOrderDetailPage() {
   const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
   const [orders, setOrders] = useState(initialOrdersData);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showCreateWOConfirm, setShowCreateWOConfirm] = useState(false);
 
   const order = orders[orderNo];
 
@@ -90,9 +116,32 @@ export default function ServiceOrderDetailPage() {
     setShowApproveConfirm(false);
   };
 
+  const handleCreateWO = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
+    const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", hour12: true });
+    const newWONo = `WO-${orderNo.replace("SO-", "")}`;
+    const newWO = {
+      documentNumber: newWONo,
+      createdDate: `${dateStr} ${timeStr}`,
+      status: "CREATED",
+    };
+    setOrders((prev) => ({
+      ...prev,
+      [orderNo]: {
+        ...prev[orderNo],
+        workOrders: [newWO],
+      },
+    }));
+    setShowCreateWOConfirm(false);
+    setActiveTab("docref");
+  };
+
   const totalQty = order.services.reduce((s: number, x: any) => s + x.quantity, 0);
   const grandTotal = order.services.reduce((s: number, x: any) => s + x.total, 0);
   const isDraft = order.status === "DRAFT";
+  const hasWO = order.workOrders.length > 0;
+  const wo = hasWO ? order.workOrders[0] : null;
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -123,6 +172,16 @@ export default function ServiceOrderDetailPage() {
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
+              {!isDraft && !hasWO && order.services.length > 0 && (
+                <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
+                  <Wrench size={14} /> Create Work Orders
+                </button>
+              )}
+              {!isDraft && hasWO && (
+                <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
+                  <ExternalLink size={14} /> View Work Orders
+                </button>
+              )}
               {isDraft && (
                 <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
                   <CheckCircle size={14} /> Approve
@@ -176,23 +235,19 @@ export default function ServiceOrderDetailPage() {
                 <table style={S.table}>
                   <thead>
                     <tr>
-                      <th style={{ ...S.th, width: 40 }}>No.</th>
                       <th style={S.th}>Document Number</th>
                       <th style={S.th}>Created Date</th>
                       <th style={S.th}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {order.workOrders.map((wo: any, i: number) => (
-                      <tr key={wo.documentNumber} style={S.tr}>
-                        <td style={S.td}>{i + 1}</td>
-                        <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{wo.documentNumber}</td>
-                        <td style={S.td}>{wo.createdDate}</td>
-                        <td style={S.td}>
-                          <span style={{ ...S.pill, background: "#ea001e" }}>{wo.status}</span>
-                        </td>
-                      </tr>
-                    ))}
+                    <tr style={S.tr}>
+                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{wo!.documentNumber}</td>
+                      <td style={S.td}>{wo!.createdDate}</td>
+                      <td style={S.td}>
+                        <span style={{ ...S.pill, background: wo!.status === "COMPLETED" ? "#2e844a" : wo!.status === "IN PROGRESS" ? "#0176d3" : "#fe9339" }}>{wo!.status}</span>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -222,6 +277,32 @@ export default function ServiceOrderDetailPage() {
               <button onClick={() => setShowApproveConfirm(false)} style={S.actionBtn}>Batal</button>
               <button onClick={handleApprove} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
                 <CheckCircle size={14} /> Ya, Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Work Orders Confirmation Modal */}
+      {showCreateWOConfirm && (
+        <div style={S.modalOverlay}>
+          <div style={S.modal}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 12 }}>Create Work Orders?</h3>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20, lineHeight: 1.5 }}>
+              Work Order baru akan dibuat dari Service Order ini berdasarkan <strong>{order.services.length} service item</strong> yang terdaftar.
+            </p>
+            <div style={{ background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8, padding: 12, marginBottom: 20 }}>
+              {order.services.map((svc: any, i: number) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: i < order.services.length - 1 ? "1px solid #ecebea" : "none" }}>
+                  <span style={{ color: "#001526" }}>{svc.item}</span>
+                  <span style={{ color: "#444746" }}>Qty: {svc.quantity}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowCreateWOConfirm(false)} style={S.actionBtn}>Batal</button>
+              <button onClick={handleCreateWO} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
+                <Wrench size={14} /> Ya, Create Work Orders
               </button>
             </div>
           </div>

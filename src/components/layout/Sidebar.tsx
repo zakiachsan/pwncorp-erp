@@ -11,6 +11,12 @@ import {
   ChevronDown,
   Menu,
   X,
+  FileText,
+  DollarSign,
+  Receipt,
+  CreditCard,
+  BookOpen,
+  PieChart,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,7 +29,8 @@ interface NavItem {
   children?: { label: string; href: string }[];
 }
 
-const navGroups: { title: string; items: NavItem[] }[] = [
+/* ─── Operasional Nav ─── */
+const operasionalGroups: { title: string; items: NavItem[] }[] = [
   {
     title: "Overview",
     items: [
@@ -75,51 +82,73 @@ const navGroups: { title: string; items: NavItem[] }[] = [
       },
     ],
   },
+];
+
+/* ─── Finance Nav ─── */
+const financeGroups: { title: string; items: NavItem[] }[] = [
+  {
+    title: "Finance",
+    items: [
+      {
+        label: "Invoices",
+        icon: <FileText size={18} />,
+        children: [
+          { label: "Purchase Invoices", href: "/finance/invoices/purchase" },
+          { label: "Invoice Payables", href: "/finance/invoices/payables" },
+          { label: "Invoice Receivables", href: "/finance/invoices/receivables" },
+        ],
+      },
+      {
+        label: "Payments",
+        icon: <CreditCard size={18} />,
+        href: "/finance/payments",
+      },
+      {
+        label: "Statement of Accounts",
+        icon: <BookOpen size={18} />,
+        href: "/finance/soa",
+      },
+      {
+        label: "Finance Reports",
+        icon: <PieChart size={18} />,
+        children: [
+          { label: "Account Payables", href: "/finance/reports/ap" },
+          { label: "Account Receivables", href: "/finance/reports/ar" },
+        ],
+      },
+    ],
+  },
   {
     title: "Accounting",
     items: [
-      {
-        label: "Accounting",
-        icon: <BarChart3 size={18} />,
-        href: "/finance",
-      },
       {
         label: "Buku Besar",
         icon: <Database size={18} />,
         children: [
           { label: "Akun Perkiraan (COA)", href: "/finance/coa" },
+          { label: "Account Tree", href: "/finance/coa/tree" },
           { label: "Jurnal Umum", href: "/finance/journal" },
         ],
       },
       {
         label: "Kas & Bank",
-        icon: <BarChart3 size={18} />,
+        icon: <DollarSign size={18} />,
         children: [
-          { label: "Pembayaran", href: "/finance/payments" },
           { label: "Penerimaan", href: "/finance/receipts" },
           { label: "Transfer Bank", href: "/finance/transfers" },
           { label: "Rekonsiliasi Bank", href: "/finance/bank-reconciliation" },
         ],
       },
       {
-        label: "Penjualan",
-        icon: <ClipboardList size={18} />,
-        children: [
-          { label: "Faktur Penjualan", href: "/finance/invoices" },
-        ],
-      },
-      {
-        label: "Laporan",
-        icon: <Wrench size={18} />,
-        children: [
-          { label: "Laporan Keuangan", href: "/finance/reports" },
-        ],
+        label: "Accounting Reports",
+        icon: <PieChart size={18} />,
+        href: "/finance/accounting-reports",
       },
     ],
   },
 ];
 
-// ─── Inline style objects (guaranteed to work) ───
+// ─── Inline style objects ───
 const S = {
   sidebar: {
     width: 260,
@@ -159,6 +188,29 @@ const S = {
     fontWeight: 700,
     color: "#fff",
     whiteSpace: "nowrap" as const,
+  },
+  tabRow: {
+    display: "flex",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    flexShrink: 0,
+  },
+  tab: {
+    flex: 1,
+    padding: "10px 0",
+    fontSize: 12,
+    fontWeight: 600,
+    textAlign: "center" as const,
+    cursor: "pointer",
+    border: "none",
+    background: "transparent",
+    color: "rgba(255,255,255,0.4)",
+    transition: "all 150ms",
+    borderBottom: "2px solid transparent",
+  },
+  tabActive: {
+    color: "#fff",
+    borderBottom: "2px solid #0176d3",
+    background: "rgba(1,118,211,0.1)",
   },
   nav: {
     flex: 1,
@@ -251,6 +303,9 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const activeTab: "operasional" | "finance" = pathname.startsWith("/finance") ? "finance" : "operasional";
+
+  const navGroups = activeTab === "operasional" ? operasionalGroups : financeGroups;
 
   const toggleGroup = (label: string) => {
     setExpandedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -292,6 +347,107 @@ export default function Sidebar() {
     }
   };
 
+  const renderNav = (groups: { title: string; items: NavItem[] }[]) => (
+    <nav style={S.nav}>
+      {groups.map((group) => (
+        <div key={group.title} style={{ marginBottom: 8 }}>
+          {!collapsed && (
+            <div style={S.sectionTitle}>{group.title}</div>
+          )}
+
+          {group.items.map((item) => {
+            const hasChildren = item.children && item.children.length > 0;
+            const isExpanded = expandedGroups[item.label] || false;
+            const groupActive = isGroupActive(item);
+
+            if (hasChildren) {
+              return (
+                <div key={item.label}>
+                  <button
+                    onClick={() => toggleGroup(item.label)}
+                    style={{
+                      ...S.navItem,
+                      ...(groupActive ? S.navItemActive : {}),
+                    }}
+                    onMouseEnter={navItemHover}
+                    onMouseLeave={(e) => navItemLeave(e, groupActive)}
+                  >
+                    <span style={S.iconWrap}>{item.icon}</span>
+                    {!collapsed && (
+                      <>
+                        <span style={{ flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>
+                          {item.label}
+                        </span>
+                        <span
+                          style={{
+                            ...S.chevron,
+                            transform: isExpanded ? "rotate(180deg)" : "rotate(0)",
+                          }}
+                        >
+                          <ChevronDown size={14} />
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+                  {!collapsed && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        maxHeight: isExpanded ? 500 : 0,
+                        opacity: isExpanded ? 1 : 0,
+                        overflow: "hidden",
+                        transition: "max-height 200ms ease, opacity 200ms ease",
+                      }}
+                    >
+                      {item.children?.map((child) => {
+                        const active = pathname === child.href;
+                        return (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            style={{
+                              ...S.subItem,
+                              ...(active ? S.subItemActive : {}),
+                            }}
+                            onMouseEnter={subItemHover}
+                            onMouseLeave={(e) => subItemLeave(e, active)}
+                          >
+                            <span style={{ whiteSpace: "nowrap" }}>{child.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.label}
+                href={item.href!}
+                style={{
+                  ...S.navItem,
+                  ...(active ? S.navItemActive : {}),
+                }}
+                onMouseEnter={navItemHover}
+                onMouseLeave={(e) => navItemLeave(e, active)}
+              >
+                <span style={S.iconWrap}>{item.icon}</span>
+                {!collapsed && (
+                  <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+
   const sidebarContent = (
     <>
       {/* Logo */}
@@ -300,106 +456,26 @@ export default function Sidebar() {
         {!collapsed && <span style={S.logoText}>pwncorp</span>}
       </div>
 
+      {/* Tab Switcher */}
+      {!collapsed && (
+        <div style={S.tabRow}>
+          <button
+            style={{ ...S.tab, ...(activeTab === "operasional" ? S.tabActive : {}) }}
+            onClick={() => { if (activeTab !== "operasional") window.location.href = "/dashboard"; }}
+          >
+            Operasional
+          </button>
+          <button
+            style={{ ...S.tab, ...(activeTab === "finance" ? S.tabActive : {}) }}
+            onClick={() => { if (activeTab !== "finance") window.location.href = "/finance"; }}
+          >
+            Finance
+          </button>
+        </div>
+      )}
+
       {/* Nav */}
-      <nav style={S.nav}>
-        {navGroups.map((group) => (
-          <div key={group.title} style={{ marginBottom: 8 }}>
-            {!collapsed && (
-              <div style={S.sectionTitle}>{group.title}</div>
-            )}
-
-            {group.items.map((item) => {
-              const hasChildren = item.children && item.children.length > 0;
-              const isExpanded = expandedGroups[item.label] ?? true;
-              const groupActive = isGroupActive(item);
-
-              if (hasChildren) {
-                return (
-                  <div key={item.label}>
-                    <button
-                      onClick={() => toggleGroup(item.label)}
-                      style={{
-                        ...S.navItem,
-                        ...(groupActive ? S.navItemActive : {}),
-                      }}
-                      onMouseEnter={navItemHover}
-                      onMouseLeave={(e) => navItemLeave(e, groupActive)}
-                    >
-                      <span style={S.iconWrap}>{item.icon}</span>
-                      {!collapsed && (
-                        <>
-                          <span style={{ flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>
-                            {item.label}
-                          </span>
-                          <span
-                            style={{
-                              ...S.chevron,
-                              transform: isExpanded ? "rotate(180deg)" : "rotate(0)",
-                            }}
-                          >
-                            <ChevronDown size={14} />
-                          </span>
-                        </>
-                      )}
-                    </button>
-
-                    {/* Sub-menu — guaranteed flex column via inline style */}
-                    {!collapsed && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          maxHeight: isExpanded ? 500 : 0,
-                          opacity: isExpanded ? 1 : 0,
-                          overflow: "hidden",
-                          transition: "max-height 200ms ease, opacity 200ms ease",
-                        }}
-                      >
-                        {item.children?.map((child) => {
-                          const active = pathname === child.href;
-                          return (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              style={{
-                                ...S.subItem,
-                                ...(active ? S.subItemActive : {}),
-                              }}
-                              onMouseEnter={subItemHover}
-                              onMouseLeave={(e) => subItemLeave(e, active)}
-                            >
-                              <span style={{ whiteSpace: "nowrap" }}>{child.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href!}
-                  style={{
-                    ...S.navItem,
-                    ...(active ? S.navItemActive : {}),
-                  }}
-                  onMouseEnter={navItemHover}
-                  onMouseLeave={(e) => navItemLeave(e, active)}
-                >
-                  <span style={S.iconWrap}>{item.icon}</span>
-                  {!collapsed && (
-                    <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </nav>
+      {renderNav(navGroups)}
 
       {/* Collapse toggle */}
       <button
@@ -472,111 +548,25 @@ export default function Sidebar() {
           </button>
         </div>
 
+        {/* Mobile tab switcher */}
+        <div style={S.tabRow}>
+          <button
+            style={{ ...S.tab, ...(activeTab === "operasional" ? S.tabActive : {}) }}
+            onClick={() => { if (activeTab !== "operasional") window.location.href = "/dashboard"; }}
+          >
+            Operasional
+          </button>
+          <button
+            style={{ ...S.tab, ...(activeTab === "finance" ? S.tabActive : {}) }}
+            onClick={() => { if (activeTab !== "finance") window.location.href = "/finance"; }}
+          >
+            Finance
+          </button>
+        </div>
+
         {/* Mobile nav */}
-        <nav style={S.nav}>
-          {navGroups.map((group) => (
-            <div key={group.title} style={{ marginBottom: 8 }}>
-              <div style={S.sectionTitle}>{group.title}</div>
-
-              {group.items.map((item) => {
-                const hasChildren = item.children && item.children.length > 0;
-                const isExpanded = expandedGroups[item.label] ?? true;
-                const groupActive = isGroupActive(item);
-
-                if (hasChildren) {
-                  return (
-                    <div key={item.label}>
-                      <button
-                        onClick={() => toggleGroup(item.label)}
-                        style={{
-                          ...S.navItem,
-                          ...(groupActive ? S.navItemActive : {}),
-                        }}
-                        onMouseEnter={navItemHover}
-                        onMouseLeave={(e) => navItemLeave(e, groupActive)}
-                      >
-                        <span style={S.iconWrap}>{item.icon}</span>
-                        <span style={{ flex: 1, textAlign: "left", whiteSpace: "nowrap" }}>
-                          {item.label}
-                        </span>
-                        <span
-                          style={{
-                            ...S.chevron,
-                            transform: isExpanded ? "rotate(180deg)" : "rotate(0)",
-                          }}
-                        >
-                          <ChevronDown size={14} />
-                        </span>
-                      </button>
-
-                      {isExpanded && item.children && (
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                          {item.children.map((child) => {
-                            const active = pathname === child.href;
-                            return (
-                              <Link
-                                key={child.href}
-                                href={child.href}
-                                onClick={() => setMobileOpen(false)}
-                                style={{
-                                  ...S.subItem,
-                                  ...(active ? S.subItemActive : {}),
-                                }}
-                                onMouseEnter={subItemHover}
-                                onMouseLeave={(e) => subItemLeave(e, active)}
-                              >
-                                <span style={{ whiteSpace: "nowrap" }}>{child.label}</span>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                const active = isActive(item.href);
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href!}
-                    onClick={() => setMobileOpen(false)}
-                    style={{
-                      ...S.navItem,
-                      ...(active ? S.navItemActive : {}),
-                    }}
-                    onMouseEnter={navItemHover}
-                    onMouseLeave={(e) => navItemLeave(e, active)}
-                  >
-                    <span style={S.iconWrap}>{item.icon}</span>
-                    <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+        {renderNav(navGroups)}
       </aside>
-
-      {/* ═══ Mobile hamburger ═══ */}
-      <button
-        className="lg:hidden"
-        onClick={() => setMobileOpen(true)}
-        style={{
-          position: "fixed",
-          top: 12,
-          left: 12,
-          zIndex: 30,
-          padding: 8,
-          background: "#fff",
-          border: "1px solid #ecebea",
-          borderRadius: 4,
-          boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-          cursor: "pointer",
-        }}
-      >
-        <Menu size={20} style={{ color: "#001526" }} />
-      </button>
     </>
   );
 }

@@ -20,6 +20,10 @@ const data: Record<string, any> = {
   "B 9012 GH": { plate: "B 9012 GH", brand: "Mitsubishi", model: "Pajero", year: "2020", color: "Putih", customer: "Siti Rahmawati", history: [] },
   "B 3456 IJ": { plate: "B 3456 IJ", brand: "Suzuki", model: "Ertiga", year: "2022", color: "Silver", customer: "CV Berkah Abadi", history: [] },
   "B 7890 KL": { plate: "B 7890 KL", brand: "Daihatsu", model: "Xenia", year: "2021", color: "Merah", customer: "Ahmad Fauzi", history: [] },
+  "B 1112 MN": { plate: "B 1112 MN", brand: "Isuzu", model: "Elf", year: "2019", color: "Biru", customer: "PT Transport Jaya", history: [
+    { no: "SO-006", date: "24 Jun 2026", services: "Service Berkala", status: "Draft", total: "Rp 4.800.000" },
+  ] },
+  "B 1314 OP": { plate: "B 1314 OP", brand: "Mitsubishi", model: "L300", year: "2020", color: "Putih", customer: "CV Berkah Abadi", history: [] },
 };
 
 const statusColor: Record<string, string> = { Draft: "#6b7280", Approved: "#0176d3", "In Progress": "#f59e0b", Completed: "#2e844a" };
