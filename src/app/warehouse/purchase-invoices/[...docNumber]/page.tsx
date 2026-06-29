@@ -59,7 +59,7 @@ const piDetail: Record<string, any> = {
     deliveries: [
       { refCode: "PD/HO/26050082", date: "28 Apr 2026", warehouse: "Gudang Utama", status: "RECEIVED", total: 2850000 },
     ],
-    payments: [
+    paymentsList: [
       { refCode: "PAY/HO/26050041", date: "15 May 2026", amount: 0, status: "PENDING", method: "Bank Transfer" },
     ],
     returns: [],
@@ -490,7 +490,7 @@ export default function PurchaseInvoiceDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pi.payments.map((p: any, idx: number) => (
+                  {pi.paymentsList.map((p: any, idx: number) => (
                     <tr key={idx}>
                       <td
                         className="font-medium cursor-pointer"
