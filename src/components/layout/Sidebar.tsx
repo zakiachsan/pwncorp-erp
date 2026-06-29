@@ -64,6 +64,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         icon: <Package size={18} />,
         children: [
           { label: "Purchase Request", href: "/warehouse/purchase-request" },
+          { label: "Pembanding", href: "/warehouse/pembanding" },
           { label: "Purchase Orders", href: "/warehouse/purchase-orders" },
           { label: "Purchase Deliveries", href: "/warehouse/purchase-deliveries" },
           { label: "Purchase Invoices", href: "/warehouse/purchase-invoices" },

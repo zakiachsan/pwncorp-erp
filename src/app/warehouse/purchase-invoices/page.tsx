@@ -50,34 +50,6 @@ export default function PurchaseInvoicesPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 16, background: "#ecebea", borderRadius: 8, padding: 3, width: "fit-content" }}>
-        <button
-          onClick={() => setActiveTab("standard")}
-          style={{
-            padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6,
-            cursor: "pointer", whiteSpace: "nowrap",
-            color: activeTab === "standard" ? "#fff" : "#444746",
-            background: activeTab === "standard" ? "#0176d3" : "transparent",
-            fontWeight: activeTab === "standard" ? 600 : 400,
-          }}
-        >
-          Company Purchase Invoice
-        </button>
-        <button
-          onClick={() => setActiveTab("fixedAssets")}
-          style={{
-            padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6,
-            cursor: "pointer", whiteSpace: "nowrap",
-            color: activeTab === "fixedAssets" ? "#fff" : "#444746",
-            background: activeTab === "fixedAssets" ? "#0176d3" : "transparent",
-            fontWeight: activeTab === "fixedAssets" ? 600 : 400,
-          }}
-        >
-          Fixed Asset
-        </button>
-      </div>
-
       {/* Filter Section */}
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">

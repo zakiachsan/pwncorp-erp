@@ -35,7 +35,7 @@ const formatIDR = (n: number) => {
 
 export default function PurchaseOrdersPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"standard" | "fixedAssets">("standard");
+  const [activeTab, setActiveTab] = useState<"standard">("standard");
 
   return (
     <div>
@@ -46,26 +46,6 @@ export default function PurchaseOrdersPage() {
           Purchase Order
           <Star className="w-5 h-5 text-yellow-400 ml-2" />
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-0 mb-4 bg-[#ecebea] rounded-lg p-0.5 w-fit">
-        {([
-          { key: "standard" as const, label: "Standard" },
-          { key: "fixedAssets" as const, label: "Fixed Assets" },
-        ]).map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              activeTab === t.key
-                ? "bg-[#0176d3] text-white"
-                : "bg-transparent text-[#444746] hover:bg-white"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
       </div>
 
       {/* Filter */}
