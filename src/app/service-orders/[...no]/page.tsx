@@ -150,11 +150,13 @@ const initialOrdersData: Record<string, any> = {
     odometer: "120.000",
     year: "2019",
     color: "BIRU",
-    status: "DRAFT",
+    status: "APPROVED",
     services: [
       { item: "F1 - Overhaul", description: "Overhaul Mesin", estimatedTime: "480 menit", quantity: 1, priceExTax: 2500000, discount: "5%", subtotal: 2375000, tax: 0, otherTax: 0, total: 2375000 },
     ],
-    workOrders: [],
+    workOrders: [
+      { documentNumber: "SWO/006/26060155", createdDate: "25-Jun-2026 08:00 AM", status: "IN PROGRESS" },
+    ],
   },
   "SRO/007/26060143": {
     documentNumber: "SRO/007/26060143",
@@ -340,7 +342,14 @@ export default function ServiceOrderDetailPage() {
                   </thead>
                   <tbody>
                     <tr style={S.tr}>
-                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{wo!.documentNumber}</td>
+                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>
+                        <span
+                          onClick={() => router.push(`/work-orders/${wo!.documentNumber}`)}
+                          style={{ cursor: "pointer", textDecoration: "underline", textDecorationColor: "#0176d3" }}
+                        >
+                          {wo!.documentNumber}
+                        </span>
+                      </td>
                       <td style={S.td}>{wo!.createdDate}</td>
                       <td style={S.td}>
                         <span style={{ ...S.pill, background: wo!.status === "COMPLETED" ? "#2e844a" : wo!.status === "IN PROGRESS" ? "#0176d3" : "#fe9339" }}>{wo!.status}</span>
@@ -354,7 +363,7 @@ export default function ServiceOrderDetailPage() {
             )}
           </div>
           <h3 style={S.sectionTitle}>Services</h3>
-          <ServicesTable services={order.services} totalQty={totalQty} grandTotal={grandTotal} />
+          <ServicesTable services={order.services} totalQty={totalQty} grandTotal={grandTotal} router={router} />
         </div>
       )}
 
@@ -424,7 +433,7 @@ function F({ label, value, link = false }: { label: string; value: string; link?
 }
 
 /* ─── Services Table ─── */
-function ServicesTable({ services, totalQty, grandTotal }: { services: any[]; totalQty: number; grandTotal: number }) {
+function ServicesTable({ services, totalQty, grandTotal, router }: { services: any[]; totalQty: number; grandTotal: number; router: any }) {
   return (
     <div style={S.tableWrap}>
       <table style={S.table}>
@@ -443,20 +452,30 @@ function ServicesTable({ services, totalQty, grandTotal }: { services: any[]; to
           </tr>
         </thead>
         <tbody>
-          {services.map((svc: any, i: number) => (
-            <tr key={i} style={S.tr}>
-              <td style={S.td}>{i + 1}</td>
-              <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
-              <td style={S.td}>{svc.description}</td>
-              <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
-              <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.priceExTax)}</td>
-              <td style={{ ...S.td, textAlign: "center" }}>{svc.discount}</td>
-              <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.subtotal)}</td>
-              <td style={{ ...S.td, textAlign: "right" }}>{svc.tax}</td>
-              <td style={{ ...S.td, textAlign: "right" }}>{svc.otherTax}</td>
-              <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
-            </tr>
-          ))}
+          {services.map((svc: any, i: number) => {
+            const code = svc.item.split(" - ")[0].trim();
+            return (
+              <tr key={i} style={S.tr}>
+                <td style={S.td}>{i + 1}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>
+                  <span
+                    onClick={() => router.push(`/master-data/services/${code}`)}
+                    style={{ cursor: "pointer", textDecoration: "underline", textDecorationColor: "#0176d3" }}
+                  >
+                    {svc.item}
+                  </span>
+                </td>
+                <td style={S.td}>{svc.description}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.priceExTax)}</td>
+                <td style={{ ...S.td, textAlign: "center" }}>{svc.discount}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.subtotal)}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{svc.tax}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{svc.otherTax}</td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+              </tr>
+            );
+          })}
         </tbody>
         <tfoot>
           <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
