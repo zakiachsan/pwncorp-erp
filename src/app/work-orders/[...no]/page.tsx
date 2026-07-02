@@ -141,6 +141,26 @@ const soGeneratedWOs: Record<string, any> = {
 };
 
 const allWOs = { ...woData, ...soGeneratedWOs };
+
+// SWO → SRI mapping for Document Reference tab
+const swoSriMap: Record<string, { docNo: string; invoiceDate: string; status: string; total: number }[]> = {
+  "SWO/006/26060155": [
+    { docNo: "SRI/001/26060155", invoiceDate: "27-Jun-2026", status: "UNPAID", total: 4800000 },
+  ],
+  "SWO/003/26060152": [
+    { docNo: "SRI/002/26060152", invoiceDate: "27-Jun-2026", status: "PAID", total: 5200000 },
+  ],
+  "SWO/002/26060151": [
+    { docNo: "SRI/003/26060150", invoiceDate: "26-Jun-2026", status: "PARTIAL", total: 1800000 },
+  ],
+  "SWO/001/26060149": [
+    { docNo: "SRI/004/26060149", invoiceDate: "24-Jun-2026", status: "PAID", total: 2500000 },
+  ],
+  "SWO/005/26060154": [
+    { docNo: "SRI/005/26060154", invoiceDate: "26-Jun-2026", status: "PAID", total: 950000 },
+  ],
+};
+
 const fmt = (n: number) => n.toLocaleString("id-ID");
 
 const statusColor = (s: string) => {
@@ -425,6 +445,42 @@ export default function WorkOrderDetailPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Service Invoices */}
+          <h3 style={{ ...S.sectionTitle, marginTop: 20 }}>Service Invoices</h3>
+          {swoSriMap[wo.documentNumber] ? (
+            <div style={S.tableWrap}>
+              <table style={S.table}>
+                <thead>
+                  <tr>
+                    <th style={{ ...S.th, width: 36 }}>No.</th>
+                    <th style={S.th}>Document Number</th>
+                    <th style={S.th}>Invoice Date</th>
+                    <th style={S.th}>Status</th>
+                    <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {swoSriMap[wo.documentNumber].map((sri: any, i: number) => (
+                    <tr key={sri.docNo} style={S.tr}>
+                      <td style={S.td}>{i + 1}</td>
+                      <td
+                        style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
+                        onClick={() => router.push(`/finance/invoices/service/${sri.docNo}`)}
+                      >{sri.docNo}</td>
+                      <td style={S.td}>{sri.invoiceDate}</td>
+                      <td style={S.td}>
+                        <span style={{ ...S.pill, background: sri.status === "PAID" ? "#2e844a" : sri.status === "PARTIAL" ? "#f59e0b" : "#ea001e" }}>{sri.status}</span>
+                      </td>
+                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sri.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada Service Invoice</p></div>
+          )}
         </div>
       )}
 

@@ -3,12 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const receivables = [
-  { docNo: "IR/SO/26060001", refNo: "INV-001", sriNo: "SRI/004/26060149", customer: "Budi Santoso", invoiceDate: "24-Jun-2026", dueDate: "30-Jun-2026", status: "PAID", total: 2500000, amountPaid: 2500000, amountDue: 0, journalNo: "13801161" },
-  { docNo: "IR/SO/26060002", refNo: "INV-002", sriNo: "SRI/003/26060150", customer: "PT Maju Jaya", invoiceDate: "25-Jun-2026", dueDate: "28-Jun-2026", status: "UNPAID", total: 1800000, amountPaid: 0, amountDue: 1800000, journalNo: "-" },
-  { docNo: "IR/SO/26060003", refNo: "INV-003", sriNo: "SRI/002/26060152", customer: "Siti Rahmawati", invoiceDate: "26-Jun-2026", dueDate: "02-Jul-2026", status: "PARTIAL", total: 5200000, amountPaid: 2600000, amountDue: 2600000, journalNo: "13801162" },
-  { docNo: "IR/SO/26060004", refNo: "INV-004", sriNo: "SRI/005/26060154", customer: "Ahmad Fauzi", invoiceDate: "26-Jun-2026", dueDate: "28-Jun-2026", status: "PAID", total: 950000, amountPaid: 950000, amountDue: 0, journalNo: "13801163" },
-  { docNo: "IR/SO/26060005", refNo: "INV-005", sriNo: "SRI/001/26060155", customer: "PT Transport Jaya", invoiceDate: "26-Jun-2026", dueDate: "30-Jun-2026", status: "DRAFT", total: 4800000, amountPaid: 0, amountDue: 4800000, journalNo: "-" },
+const serviceInvoices = [
+  { docNo: "SRI/001/26060155", swoNo: "SWO/006/26060155", customer: "PT Transport Jaya", invoiceDate: "27-Jun-2026", dueDate: "04-Jul-2026", status: "UNPAID", total: 4800000, amountPaid: 0, amountDue: 4800000 },
+  { docNo: "SRI/002/26060152", swoNo: "SWO/003/26060152", customer: "Siti Rahmawati", invoiceDate: "27-Jun-2026", dueDate: "04-Jul-2026", status: "PAID", total: 5200000, amountPaid: 5200000, amountDue: 0 },
+  { docNo: "SRI/003/26060150", swoNo: "SWO/002/26060151", customer: "PT Maju Jaya", invoiceDate: "26-Jun-2026", dueDate: "03-Jul-2026", status: "PARTIAL", total: 1800000, amountPaid: 900000, amountDue: 900000 },
 ];
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
@@ -23,11 +21,11 @@ const statusColor = (s: string) => {
   return map[s] || "#6b7280";
 };
 
-export default function InvoiceReceivablesPage() {
+export default function ServiceInvoicesPage() {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("");
 
-  const filtered = receivables.filter((inv) => {
+  const filtered = serviceInvoices.filter((inv) => {
     if (statusFilter && inv.status !== statusFilter) return false;
     return true;
   });
@@ -41,17 +39,19 @@ export default function InvoiceReceivablesPage() {
       {/* Page Title */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0176d3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-          <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" x2="8" y1="13" y2="13" />
+          <line x1="16" x2="8" y1="17" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
         </svg>
-        <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Invoice Receivables</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Service Invoices</h1>
       </div>
 
       {/* Summary */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
         <div style={S.card}>
-          <div style={{ fontSize: 12, color: "#444746", marginBottom: 4 }}>Total Receivables</div>
+          <div style={{ fontSize: 12, color: "#444746", marginBottom: 4 }}>Total Invoices</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#001526" }}>Rp {fmt(totalReceivable)}</div>
         </div>
         <div style={S.card}>
@@ -62,31 +62,6 @@ export default function InvoiceReceivablesPage() {
           <div style={{ fontSize: 12, color: "#444746", marginBottom: 4 }}>Amount Received</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#2e844a" }}>Rp {fmt(totalPaid)}</div>
         </div>
-      </div>
-
-      {/* Sub Tabs */}
-      <div style={{ display: "flex", gap: 0, marginBottom: 16 }}>
-        {(["payables", "receivables"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => {
-              if (t === "payables") router.push("/finance/invoices/payables");
-              else router.push("/finance/invoices/receivables");
-            }}
-            style={{
-              padding: "8px 16px",
-              fontSize: 12,
-              fontWeight: t === "receivables" ? 600 : 400,
-              color: t === "receivables" ? "#fff" : "#444746",
-              background: t === "receivables" ? "#0176d3" : "#ecebea",
-              border: "none",
-              borderRadius: t === "payables" ? "6px 0 0 6px" : "0 6px 6px 0",
-              cursor: "pointer",
-            }}
-          >
-            {t === "payables" ? "Payables" : "Receivables"}
-          </button>
-        ))}
       </div>
 
       {/* Filter */}
@@ -110,7 +85,7 @@ export default function InvoiceReceivablesPage() {
           <thead>
             <tr>
               <th style={S.th}>Document Number</th>
-              <th style={S.th}>SRI No</th>
+              <th style={S.th}>SWO Reference</th>
               <th style={S.th}>Customer</th>
               <th style={S.th}>Invoice Date</th>
               <th style={S.th}>Due Date</th>
@@ -118,7 +93,6 @@ export default function InvoiceReceivablesPage() {
               <th style={{ ...S.th, textAlign: "right" }}>Total</th>
               <th style={{ ...S.th, textAlign: "right" }}>Received</th>
               <th style={{ ...S.th, textAlign: "right" }}>Due</th>
-              <th style={S.th}>Journal</th>
             </tr>
           </thead>
           <tbody>
@@ -126,17 +100,17 @@ export default function InvoiceReceivablesPage() {
               <tr
                 key={inv.docNo}
                 style={{ ...S.tr, cursor: "pointer" }}
-                onClick={() => router.push(`/finance/invoices/${inv.docNo}`)}
+                onClick={() => router.push(`/finance/invoices/service/${inv.docNo}`)}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >
                 <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo}</td>
                 <td style={S.td}>
                   <span
-                    onClick={(e) => { e.stopPropagation(); router.push(`/finance/invoices/service/${inv.sriNo}`); }}
+                    onClick={(e) => { e.stopPropagation(); router.push(`/work-orders/${inv.swoNo}`); }}
                     style={{ color: "#0176d3", fontWeight: 500, cursor: "pointer", textDecoration: "underline", textDecorationColor: "#0176d3" }}
                   >
-                    {inv.sriNo}
+                    {inv.swoNo}
                   </span>
                 </td>
                 <td style={{ ...S.td, color: "#0176d3" }}>{inv.customer}</td>
@@ -150,7 +124,6 @@ export default function InvoiceReceivablesPage() {
                 <td style={{ ...S.td, textAlign: "right", color: inv.amountDue > 0 ? "#ea001e" : "#444746", fontWeight: inv.amountDue > 0 ? 600 : 400 }}>
                   {fmt(inv.amountDue)}
                 </td>
-                <td style={{ ...S.td, color: inv.journalNo !== "-" ? "#0176d3" : "#444746" }}>{inv.journalNo}</td>
               </tr>
             ))}
           </tbody>

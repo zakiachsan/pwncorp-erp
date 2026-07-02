@@ -130,6 +130,7 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
         children: [
           { label: "Purchase Invoices", href: "/finance/invoices/purchase" },
           { label: "Invoice Payables", href: "/finance/invoices/payables" },
+          { label: "Service Invoices", href: "/finance/invoices/service" },
           { label: "Invoice Receivables", href: "/finance/invoices/receivables" },
         ],
       },
