@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Plus, Search, X, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 type EntryType = "masuk" | "keluar";
 
@@ -30,8 +31,8 @@ const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function PettyCashPage() {
   const [data, setData] = useState<CashEntry[]>(INITIAL_DATA);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
   const [filterCategory, setFilterCategory] = useState("Semua");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -39,8 +40,9 @@ export default function PettyCashPage() {
 
   const filtered = useMemo(() => {
     return data.filter((d) => {
-      if (dateFrom && d.date < dateFrom) return false;
-      if (dateTo && d.date > dateTo) return false;
+      const entryDate = new Date(d.date);
+      if (dateFrom && entryDate < dateFrom) return false;
+      if (dateTo && entryDate > dateTo) return false;
       if (filterCategory !== "Semua" && d.category !== filterCategory) return false;
       if (search && !d.description.toLowerCase().includes(search.toLowerCase()) && !d.id.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
@@ -92,12 +94,8 @@ export default function PettyCashPage() {
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
-            <label className="form-label">Dari Tanggal</label>
-            <input type="date" className="form-input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Sampai Tanggal</label>
-            <input type="date" className="form-input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+            <label className="form-label">Rentang Tanggal</label>
+            <DateRangePicker from={dateFrom} to={dateTo} onChange={(f, t) => { setDateFrom(f); setDateTo(t); }} />
           </div>
           <div className="form-group">
             <label className="form-label">Kategori</label>

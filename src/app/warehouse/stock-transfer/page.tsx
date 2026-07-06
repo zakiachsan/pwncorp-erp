@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Search, Star, ArrowUpDown } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const transfers = [
   {
@@ -44,6 +46,8 @@ const transfers = [
 
 export default function StockTransferPage() {
   const router = useRouter();
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   return (
     <div>
@@ -68,12 +72,12 @@ export default function StockTransferPage() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">From Date</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">To Date</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">From (Warehouse)</label>

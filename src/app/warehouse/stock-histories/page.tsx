@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Search, Star, ArrowUpDown, X } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const warehouseOptions = ["Gudang Wijaya", "Wijaya Motor - WH Main", "Wijaya Motor - WH Parts"];
 const typeOptions = ["Purchase Delivery", "Stock Transfer", "Stock Opname", "Stock Order"];
@@ -35,6 +36,8 @@ export default function StockHistoriesPage() {
   const router = useRouter();
   const [typeFilter, setTypeFilter] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   return (
     <div>
@@ -103,12 +106,12 @@ export default function StockHistoriesPage() {
             <input type="text" className="form-input" placeholder="Created by..." />
           </div>
           <div className="form-group">
-            <label className="form-label">From Date</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">To Date</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>

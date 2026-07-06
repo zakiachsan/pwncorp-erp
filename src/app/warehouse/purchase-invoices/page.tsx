@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Truck, Star, Search, ArrowUpDown } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -38,6 +39,8 @@ const formatIDR = (n: number) => {
 export default function PurchaseInvoicesPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"standard" | "fixedAssets">("standard");
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   return (
     <div>
@@ -76,12 +79,12 @@ export default function PurchaseInvoicesPage() {
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">From Date</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">To Date</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Supplier</label>

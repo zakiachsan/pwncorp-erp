@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Search } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const historyData = [
   { id: "RFP/003/260703", tanggal: "03 Jul 2026", keperluan: "Biaya Operasional Bengkel", penerima: "PLN / PDAM", jumlah: 3200000, metode: "Transfer Bank BCA", status: "Paid", tglBayar: "03 Jul 2026" },
@@ -13,6 +15,8 @@ const historyData = [
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function PaymentHistoryPage() {
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
   return (
     <div>
       <div className="view-header">
@@ -25,12 +29,12 @@ export default function PaymentHistoryPage() {
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="form-group">
-            <label className="form-label">Dari Tanggal</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Sampai Tanggal</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>

@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, Search } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const productData: Record<string, any> = {
   "000-TRS-0371": {
@@ -60,6 +61,8 @@ export default function ProductDetailPage() {
   const skuArr = Array.isArray(params.sku) ? params.sku : [params.sku];
   const sku = skuArr.join("/");
   const [activeTab, setActiveTab] = useState<TabKey>("product");
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
   const product = productData["000-TRS-0371"];
 
   return (
@@ -239,8 +242,14 @@ export default function ProductDetailPage() {
           <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "flex-end" }}>
             <div><label style={S.filterLabel}>Warehouse</label><select style={S.filterInput}><option value="">Gudang Wijaya</option></select></div>
             <div><label style={S.filterLabel}>Type</label><input type="text" style={S.filterInput} placeholder="Type" /></div>
-            <div><label style={S.filterLabel}>From Date</label><input type="date" style={S.filterInput} /></div>
-            <div><label style={S.filterLabel}>To Date</label><input type="date" style={S.filterInput} /></div>
+            <div>
+              <label style={S.filterLabel}>Tanggal</label>
+              <DateRangePicker
+                from={dateFrom}
+                to={dateTo}
+                onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+              />
+            </div>
             <div><label style={S.filterLabel}>Created By</label><input type="text" style={S.filterInput} /></div>
             <button style={S.searchBtn}><Search size={14} /> Search</button>
           </div>

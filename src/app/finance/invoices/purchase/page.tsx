@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Search, Download, ChevronDown } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const purchaseInvoices = [
   { docNo: "PI/HO/26050143", refNo: "B2664EQ", po: "PO-001", createdAt: "24-Jun-2026 10:17 AM", invoiceDate: "12-May-2026", dueDate: "11-Jun-2026", supplier: "PT Auto Parts", status: "APPROVED", total: 1280000 },
@@ -43,6 +44,8 @@ export default function PurchaseInvoicesPage() {
     supplier: "",
     status: "",
   });
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   const filtered = purchaseInvoices.filter((inv) => {
     if (filters.docNo && !inv.docNo.toLowerCase().includes(filters.docNo.toLowerCase())) return false;
@@ -107,21 +110,11 @@ export default function PurchaseInvoicesPage() {
             />
           </div>
           <div>
-            <label style={S.label}>From Date</label>
-            <input
-              type="date"
-              style={S.input}
-              value={filters.fromDate}
-              onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
-            />
-          </div>
-          <div>
-            <label style={S.label}>To Date</label>
-            <input
-              type="date"
-              style={S.input}
-              value={filters.toDate}
-              onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
+            <label style={S.label}>Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
             />
           </div>
           <div>

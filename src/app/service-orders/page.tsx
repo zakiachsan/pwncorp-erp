@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Filter, Download } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const orders = [
   { no: "SRO/007/26060143", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
@@ -25,6 +27,8 @@ const statusPill = (status: string) => {
 
 export default function ServiceOrdersPage() {
   const router = useRouter();
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   return (
     <div>
@@ -85,12 +89,8 @@ export default function ServiceOrdersPage() {
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Dari Tanggal</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Sampai Tanggal</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker from={dateFrom} to={dateTo} onChange={(f, t) => { setDateFrom(f); setDateTo(t); }} />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>

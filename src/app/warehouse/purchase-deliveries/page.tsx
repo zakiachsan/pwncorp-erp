@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Search, Star, Truck, ArrowUpDown } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const deliveries = [
   { refCode: "PD/WJY/26060041", refNo: "B1795PQQ", po: "PO/WJY/26060101", pi: "PI/WJY/26060021", date: "25 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Astra Otoparts", status: "RECEIVED" },
@@ -25,6 +26,8 @@ const deliveries = [
 export default function PurchaseDeliveriesPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"standard" | "fixedAssets">("standard");
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
 
   return (
     <div>
@@ -57,12 +60,12 @@ export default function PurchaseDeliveriesPage() {
             <input type="text" className="form-input" placeholder="PI Number..." />
           </div>
           <div className="form-group">
-            <label className="form-label">From Date</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">To Date</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>

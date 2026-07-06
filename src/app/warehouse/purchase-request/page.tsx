@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Truck, Star, Search, X } from "lucide-react";
+import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const purchaseRequests = [
   { refCode: "PRQ/HO/26010014", date: "14 Jan 2026", dueAt: "21 Jan 2026", warehouse: "Workshop Utama", supplier: "PT Bearing Jaya", status: "PENDING APPROVAL", closed: false, purchaseOrder: "" },
@@ -28,6 +30,8 @@ const statusPill = (status: string) => {
 
 export default function PurchaseRequestListPage() {
   const router = useRouter();
+  const [dateFrom, setDateFrom] = useState<Date>(new Date());
+  const [dateTo, setDateTo] = useState<Date>(new Date());
   return (
     <div>
       <div className="view-header">
@@ -46,12 +50,12 @@ export default function PurchaseRequestListPage() {
             <input type="text" className="form-input" placeholder="PRQ/HO/..." />
           </div>
           <div className="form-group">
-            <label className="form-label">From Date</label>
-            <input type="date" className="form-input" />
-          </div>
-          <div className="form-group">
-            <label className="form-label">To Date</label>
-            <input type="date" className="form-input" />
+            <label className="form-label">Tanggal</label>
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>
