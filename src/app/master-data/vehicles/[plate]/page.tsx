@@ -6,24 +6,82 @@ import { ArrowLeft, Edit } from "lucide-react";
 
 const data: Record<string, any> = {
   "B 1234 CD": {
-    plate: "B 1234 CD", brand: "Toyota", model: "Avanza", year: "2022", color: "Silver", customer: "Budi Santoso",
+    plate: "B 1234 CD", brand: "Toyota", model: "Avanza", year: "2022", color: "Silver",
+    customer: "Budi Santoso", customerId: "C-001", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat",
     history: [
-      { no: "SO-001", date: "26 Jun 2026", services: "Spooring, Balancing", status: "Approved", total: "Rp 2.500.000" },
-      { no: "SO-005", date: "24 Jun 2026", services: "Ganti Oli", status: "Completed", total: "Rp 950.000" },
-      { no: "SO-009", date: "22 Jun 2026", services: "Ganti Rem", status: "Draft", total: "Rp 1.500.000" },
+      { no: "SRO-001", date: "5 Jul 2026", services: "Spooring, Balancing", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Approved", total: "Rp 2.500.000" },
+      { no: "SRO-005", date: "24 Jun 2026", services: "Ganti Oli", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Completed", total: "Rp 950.000" },
+      { no: "SRO-008", date: "22 Jun 2026", services: "Ganti Rem", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Draft", total: "Rp 1.200.000" },
     ]
   },
   "B 5678 EF": {
-    plate: "B 5678 EF", brand: "Honda", model: "Civic", year: "2021", color: "Hitam", customer: "PT Maju Jaya",
-    history: [{ no: "SO-002", date: "26 Jun 2026", services: "Ganti Oli", status: "Approved", total: "Rp 1.800.000" }]
+    plate: "B 5678 EF", brand: "Honda", model: "Civic", year: "2021", color: "Hitam",
+    customer: "PT Maju Jaya", customerId: "C-002", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Selatan",
+    history: [
+      { no: "SRO-002", date: "4 Jul 2026", services: "Ganti Oli", store: "Wijaya Motor One Stop Service - Jakarta Selatan", status: "Approved", total: "Rp 1.800.000" },
+      { no: "SRO-010", date: "1 Jul 2026", services: "Service Berkala 40K", store: "Wijaya Motor One Stop Service - Jakarta Selatan", status: "Completed", total: "Rp 3.200.000" },
+    ]
   },
-  "B 9012 GH": { plate: "B 9012 GH", brand: "Mitsubishi", model: "Pajero", year: "2020", color: "Putih", customer: "Siti Rahmawati", history: [] },
-  "B 3456 IJ": { plate: "B 3456 IJ", brand: "Suzuki", model: "Ertiga", year: "2022", color: "Silver", customer: "CV Berkah Abadi", history: [] },
-  "B 7890 KL": { plate: "B 7890 KL", brand: "Daihatsu", model: "Xenia", year: "2021", color: "Merah", customer: "Ahmad Fauzi", history: [] },
-  "B 1112 MN": { plate: "B 1112 MN", brand: "Isuzu", model: "Elf", year: "2019", color: "Biru", customer: "PT Transport Jaya", history: [
-    { no: "SO-006", date: "24 Jun 2026", services: "Service Berkala", status: "Draft", total: "Rp 4.800.000" },
-  ] },
-  "B 1314 OP": { plate: "B 1314 OP", brand: "Mitsubishi", model: "L300", year: "2020", color: "Putih", customer: "CV Berkah Abadi", history: [] },
+  "B 9012 GH": {
+    plate: "B 9012 GH", brand: "Mitsubishi", model: "Pajero", year: "2020", color: "Putih",
+    customer: "Siti Rahmawati", customerId: "C-003", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung",
+    history: [
+      { no: "SRO-003", date: "3 Jul 2026", services: "Ganti Ban + Spooring", store: "Wijaya Motor One Stop Service - Bandung", status: "Approved", total: "Rp 1.500.000" },
+    ]
+  },
+  "B 3456 IJ": {
+    plate: "B 3456 IJ", brand: "Suzuki", model: "Ertiga", year: "2022", color: "Silver",
+    customer: "CV Berkah Abadi", customerId: "C-004", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung",
+    history: [
+      { no: "SRO-004", date: "3 Jul 2026", services: "Body Repair", store: "Wijaya Motor One Stop Service - Bandung", status: "Completed", total: "Rp 4.500.000" },
+    ]
+  },
+  "B 7890 KL": {
+    plate: "B 7890 KL", brand: "Daihatsu", model: "Xenia", year: "2021", color: "Merah",
+    customer: "Ahmad Fauzi", customerId: "C-005", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat",
+    history: []
+  },
+  "B 1112 MN": {
+    plate: "B 1112 MN", brand: "Isuzu", model: "Elf", year: "2019", color: "Biru",
+    customer: "PT Transport Jaya", customerId: "C-006", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat",
+    history: [
+      { no: "SRO-007", date: "1 Jul 2026", services: "Engine Overhaul", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "In Progress", total: "Rp 12.000.000" },
+    ]
+  },
+  "B 1314 OP": {
+    plate: "B 1314 OP", brand: "Mitsubishi", model: "L300", year: "2020", color: "Putih",
+    customer: "CV Berkah Abadi", customerId: "C-004", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung",
+    history: [
+      { no: "SRO-011", date: "20 Jun 2026", services: "Ganti Aki + Tune Up", store: "Wijaya Motor One Stop Service - Bandung", status: "Completed", total: "Rp 2.800.000" },
+    ]
+  },
+  "B 2468 QR": {
+    plate: "B 2468 QR", brand: "Toyota", model: "Innova", year: "2023", color: "Putih",
+    customer: "Dewi Lestari", customerId: "C-007", storeTerbanyak: "Wijaya Motor One Stop Service - Surabaya",
+    history: [
+      { no: "SRO-015", date: "30 Jun 2026", services: "Ganti Oli + Filter", store: "Wijaya Motor One Stop Service - Surabaya", status: "Completed", total: "Rp 1.850.000" },
+    ]
+  },
+  "B 3690 ST": {
+    plate: "B 3690 ST", brand: "Honda", model: "CR-V", year: "2021", color: "Hitam",
+    customer: "PT Sinar Auto", customerId: "C-008", storeTerbanyak: "Wijaya Motor One Stop Service - Surabaya",
+    history: []
+  },
+  "B 4812 UV": {
+    plate: "B 4812 UV", brand: "Toyota", model: "Fortuner", year: "2020", color: "Silver",
+    customer: "PT Karya Mandiri", customerId: "C-010", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat",
+    history: []
+  },
+  "B 5934 WX": {
+    plate: "B 5934 WX", brand: "Daihatsu", model: "Ayla", year: "2023", color: "Kuning",
+    customer: "Nina Anggraini", customerId: "C-011", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung",
+    history: []
+  },
+  "B 6056 YZ": {
+    plate: "B 6056 YZ", brand: "Suzuki", model: "APV", year: "2021", color: "Abu-abu",
+    customer: "PT Karya Mandiri", customerId: "C-010", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat",
+    history: []
+  },
 };
 
 const statusColor: Record<string, string> = { Draft: "#6b7280", Approved: "#0176d3", "In Progress": "#f59e0b", Completed: "#2e844a" };
@@ -79,7 +137,8 @@ export default function VehicleDetailPage() {
           <F label="MODEL" value={item.model} />
           <F label="TAHUN" value={item.year} />
           <F label="WARNA" value={item.color} />
-          <F label="CUSTOMER" value={item.customer} />
+          <F label="CUSTOMER" value={item.customer} link onClick={() => router.push(`/master-data/customers/${item.customerId}`)} />
+          <F label="STORE TERBANYAK" value={item.storeTerbanyak} />
         </div>
       )}
 
@@ -89,9 +148,10 @@ export default function VehicleDetailPage() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>No. SO</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>No. SRO</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Date</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Services</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Store</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Status</th>
                   <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Total</th>
                 </tr>
@@ -102,6 +162,7 @@ export default function VehicleDetailPage() {
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0", color: "#0176d3", fontWeight: 500 }}>{h.no}</td>
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>{h.date}</td>
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>{h.services}</td>
+                    <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0", fontSize: 12, color: "#444746" }}>{h.store}</td>
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>
                       <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusColor[h.status] || "#6b7280", color: "#fff" }}>{h.status}</span>
                     </td>
@@ -119,11 +180,14 @@ export default function VehicleDetailPage() {
   );
 }
 
-function F({ label, value }: { label: string; value: string }) {
+function F({ label, value, link, onClick }: { label: string; value: string; link?: boolean; onClick?: () => void }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", borderBottom: "1px solid #f0f0f0" }}>
       <span style={{ fontSize: 12, color: "#444746" }}>{label}</span>
-      <span style={{ fontSize: 12, fontWeight: 500, color: "#001526" }}>{value}</span>
+      <span
+        style={{ fontSize: 12, fontWeight: 500, color: link ? "#0176d3" : "#001526", cursor: link ? "pointer" : "default", textDecoration: link ? "underline" : "none" }}
+        onClick={onClick}
+      >{value}</span>
     </div>
   );
 }

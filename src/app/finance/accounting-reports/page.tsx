@@ -232,36 +232,36 @@ const TABS: TabConfig[] = [
       { header: "Change %", key: "changePercent", align: "right" },
     ],
     data: [
-      { code: "4101", accountName: "Pendapatan Jasa Service", currentPeriod: "85.500.000", previousPeriod: "78.200.000", change: "7.300.000", changePercent: "9.33%" },
-      { code: "4102", accountName: "Pendapatan Jual Sparepart", currentPeriod: "125.800.000", previousPeriod: "112.500.000", change: "13.300.000", changePercent: "11.82%" },
-      { code: "4103", accountName: "Pendapatan Servis AC", currentPeriod: "18.200.000", previousPeriod: "15.800.000", change: "2.400.000", changePercent: "15.19%" },
-      { code: "4104", accountName: "Pendapatan Tambal Ban", currentPeriod: "8.500.000", previousPeriod: "7.200.000", change: "1.300.000", changePercent: "18.06%" },
-      { code: "4201", accountName: "Pendapatan Bunga Bank", currentPeriod: "2.100.000", previousPeriod: "1.800.000", change: "300.000", changePercent: "16.67%" },
-      { code: "5101", accountName: "HPP Sparepart", currentPeriod: "78.500.000", previousPeriod: "71.200.000", change: "7.300.000", changePercent: "10.25%" },
-      { code: "5102", accountName: "Biaya Gaji Karyawan", currentPeriod: "45.000.000", previousPeriod: "42.500.000", change: "2.500.000", changePercent: "5.88%" },
-      { code: "5103", accountName: "Biaya Sewa Bengkel", currentPeriod: "10.200.000", previousPeriod: "10.200.000", change: "0", changePercent: "0.00%" },
-      { code: "5104", accountName: "Biaya Listrik & Air", currentPeriod: "6.800.000", previousPeriod: "6.200.000", change: "600.000", changePercent: "9.68%" },
-      { code: "5105", accountName: "Biaya Perawatan Gedung", currentPeriod: "3.500.000", previousPeriod: "3.000.000", change: "500.000", changePercent: "16.67%" },
-      { code: "5106", accountName: "Biaya Depresiasi Peralatan", currentPeriod: "5.000.000", previousPeriod: "5.000.000", change: "0", changePercent: "0.00%" },
-      { code: "5107", accountName: "Biaya Depresiasi Kendaraan", currentPeriod: "2.800.000", previousPeriod: "2.800.000", change: "0", changePercent: "0.00%" },
-      { code: "5108", accountName: "Biaya ATK & Perlengkapan", currentPeriod: "1.800.000", previousPeriod: "1.500.000", change: "300.000", changePercent: "20.00%" },
-      { code: "5109", accountName: "Biaya Asuransi", currentPeriod: "2.400.000", previousPeriod: "2.400.000", change: "0", changePercent: "0.00%" },
-      { code: "5110", accountName: "Biaya Telekomunikasi", currentPeriod: "1.200.000", previousPeriod: "1.100.000", change: "100.000", changePercent: "9.09%" },
-      { code: "5111", accountName: "Biaya Transport & Perjalanan", currentPeriod: "2.500.000", previousPeriod: "2.000.000", change: "500.000", changePercent: "25.00%" },
-      { code: "5112", accountName: "Biaya Marketing & Promosi", currentPeriod: "4.500.000", previousPeriod: "3.800.000", change: "700.000", changePercent: "18.42%" },
-      { code: "6101", accountName: "Pendapatan Selisih Kurs", currentPeriod: "350.000", previousPeriod: "200.000", change: "150.000", changePercent: "75.00%" },
-      { code: "6102", accountName: "Beban Bunga Bank", currentPeriod: "3.200.000", previousPeriod: "3.500.000", change: "-300.000", changePercent: "-8.57%" },
-      { code: "6103", accountName: "Beban Pajak Penghasilan", currentPeriod: "8.500.000", previousPeriod: "7.200.000", change: "1.300.000", changePercent: "18.06%" },
-      { code: "4105", accountName: "Pendapatan Konsinyasi", currentPeriod: "5.200.000", previousPeriod: "4.500.000", change: "700.000", changePercent: "15.56%" },
-      { code: "5113", accountName: "Biaya Pengiriman", currentPeriod: "3.800.000", previousPeriod: "3.200.000", change: "600.000", changePercent: "18.75%" },
-      { code: "5114", accountName: "Biaya Kerusakan barang", currentPeriod: "1.200.000", previousPeriod: "800.000", change: "400.000", changePercent: "50.00%" },
-      { code: "6104", accountName: "Pendapatan Lain-lain", currentPeriod: "1.500.000", previousPeriod: "1.000.000", change: "500.000", changePercent: "50.00%" },
-      { code: "6105", accountName: "Beban Lain-lain", currentPeriod: "900.000", previousPeriod: "750.000", change: "150.000", changePercent: "20.00%" },
-      { code: "5115", accountName: "Biaya Pemeliharaan Kendaraan", currentPeriod: "2.000.000", previousPeriod: "1.800.000", change: "200.000", changePercent: "11.11%" },
-      { code: "4106", accountName: "Pendapatan Jasa Konsultasi", currentPeriod: "3.800.000", previousPeriod: "3.200.000", change: "600.000", changePercent: "18.75%" },
-      { code: "5116", accountName: "Biaya Rekrutmen", currentPeriod: "1.500.000", previousPeriod: "1.000.000", change: "500.000", changePercent: "50.00%" },
-      { code: "5117", accountName: "Biaya Pelatihan Karyawan", currentPeriod: "2.200.000", previousPeriod: "1.800.000", change: "400.000", changePercent: "22.22%" },
-      { code: "6106", accountName: "Beban Pajak Daerah", currentPeriod: "1.100.000", previousPeriod: "1.000.000", change: "100.000", changePercent: "10.00%" },
+      { code: "4101", accountName: "Pendapatan Jasa Service", category: "Revenue", currentPeriod: "85.500.000", previousPeriod: "78.200.000", change: "7.300.000", changePercent: "9.33%" },
+      { code: "4102", accountName: "Pendapatan Jual Sparepart", category: "Revenue", currentPeriod: "125.800.000", previousPeriod: "112.500.000", change: "13.300.000", changePercent: "11.82%" },
+      { code: "4103", accountName: "Pendapatan Servis AC", category: "Revenue", currentPeriod: "18.200.000", previousPeriod: "15.800.000", change: "2.400.000", changePercent: "15.19%" },
+      { code: "4104", accountName: "Pendapatan Tambal Ban", category: "Revenue", currentPeriod: "8.500.000", previousPeriod: "7.200.000", change: "1.300.000", changePercent: "18.06%" },
+      { code: "4201", accountName: "Pendapatan Bunga Bank", category: "Revenue", currentPeriod: "2.100.000", previousPeriod: "1.800.000", change: "300.000", changePercent: "16.67%" },
+      { code: "4105", accountName: "Pendapatan Konsinyasi", category: "Revenue", currentPeriod: "5.200.000", previousPeriod: "4.500.000", change: "700.000", changePercent: "15.56%" },
+      { code: "4106", accountName: "Pendapatan Jasa Konsultasi", category: "Revenue", currentPeriod: "3.800.000", previousPeriod: "3.200.000", change: "600.000", changePercent: "18.75%" },
+      { code: "6101", accountName: "Pendapatan Selisih Kurs", category: "Revenue", currentPeriod: "350.000", previousPeriod: "200.000", change: "150.000", changePercent: "75.00%" },
+      { code: "6104", accountName: "Pendapatan Lain-lain", category: "Revenue", currentPeriod: "1.500.000", previousPeriod: "1.000.000", change: "500.000", changePercent: "50.00%" },
+      { code: "5101", accountName: "HPP Sparepart", category: "HPP", currentPeriod: "78.500.000", previousPeriod: "71.200.000", change: "7.300.000", changePercent: "10.25%" },
+      { code: "5102", accountName: "Biaya Gaji Karyawan", category: "Expense", currentPeriod: "45.000.000", previousPeriod: "42.500.000", change: "2.500.000", changePercent: "5.88%" },
+      { code: "5103", accountName: "Biaya Sewa Bengkel", category: "Expense", currentPeriod: "10.200.000", previousPeriod: "10.200.000", change: "0", changePercent: "0.00%" },
+      { code: "5104", accountName: "Biaya Listrik & Air", category: "Expense", currentPeriod: "6.800.000", previousPeriod: "6.200.000", change: "600.000", changePercent: "9.68%" },
+      { code: "5105", accountName: "Biaya Perawatan Gedung", category: "Expense", currentPeriod: "3.500.000", previousPeriod: "3.000.000", change: "500.000", changePercent: "16.67%" },
+      { code: "5106", accountName: "Biaya Depresiasi Peralatan", category: "Expense", currentPeriod: "5.000.000", previousPeriod: "5.000.000", change: "0", changePercent: "0.00%" },
+      { code: "5107", accountName: "Biaya Depresiasi Kendaraan", category: "Expense", currentPeriod: "2.800.000", previousPeriod: "2.800.000", change: "0", changePercent: "0.00%" },
+      { code: "5108", accountName: "Biaya ATK & Perlengkapan", category: "Expense", currentPeriod: "1.800.000", previousPeriod: "1.500.000", change: "300.000", changePercent: "20.00%" },
+      { code: "5109", accountName: "Biaya Asuransi", category: "Expense", currentPeriod: "2.400.000", previousPeriod: "2.400.000", change: "0", changePercent: "0.00%" },
+      { code: "5110", accountName: "Biaya Telekomunikasi", category: "Expense", currentPeriod: "1.200.000", previousPeriod: "1.100.000", change: "100.000", changePercent: "9.09%" },
+      { code: "5111", accountName: "Biaya Transport & Perjalanan", category: "Expense", currentPeriod: "2.500.000", previousPeriod: "2.000.000", change: "500.000", changePercent: "25.00%" },
+      { code: "5112", accountName: "Biaya Marketing & Promosi", category: "Expense", currentPeriod: "4.500.000", previousPeriod: "3.800.000", change: "700.000", changePercent: "18.42%" },
+      { code: "5113", accountName: "Biaya Pengiriman", category: "Expense", currentPeriod: "3.800.000", previousPeriod: "3.200.000", change: "600.000", changePercent: "18.75%" },
+      { code: "5114", accountName: "Biaya Kerusakan barang", category: "Expense", currentPeriod: "1.200.000", previousPeriod: "800.000", change: "400.000", changePercent: "50.00%" },
+      { code: "5115", accountName: "Biaya Pemeliharaan Kendaraan", category: "Expense", currentPeriod: "2.000.000", previousPeriod: "1.800.000", change: "200.000", changePercent: "11.11%" },
+      { code: "5116", accountName: "Biaya Rekrutmen", category: "Expense", currentPeriod: "1.500.000", previousPeriod: "1.000.000", change: "500.000", changePercent: "50.00%" },
+      { code: "5117", accountName: "Biaya Pelatihan Karyawan", category: "Expense", currentPeriod: "2.200.000", previousPeriod: "1.800.000", change: "400.000", changePercent: "22.22%" },
+      { code: "6102", accountName: "Beban Bunga Bank", category: "Expense", currentPeriod: "3.200.000", previousPeriod: "3.500.000", change: "-300.000", changePercent: "-8.57%" },
+      { code: "6103", accountName: "Beban Pajak Penghasilan", category: "Expense", currentPeriod: "8.500.000", previousPeriod: "7.200.000", change: "1.300.000", changePercent: "18.06%" },
+      { code: "6105", accountName: "Beban Lain-lain", category: "Expense", currentPeriod: "900.000", previousPeriod: "750.000", change: "150.000", changePercent: "20.00%" },
+      { code: "6106", accountName: "Beban Pajak Daerah", category: "Expense", currentPeriod: "1.100.000", previousPeriod: "1.000.000", change: "100.000", changePercent: "10.00%" },
     ],
   },
 
@@ -391,53 +391,6 @@ export default function AccountingReportsPage() {
         <h1 style={{ fontSize: 20, fontWeight: 700, color: "#001526", margin: 0 }}>Accounting Reports</h1>
       </div>
 
-      {/* ── Summary Cards ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "16px 24px 0" }}>
-        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Total Entries</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#001526" }}>{cfg.data.length}</div>
-        </div>
-        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Active Tab</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#0176d3" }}>{cfg.label}</div>
-        </div>
-        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Page</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#001526" }}>{page} / {totalPages || 1}</div>
-        </div>
-        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Last Updated</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#444746" }}>Today</div>
-        </div>
-      </div>
-
-      {/* ── tab bar ── */}
-      <div style={{ display: "flex", gap: 0, padding: "16px 24px 0", flexWrap: "wrap" }}>
-        {TABS.map((tab, i) => {
-          const isActive = i === activeTab;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveTab(i); setPage(1); }}
-              style={{
-                padding: "8px 16px",
-                fontSize: 12,
-                fontWeight: isActive ? 600 : 400,
-                color: isActive ? "#fff" : "#444746",
-                background: isActive ? "#0176d3" : "#ecebea",
-                border: "none",
-                borderRadius: i === 0 ? "6px 0 0 6px" : i === TABS.length - 1 ? "0 6px 6px 0" : "0",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                transition: "background .15s, color .15s",
-              }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* ── filter section ── */}
       <div style={{ margin: "16px 24px", padding: "16px", background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
@@ -522,6 +475,25 @@ export default function AccountingReportsPage() {
         </div>
       </div>
 
+      {/* ── tab bar ── (below filter) */}
+      <div style={{ display: "flex", gap: 0, padding: "0 24px", flexWrap: "wrap" }}>
+        {TABS.map((tab, i) => {
+          const isActive = i === activeTab;
+          return (
+            <button key={tab.id} onClick={() => { setActiveTab(i); setPage(1); }}
+              style={{
+                padding: "8px 16px", fontSize: 12, fontWeight: isActive ? 600 : 400,
+                color: isActive ? "#fff" : "#444746", background: isActive ? "#0176d3" : "#ecebea",
+                border: "none", borderRadius: i === 0 ? "6px 0 0 6px" : i === TABS.length - 1 ? "0 6px 6px 0" : "0",
+                cursor: "pointer", whiteSpace: "nowrap", transition: "background .15s, color .15s",
+              }}>{tab.label}</button>
+          );
+        })}
+      </div>
+
+      {/* ── Per-tab summary cards ── */}
+      <PerTabSummary tabId={cfg.id} data={cfg.data} />
+
       {/* ── data table ── */}
       <div style={{ margin: "0 24px 24px", overflowX: "auto" }}>
         {cfg.data.length === 0 ? (
@@ -605,6 +577,90 @@ export default function AccountingReportsPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ─── Per-tab summary cards ─── */
+function PerTabSummary({ tabId, data }: { tabId: string; data: Record<string, any>[] }) {
+  const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+  const parseNum = (v: any) => parseInt((v || "0").toString().replace(/[^0-9-]/g, "")) || 0;
+
+  if (tabId === "profit-loss") {
+    const pendapatan = data.filter((d: any) => d.category === "Revenue").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const hpp = data.filter((d: any) => d.category === "HPP").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const beban = data.filter((d: any) => d.category === "Expense").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const labaBersih = pendapatan - hpp - beban;
+    const cards = [
+      { label: "Total Pendapatan", value: fmt(pendapatan), color: "#2e844a" },
+      { label: "HPP (Modal Barang)", value: fmt(hpp), color: "#ea001e" },
+      { label: "Beban Operasional", value: fmt(beban), color: "#fe9339" },
+      { label: "Laba Bersih", value: fmt(labaBersih), color: labaBersih >= 0 ? "#0176d3" : "#ea001e" },
+    ];
+    return <CardRow cards={cards} />;
+  }
+
+  if (tabId === "balance-sheet") {
+    const totalAset = data.filter((d: any) => ["Kas & Bank","Piutang","Persediaan","Fixed Asset"].includes(d.parent)).reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const totalUtang = data.filter((d: any) => ["Utang","Utang Jangka Panjang"].includes(d.parent)).reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const totalModal = data.filter((d: any) => d.parent === "Modal").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const cards = [
+      { label: "Total Aset", value: fmt(totalAset), color: "#0176d3" },
+      { label: "Total Liabilitas", value: fmt(Math.abs(totalUtang)), color: "#ea001e" },
+      { label: "Total Ekuitas", value: fmt(totalModal), color: "#2e844a" },
+      { label: "Data Entries", value: String(data.length), color: "#444746" },
+    ];
+    return <CardRow cards={cards} />;
+  }
+
+  if (tabId === "trial-balance") {
+    const totalDebit = data.reduce((s: number, d: any) => s + parseNum(d.debit), 0);
+    const totalKredit = data.reduce((s: number, d: any) => s + parseNum(d.credit), 0);
+    const cards = [
+      { label: "Total Debit", value: fmt(totalDebit), color: "#0176d3" },
+      { label: "Total Kredit", value: fmt(totalKredit), color: "#ea001e" },
+      { label: "Selisih", value: fmt(totalDebit - totalKredit), color: "#fe9339" },
+      { label: "Status", value: totalDebit === totalKredit ? "Balance" : "Unbalanced", color: totalDebit === totalKredit ? "#2e844a" : "#ea001e" },
+    ];
+    return <CardRow cards={cards} />;
+  }
+
+  if (tabId === "account-transactions" || tabId === "journal-transactions") {
+    const totalDebit = data.filter((d: any) => d.debit !== "0").reduce((s: number, d: any) => s + parseNum(d.debit), 0);
+    const totalKredit = data.filter((d: any) => d.credit !== "0").reduce((s: number, d: any) => s + parseNum(d.credit), 0);
+    const cards = [
+      { label: "Total Debit", value: fmt(totalDebit), color: "#0176d3" },
+      { label: "Total Kredit", value: fmt(totalKredit), color: "#ea001e" },
+      { label: "Total Entries", value: String(data.length), color: "#444746" },
+      { label: "Net Flow", value: fmt(totalDebit - totalKredit), color: totalDebit >= totalKredit ? "#2e844a" : "#ea001e" },
+    ];
+    return <CardRow cards={cards} />;
+  }
+
+  if (tabId === "fixed-asset-list") {
+    const totalBookValue = data.reduce((s: number, d: any) => s + parseNum(d.bookValue), 0);
+    const activeAssets = data.filter((d: any) => d.status === "Registered").length;
+    const cards = [
+      { label: "Total Aset", value: String(data.length), color: "#0176d3" },
+      { label: "Aktif", value: String(activeAssets), color: "#2e844a" },
+      { label: "Total Book Value", value: fmt(totalBookValue), color: "#444746" },
+      { label: "Disposed", value: String(data.length - activeAssets), color: "#ea001e" },
+    ];
+    return <CardRow cards={cards} />;
+  }
+
+  return null;
+}
+
+function CardRow({ cards }: { cards: { label: string; value: string; color: string }[] }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${cards.length}, 1fr)`, gap: 12, padding: "16px 24px 0" }}>
+      {cards.map((c, i) => (
+        <div key={i} className="card-slds" style={{ textAlign: "center", padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>{c.label}</div>
+          <div style={{ fontSize: c.value.length > 10 ? 14 : 20, fontWeight: 700, color: c.color }}>{c.value}</div>
+        </div>
+      ))}
     </div>
   );
 }

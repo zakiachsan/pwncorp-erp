@@ -7,24 +7,57 @@ import { ArrowLeft, Edit } from "lucide-react";
 const data: Record<string, any> = {
   "C-001": {
     id: "C-001", name: "Budi Santoso", phone: "0812-3456-7890", type: "Retail",
-    address: "Jl. Merdeka No. 10, Jakarta", email: "budi@email.com", vehicles: 1, lastService: "26 Jun 2026",
+    address: "Jl. Merdeka No. 10, Jakarta", email: "budi@email.com", vehicles: 1,
+    storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat", totalTransaksi: 12, lastService: "5 Jul 2026",
     history: [
-      { no: "SO-001", date: "26 Jun 2026", vehicle: "Toyota Avanza", status: "Approved", total: "Rp 2.500.000" },
-      { no: "SO-005", date: "24 Jun 2026", vehicle: "Toyota Avanza", status: "Completed", total: "Rp 950.000" },
-      { no: "SO-008", date: "22 Jun 2026", vehicle: "Toyota Avanza", status: "Draft", total: "Rp 1.200.000" },
+      { no: "SRO-001", date: "5 Jul 2026", vehicle: "Toyota Avanza", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Approved", total: "Rp 2.500.000" },
+      { no: "SRO-005", date: "24 Jun 2026", vehicle: "Toyota Avanza", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Completed", total: "Rp 950.000" },
+      { no: "SRO-008", date: "22 Jun 2026", vehicle: "Toyota Avanza", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Draft", total: "Rp 1.200.000" },
     ]
   },
   "C-002": {
     id: "C-002", name: "PT Maju Jaya", phone: "021-555-1234", type: "Wholesale",
-    address: "Jl. Sudirman No. 55, Jakarta", email: "info@majujaya.co.id", vehicles: 3, lastService: "26 Jun 2026",
+    address: "Jl. Sudirman No. 55, Jakarta", email: "info@majujaya.co.id", vehicles: 3,
+    storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Selatan", totalTransaksi: 47, lastService: "4 Jul 2026",
     history: [
-      { no: "SO-002", date: "26 Jun 2026", vehicle: "Honda Civic", status: "Approved", total: "Rp 1.800.000" },
+      { no: "SRO-002", date: "4 Jul 2026", vehicle: "Honda Civic", store: "Wijaya Motor One Stop Service - Jakarta Selatan", status: "Approved", total: "Rp 1.800.000" },
+      { no: "SRO-010", date: "1 Jul 2026", vehicle: "Toyota Hiace", store: "Wijaya Motor One Stop Service - Jakarta Selatan", status: "Completed", total: "Rp 3.200.000" },
+      { no: "SRO-012", date: "28 Jun 2026", vehicle: "Honda Civic", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Completed", total: "Rp 2.100.000" },
     ]
   },
-  "C-003": { id: "C-003", name: "Siti Rahmawati", phone: "0856-7890-1234", type: "Retail", address: "Jl. Thamrin No. 20", email: "siti@email.com", vehicles: 1, lastService: "25 Jun 2026", history: [] },
-  "C-004": { id: "C-004", name: "CV Berkah Abadi", phone: "022-888-5678", type: "Wholesale", address: "Jl. Asia Afrika No. 30", email: "berkah@abadi.co.id", vehicles: 2, lastService: "24 Jun 2026", history: [] },
-  "C-005": { id: "C-005", name: "Ahmad Fauzi", phone: "0878-9012-3456", type: "Retail", address: "Jl. Pemuda No. 15", email: "ahmad@email.com", vehicles: 1, lastService: "24 Jun 2026", history: [] },
-  "C-006": { id: "C-006", name: "PT Transport Jaya", phone: "021-777-9012", type: "Wholesale", address: "Jl. Gatot Subroto No. 67", email: "info@transportjaya.co.id", vehicles: 5, lastService: "23 Jun 2026", history: [] },
+  "C-003": { id: "C-003", name: "Siti Rahmawati", phone: "0856-7890-1234", type: "Retail", address: "Jl. Thamrin No. 20", email: "siti@email.com", vehicles: 1, storeTerbanyak: "Wijaya Motor One Stop Service - Bandung", totalTransaksi: 8, lastService: "3 Jul 2026", history: [
+    { no: "SRO-003", date: "3 Jul 2026", vehicle: "Daihatsu Xenia", store: "Wijaya Motor One Stop Service - Bandung", status: "Approved", total: "Rp 1.500.000" },
+  ]},
+  "C-004": { id: "C-004", name: "CV Berkah Abadi", phone: "022-888-5678", type: "Wholesale", address: "Jl. Asia Afrika No. 30", email: "berkah@abadi.co.id", vehicles: 2, storeTerbanyak: "Wijaya Motor One Stop Service - Bandung", totalTransaksi: 31, lastService: "3 Jul 2026", history: [
+    { no: "SRO-004", date: "3 Jul 2026", vehicle: "Suzuki Carry", store: "Wijaya Motor One Stop Service - Bandung", status: "Completed", total: "Rp 4.500.000" },
+  ]},
+  "C-005": { id: "C-005", name: "Ahmad Fauzi", phone: "0878-9012-3456", type: "Retail", address: "Jl. Pemuda No. 15", email: "ahmad@email.com", vehicles: 1, storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat", totalTransaksi: 5, lastService: "2 Jul 2026", history: [
+    { no: "SRO-006", date: "2 Jul 2026", vehicle: "Honda Jazz", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "Completed", total: "Rp 900.000" },
+  ]},
+  "C-006": { id: "C-006", name: "PT Transport Jaya", phone: "021-777-9012", type: "Wholesale", address: "Jl. Gatot Subroto No. 67", email: "info@transportjaya.co.id", vehicles: 5, storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat", totalTransaksi: 89, lastService: "1 Jul 2026", history: [
+    { no: "SRO-007", date: "1 Jul 2026", vehicle: "Mitsubishi Fuso", store: "Wijaya Motor One Stop Service - Jakarta Pusat", status: "In Progress", total: "Rp 12.000.000" },
+  ]},
+  "C-007": {
+    id: "C-007", name: "Dewi Lestari", phone: "0813-4567-8901", type: "Retail",
+    address: "Jl. Diponegoro No. 42, Surabaya", email: "dewi@email.com", vehicles: 2,
+    storeTerbanyak: "Wijaya Motor One Stop Service - Surabaya", totalTransaksi: 15, lastService: "30 Jun 2026",
+    history: [
+      { no: "SRO-015", date: "30 Jun 2026", vehicle: "Honda Brio", store: "Wijaya Motor One Stop Service - Surabaya", status: "Completed", total: "Rp 1.850.000" },
+      { no: "SRO-018", date: "15 Jun 2026", vehicle: "Honda Brio", store: "Wijaya Motor One Stop Service - Surabaya", status: "Completed", total: "Rp 650.000" },
+    ]
+  },
+  "C-008": {
+    id: "C-008", name: "PT Sinar Auto", phone: "031-444-7890", type: "Wholesale",
+    address: "Jl. Raya Darmo No. 88, Surabaya", email: "info@sinarauto.co.id", vehicles: 8,
+    storeTerbanyak: "Wijaya Motor One Stop Service - Surabaya", totalTransaksi: 62, lastService: "29 Jun 2026",
+    history: [
+      { no: "SRO-020", date: "29 Jun 2026", vehicle: "Isuzu Elf", store: "Wijaya Motor One Stop Service - Surabaya", status: "Approved", total: "Rp 8.700.000" },
+    ]
+  },
+  "C-009": { id: "C-009", name: "Rudi Hermawan", phone: "0857-1234-5678", type: "Retail", address: "Jl. Kemang No. 12, Jakarta", email: "rudi@email.com", vehicles: 1, storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Selatan", totalTransaksi: 3, lastService: "28 Jun 2026", history: [] },
+  "C-010": { id: "C-010", name: "PT Karya Mandiri", phone: "021-333-4567", type: "Wholesale", address: "Jl. Hayam Wuruk No. 55, Jakarta", email: "info@karyamandiri.co.id", vehicles: 4, storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat", totalTransaksi: 55, lastService: "27 Jun 2026", history: [] },
+  "C-011": { id: "C-011", name: "Nina Anggraini", phone: "0822-9876-5432", type: "Retail", address: "Jl. Cihampelas No. 25, Bandung", email: "nina@email.com", vehicles: 1, storeTerbanyak: "Wijaya Motor One Stop Service - Bandung", totalTransaksi: 6, lastService: "26 Jun 2026", history: [] },
+  "C-012": { id: "C-012", name: "Hendra Gunawan", phone: "0819-5555-1111", type: "Retail", address: "Jl. Kelapa Gading No. 7, Jakarta", email: "hendra@email.com", vehicles: 1, storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat", totalTransaksi: 9, lastService: "25 Jun 2026", history: [] },
 };
 
 const statusPill = (status: string) => {
@@ -85,6 +118,8 @@ export default function CustomerDetailPage() {
           <F label="ALAMAT" value={item.address} />
           <F label="EMAIL" value={item.email} />
           <F label="KENDARAAN" value={item.vehicles + " unit"} />
+          <F label="STORE TERBANYAK" value={item.storeTerbanyak} />
+          <F label="TOTAL TRANSAKSI" value={String(item.totalTransaksi) + " kali"} />
           <F label="SERVICE TERAKHIR" value={item.lastService} />
         </div>
       )}
@@ -95,9 +130,10 @@ export default function CustomerDetailPage() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr>
-                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>No. SO</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>No. SRO</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Date</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Vehicle</th>
+                  <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Store</th>
                   <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Status</th>
                   <th style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase", background: "#f9f9f9", borderBottom: "1px solid #ecebea" }}>Total</th>
                 </tr>
@@ -108,6 +144,7 @@ export default function CustomerDetailPage() {
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0", color: "#0176d3", fontWeight: 500 }}>{h.no}</td>
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>{h.date}</td>
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>{h.vehicle}</td>
+                    <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0", fontSize: 12, color: "#444746" }}>{h.store}</td>
                     <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>
                       <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(h.status), color: "#fff" }}>{h.status}</span>
                     </td>

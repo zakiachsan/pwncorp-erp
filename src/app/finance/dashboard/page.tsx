@@ -181,105 +181,13 @@ export default function FinanceDashboardPage() {
         ))}
       </div>
 
-      {/* Row 2: Piutang & Hutang Mendesak Detail */}
+      {/* Row 2: Trend Pendapatan & Biaya + Radar Alokasi Biaya */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {/* Piutang */}
-        <div className="card-slds" style={{ padding: 18 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Clock size={16} color="#fe9339" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>Piutang Jatuh Tempo</span>
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#fe9339" }}>{fmt(totalPiutang)}</span>
-          </div>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead>
-              <tr>
-                <th style={ST.thL}>Customer</th>
-                <th style={ST.thR}>Jumlah</th>
-                <th style={ST.thR}>Jatuh Tempo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {piutangJatuhTempo.map((p, i) => (
-                <tr key={i}>
-                  <td style={ST.td}>{p.customer}</td>
-                  <td style={{ ...ST.td, textAlign: "right", fontWeight: 600 }}>{fmt(p.jumlah)}</td>
-                  <td style={{ ...ST.td, textAlign: "right", color: p.hari < 0 ? "#ea001e" : p.hari <= 3 ? "#fe9339" : "#444746" }}>
-                    {p.jatuhTempo}
-                    {p.hari < 0 ? <span style={{ fontSize: 10, color: "#ea001e", marginLeft: 4 }}>(overdue)</span> : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Hutang Mendesak */}
-        <div className="card-slds" style={{ padding: 18 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <AlertTriangle size={16} color="#ea001e" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>Hutang Mendesak</span>
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#ea001e" }}>{fmt(totalHutangMendesak)}</span>
-          </div>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead>
-              <tr>
-                <th style={ST.thL}>Vendor</th>
-                <th style={ST.thL}>Keperluan</th>
-                <th style={ST.thR}>Jumlah</th>
-                <th style={ST.thR}>Jatuh Tempo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {hutangMendesak.map((h, i) => (
-                <tr key={i}>
-                  <td style={ST.td}>{h.vendor}</td>
-                  <td style={{ ...ST.td, fontSize: 12, color: "#8e8f8e" }}>{h.desc}</td>
-                  <td style={{ ...ST.td, textAlign: "right", fontWeight: 600, color: "#ea001e" }}>{fmt(h.jumlah)}</td>
-                  <td style={{ ...ST.td, textAlign: "right", color: h.hari < 0 ? "#ea001e" : "#444746" }}>
-                    {h.jatuhTempo}
-                    {h.hari < 0 ? <span style={{ fontSize: 10, color: "#ea001e", marginLeft: 4 }}>(overdue)</span> : <span style={{ fontSize: 10, color: "#8e8f8e", marginLeft: 4 }}>({h.hari}h)</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Row 3: Recent Transactions */}
-      <div className="card-slds" style={{ padding: 18 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Wallet size={16} color="#0176d3" />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>Transaksi Terbaru</span>
-          </div>
-        </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-          <thead>
-            <tr>
-              <th style={ST.thL}>Tanggal</th>
-              <th style={ST.thL}>Keterangan</th>
-              <th style={ST.thL}>Pihak</th>
-              <th style={ST.thR}>Jumlah</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentTransactions.map((t, i) => (
-              <tr key={i}>
-                <td style={{ ...ST.td, color: "#8e8f8e", fontSize: 12 }}>{t.date}</td>
-                <td style={{ ...ST.td, fontWeight: 500 }}>{t.desc}</td>
-                <td style={ST.td}>{t.customer}</td>
-                <td style={{ ...ST.td, textAlign: "right", fontWeight: 600, color: t.type === "masuk" ? "#2e844a" : "#ea001e" }}>
-                  {t.type === "masuk" ? "+" : "-"}{fmt(t.amount)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Trend Pendapatan & Biaya */}
+        <TrendLineChart />
+        
+        {/* Radar Alokasi Biaya */}
+        <RadarBiayaChart />
       </div>
 
       {/* Modal Tambah Rekening */}
@@ -323,6 +231,107 @@ function WalletIcon({ className }: { className?: string }) {
       <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
       <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
     </svg>
+  );
+}
+
+/* ─── Trend Line Chart ─── */
+function TrendLineChart() {
+  const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"];
+  const pendapatan = [45, 52, 48, 65, 58, 72, 68];
+  const biaya = [32, 38, 35, 42, 40, 48, 45];
+  
+  const maxVal = Math.max(...pendapatan, ...biaya);
+  const chartH = 180, chartW = 400, padL = 50, padR = 20, padT = 20, padB = 30;
+  
+  const scaleY = (v: number) => chartH - ((v / maxVal) * (chartH - padT - padB)) - padB;
+  const scaleX = (i: number) => padL + (i * (chartW - padL - padR) / (months.length - 1));
+  
+  const linePath = (data: number[]) => 
+    data.map((v, i) => `${i === 0 ? "M" : "L"}${scaleX(i)},${scaleY(v)}`).join(" ");
+  
+  const totalBiaya = biaya.reduce((s, v) => s + v, 0) * 1000000;
+  
+  return (
+    <div className="card-slds" style={{ padding: 18 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: "#001526", marginBottom: 12 }}>Tren Pendapatan & Biaya</div>
+      <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: "100%", height: "auto" }}>
+        {/* Y axis labels */}
+        {[0, maxVal / 2, maxVal].map((v, i) => (
+          <g key={i}>
+            <text x={padL - 8} y={scaleY(v) + 4} textAnchor="end" fill="#8e8f8e" fontSize={10}>
+              {v > 0 ? `Rp ${v}jt` : "0"}
+            </text>
+            <line x1={padL} y1={scaleY(v)} x2={chartW - padR} y2={scaleY(v)} stroke="#ecebea" strokeWidth={0.5} />
+          </g>
+        ))}
+        {/* Biaya line */}
+        <path d={linePath(biaya)} fill="none" stroke="#ea001e" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        {biaya.map((v, i) => (
+          <circle key={i} cx={scaleX(i)} cy={scaleY(v)} r={3} fill="#fff" stroke="#ea001e" strokeWidth={2} />
+        ))}
+        {/* Pendapatan line */}
+        <path d={linePath(pendapatan)} fill="none" stroke="#0176d3" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        {pendapatan.map((v, i) => (
+          <circle key={i} cx={scaleX(i)} cy={scaleY(v)} r={3} fill="#fff" stroke="#0176d3" strokeWidth={2} />
+        ))}
+        {/* X axis labels */}
+        {months.map((m, i) => (
+          <text key={i} x={scaleX(i)} y={chartH - 8} textAnchor="middle" fill="#8e8f8e" fontSize={10}>{m}</text>
+        ))}
+      </svg>
+      <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 11, color: "#8e8f8e" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ width: 10, height: 2, background: "#0176d3" }} /> Pendapatan
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ width: 10, height: 2, background: "#ea001e" }} /> Biaya
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Radar Alokasi Biaya ─── */
+function RadarBiayaChart() {
+  const categories = [
+    { label: "Gaji & Tunjangan", amount: 45000000, pct: 42 },
+    { label: "Sparepart & Material", amount: 28000000, pct: 26 },
+    { label: "Operasional", amount: 15000000, pct: 14 },
+    { label: "Transportasi", amount: 5000000, pct: 5 },
+    { label: "ATK & Perlengkapan", amount: 3500000, pct: 3 },
+    { label: "Maintenance", amount: 4000000, pct: 4 },
+    { label: "Konsumsi", amount: 2000000, pct: 2 },
+    { label: "Lain-lain", amount: 4500000, pct: 4 },
+  ];
+  
+  const totalBiaya = categories.reduce((s, c) => s + c.amount, 0);
+  const colors = ["#0176d3", "#2e844a", "#ea001e", "#fe9339", "#8b5cf6", "#f59e0b", "#06a59a", "#6b7280"];
+  
+  return (
+    <div className="card-slds" style={{ padding: 18 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>Alokasi Biaya</div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 10, color: "#8e8f8e", textTransform: "uppercase" }}>Total Biaya</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "#ea001e" }}>{fmt(totalBiaya)}</div>
+        </div>
+      </div>
+      
+      {/* Horizontal bar chart */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {categories.map((c, i) => (
+          <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 11, width: 120, textAlign: "right", color: "#444746", whiteSpace: "nowrap" }}>{c.label}</span>
+            <div style={{ flex: 1, height: 18, background: "#f3f3f3", borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${c.pct}%`, background: colors[i], borderRadius: 4, transition: "width 500ms", display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 6 }}>
+                <span style={{ fontSize: 9, fontWeight: 600, color: "#fff" }}>{c.pct}%</span>
+              </div>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#001526", width: 100, whiteSpace: "nowrap" }}>{fmt(c.amount)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
