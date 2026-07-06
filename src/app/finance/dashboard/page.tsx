@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Wallet, Banknote, Landmark, TrendingUp, TrendingDown, Clock, Users, FileText } from "lucide-react";
+import { Plus, X, Wallet, Banknote, Landmark, TrendingUp, Clock, FileText, AlertTriangle } from "lucide-react";
 
 interface Rekening {
   id: string;
@@ -43,23 +43,28 @@ const piutangJatuhTempo = [
   { customer: "Siti Rahmawati", jumlah: 4500000, jatuhTempo: "03 Jul 2026", hari: -2 },
 ];
 
-const hutangJatuhTempo = [
-  { vendor: "PT Parts Indo", jumlah: 2000000, jatuhTempo: "12 Jul 2026", hari: 7 },
-  { vendor: "PT Diesel Parts", jumlah: 3500000, jatuhTempo: "08 Jul 2026", hari: 3 },
+const hutangMendesak = [
+  { vendor: "PT Parts Indo", jumlah: 2000000, jatuhTempo: "08 Jul 2026", hari: 2, desc: "Pembayaran Sparepart" },
+  { vendor: "PT Diesel Parts", jumlah: 3500000, jatuhTempo: "07 Jul 2026", hari: 1, desc: "Pembelian Piston Kit" },
+  { vendor: "PLN", jumlah: 3200000, jatuhTempo: "05 Jul 2026", hari: -1, desc: "Listrik Bengkel" },
 ];
 
 export default function FinanceDashboardPage() {
   const [rekeningList, setRekeningList] = useState<Rekening[]>(initialRekening);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ nama: "", noRekening: "", saldoAwal: "" });
+  const [dateFrom, setDateFrom] = useState("2026-01-01");
+  const [dateTo, setDateTo] = useState("2026-07-06");
 
   const totalKasBank = rekeningList.reduce((sum, r) => sum + r.saldo, 0);
   const totalPiutang = piutangJatuhTempo.reduce((s, p) => s + p.jumlah, 0);
-  const totalHutang = hutangJatuhTempo.reduce((s, h) => s + h.jumlah, 0);
+  const totalHutangMendesak = hutangMendesak.reduce((s, h) => s + h.jumlah, 0);
 
-  const totalPemasukanBulanIni = recentTransactions.filter((t) => t.type === "masuk").reduce((s, t) => s + t.amount, 0);
-  const totalPengeluaranBulanIni = recentTransactions.filter((t) => t.type === "keluar").reduce((s, t) => s + t.amount, 0);
-  const netCashflow = totalPemasukanBulanIni - totalPengeluaranBulanIni;
+  const totalPemasukan = recentTransactions.filter((t) => t.type === "masuk").reduce((s, t) => s + t.amount, 0);
+  const totalPengeluaran = recentTransactions.filter((t) => t.type === "keluar").reduce((s, t) => s + t.amount, 0);
+
+  const omzet2026 = 875000000;
+  const labaBersih2026 = 218750000;
 
   const handleSave = () => {
     if (!form.nama.trim() || !form.saldoAwal) return;
@@ -82,48 +87,69 @@ export default function FinanceDashboardPage() {
         </div>
       </div>
 
-      {/* Row 1: Top Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className="card-slds" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 8, background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Landmark size={20} color="#f28500" />
+      {/* Filter Periode Analisis */}
+      <div className="filter-section">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="form-group">
+            <label className="form-label">Dari Tanggal</label>
+            <input type="date" className="form-input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
           </div>
-          <div>
-            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Kas & Bank</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#001526" }}>{fmt(totalKasBank)}</div>
-            <div style={{ fontSize: 11, color: "#8e8f8e" }}>{rekeningList.length} rekening</div>
+          <div className="form-group">
+            <label className="form-label">Sampai Tanggal</label>
+            <input type="date" className="form-input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">&nbsp;</label>
+            <span style={{ fontSize: 12, color: "#8e8f8e", paddingTop: 8 }}>Periode Analisis</span>
           </div>
         </div>
+      </div>
 
+      {/* Row 1: 4 Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {/* Omzet */}
         <div className="card-slds" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 44, height: 44, borderRadius: 8, background: "#eef4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <TrendingUp size={20} color="#0176d3" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Pemasukan Bulan Ini</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#2e844a" }}>{fmt(totalPemasukanBulanIni)}</div>
+            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Omzet (Revenue)</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#0176d3" }}>{fmt(omzet2026)}</div>
           </div>
         </div>
 
+        {/* Laba Bersih */}
+        <div className="card-slds" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 8, background: "#ecfdf5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Banknote size={20} color="#2e844a" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Laba Bersih</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#2e844a" }}>{fmt(labaBersih2026)}</div>
+          </div>
+        </div>
+
+        {/* Kas & Bank Aktif */}
+        <div className="card-slds" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 8, background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Landmark size={20} color="#f28500" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Kas & Bank Aktif</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#001526" }}>{fmt(totalKasBank)}</div>
+            <div style={{ fontSize: 11, color: "#8e8f8e" }}>{rekeningList.length} rekening</div>
+          </div>
+        </div>
+
+        {/* Hutang Mendesak */}
         <div className="card-slds" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 44, height: 44, borderRadius: 8, background: "#fce4ec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <TrendingDown size={20} color="#ea001e" />
+            <AlertTriangle size={20} color="#ea001e" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Pengeluaran Bulan Ini</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#ea001e" }}>{fmt(totalPengeluaranBulanIni)}</div>
-          </div>
-        </div>
-
-        <div className="card-slds" style={{ padding: 18, display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 8, background: netCashflow >= 0 ? "#ecfdf5" : "#fce4ec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <TrendingUp size={20} color={netCashflow >= 0 ? "#2e844a" : "#ea001e"} />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Net Cashflow</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: netCashflow >= 0 ? "#2e844a" : "#ea001e" }}>
-              {netCashflow >= 0 ? "+" : ""}{fmt(netCashflow)}
-            </div>
+            <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Hutang Mendesak</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#ea001e" }}>{fmt(totalHutangMendesak)}</div>
+            <div style={{ fontSize: 11, color: "#8e8f8e" }}>{hutangMendesak.length} tagihan</div>
           </div>
         </div>
       </div>
@@ -155,7 +181,7 @@ export default function FinanceDashboardPage() {
         ))}
       </div>
 
-      {/* Row 2: Piutang & Hutang Jatuh Tempo */}
+      {/* Row 2: Piutang & Hutang Mendesak Detail */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Piutang */}
         <div className="card-slds" style={{ padding: 18 }}>
@@ -169,17 +195,17 @@ export default function FinanceDashboardPage() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr>
-                <th style={{ textAlign: "left", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Customer</th>
-                <th style={{ textAlign: "right", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Jumlah</th>
-                <th style={{ textAlign: "right", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Jatuh Tempo</th>
+                <th style={ST.thL}>Customer</th>
+                <th style={ST.thR}>Jumlah</th>
+                <th style={ST.thR}>Jatuh Tempo</th>
               </tr>
             </thead>
             <tbody>
               {piutangJatuhTempo.map((p, i) => (
                 <tr key={i}>
-                  <td style={{ padding: "7px 0", borderBottom: "1px solid #f5f5f5" }}>{p.customer}</td>
-                  <td style={{ textAlign: "right", fontWeight: 600, padding: "7px 0", borderBottom: "1px solid #f5f5f5" }}>{fmt(p.jumlah)}</td>
-                  <td style={{ textAlign: "right", padding: "7px 0", borderBottom: "1px solid #f5f5f5", color: p.hari < 0 ? "#ea001e" : p.hari <= 3 ? "#fe9339" : "#444746" }}>
+                  <td style={ST.td}>{p.customer}</td>
+                  <td style={{ ...ST.td, textAlign: "right", fontWeight: 600 }}>{fmt(p.jumlah)}</td>
+                  <td style={{ ...ST.td, textAlign: "right", color: p.hari < 0 ? "#ea001e" : p.hari <= 3 ? "#fe9339" : "#444746" }}>
                     {p.jatuhTempo}
                     {p.hari < 0 ? <span style={{ fontSize: 10, color: "#ea001e", marginLeft: 4 }}>(overdue)</span> : null}
                   </td>
@@ -189,29 +215,34 @@ export default function FinanceDashboardPage() {
           </table>
         </div>
 
-        {/* Hutang */}
+        {/* Hutang Mendesak */}
         <div className="card-slds" style={{ padding: 18 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <FileText size={16} color="#ea001e" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>Hutang Jatuh Tempo</span>
+              <AlertTriangle size={16} color="#ea001e" />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>Hutang Mendesak</span>
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#ea001e" }}>{fmt(totalHutang)}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "#ea001e" }}>{fmt(totalHutangMendesak)}</span>
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr>
-                <th style={{ textAlign: "left", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Vendor</th>
-                <th style={{ textAlign: "right", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Jumlah</th>
-                <th style={{ textAlign: "right", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Jatuh Tempo</th>
+                <th style={ST.thL}>Vendor</th>
+                <th style={ST.thL}>Keperluan</th>
+                <th style={ST.thR}>Jumlah</th>
+                <th style={ST.thR}>Jatuh Tempo</th>
               </tr>
             </thead>
             <tbody>
-              {hutangJatuhTempo.map((h, i) => (
+              {hutangMendesak.map((h, i) => (
                 <tr key={i}>
-                  <td style={{ padding: "7px 0", borderBottom: "1px solid #f5f5f5" }}>{h.vendor}</td>
-                  <td style={{ textAlign: "right", fontWeight: 600, padding: "7px 0", borderBottom: "1px solid #f5f5f5", color: "#ea001e" }}>{fmt(h.jumlah)}</td>
-                  <td style={{ textAlign: "right", padding: "7px 0", borderBottom: "1px solid #f5f5f5", color: "#444746" }}>{h.jatuhTempo} <span style={{ fontSize: 10, color: "#8e8f8e" }}>({h.hari}h)</span></td>
+                  <td style={ST.td}>{h.vendor}</td>
+                  <td style={{ ...ST.td, fontSize: 12, color: "#8e8f8e" }}>{h.desc}</td>
+                  <td style={{ ...ST.td, textAlign: "right", fontWeight: 600, color: "#ea001e" }}>{fmt(h.jumlah)}</td>
+                  <td style={{ ...ST.td, textAlign: "right", color: h.hari < 0 ? "#ea001e" : "#444746" }}>
+                    {h.jatuhTempo}
+                    {h.hari < 0 ? <span style={{ fontSize: 10, color: "#ea001e", marginLeft: 4 }}>(overdue)</span> : <span style={{ fontSize: 10, color: "#8e8f8e", marginLeft: 4 }}>({h.hari}h)</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -230,19 +261,19 @@ export default function FinanceDashboardPage() {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr>
-              <th style={{ textAlign: "left", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Tanggal</th>
-              <th style={{ textAlign: "left", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Keterangan</th>
-              <th style={{ textAlign: "left", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Pihak</th>
-              <th style={{ textAlign: "right", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" }}>Jumlah</th>
+              <th style={ST.thL}>Tanggal</th>
+              <th style={ST.thL}>Keterangan</th>
+              <th style={ST.thL}>Pihak</th>
+              <th style={ST.thR}>Jumlah</th>
             </tr>
           </thead>
           <tbody>
             {recentTransactions.map((t, i) => (
               <tr key={i}>
-                <td style={{ padding: "7px 0", borderBottom: "1px solid #f5f5f5", color: "#8e8f8e", fontSize: 12 }}>{t.date}</td>
-                <td style={{ padding: "7px 0", borderBottom: "1px solid #f5f5f5", fontWeight: 500 }}>{t.desc}</td>
-                <td style={{ padding: "7px 0", borderBottom: "1px solid #f5f5f5" }}>{t.customer}</td>
-                <td style={{ textAlign: "right", fontWeight: 600, padding: "7px 0", borderBottom: "1px solid #f5f5f5", color: t.type === "masuk" ? "#2e844a" : "#ea001e" }}>
+                <td style={{ ...ST.td, color: "#8e8f8e", fontSize: 12 }}>{t.date}</td>
+                <td style={{ ...ST.td, fontWeight: 500 }}>{t.desc}</td>
+                <td style={ST.td}>{t.customer}</td>
+                <td style={{ ...ST.td, textAlign: "right", fontWeight: 600, color: t.type === "masuk" ? "#2e844a" : "#ea001e" }}>
                   {t.type === "masuk" ? "+" : "-"}{fmt(t.amount)}
                 </td>
               </tr>
@@ -294,3 +325,9 @@ function WalletIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+const ST: Record<string, React.CSSProperties> = {
+  thL: { textAlign: "left", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" },
+  thR: { textAlign: "right", fontWeight: 600, fontSize: 10, color: "#8e8f8e", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #ecebea" },
+  td: { padding: "7px 0", borderBottom: "1px solid #f5f5f5" },
+};
