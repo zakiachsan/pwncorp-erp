@@ -391,6 +391,26 @@ export default function AccountingReportsPage() {
         <h1 style={{ fontSize: 20, fontWeight: 700, color: "#001526", margin: 0 }}>Accounting Reports</h1>
       </div>
 
+      {/* ── Summary Cards ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "16px 24px 0" }}>
+        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Total Entries</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#001526" }}>{cfg.data.length}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Active Tab</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#0176d3" }}>{cfg.label}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Page</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#001526" }}>{page} / {totalPages || 1}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center", padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", textTransform: "uppercase", marginBottom: 4 }}>Last Updated</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#444746" }}>Today</div>
+        </div>
+      </div>
+
       {/* ── tab bar ── */}
       <div style={{ display: "flex", gap: 0, padding: "16px 24px 0", flexWrap: "wrap" }}>
         {TABS.map((tab, i) => {

@@ -1,28 +1,56 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, BookOpen, Download } from "lucide-react";
+import { Search, Download } from "lucide-react";
 
 const journals = [
-  { date: "26 Jun 2026", ref: "INV-001", account: "Kas", description: "Pembayaran Invoice INV-001", debit: "Rp 2.500.000", credit: "-" },
-  { date: "26 Jun 2026", ref: "INV-001", account: "Piutang", description: "Pembayaran Invoice INV-001", debit: "-", credit: "Rp 2.500.000" },
-  { date: "25 Jun 2026", ref: "PO-001", account: "Persediaan", description: "Pembelian sparepart PO-001", debit: "Rp 4.250.000", credit: "-" },
-  { date: "25 Jun 2026", ref: "PO-001", account: "Hutang Usaha", description: "Pembelian sparepart PO-001", debit: "-", credit: "Rp 4.250.000" },
-  { date: "24 Jun 2026", ref: "WO-004", account: "Beban Sparepart", description: "Pemakaian sparepart WO-004", debit: "Rp 1.500.000", credit: "-" },
-  { date: "24 Jun 2026", ref: "WO-004", account: "Persediaan", description: "Pemakaian sparepart WO-004", debit: "-", credit: "Rp 1.500.000" },
+  { date: "26 Jun 2026", ref: "INV-001", account: "Kas", description: "Pembayaran Invoice INV-001", debit: 2500000, credit: 0 },
+  { date: "26 Jun 2026", ref: "INV-001", account: "Piutang", description: "Pembayaran Invoice INV-001", debit: 0, credit: 2500000 },
+  { date: "25 Jun 2026", ref: "PO-001", account: "Persediaan", description: "Pembelian sparepart PO-001", debit: 4250000, credit: 0 },
+  { date: "25 Jun 2026", ref: "PO-001", account: "Hutang Usaha", description: "Pembelian sparepart PO-001", debit: 0, credit: 4250000 },
+  { date: "24 Jun 2026", ref: "WO-004", account: "Beban Sparepart", description: "Pemakaian sparepart WO-004", debit: 1500000, credit: 0 },
+  { date: "24 Jun 2026", ref: "WO-004", account: "Persediaan", description: "Pemakaian sparepart WO-004", debit: 0, credit: 1500000 },
 ];
+
+const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+
+const saldoAwal = 150000000;
+const totalDebit = journals.reduce((s, j) => s + j.debit, 0);
+const totalKredit = journals.reduce((s, j) => s + j.credit, 0);
+const saldoAkhir = saldoAwal + totalDebit - totalKredit;
 
 export default function JournalPage() {
   const router = useRouter();
+
   return (
     <div>
       <div className="view-header">
         <div className="view-title">
           <JournalIcon className="w-6 h-6 text-[--color-brand-secondary]" />
-          General Ledger / Jurnal
+          Jurnal Umum
         </div>
         <div className="flex gap-2">
           <button className="btn btn--sm"><Download size={14} /> Export</button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="card-slds" style={{ textAlign: "center" }}>
+          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Saldo Awal</div>
+          <div className="text-xl font-bold text-[--color-text-primary]">{fmt(saldoAwal)}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center" }}>
+          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Debit Masuk</div>
+          <div className="text-xl font-bold" style={{ color: "var(--color-success)" }}>{fmt(totalDebit)}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center" }}>
+          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Kredit Keluar</div>
+          <div className="text-xl font-bold" style={{ color: "var(--color-error)" }}>{fmt(totalKredit)}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center" }}>
+          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Saldo Akhir</div>
+          <div className="text-xl font-bold" style={{ color: saldoAkhir >= 0 ? "var(--color-brand)" : "var(--color-error)" }}>{fmt(saldoAkhir)}</div>
         </div>
       </div>
 
@@ -68,13 +96,13 @@ export default function JournalPage() {
           </thead>
           <tbody>
             {journals.map((j, i) => (
-              <tr key={j.ref} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${j.ref}`)}>
+              <tr key={`${j.ref}-${i}`} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${j.ref}`)}>
                 <td className="text-[--color-text-secondary]">{j.date}</td>
                 <td className="font-medium text-[--color-brand]">{j.ref}</td>
                 <td>{j.account}</td>
                 <td>{j.description}</td>
-                <td className="text-right font-medium">{j.debit}</td>
-                <td className="text-right font-medium">{j.credit}</td>
+                <td className="text-right font-medium">{j.debit > 0 ? fmt(j.debit) : "-"}</td>
+                <td className="text-right font-medium">{j.credit > 0 ? fmt(j.credit) : "-"}</td>
               </tr>
             ))}
           </tbody>

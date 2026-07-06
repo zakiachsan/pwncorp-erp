@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
 const wos = [
-  { no: "SWO/006/26060155", so: "SRO/006/26060155", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", mekanik: "Bambang", status: "In Progress", start: "25 Jun 2026", target: "27 Jun 2026", hasInvoice: false },
-  { no: "SWO/005/26060154", so: "SRO/005/26060154", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", mekanik: "Agus", status: "Draft", start: "26 Jun 2026", target: "28 Jun 2026", hasInvoice: false },
-  { no: "SWO/004/26060153", so: "SRO/004/26060153", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", mekanik: "Bambang", status: "Completed", start: "24 Jun 2026", target: "25 Jun 2026", hasInvoice: true },
-  { no: "SWO/003/26060152", so: "SRO/003/26060152", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", mekanik: "Hendra", status: "QC", start: "25 Jun 2026", target: "26 Jun 2026", hasInvoice: false },
-  { no: "SWO/002/26060151", so: "SRO/002/26060150", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", mekanik: "Agus", status: "Waiting Stock", start: "26 Jun 2026", target: "28 Jun 2026", hasInvoice: true },
-  { no: "SWO/001/26060149", so: "SRO/001/26060149", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", mekanik: "Hendra", status: "In Progress", start: "26 Jun 2026", target: "27 Jun 2026", hasInvoice: false },
+  { no: "SWO/006/26060155", so: "SRO/006/26060155", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", mekanik: "Bambang", status: "In Progress", start: "25 Jun 2026", target: "27 Jun 2026", sri: "SRI/001/26060155" },
+  { no: "SWO/005/26060154", so: "SRO/005/26060154", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", mekanik: "Agus", status: "Draft", start: "26 Jun 2026", target: "28 Jun 2026", sri: "SRI/005/26060154" },
+  { no: "SWO/004/26060153", so: "SRO/004/26060153", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", mekanik: "Bambang", status: "Completed", start: "24 Jun 2026", target: "25 Jun 2026", sri: null },
+  { no: "SWO/003/26060152", so: "SRO/003/26060152", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", mekanik: "Hendra", status: "QC", start: "25 Jun 2026", target: "26 Jun 2026", sri: "SRI/002/26060152" },
+  { no: "SWO/002/26060151", so: "SRO/002/26060150", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", mekanik: "Agus", status: "Waiting Stock", start: "26 Jun 2026", target: "28 Jun 2026", sri: "SRI/003/26060150" },
+  { no: "SWO/001/26060149", so: "SRO/001/26060149", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", mekanik: "Hendra", status: "In Progress", start: "26 Jun 2026", target: "27 Jun 2026", sri: "SRI/004/26060149" },
 ];
 
 const statusPill = (status: string) => {
@@ -93,7 +93,7 @@ export default function WorkOrdersPage() {
               <th>Mulai</th>
               <th>Target</th>
               <th>No. SRO</th>
-              <th>Linked Docs</th>
+              <th>No. SRI</th>
             </tr>
           </thead>
           <tbody>
@@ -124,15 +124,14 @@ export default function WorkOrdersPage() {
                   onClick={() => router.push(`/service-orders/${wo.so}`)}
                 >{wo.so}</td>
                 <td>
-                  <span
-                    title={wo.hasInvoice ? "Invoice sudah dibuat" : "Belum ada Invoice"}
-                    style={{
-                      display: "inline-flex", alignItems: "center", justifyContent: "center",
-                      width: 22, height: 22, borderRadius: 4, fontSize: 11, fontWeight: 700,
-                      background: wo.hasInvoice ? "#0176d3" : "#d8d8d8",
-                      color: wo.hasInvoice ? "#fff" : "#8e8f8e",
-                    }}
-                  >INV</span>
+                  {wo.sri ? (
+                    <span
+                      style={{ color: "var(--color-brand)", fontWeight: 500, cursor: "pointer" }}
+                      onClick={() => router.push(`/service-invoices/${wo.sri}`)}
+                    >{wo.sri}</span>
+                  ) : (
+                    <span style={{ color: "#8e8f8e" }}>-</span>
+                  )}
                 </td>
               </tr>
             ))}

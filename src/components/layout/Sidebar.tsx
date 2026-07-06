@@ -17,6 +17,8 @@ import {
   CreditCard,
   BookOpen,
   PieChart,
+  Briefcase,
+  ReceiptText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -40,6 +42,11 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
   {
     title: "Operasional",
     items: [
+      {
+        label: "Project",
+        icon: <Briefcase size={18} />,
+        href: "/project",
+      },
       {
         label: "Service Orders",
         icon: <ClipboardList size={18} />,
@@ -122,8 +129,37 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
 /* ─── Finance Nav ─── */
 const financeGroups: { title: string; items: NavItem[] }[] = [
   {
+    title: "Dashboard",
+    items: [
+      {
+        label: "Dashboard Finance",
+        icon: <LayoutDashboard size={18} />,
+        href: "/finance/dashboard",
+      },
+    ],
+  },
+  {
     title: "Finance",
     items: [
+      {
+        label: "Request Payment",
+        icon: <FileText size={18} />,
+        href: "/finance/request-payment",
+      },
+      {
+        label: "Buku Kasir",
+        icon: <BookOpen size={18} />,
+        href: "/finance/petty-cash",
+      },
+      {
+        label: "Payment Processing",
+        icon: <CreditCard size={18} />,
+        children: [
+          { label: "Approval Desk", href: "/finance/payment-processing/approval" },
+          { label: "Payment Execution", href: "/finance/payment-processing/execution" },
+          { label: "Payment History", href: "/finance/payment-processing/history" },
+        ],
+      },
       {
         label: "Invoices",
         icon: <FileText size={18} />,
@@ -132,6 +168,13 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
           { label: "Invoice Payables", href: "/finance/invoices/payables" },
           { label: "Service Invoices", href: "/finance/invoices/service" },
           { label: "Invoice Receivables", href: "/finance/invoices/receivables" },
+        ],
+      },
+      {
+        label: "Finance AR",
+        icon: <ReceiptText size={18} />,
+        children: [
+          { label: "Rencana Tagihan", href: "/finance/ar/rencana-tagihan" },
         ],
       },
       {
@@ -150,6 +193,7 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
         children: [
           { label: "Account Payables", href: "/finance/reports/ap" },
           { label: "Account Receivables", href: "/finance/reports/ar" },
+          { label: "Cash Flow", href: "/finance/reports/cash-flow" },
         ],
       },
     ],
@@ -179,6 +223,16 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
         label: "Accounting Reports",
         icon: <PieChart size={18} />,
         href: "/finance/accounting-reports",
+      },
+    ],
+  },
+  {
+    title: "Pengaturan",
+    items: [
+      {
+        label: "Master Data (COA)",
+        icon: <Database size={18} />,
+        href: "/finance/coa",
       },
     ],
   },

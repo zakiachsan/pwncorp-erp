@@ -5,7 +5,7 @@ import { Plus, Search, Filter, Download } from "lucide-react";
 
 const orders = [
   { no: "SRO/007/26060143", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/006/26060155", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Draft", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/006/26060155", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Delivered", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
   { no: "SRO/005/26060154", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
   { no: "SRO/004/26060153", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
   { no: "SRO/003/26060152", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
@@ -16,6 +16,7 @@ const orders = [
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
     Draft: "pill pill--draft",
+    Delivered: "pill pill--delivered",
     Approved: "pill pill--approved",
     Cancelled: "pill pill--cancelled",
   };
@@ -53,6 +54,7 @@ export default function ServiceOrdersPage() {
             <select className="form-select">
               <option>All Status</option>
               <option>Draft</option>
+              <option>Delivered</option>
               <option>Approved</option>
               <option>Cancelled</option>
             </select>

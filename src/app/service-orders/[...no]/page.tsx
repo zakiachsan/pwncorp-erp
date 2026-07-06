@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Printer, FileText, Phone, ChevronRight, CheckCircle, Wrench, ExternalLink } from "lucide-react";
+import { ArrowLeft, Printer, FileText, Phone, ChevronRight, CheckCircle, Wrench, ExternalLink, Briefcase } from "lucide-react";
 
 const initialOrdersData: Record<string, any> = {
   "SRO/001/26060149": {
@@ -24,6 +24,7 @@ const initialOrdersData: Record<string, any> = {
     year: "2022",
     color: "SILVER",
     status: "DRAFT",
+    project: { id: "PRJ/004/26060620", name: "Ganti Oli & Tune Up Fleet" },
     services: [
       { item: "A3 - Spooring Mobil Kelas I", description: "Spooring", estimatedTime: "", quantity: 1, priceExTax: 375000, discount: "10%", subtotal: 337500, tax: 0, otherTax: 0, total: 337500 },
       { item: "B4 - Balancing Ring >19\"", description: "Balancing", estimatedTime: "", quantity: 4, priceExTax: 60000, discount: "10%", subtotal: 216000, tax: 0, otherTax: 0, total: 216000 },
@@ -50,6 +51,7 @@ const initialOrdersData: Record<string, any> = {
     year: "2021",
     color: "HITAM",
     status: "APPROVED",
+    project: { id: "PRJ/001/26040410", name: "Service Berkala Fleet PT Maju Jaya" },
     services: [
       { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
     ],
@@ -76,6 +78,7 @@ const initialOrdersData: Record<string, any> = {
     year: "2020",
     color: "PUTIH",
     status: "APPROVED",
+    project: { id: "PRJ/002/26050501", name: "Overhaul Mesin Isuzu Elf" },
     services: [
       { item: "C1 - Service Berkala 10K", description: "Service Umum", estimatedTime: "90 menit", quantity: 1, priceExTax: 450000, discount: "-", subtotal: 450000, tax: 0, otherTax: 0, total: 450000 },
       { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
@@ -103,6 +106,7 @@ const initialOrdersData: Record<string, any> = {
     year: "2023",
     color: "MERAH",
     status: "DRAFT",
+    project: { id: "PRJ/003/26060601", name: "Perawatan Berkala Q3 2026" },
     services: [
       { item: "D1 - Tune Up", description: "Tune Up Mesin", estimatedTime: "120 menit", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, tax: 0, otherTax: 0, total: 350000 },
     ],
@@ -127,6 +131,7 @@ const initialOrdersData: Record<string, any> = {
     year: "2022",
     color: "ABU-ABU",
     status: "CANCELLED",
+    project: null,
     services: [
       { item: "E1 - Rem Mobil", description: "Ganti Kampas Rem", estimatedTime: "45 menit", quantity: 1, priceExTax: 280000, discount: "-", subtotal: 280000, tax: 0, otherTax: 0, total: 280000 },
     ],
@@ -150,13 +155,12 @@ const initialOrdersData: Record<string, any> = {
     odometer: "120.000",
     year: "2019",
     color: "BIRU",
-    status: "APPROVED",
+    status: "DELIVERED",
+    project: { id: "PRJ/001/26040410", name: "Service Berkala Fleet PT Maju Jaya" },
     services: [
       { item: "F1 - Overhaul", description: "Overhaul Mesin", estimatedTime: "480 menit", quantity: 1, priceExTax: 2500000, discount: "5%", subtotal: 2375000, tax: 0, otherTax: 0, total: 2375000 },
     ],
-    workOrders: [
-      { documentNumber: "SWO/006/26060155", createdDate: "25-Jun-2026 08:00 AM", status: "IN PROGRESS" },
-    ],
+    workOrders: [],
   },
   "SRO/007/26060143": {
     documentNumber: "SRO/007/26060143",
@@ -177,6 +181,7 @@ const initialOrdersData: Record<string, any> = {
     year: "2018",
     color: "PUTIH",
     status: "CANCELLED",
+    project: null,
     services: [
       { item: "G1 - Service AC", description: "Service AC Mobil", estimatedTime: "60 menit", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, tax: 0, otherTax: 0, total: 350000 },
     ],
@@ -193,6 +198,7 @@ export default function ServiceOrderDetailPage() {
   const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
   const [orders, setOrders] = useState(initialOrdersData);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showDeliverConfirm, setShowDeliverConfirm] = useState(false);
   const [showCreateWOConfirm, setShowCreateWOConfirm] = useState(false);
 
   const order = orders[orderNo];
@@ -214,6 +220,14 @@ export default function ServiceOrderDetailPage() {
       [orderNo]: { ...prev[orderNo], status: "APPROVED" },
     }));
     setShowApproveConfirm(false);
+  };
+
+  const handleDeliver = () => {
+    setOrders((prev) => ({
+      ...prev,
+      [orderNo]: { ...prev[orderNo], status: "DELIVERED" },
+    }));
+    setShowDeliverConfirm(false);
   };
 
   const handleCreateWO = () => {
@@ -240,6 +254,8 @@ export default function ServiceOrderDetailPage() {
   const totalQty = order.services.reduce((s: number, x: any) => s + x.quantity, 0);
   const grandTotal = order.services.reduce((s: number, x: any) => s + x.total, 0);
   const isDraft = order.status === "DRAFT";
+  const isDelivered = order.status === "DELIVERED";
+  const isApproved = order.status === "APPROVED";
   const hasWO = order.workOrders.length > 0;
   const wo = hasWO ? order.workOrders[0] : null;
 
@@ -268,23 +284,34 @@ export default function ServiceOrderDetailPage() {
               <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
               <div style={{ display: "flex", gap: 6 }}>
                 <span style={{ ...S.badge, ...(order.status === "DRAFT" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
+                <span style={{ ...S.badge, ...(order.status === "DELIVERED" ? S.badgeActive : S.badgeInactive) }}>DELIVERED</span>
                 <span style={{ ...S.badge, ...(order.status === "APPROVED" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
               </div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              {!isDraft && !hasWO && order.services.length > 0 && (
+              {isDraft && (
+                <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}>
+                  <CheckCircle size={14} /> Deliver
+                </button>
+              )}
+              {isDelivered && (
+                <>
+                  <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
+                    <CheckCircle size={14} /> Approve
+                  </button>
+                  <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
+                    <Wrench size={14} /> Create Work Orders
+                  </button>
+                </>
+              )}
+              {isApproved && !hasWO && order.services.length > 0 && (
                 <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
                   <Wrench size={14} /> Create Work Orders
                 </button>
               )}
-              {!isDraft && hasWO && (
+              {isApproved && hasWO && (
                 <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
                   <ExternalLink size={14} /> View Work Orders
-                </button>
-              )}
-              {isDraft && (
-                <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
-                  <CheckCircle size={14} /> Approve
                 </button>
               )}
               <button style={S.actionBtn}><Printer size={14} /> Print</button>
@@ -314,6 +341,23 @@ export default function ServiceOrderDetailPage() {
             </div>
             {/* Right Column */}
             <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 2 }}>PROJECT</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: "#001526", display: "flex", alignItems: "center", gap: 4 }}>
+                  {order.project ? (
+                    <span
+                      style={{ color: "#0176d3", cursor: "pointer" }}
+                      onClick={() => router.push(`/project/${order.project.id}`)}
+                    >
+                      <Briefcase size={13} style={{ display: "inline", marginRight: 4, verticalAlign: "-2px", color: "#0176d3" }} />
+                      {order.project.name}
+                      <ChevronRight size={13} style={{ display: "inline", marginLeft: 2, verticalAlign: "-2px", color: "#0176d3" }} />
+                    </span>
+                  ) : (
+                    <span style={{ color: "#8e8f8e" }}>-</span>
+                  )}
+                </div>
+              </div>
               <F label="VEHICLE TYPE" value={order.vehicleType} />
               <F label="VEHICLE MAKE" value={order.vehicleMake} />
               <F label="VEHICLE MODEL" value={order.vehicleModel} />
@@ -378,12 +422,30 @@ export default function ServiceOrderDetailPage() {
           <div style={S.modal}>
             <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 12 }}>Approve Service Order?</h3>
             <p style={{ fontSize: 14, color: "#444746", marginBottom: 20, lineHeight: 1.5 }}>
-              Status akan berubah dari <strong>DRAFT</strong> ke <strong>APPROVED</strong>. Service Order yang sudah di-approve akan masuk ke Work Orders.
+              Status akan berubah dari <strong>DELIVERED</strong> ke <strong>APPROVED</strong>. Service Order yang sudah di-approve akan masuk ke Work Orders.
             </p>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <button onClick={() => setShowApproveConfirm(false)} style={S.actionBtn}>Batal</button>
               <button onClick={handleApprove} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
                 <CheckCircle size={14} /> Ya, Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deliver Confirmation Modal */}
+      {showDeliverConfirm && (
+        <div style={S.modalOverlay}>
+          <div style={S.modal}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 12 }}>Deliver Service Order?</h3>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20, lineHeight: 1.5 }}>
+              Status akan berubah dari <strong>DRAFT</strong> ke <strong>DELIVERED</strong>. SO akan dikirim ke customer untuk menunggu approval.
+            </p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowDeliverConfirm(false)} style={S.actionBtn}>Batal</button>
+              <button onClick={handleDeliver} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}>
+                <CheckCircle size={14} /> Ya, Deliver
               </button>
             </div>
           </div>

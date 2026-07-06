@@ -155,6 +155,9 @@ a:hover {
   .pill--draft {
     @apply bg-gray-500 text-white;
   }
+  .pill--delivered {
+    @apply bg-blue-500 text-white;
+  }
   .pill--approved,
   .pill--completed {
     @apply bg-[--color-success] text-white;
