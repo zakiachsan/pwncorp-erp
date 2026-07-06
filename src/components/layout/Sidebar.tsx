@@ -48,6 +48,11 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         href: "/project",
       },
       {
+        label: "Anggaran",
+        icon: <BarChart3 size={18} />,
+        href: "/warehouse/anggaran",
+      },
+      {
         label: "Service Orders",
         icon: <ClipboardList size={18} />,
         href: "/service-orders",
@@ -81,11 +86,6 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
           { label: "Warehouse Stock Histories", href: "/warehouse/stock-histories" },
 
         ],
-      },
-      {
-        label: "Anggaran",
-        icon: <BarChart3 size={18} />,
-        href: "/warehouse/anggaran",
       },
     ],
   },

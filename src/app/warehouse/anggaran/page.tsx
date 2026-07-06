@@ -1,42 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Trash2, BarChart3 } from "lucide-react";
+import { Plus, X, BarChart3, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface AnggaranItem {
+interface AnggaranSWO {
   id: string;
-  kategori: string;
-  item: string;
+  swoId: string;
+  sroId: string;
+  customer: string;
+  kendaraan: string;
+  noPol: string;
   anggaran: number;
   realisasi: number;
 }
 
-interface WorkOrder {
-  id: string;
-  name: string;
-  customer: string;
-}
-
-const workOrders: WorkOrder[] = [
-  { id: "SWO/001/26060149", name: "Service Berkala Toyota Avanza", customer: "Budi Santoso" },
-  { id: "SWO/002/26060151", name: "Ganti Oli Honda Civic", customer: "PT Maju Jaya" },
-  { id: "SWO/003/26060152", name: "Service Umum Mitsubishi Pajero", customer: "Siti Rahmawati" },
-  { id: "SWO/004/26060153", name: "Tune Up Suzuki Ertiga", customer: "CV Berkah Abadi" },
-  { id: "SWO/005/26060154", name: "Ganti Kampas Rem Daihatsu Xenia", customer: "Ahmad Fauzi" },
-  { id: "SWO/006/26060155", name: "Overhaul Isuzu Elf", customer: "PT Transport Jaya" },
+const projects = [
+  { id: "PRJ/001/26040410", name: "Service Berkala Fleet PT Maju Jaya" },
+  { id: "PRJ/002/26050501", name: "Overhaul Mesin Isuzu Elf" },
+  { id: "PRJ/003/26060601", name: "Perawatan Berkala Q3 2026" },
+  { id: "PRJ/004/26060620", name: "Ganti Oli & Tune Up Fleet" },
 ];
 
-const kategoriOptions = [
-  { label: "Material & Jasa", color: "var(--color-brand)" },
-  { label: "Biaya Operasional", color: "var(--color-warning)" },
-  { label: "Pajak", color: "var(--color-success)" },
-];
-
-const initialItems: AnggaranItem[] = [
-  { id: "A-001", kategori: "Material & Jasa", item: "Oli Mesin 5W-30", anggaran: 255000, realisasi: 255000 },
-  { id: "A-002", kategori: "Material & Jasa", item: "Filter Udara", anggaran: 120000, realisasi: 120000 },
-  { id: "A-003", kategori: "Biaya Operasional", item: "Jasa Mekanik", anggaran: 350000, realisasi: 300000 },
-  { id: "A-004", kategori: "Pajak", item: "PPN 11%", anggaran: 80000, realisasi: 80000 },
+const initialData: AnggaranSWO[] = [
+  { id: "A-001", swoId: "SWO/002/26060151", sroId: "SRO/002/26060150", customer: "PT Maju Jaya", kendaraan: "Honda Civic", noPol: "B 5678 EF", anggaran: 5000000, realisasi: 4800000 },
+  { id: "A-002", swoId: "SWO/001/26060149", sroId: "SRO/001/26060149", customer: "PT Maju Jaya", kendaraan: "Toyota Avanza", noPol: "B 1234 CD", anggaran: 2500000, realisasi: 2500000 },
+  { id: "A-003", swoId: "SWO/004/26060153", sroId: "SRO/004/26060153", customer: "PT Maju Jaya", kendaraan: "Suzuki Ertiga", noPol: "B 3456 IJ", anggaran: 3500000, realisasi: 3500000 },
+  { id: "A-004", swoId: "SWO/007/26060143", sroId: "SRO/007/26060143", customer: "PT Maju Jaya", kendaraan: "Mitsubishi L300", noPol: "B 1314 OP", anggaran: 3500000, realisasi: 3500000 },
+  { id: "A-005", swoId: "SWO/006/26060155", sroId: "SRO/006/26060155", customer: "PT Maju Jaya", kendaraan: "Isuzu Elf", noPol: "B 1112 MN", anggaran: 8000000, realisasi: 7200000 },
+  { id: "A-006", swoId: "SWO/009/26060201", sroId: "SRO/002/26060150", customer: "PT Maju Jaya", kendaraan: "Toyota Fortuner", noPol: "B 3002 CD", anggaran: 4500000, realisasi: 4000000 },
+  { id: "A-007", swoId: "SWO/010/26060202", sroId: "SRO/006/26060155", customer: "PT Maju Jaya", kendaraan: "Toyota Fortuner", noPol: "B 3002 CD", anggaran: 3500000, realisasi: 0 },
+  { id: "A-008", swoId: "SWO/003/26060152", sroId: "SRO/003/26060152", customer: "PT Maju Jaya", kendaraan: "Mitsubishi Pajero", noPol: "B 9012 GH", anggaran: 4500000, realisasi: 4500000 },
+  { id: "A-009", swoId: "SWO/011/26060203", sroId: "SRO/006/26060155", customer: "PT Maju Jaya", kendaraan: "Mitsubishi Pajero", noPol: "B 9012 GH", anggaran: 5200000, realisasi: 5200000 },
+  { id: "A-010", swoId: "SWO/008/26060200", sroId: "SRO/004/26060153", customer: "PT Maju Jaya", kendaraan: "Suzuki Ertiga", noPol: "B 3456 IJ", anggaran: 2000000, realisasi: 1500000 },
 ];
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
@@ -46,90 +42,70 @@ const fmtShort = (n: number) => {
 };
 
 export default function AnggaranPage() {
-  const [items, setItems] = useState<AnggaranItem[]>(initialItems);
-  const [selectedWO, setSelectedWO] = useState(workOrders[0].id);
+  const router = useRouter();
+  const [items, setItems] = useState<AnggaranSWO[]>(initialData);
+  const [selectedProject, setSelectedProject] = useState(projects[0].id);
   const [modalOpen, setModalOpen] = useState(false);
-  const [formKategori, setFormKategori] = useState("Material & Jasa");
-  const [formItem, setFormItem] = useState("");
-  const [formAnggaran, setFormAnggaran] = useState("");
-  const [formRealisasi, setFormRealisasi] = useState("");
+  const [form, setForm] = useState({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
 
-  const selectedWOData = workOrders.find((w) => w.id === selectedWO);
+  const pp = projects.find((p) => p.id === selectedProject);
 
   const addItem = () => {
-    if (!formItem || !formAnggaran) return;
-    const anggaranNum = parseInt(formAnggaran.replace(/[^0-9]/g, "")) || 0;
-    const realisasiNum = parseInt(formRealisasi.replace(/[^0-9]/g, "")) || 0;
-    const newItem: AnggaranItem = {
+    if (!form.swoId || !form.anggaran) return;
+    const newItem: AnggaranSWO = {
       id: `A-${String(items.length + 1).padStart(3, "0")}`,
-      kategori: formKategori,
-      item: formItem,
-      anggaran: anggaranNum,
-      realisasi: realisasiNum,
+      swoId: form.swoId,
+      sroId: form.sroId,
+      customer: form.customer,
+      kendaraan: form.kendaraan,
+      noPol: form.noPol,
+      anggaran: parseInt(form.anggaran.replace(/[^0-9]/g, "")) || 0,
+      realisasi: parseInt(form.realisasi.replace(/[^0-9]/g, "")) || 0,
     };
     setItems((prev) => [...prev, newItem]);
     setModalOpen(false);
-    setFormItem("");
-    setFormAnggaran("");
-    setFormRealisasi("");
+    setForm({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
   };
 
-  const handleDeleteItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
+  const handleDelete = (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const totalAnggaran = items.reduce((sum, i) => sum + i.anggaran, 0);
-  const totalRealisasi = items.reduce((sum, i) => sum + i.realisasi, 0);
+  const totalAnggaran = items.reduce((s, i) => s + i.anggaran, 0);
+  const totalRealisasi = items.reduce((s, i) => s + i.realisasi, 0);
   const sisaBudget = totalAnggaran - totalRealisasi;
-
-  const grouped = kategoriOptions.map((k) => {
-    const catItems = items.filter((i) => i.kategori === k.label);
-    const anggaran = catItems.reduce((s, i) => s + i.anggaran, 0);
-    const realisasi = catItems.reduce((s, i) => s + i.realisasi, 0);
-    const pct = anggaran > 0 ? Math.min(100, Math.round((realisasi / anggaran) * 100)) : 0;
-    const over = realisasi > anggaran;
-    return { label: k.label, color: k.color, pct, anggaran, realisasi, over };
-  });
 
   return (
     <div>
-      {/* Header */}
       <div className="view-header">
         <div className="view-title">
           <BarChart3 className="w-6 h-6 text-[--color-brand-secondary]" />
           Anggaran
         </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="btn btn--brand btn--sm"
-        >
-          <Plus size={14} /> Tambah Item
+        <button onClick={() => setModalOpen(true)} className="btn btn--brand btn--sm">
+          <Plus size={14} /> Tambah SWO
         </button>
       </div>
 
-      {/* Work Order Selector */}
+      {/* Filter: Project */}
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="form-group">
-            <label className="form-label">Work Order</label>
-            <select
-              value={selectedWO}
-              onChange={(e) => setSelectedWO(e.target.value)}
-              className="form-select"
-            >
-              {workOrders.map((w) => (
-                <option key={w.id} value={w.id}>{w.id} — {w.name}</option>
+            <label className="form-label">Project</label>
+            <select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} className="form-select">
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.id} — {p.name}</option>
               ))}
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Customer</label>
-            <input type="text" className="form-input" value={selectedWOData?.customer || ""} readOnly />
+            <input type="text" className="form-input" value={pp?.name || ""} readOnly />
           </div>
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div className="card-slds" style={{ textAlign: "center" }}>
           <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Anggaran</div>
@@ -145,62 +121,27 @@ export default function AnggaranPage() {
         </div>
       </div>
 
-      {/* Category Progress */}
-      <div className="card-slds mb-4">
-        <h3 className="text-sm font-bold text-[--color-text-primary] mb-5">Anggaran vs Realisasi per Kategori</h3>
-        <div className="space-y-5">
-          {grouped.map((cat) => (
-            <div key={cat.label}>
-              <div className="flex justify-between text-sm font-semibold text-[--color-text-secondary] mb-2">
-                <span>{cat.label}</span>
-                <span style={{ color: cat.over ? "var(--color-error)" : cat.color }}>
-                  {cat.over ? "Overbudget" : `${cat.pct}% tercapai`}
-                </span>
-              </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${cat.over ? 100 : cat.pct}%`,
-                    background: cat.over ? "var(--color-error)" : cat.color,
-                  }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-[--color-text-placeholder] mt-1.5">
-                <span>Anggaran: {fmt(cat.anggaran)}</span>
-                <span>Realisasi: {fmt(cat.realisasi)}</span>
-              </div>
-              {cat.over && (
-                <div className="mt-2 text-xs font-medium text-[--color-error] bg-red-50 border border-red-100 rounded-lg px-3 py-1.5">
-                  ⚠️ Overbudget {fmt(cat.realisasi - cat.anggaran)}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Detail Breakdown */}
+      {/* Detail Breakdown Per SWO */}
       <div className="card-slds">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-[--color-text-primary]">Detail Breakdown Anggaran</h3>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[--color-brand] bg-[--color-brand-light] hover:bg-blue-100 rounded-lg transition"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Tambah Item
+          <h3 className="text-sm font-bold text-[--color-text-primary]">Detail Breakdown Anggaran per SWO</h3>
+          <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[--color-brand] bg-[--color-brand-light] hover:bg-blue-100 rounded-lg transition">
+            <Plus className="w-3.5 h-3.5" /> Tambah SWO
           </button>
         </div>
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <th className="text-left text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Kategori</th>
-                <th className="text-left text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Item</th>
-                <th className="text-right text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Anggaran</th>
-                <th className="text-right text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Realisasi</th>
-                <th className="text-right text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Selisih</th>
+                <th>No.</th>
+                <th>No. SWO</th>
+                <th>No. SRO</th>
+                <th>Customer</th>
+                <th>Kendaraan</th>
+                <th>No. Pol</th>
+                <th className="text-right">Anggaran</th>
+                <th className="text-right">Realisasi</th>
+                <th className="text-right">Selisih</th>
                 <th className="w-10"></th>
               </tr>
             </thead>
@@ -208,103 +149,95 @@ export default function AnggaranPage() {
               {items.map((row, i) => {
                 const selisih = row.anggaran - row.realisasi;
                 const selisihColor = selisih > 0 ? "var(--color-success)" : selisih === 0 ? "var(--color-text-placeholder)" : "var(--color-error)";
-                const selisihText = selisih >= 0 ? `+ ${fmtShort(selisih)}` : `- ${fmtShort(Math.abs(selisih))}`;
-                const kategoriColor = kategoriOptions.find((k) => k.label === row.kategori)?.color || "var(--color-text-placeholder)";
                 return (
                   <tr key={row.id}>
-                    <td className="text-sm font-medium">{row.kategori}</td>
-                    <td className="font-medium text-sm">{row.item}</td>
-                    <td className="text-right text-sm">{fmt(row.anggaran)}</td>
-                    <td className="text-right text-sm">{fmt(row.realisasi)}</td>
-                    <td className="text-right text-sm font-semibold" style={{ color: selisihColor }}>{selisihText}</td>
+                    <td className="text-sm">{i + 1}</td>
+                    <td>
+                      <span className="font-medium cursor-pointer" style={{ color: "var(--color-brand)" }}
+                        onClick={() => router.push(`/work-orders/${row.swoId}`)}>
+                        {row.swoId}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="font-medium cursor-pointer" style={{ color: "var(--color-brand)" }}
+                        onClick={() => router.push(`/service-orders/${row.sroId}`)}>
+                        {row.sroId}
+                      </span>
+                    </td>
+                    <td>{row.customer}</td>
+                    <td>{row.kendaraan}</td>
+                    <td>{row.noPol}</td>
+                    <td className="text-right font-medium">{fmt(row.anggaran)}</td>
+                    <td className="text-right font-medium">{fmt(row.realisasi)}</td>
+                    <td className="text-right font-semibold" style={{ color: selisihColor }}>
+                      {selisih >= 0 ? "+" : ""}{fmt(selisih)}
+                    </td>
                     <td className="text-right">
-                      <button
-                        onClick={() => handleDeleteItem(i)}
+                      <button onClick={() => handleDelete(row.id)}
                         className="inline-flex items-center justify-center p-1 text-[--color-text-placeholder] hover:text-[--color-error] transition"
-                        title="Hapus"
-                      >
-                        <Trash2 className="w-4 h-4" />
+                        title="Hapus">
+                        <X className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
                 );
               })}
               {items.length === 0 && (
-                <tr><td colSpan={6} className="py-6 text-center text-xs text-[--color-text-placeholder]">Belum ada data anggaran</td></tr>
+                <tr><td colSpan={10} className="py-6 text-center text-xs text-[--color-text-placeholder]">Belum ada data anggaran</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Modal Tambah Item */}
+      {/* Modal Tambah SWO */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
           <div className="relative bg-white rounded-lg shadow-lg w-full max-w-lg border border-[--color-border-light]">
             <div className="px-6 py-4 border-b border-[--color-border-light] flex items-center justify-between">
-              <h2 className="text-base font-bold text-[--color-text-primary]">Tambah Item Anggaran</h2>
-              <button onClick={() => setModalOpen(false)} className="text-[--color-text-placeholder] hover:text-[--color-text-secondary]">
-                <X className="w-5 h-5" />
-              </button>
+              <h2 className="text-base font-bold text-[--color-text-primary]">Tambah Anggaran SWO</h2>
+              <button onClick={() => setModalOpen(false)} className="text-[--color-text-placeholder] hover:text-[--color-text-secondary]"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="form-group">
-                <label className="form-label">Kategori</label>
-                <select
-                  value={formKategori}
-                  onChange={(e) => setFormKategori(e.target.value)}
-                  className="form-select"
-                >
-                  {kategoriOptions.map((k) => <option key={k.label}>{k.label}</option>)}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-group">
+                  <label className="form-label">No. SWO *</label>
+                  <input type="text" className="form-input" placeholder="SWO/XXX/..." value={form.swoId} onChange={(e) => setForm({ ...form, swoId: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">No. SRO</label>
+                  <input type="text" className="form-input" placeholder="SRO/XXX/..." value={form.sroId} onChange={(e) => setForm({ ...form, sroId: e.target.value })} />
+                </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Nama Item</label>
-                <input
-                  type="text"
-                  value={formItem}
-                  onChange={(e) => setFormItem(e.target.value)}
-                  placeholder="Contoh: Oli Mesin 5W-30"
-                  className="form-input"
-                />
+                <label className="form-label">Customer</label>
+                <input type="text" className="form-input" placeholder="Nama customer" value={form.customer} onChange={(e) => setForm({ ...form, customer: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-group">
-                  <label className="form-label">Nilai Anggaran</label>
-                  <input
-                    type="text"
-                    value={formAnggaran}
-                    onChange={(e) => setFormAnggaran(e.target.value)}
-                    placeholder="Rp 0"
-                    className="form-input"
-                  />
+                  <label className="form-label">Kendaraan</label>
+                  <input type="text" className="form-input" placeholder="Merk kendaraan" value={form.kendaraan} onChange={(e) => setForm({ ...form, kendaraan: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Realisasi (Opsional)</label>
-                  <input
-                    type="text"
-                    value={formRealisasi}
-                    onChange={(e) => setFormRealisasi(e.target.value)}
-                    placeholder="Rp 0"
-                    className="form-input"
-                  />
+                  <label className="form-label">No. Polisi</label>
+                  <input type="text" className="form-input" placeholder="B XXXX XX" value={form.noPol} onChange={(e) => setForm({ ...form, noPol: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-group">
+                  <label className="form-label">Nilai Anggaran *</label>
+                  <input type="text" className="form-input" placeholder="Rp 0" value={form.anggaran} onChange={(e) => setForm({ ...form, anggaran: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Realisasi</label>
+                  <input type="text" className="form-input" placeholder="Rp 0" value={form.realisasi} onChange={(e) => setForm({ ...form, realisasi: e.target.value })} />
                 </div>
               </div>
             </div>
             <div className="px-6 py-4 border-t border-[--color-border-light] flex justify-end gap-3">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="btn btn--sm"
-              >
-                Batal
-              </button>
-              <button
-                onClick={addItem}
-                className="btn btn--brand btn--sm"
-              >
-                Simpan
-              </button>
+              <button onClick={() => setModalOpen(false)} className="btn btn--sm">Batal</button>
+              <button onClick={addItem} className="btn btn--brand btn--sm">Simpan</button>
             </div>
           </div>
         </div>
