@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
 const wos = [
-  { no: "SWO/006/26060155", so: "SRO/006/26060155", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", mekanik: "Bambang", status: "In Progress", start: "25 Jun 2026", target: "27 Jun 2026", sri: "SRI/001/26060155" },
-  { no: "SWO/005/26060154", so: "SRO/005/26060154", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", mekanik: "Agus", status: "Draft", start: "26 Jun 2026", target: "28 Jun 2026", sri: "SRI/005/26060154" },
-  { no: "SWO/004/26060153", so: "SRO/004/26060153", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", mekanik: "Bambang", status: "Completed", start: "24 Jun 2026", target: "25 Jun 2026", sri: null },
-  { no: "SWO/003/26060152", so: "SRO/003/26060152", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", mekanik: "Hendra", status: "QC", start: "25 Jun 2026", target: "26 Jun 2026", sri: "SRI/002/26060152" },
-  { no: "SWO/002/26060151", so: "SRO/002/26060150", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", mekanik: "Agus", status: "Waiting Stock", start: "26 Jun 2026", target: "28 Jun 2026", sri: "SRI/003/26060150" },
-  { no: "SWO/001/26060149", so: "SRO/001/26060149", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", mekanik: "Hendra", status: "In Progress", start: "26 Jun 2026", target: "27 Jun 2026", sri: "SRI/004/26060149" },
+  { no: "SWO/006/26060155", so: "SRO/006/26060155", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", mekanik: "Bambang", store: "PT Putro Joyo Motor", status: "In Progress", start: "25 Jun 2026", target: "27 Jun 2026", sri: "SRI/001/26060155" },
+  { no: "SWO/005/26060154", so: "SRO/005/26060154", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", mekanik: "Agus", store: "PT Nia Jaya Motor", status: "Draft", start: "26 Jun 2026", target: "28 Jun 2026", sri: "SRI/005/26060154" },
+  { no: "SWO/004/26060153", so: "SRO/004/26060153", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", mekanik: "Bambang", store: "Wijaya Motor", status: "Completed", start: "24 Jun 2026", target: "25 Jun 2026", sri: null },
+  { no: "SWO/003/26060152", so: "SRO/003/26060152", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", mekanik: "Hendra", store: "PT Putra Wijaya Motor", status: "QC", start: "25 Jun 2026", target: "26 Jun 2026", sri: "SRI/002/26060152" },
+  { no: "SWO/002/26060151", so: "SRO/002/26060150", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", mekanik: "Agus", store: "PT Putro Joyo Motor", status: "Waiting Stock", start: "26 Jun 2026", target: "28 Jun 2026", sri: "SRI/003/26060150" },
+  { no: "SWO/001/26060149", so: "SRO/001/26060149", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", mekanik: "Hendra", store: "PT Nia Jaya Motor", status: "In Progress", start: "26 Jun 2026", target: "27 Jun 2026", sri: "SRI/004/26060149" },
 ];
 
 const statusPill = (status: string) => {
@@ -38,7 +38,7 @@ export default function WorkOrdersPage() {
 
       {/* Filter */}
       <div className="filter-section">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <div className="form-group">
             <label className="form-label">Status</label>
             <select className="form-select">
@@ -48,6 +48,16 @@ export default function WorkOrdersPage() {
               <option>In Progress</option>
               <option>QC</option>
               <option>Completed</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Store</label>
+            <select className="form-select">
+              <option>All Stores</option>
+              <option>PT Putra Wijaya Motor</option>
+              <option>PT Putro Joyo Motor</option>
+              <option>PT Nia Jaya Motor</option>
+              <option>Wijaya Motor</option>
             </select>
           </div>
           <div className="form-group">
@@ -88,6 +98,7 @@ export default function WorkOrdersPage() {
               <th>No. SWO</th>
               <th>Customers</th>
               <th>Vehicle No</th>
+              <th>Store</th>
               <th>Mekanik</th>
               <th>Status</th>
               <th>Mulai</th>
@@ -114,6 +125,7 @@ export default function WorkOrdersPage() {
                   <div className="font-medium" style={{ color: "var(--color-brand)" }}>{wo.platNo}</div>
                   <div className="text-xs text-[--color-text-secondary]">{wo.merkMobil}</div>
                 </td>
+                <td className="text-[--color-text-secondary]">{wo.store}</td>
                 <td>{wo.mekanik}</td>
                 <td><span className={statusPill(wo.status)}>{wo.status}</span></td>
                 <td className="text-[--color-text-secondary]">{wo.start}</td>

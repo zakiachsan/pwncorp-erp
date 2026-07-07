@@ -118,9 +118,52 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         href: "/master-data/services",
       },
       {
+        label: "Package Services",
+        icon: <Package size={18} />,
+        href: "/service-packages",
+      },
+      {
         label: "Users",
         icon: <Users size={18} />,
         href: "/master-data/users",
+      },
+    ],
+  },
+  {
+    title: "Reports",
+    items: [
+      {
+        label: "Service Orders",
+        icon: <ClipboardList size={18} />,
+        children: [
+          { label: "Summary Service Orders", href: "/reports/summary-service-orders" },
+          { label: "Detailed Service Orders", href: "/reports/detailed-service-orders" },
+        ],
+      },
+      {
+        label: "Work Orders",
+        icon: <Wrench size={18} />,
+        children: [
+          { label: "Summary Service Work Orders", href: "/reports/summary-service-work-orders" },
+          { label: "Detailed Service Work Orders", href: "/reports/detailed-service-work-orders" },
+        ],
+      },
+      {
+        label: "Service Invoices",
+        icon: <FileText size={18} />,
+        children: [
+          { label: "Summary Service Invoices", href: "/reports/summary-service-invoices" },
+          { label: "Detailed Service Invoices", href: "/reports/detailed-service-invoices" },
+        ],
+      },
+      {
+        label: "Payments",
+        icon: <DollarSign size={18} />,
+        children: [
+          { label: "Service Payment Received", href: "/reports/service-payment-received" },
+          { label: "Service Payment Type Info", href: "/reports/service-payment-type-info" },
+          { label: "Daily Service Payments", href: "/reports/daily-service-payments" },
+        ],
       },
     ],
   },

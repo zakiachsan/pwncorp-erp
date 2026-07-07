@@ -6,13 +6,13 @@ import { Plus, Search, Filter, Download } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const orders = [
-  { no: "SRO/007/26060143", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/006/26060155", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", status: "Delivered", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/005/26060154", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/004/26060153", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/003/26060152", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
-  { no: "SRO/002/26060150", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026", hasWO: true, hasInvoice: true },
-  { no: "SRO/001/26060149", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/007/26060143", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", store: "PT Putra Wijaya Motor", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/006/26060155", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", store: "PT Putro Joyo Motor", status: "Delivered", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/005/26060154", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", store: "PT Nia Jaya Motor", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/004/26060153", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", store: "Wijaya Motor", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
+  { no: "SRO/003/26060152", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", store: "PT Putra Wijaya Motor", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
+  { no: "SRO/002/26060150", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", store: "PT Putro Joyo Motor", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026", hasWO: true, hasInvoice: true },
+  { no: "SRO/001/26060149", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", store: "PT Nia Jaya Motor", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026", hasWO: false, hasInvoice: false },
 ];
 
 const statusPill = (status: string) => {
@@ -52,7 +52,7 @@ export default function ServiceOrdersPage() {
 
       {/* Filter Section */}
       <div className="filter-section">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <div className="form-group">
             <label className="form-label">Status</label>
             <select className="form-select">
@@ -61,6 +61,16 @@ export default function ServiceOrdersPage() {
               <option>Delivered</option>
               <option>Approved</option>
               <option>Cancelled</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Store</label>
+            <select className="form-select">
+              <option>All Stores</option>
+              <option>PT Putra Wijaya Motor</option>
+              <option>PT Putro Joyo Motor</option>
+              <option>PT Nia Jaya Motor</option>
+              <option>Wijaya Motor</option>
             </select>
           </div>
           <div className="form-group">
@@ -114,6 +124,7 @@ export default function ServiceOrdersPage() {
               <th>No. SRO</th>
               <th>Customers</th>
               <th>Vehicle No</th>
+              <th>Store</th>
               <th>Service Advisor</th>
               <th>Status</th>
               <th>Total</th>
@@ -139,6 +150,7 @@ export default function ServiceOrdersPage() {
                   <div className="font-medium" style={{ color: "var(--color-brand)" }}>{order.platNo}</div>
                   <div className="text-xs text-[--color-text-secondary]">{order.merkMobil}</div>
                 </td>
+                <td className="text-[--color-text-secondary]">{order.store}</td>
                 <td>{order.sa}</td>
                 <td><span className={statusPill(order.status)}>{order.status}</span></td>
                 <td className="font-medium">{order.total}</td>
