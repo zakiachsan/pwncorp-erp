@@ -6,6 +6,7 @@ import { Search, Check, Calendar } from "lucide-react";
 interface CustomerBilling {
   id: string;
   customer: string;
+  store: string;
   projectId: string;
   nilaiKontrak: number;
   terminJumlah: number;
@@ -13,12 +14,12 @@ interface CustomerBilling {
 }
 
 const terminOptions = ["Tidak", "1 Kali", "2 Kali", "3 Kali"];
-
 const bulanLabels = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
 const data: CustomerBilling[] = [
   {
-    id: "C-001", customer: "PT Maju Jaya", projectId: "PRJ/001/26040410", nilaiKontrak: 45000000, terminJumlah: 3,
+    id: "C-001", customer: "PT Maju Jaya", store: "Wijaya Motor One Stop Service - Jakarta Selatan",
+    projectId: "PRJ/001/26040410", nilaiKontrak: 45000000, terminJumlah: 3,
     bulan: {
       "Januari": { ditagihkan: 0, dibayar: null, status: null },
       "Februari": { ditagihkan: 0, dibayar: null, status: null },
@@ -35,7 +36,8 @@ const data: CustomerBilling[] = [
     },
   },
   {
-    id: "C-002", customer: "PT Transport Jaya", projectId: "PRJ/002/26050501", nilaiKontrak: 25000000, terminJumlah: 2,
+    id: "C-002", customer: "PT Transport Jaya", store: "Wijaya Motor One Stop Service - Jakarta Pusat",
+    projectId: "PRJ/002/26050501", nilaiKontrak: 25000000, terminJumlah: 2,
     bulan: {
       "Januari": { ditagihkan: 0, dibayar: null, status: null },
       "Februari": { ditagihkan: 0, dibayar: null, status: null },
@@ -52,7 +54,8 @@ const data: CustomerBilling[] = [
     },
   },
   {
-    id: "C-003", customer: "CV Berkah Abadi", projectId: "PRJ/003/26060601", nilaiKontrak: 18000000, terminJumlah: 2,
+    id: "C-003", customer: "CV Berkah Abadi", store: "Wijaya Motor One Stop Service - Bandung",
+    projectId: "PRJ/003/26060601", nilaiKontrak: 18000000, terminJumlah: 2,
     bulan: {
       "Januari": { ditagihkan: 0, dibayar: null, status: null },
       "Februari": { ditagihkan: 0, dibayar: null, status: null },
@@ -69,7 +72,8 @@ const data: CustomerBilling[] = [
     },
   },
   {
-    id: "C-004", customer: "Budi Santoso", projectId: "PRJ/004/26060620", nilaiKontrak: 2500000, terminJumlah: 0,
+    id: "C-004", customer: "Budi Santoso", store: "Wijaya Motor One Stop Service - Jakarta Pusat",
+    projectId: "PRJ/004/26060620", nilaiKontrak: 2500000, terminJumlah: 0,
     bulan: {
       "Januari": { ditagihkan: 0, dibayar: null, status: null },
       "Februari": { ditagihkan: 0, dibayar: null, status: null },
@@ -119,24 +123,12 @@ export default function RencanaTagihanPage() {
         </div>
       </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
-        <div className="card-slds" style={{ textAlign: "center", padding: 16 }}>
-          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Nilai Kontrak</div>
-          <div className="text-2xl font-bold text-[--color-text-primary]">{fmt(summaryData.totalKontrak)}</div>
-        </div>
-        <div className="card-slds" style={{ textAlign: "center", padding: 16 }}>
-          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Sudah Dibayar</div>
-          <div className="text-2xl font-bold text-[--color-success]">{fmt(summaryData.paid)}</div>
-        </div>
-        <div className="card-slds" style={{ textAlign: "center", padding: 16 }}>
-          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Rencana Ditagihkan</div>
-          <div className="text-2xl font-bold text-[--color-brand]">{fmt(summaryData.planned)}</div>
-        </div>
-        <div className="card-slds" style={{ textAlign: "center", padding: 16 }}>
-          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Sisa Belum Ditagih</div>
-          <div className="text-2xl font-bold text-[--color-error]">{fmt(sisaBelum)}</div>
-        </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <SummaryCard label="Total Nilai Kontrak" value={fmt(summaryData.totalKontrak)} color="#001526" />
+        <SummaryCard label="Sudah Dibayar" value={fmt(summaryData.paid)} color="#2e844a" />
+        <SummaryCard label="Rencana Ditagihkan" value={fmt(summaryData.planned)} color="#0176d3" />
+        <SummaryCard label="Sisa Belum Ditagih" value={fmt(sisaBelum)} color="#ea001e" />
       </div>
 
       {/* Filter */}
@@ -152,7 +144,7 @@ export default function RencanaTagihanPage() {
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Cari Customer</label>
+            <label className="form-label">Cari</label>
             <input type="text" className="form-input" placeholder="Nama / Project ID..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
@@ -168,13 +160,14 @@ export default function RencanaTagihanPage() {
           <thead>
             <tr>
               <th style={{ minWidth: 180 }}>Customer</th>
-              <th style={{ textAlign: "right", minWidth: 110 }}>Nilai Kontrak</th>
+              <th style={{ minWidth: 180 }}>Store</th>
+              <th style={{ textAlign: "right", minWidth: 130, whiteSpace: "nowrap" }}>Nilai Kontrak</th>
               <th style={{ textAlign: "center", minWidth: 90 }}>Termin</th>
-              <th style={{ textAlign: "right", minWidth: 90 }}>Sisa</th>
+              <th style={{ textAlign: "right", minWidth: 110, whiteSpace: "nowrap" }}>Sisa</th>
               {bulanLabels.map((m) => (
                 <th key={m} style={{ textAlign: "center", minWidth: 130 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                    <Calendar size={12} /> {m} {year}
+                    <Calendar size={12} /> {m.substring(0, 3)} {year}
                   </div>
                 </th>
               ))}
@@ -191,6 +184,7 @@ export default function RencanaTagihanPage() {
                     <div style={{ fontWeight: 600, color: "#001526" }}>{d.customer}</div>
                     <div style={{ fontSize: 11, color: "#8e8f8e", fontFamily: "monospace" }}>{d.projectId}</div>
                   </td>
+                  <td style={{ fontSize: 12, color: "#444746" }}>{d.store}</td>
                   <td style={{ textAlign: "right", fontWeight: 600 }}>{fmt(d.nilaiKontrak)}</td>
                   <td style={{ textAlign: "center" }}>
                     <span style={{
@@ -246,6 +240,15 @@ export default function RencanaTagihanPage() {
           Tampil: <strong>{year}</strong>
         </span>
       </div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="card-slds" style={{ padding: "14px 16px" }}>
+      <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color }}>{value}</div>
     </div>
   );
 }

@@ -184,9 +184,8 @@ export default function WorkOrderDetailPage() {
   const woNo = Array.isArray(params.no) ? params.no.join("/") : (params.no as string);
   const [activeTab, setActiveTab] = useState<"details" | "docRef" | "stockOrders" | "changes" | "photos">("details");
   const [showPrint, setShowPrint] = useState(false);
+  const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
   
-  const [activeLineTab, setActiveLineTab] = useState<"services" | "spareparts" | "stockOutgoings">("services");
-
   const wo = allWOs[woNo];
 
   if (!wo) {
@@ -250,169 +249,169 @@ export default function WorkOrderDetailPage() {
       {/* Details Tab */}
       {activeTab === "details" && (
         <div>
-          {/* Two-column layout */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, marginBottom: 20 }}>
-            {/* Left Column */}
-            <div>
-              <F label="DOCUMENT NUMBER" value={wo.documentNumber} />
-              <F label="SERVICE ORDER" value={wo.soDocument} link onClick={() => router.push(`/service-orders/${wo.soNumber}`)} />
-              <F label="STORE" value={wo.store} link />
-              <F label="CUSTOMER" value={wo.customer.name} link />
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, marginTop: -4 }}>
-                <span style={{ fontSize: 13, color: "#444746" }}>{wo.customer.phone}</span>
+          {/* 3-Column Info Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div style={S.infoCol}>
+              <div style={S.infoColTitle}>Info</div>
+              <F2 label="Document Number" value={wo.documentNumber} />
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid #f5f5f5" }}>
+                <span style={{ fontSize: 11, color: "#8e8f8e", textTransform: "uppercase" }}>SERVICE ORDER</span>
+                <span
+                  onClick={() => router.push(`/service-orders/${wo.soNumber}`)}
+                  style={{ fontSize: 12, fontWeight: 500, color: "#0176d3", textAlign: "right", maxWidth: "55%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}
+                >
+                  {wo.soDocument}
+                  <ChevronRight size={12} style={{ color: "#0176d3", flexShrink: 0 }} />
+                </span>
               </div>
-              <F label="REGISTRATION NO" value={wo.registrationNo} />
-              <F label="SERVICE ADVISOR" value={wo.serviceAdvisor} link />
-              <F label="MEKANIK" value={wo.mekanik} />
+              <F2 label="Store" value={wo.store} />
+              <F2 label="Customer" value={wo.customer.name} />
+              <F2 label="Registration No" value={wo.registrationNo} />
             </div>
-            {/* Right Column */}
-            <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-              <F label="VEHICLE" value={`${wo.vehicleMake} ${wo.vehicleModel}`} />
-              <F label="VEHICLE TYPE" value={wo.vehicleType} />
-              <F label="YEAR" value={wo.year} />
-              <F label="COLOR" value={wo.color} />
-              <F label="ODOMETER" value={wo.odometer} />
-              <F label="PLAN START" value={wo.planStartDate} />
-              <F label="PLAN END" value={wo.planEndDate} />
-              <F label="ACTUAL START" value={wo.actualStartDate} />
+            <div style={S.infoCol}>
+              <div style={S.infoColTitle}>Schedule & Staff</div>
+              <F2 label="Plan Start" value={wo.planStartDate} />
+              <F2 label="Plan End" value={wo.planEndDate} />
+              <F2 label="Actual Start" value={wo.actualStartDate} />
+              <F2 label="Service Advisor" value={wo.serviceAdvisor} />
+              <F2 label="Mekanik" value={wo.mekanik} />
+            </div>
+            <div style={S.infoCol}>
+              <div style={S.infoColTitle}>Vehicle</div>
+              <F2 label="Vehicle Type" value={wo.vehicleType} />
+              <F2 label="Make / Model" value={`${wo.vehicleMake} ${wo.vehicleModel}`} />
+              <F2 label="Year" value={wo.year} />
+              <F2 label="Color" value={wo.color} />
+              <F2 label="Odometer" value={wo.odometer} />
             </div>
           </div>
 
-          {/* Notes */}
-          <h3 style={S.sectionTitle}>Notes</h3>
-          <div style={{ ...S.card, minHeight: 60, marginBottom: 20 }}>
-            <p style={{ color: "#8e8f8e", fontSize: 13, fontStyle: "italic" }}>Tidak ada catatan</p>
+          {/* Line Tabs: Services | Spareparts */}
+          <div style={{ marginBottom: 0, display: "flex", gap: 0 }}>
+            <button onClick={() => setSvcLineTab("services")} style={{
+              padding: "7px 16px", fontSize: 12, fontWeight: svcLineTab === "services" ? 600 : 400,
+              color: svcLineTab === "services" ? "#0176d3" : "#444746",
+              border: "none", borderBottom: svcLineTab === "services" ? "2px solid #0176d3" : "2px solid transparent",
+              background: "transparent", cursor: "pointer",
+            }}>Services</button>
+            <button onClick={() => setSvcLineTab("spareparts")} style={{
+              padding: "7px 16px", fontSize: 12, fontWeight: svcLineTab === "spareparts" ? 600 : 400,
+              color: svcLineTab === "spareparts" ? "#0176d3" : "#444746",
+              border: "none", borderBottom: svcLineTab === "spareparts" ? "2px solid #0176d3" : "2px solid transparent",
+              background: "transparent", cursor: "pointer",
+            }}>Spareparts</button>
           </div>
 
-          {/* Line Item Tabs + Table */}
-          <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 0 }}>
-            {([
-              { key: "services", label: "Services" },
-              { key: "spareparts", label: "Spareparts" },
-              { key: "stockOutgoings", label: "Stock Outgoings" },
-            ] as const).map((t) => (
-              <button key={t.key} onClick={() => setActiveLineTab(t.key)} style={{
-                ...S.lineTab,
-                color: activeLineTab === t.key ? "#fff" : "#444746",
-                background: activeLineTab === t.key ? "#0176d3" : "#ecebea",
-                fontWeight: activeLineTab === t.key ? 600 : 400,
-                borderRadius: t.key === "services" ? "6px 0 0 0" : t.key === "stockOutgoings" ? "0 6px 0 0" : 0,
-              }}>
-                {t.label}
-              </button>
-            ))}
+          {svcLineTab === "services" && (
+          /* Services Table */
+          <div style={S.tableWrap}>
+            <table style={S.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...S.th, width: 36 }}>No.</th>
+                  <th style={S.th}>Item</th>
+                  <th style={S.th}>Description</th>
+                  <th style={S.th}>Qty</th>
+                  <th style={S.th}>Assigned To</th>
+                  <th style={S.th}>Est. Time</th>
+                  <th style={S.th}>Status</th>
+                  <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wo.services.map((svc: any, i: number) => (
+                  <tr key={i} style={S.tr}>
+                    <td style={S.td}>{i + 1}</td>
+                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
+                    <td style={S.td}>{svc.description}</td>
+                    <td style={S.td}>{svc.quantity}</td>
+                    <td style={S.td}>{svc.assignedTo}</td>
+                    <td style={S.td}>{svc.estimatedTime}</td>
+                    <td style={S.td}>
+                      <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
+                    </td>
+                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
+                  <td colSpan={7} style={S.td}></td>
+                  <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalServiceCost)}</td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
+          )}
 
-          {/* Services Table */}
-          {activeLineTab === "services" && (
-            <div style={S.tableWrap}>
+          {svcLineTab === "spareparts" && (
+            <>
+          {/* Spareparts Table */}
+          {wo.spareparts.length > 0 ? (
+            <div style={{ ...S.tableWrap, marginTop: 16 }}>
               <table style={S.table}>
                 <thead>
                   <tr>
                     <th style={{ ...S.th, width: 36 }}>No.</th>
-                    <th style={S.th}>Item</th>
-                    <th style={S.th}>Description</th>
-                    <th style={S.th}>Qty</th>
-                    <th style={S.th}>Assigned To</th>
-                    <th style={S.th}>Est. Time</th>
-                    <th style={S.th}>Status</th>
+                    <th style={S.th}>Code</th>
+                    <th style={S.th}>Name</th>
+                    <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+                    <th style={{ ...S.th, textAlign: "right" }}>Price</th>
                     <th style={{ ...S.th, textAlign: "right" }}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {wo.services.map((svc: any, i: number) => (
+                  {wo.spareparts.map((sp: any, i: number) => (
                     <tr key={i} style={S.tr}>
                       <td style={S.td}>{i + 1}</td>
-                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
-                      <td style={S.td}>{svc.description}</td>
-                      <td style={S.td}>{svc.quantity}</td>
-                      <td style={S.td}>{svc.assignedTo}</td>
-                      <td style={S.td}>{svc.estimatedTime}</td>
-                      <td style={S.td}>
-                        <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
-                      </td>
-                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{sp.code}</td>
+                      <td style={S.td}>{sp.name}</td>
+                      <td style={{ ...S.td, textAlign: "right" }}>{sp.qty}</td>
+                      <td style={{ ...S.td, textAlign: "right" }}>{fmt(sp.price)}</td>
+                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-                    <td colSpan={7} style={S.td}></td>
-                    <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalServiceCost)}</td>
+                    <td colSpan={5} style={S.td}></td>
+                    <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalSparepartCost)}</td>
                   </tr>
                 </tfoot>
               </table>
             </div>
+          ) : (
+            <div style={{ marginTop: 16, ...S.card }}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada sparepart yang digunakan.</p></div>
+          )}
+            </>
           )}
 
-          {/* Spareparts Table */}
-          {activeLineTab === "spareparts" && (
-            <div>
-              {wo.spareparts.length > 0 ? (
-                <div style={S.tableWrap}>
-                  <table style={S.table}>
-                    <thead>
-                      <tr>
-                        <th style={{ ...S.th, width: 36 }}>No.</th>
-                        <th style={S.th}>Code</th>
-                        <th style={S.th}>Name</th>
-                        <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-                        <th style={{ ...S.th, textAlign: "right" }}>Price</th>
-                        <th style={{ ...S.th, textAlign: "right" }}>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {wo.spareparts.map((sp: any, i: number) => (
-                        <tr key={i} style={S.tr}>
-                          <td style={S.td}>{i + 1}</td>
-                          <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{sp.code}</td>
-                          <td style={S.td}>{sp.name}</td>
-                          <td style={{ ...S.td, textAlign: "right" }}>{sp.qty}</td>
-                          <td style={{ ...S.td, textAlign: "right" }}>{fmt(sp.price)}</td>
-                          <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-                        <td colSpan={5} style={S.td}></td>
-                        <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalSparepartCost)}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              ) : (
-                <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada sparepart yang digunakan.</p></div>
-              )}
-              {/* Grand Total */}
-              <div style={{ marginTop: 16, padding: "12px 16px", background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#444746" }}>TOTAL (Services + Spareparts)</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#001526" }}>Rp {fmt(grandTotal)}</span>
-              </div>
-            </div>
-          )}
+          {/* Stock Outgoings */}
+          <h3 style={{ ...S.sectionTitle, marginTop: 20 }}>Stock Outgoings</h3>
+          <div style={S.tableWrap}>
+            <table style={S.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...S.th, width: 36 }}>No.</th>
+                  <th style={S.th}>SKU</th>
+                  <th style={S.th}>Product Code</th>
+                  <th style={S.th}>Service</th>
+                  <th style={{ ...S.th, textAlign: "right" }}>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={5} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada stock outgoings.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-          {/* Stock Outgoings Table */}
-          {activeLineTab === "stockOutgoings" && (
-            <div style={S.tableWrap}>
-              <table style={S.table}>
-                <thead>
-                  <tr>
-                    <th style={{ ...S.th, width: 36 }}>No.</th>
-                    <th style={S.th}>SKU</th>
-                    <th style={S.th}>Product Code</th>
-                    <th style={S.th}>Service</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={5} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada stock outgoings.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
+          {/* Grand Total */}
+          <div style={{ marginTop: 16, padding: "12px 16px", background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#444746" }}>TOTAL (Services + Spareparts)</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#001526" }}>Rp {fmt(grandTotal)}</span>
+          </div>
         </div>
       )}
 
@@ -669,6 +668,16 @@ function F({ label, value, link = false, onClick }: { label: string; value: stri
   );
 }
 
+/* ─── Compact Field (F2) ─── */
+function F2({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid #f5f5f5" }}>
+      <span style={{ fontSize: 11, color: "#8e8f8e", textTransform: "uppercase" }}>{label}</span>
+      <span style={{ fontSize: 12, fontWeight: 500, color: "#001526", textAlign: "right", maxWidth: "55%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span>
+    </div>
+  );
+}
+
 /* ─── Styles ─── */
 const S: Record<string, React.CSSProperties> = {
   backBtn: {
@@ -706,6 +715,8 @@ const S: Record<string, React.CSSProperties> = {
     padding: "8px 20px", fontSize: 13, border: "none", borderBottom: "2px solid transparent",
     cursor: "pointer", transition: "all 150ms", whiteSpace: "nowrap" as const,
   },
+  infoCol: { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 12 },
+  infoColTitle: { fontSize: 11, fontWeight: 700, color: "#0176d3", textTransform: "uppercase" as const, marginBottom: 8, letterSpacing: "0.04em" },
   sectionTitle: {
     fontSize: 13, fontWeight: 600, color: "#0176d3", marginBottom: 8,
   },
