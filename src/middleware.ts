@@ -1,0 +1,32 @@
+export { default } from "next-auth/middleware";
+
+export const config = {
+  matcher: [
+    "/dashboard/:path*",
+    "/service-orders/:path*",
+    "/work-orders/:path*",
+    "/stock-workflow/:path*",
+    "/warehouse/:path*",
+    "/master-data/:path*",
+    "/products/:path*",
+    "/service-packages/:path*",
+    "/inventory/:path*",
+    "/project/:path*",
+    "/reports/:path*",
+    "/finance/:path*",
+    "/api/customers/:path*",
+    "/api/vehicles/:path*",
+    "/api/suppliers/:path*",
+    "/api/spareparts/:path*",
+    "/api/services/:path*",
+    "/api/service-orders/:path*",
+    "/api/work-orders/:path*",
+    "/api/invoices/:path*",
+    "/api/payments/:path*",
+    "/api/purchase-orders/:path*",
+    "/api/stock/:path*",
+    "/api/journal/:path*",
+    "/api/coa/:path*",
+    "/api/reports/:path*",
+  ],
+};

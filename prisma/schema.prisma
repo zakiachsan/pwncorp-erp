@@ -1,0 +1,812 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── AUTH ───
+model Role {
+  id    String @id @default(cuid())
+  name  String @unique
+  users User[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  roleId       String   @map("role_id")
+  role         Role     @relation(fields: [roleId], references: [id])
+  storeId      String?  @map("store_id")
+  store        Store?   @relation(fields: [storeId], references: [id])
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  saOrders        ServiceOrder[] @relation("ServiceAdvisor")
+  assignedWO      WorkOrder[]    @relation("Mekanik")
+  receipts        Receipt[]
+  createdJournals  JournalEntry[] @relation("CreatedBy")
+  approvedJournals JournalEntry[] @relation("ApprovedBy")
+  activityLogs     ActivityLog[]
+
+  @@map("users")
+}
+
+// ─── MASTER DATA ───
+model Store {
+  id        String @id @default(cuid())
+  name      String
+  code      String @unique
+  address   String?
+  isActive  Boolean @default(true) @map("is_active")
+
+  users          User[]
+  customers      Customer[]
+  vehicles       Vehicle[]
+  suppliers      Supplier[]
+  spareparts     Sparepart[]
+  services       Service[]
+  servicePackages ServicePackage[]
+  serviceOrders  ServiceOrder[]
+  workOrders     WorkOrder[]
+  invoices       Invoice[]
+  purchaseOrders    PurchaseOrder[]
+  purchaseRequests  PurchaseRequest[]
+  purchaseDeliveries PurchaseDelivery[]
+  stockOrders       StockOrder[]
+  stockTransfers StockTransfer[]
+  stockOpnames   StockOpname[]
+  bankAccounts    BankAccount[]
+  pettyCashes     PettyCash[]
+  projects        Project[]
+  journalEntries  JournalEntry[]
+  stockHistories  StockHistory[]
+  receipts        Receipt[]
+  paymentRequests PaymentRequest[]
+
+  @@map("stores")
+}
+
+model Customer {
+  id      String  @id @default(cuid())
+  storeId String  @map("store_id")
+  store   Store   @relation(fields: [storeId], references: [id])
+  name    String
+  type    String  @default("retail") // retail / wholesale
+  phone   String?
+  whatsapp String?
+  email   String?
+  address String?
+  isActive Boolean @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  vehicles        Vehicle[]
+  serviceOrders   ServiceOrder[]
+  invoices        Invoice[]
+  projects        Project[]
+  accountsReceivable AccountReceivable[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id         String   @id @default(cuid())
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id])
+  storeId    String   @map("store_id")
+  store      Store    @relation(fields: [storeId], references: [id])
+  plateNo    String   @map("plate_no")
+  brand      String
+  model      String?
+  year       Int?
+  chassisNo  String?  @map("chassis_no")
+  engineNo   String?  @map("engine_no")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  serviceOrders ServiceOrder[]
+
+  @@map("vehicles")
+}
+
+model Supplier {
+  id           String  @id @default(cuid())
+  storeId      String  @map("store_id")
+  store        Store   @relation(fields: [storeId], references: [id])
+  companyName  String  @map("company_name")
+  contactPerson String? @map("contact_person")
+  phone        String?
+  email        String?
+  address      String?
+  paymentTerms String? @map("payment_terms")
+  isActive     Boolean @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  spareparts       Sparepart[]
+  purchaseOrders   PurchaseOrder[]
+  purchaseInvoices PurchaseInvoice[]
+  purchaseReturns  PurchaseReturn[]
+  accountsPayable  AccountPayable[]
+  @@map("suppliers")
+}
+
+model Sparepart {
+  id          String   @id @default(cuid())
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  sku         String   @unique
+  name        String
+  code        String?
+  brand       String?
+  category    String?
+  type        String?
+  buyPrice    Float    @default(0) @map("buy_price")
+  sellPrice   Float    @default(0) @map("sell_price")
+  unit        String   @default("pcs")
+  minStock    Int      @default(0) @map("min_stock")
+  stockQty    Int      @default(0) @map("stock_qty")
+  location    String?
+  isTracking  Boolean  @default(true) @map("is_tracking")
+  isBundle    Boolean  @default(false) @map("is_bundle")
+  supplierId  String?  @map("supplier_id")
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  tax         String?  // PPN 11% / Non-PPN
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  soItems          SOSparepart[]
+  poItems          POItem[]
+  prItems          PurchaseRequestItem[]
+  deliveryItems    DeliveryItem[]
+  soStockItems     StockOrderItem[]
+  transferItems    TransferItem[]
+  opnameItems      OpnameItem[]
+  stockHistories   StockHistory[]
+
+  @@map("spareparts")
+}
+
+model Service {
+  id            String   @id @default(cuid())
+  storeId       String   @map("store_id")
+  store         Store    @relation(fields: [storeId], references: [id])
+  sku           String   @unique
+  name          String
+  category      String?
+  standardPrice Float    @default(0) @map("standard_price")
+  estDuration   String?  @map("est_duration")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  soItems SOService[]
+
+  @@map("services")
+}
+
+model ServicePackage {
+  id          String   @id @default(cuid())
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  sku         String   @unique
+  name        String
+  description String?
+  estDuration String?  @map("est_duration")
+  price       Float    @default(0)
+  tax         String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("service_packages")
+}
+
+// ─── OPERASIONAL ───
+model ServiceOrder {
+  id          String   @id @default(cuid())
+  soNo        String   @unique @map("so_no")
+  customerId  String   @map("customer_id")
+  customer    Customer @relation(fields: [customerId], references: [id])
+  vehicleId   String   @map("vehicle_id")
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  saId        String   @map("sa_id")
+  sa          User     @relation("ServiceAdvisor", fields: [saId], references: [id])
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  complaint   String?
+  status      String   @default("Draft") // Draft / Approved / Cancelled / Delivered
+  total       Float    @default(0)
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  spareparts SOSparepart[]
+  services   SOService[]
+  workOrders WorkOrder[]
+
+  @@map("service_orders")
+}
+
+model SOSparepart {
+  id           String      @id @default(cuid())
+  soId         String      @map("so_id")
+  so           ServiceOrder @relation(fields: [soId], references: [id])
+  sparepartId  String      @map("sparepart_id")
+  sparepart    Sparepart   @relation(fields: [sparepartId], references: [id])
+  qty          Int         @default(1)
+  unitPrice    Float       @default(0) @map("unit_price")
+  total        Float       @default(0)
+
+  @@map("so_spareparts")
+}
+
+model SOService {
+  id        String      @id @default(cuid())
+  soId      String      @map("so_id")
+  so        ServiceOrder @relation(fields: [soId], references: [id])
+  serviceId String      @map("service_id")
+  service   Service     @relation(fields: [serviceId], references: [id])
+  qty       Int         @default(1)
+  unitPrice Float       @default(0) @map("unit_price")
+  total     Float       @default(0)
+
+  @@map("so_services")
+}
+
+model WorkOrder {
+  id         String   @id @default(cuid())
+  woNo       String   @unique @map("wo_no")
+  soId       String   @map("so_id")
+  so         ServiceOrder @relation(fields: [soId], references: [id])
+  mekanikId  String?  @map("mekanik_id")
+  mekanik    User?    @relation("Mekanik", fields: [mekanikId], references: [id])
+  storeId    String   @map("store_id")
+  store      Store    @relation(fields: [storeId], references: [id])
+  status     String   @default("Draft") // Draft / Waiting Stock / Confirmed / In Progress / QC / Completed
+  startDate  DateTime? @map("start_date")
+  targetDate DateTime? @map("target_date")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  items     WOItem[]
+  invoices  Invoice[]
+  stockOrders StockOrder[]
+
+  @@map("work_orders")
+}
+
+model WOItem {
+  id        String    @id @default(cuid())
+  woId      String    @map("wo_id")
+  wo        WorkOrder @relation(fields: [woId], references: [id])
+  itemType  String    @map("item_type") // sparepart / service
+  itemId    String    @map("item_id")
+  itemName  String    @map("item_name")
+  qty       Int       @default(1)
+  unitPrice Float     @default(0) @map("unit_price")
+  total     Float     @default(0)
+
+  @@map("wo_items")
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  invNo       String   @unique @map("inv_no") // SRI/xxx
+  woId        String   @map("wo_id")
+  wo          WorkOrder @relation(fields: [woId], references: [id])
+  customerId  String   @map("customer_id")
+  customer    Customer @relation(fields: [customerId], references: [id])
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  status      String   @default("UNPAID") // UNPAID / PARTIAL / PAID
+  total       Float    @default(0)
+  amountPaid  Float    @default(0) @map("amount_paid")
+  amountDue   Float    @default(0) @map("amount_due")
+  invoiceDate DateTime @default(now()) @map("invoice_date")
+  dueDate     DateTime? @map("due_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  items    InvoiceItem[]
+  payments Payment[]
+  ar       AccountReceivable[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String  @map("invoice_id")
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  item        String
+  description String?
+  qty         Int     @default(1)
+  unitPrice   Float   @default(0) @map("unit_price")
+  total       Float   @default(0)
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  invoiceId     String   @map("invoice_id")
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  amount        Float
+  paymentDate   DateTime @default(now()) @map("payment_date")
+  paymentMethod String   @default("cash") @map("payment_method") // cash / transfer
+  refNo         String?  @map("ref_no")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("payments")
+}
+
+// ─── WAREHOUSE & INVENTORY ───
+model PurchaseRequest {
+  id          String   @id @default(cuid())
+  prNo        String   @unique @map("pr_no")
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  requestedBy String   @map("requested_by")
+  status      String   @default("Draft")
+  notes       String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  items PurchaseRequestItem[]
+
+  @@map("purchase_requests")
+}
+
+model PurchaseRequestItem {
+  id          String          @id @default(cuid())
+  prId        String          @map("pr_id")
+  pr          PurchaseRequest @relation(fields: [prId], references: [id])
+  sparepartId String          @map("sparepart_id")
+  sparepart   Sparepart       @relation(fields: [sparepartId], references: [id])
+  qty         Int             @default(1)
+  unitPrice   Float           @default(0) @map("unit_price")
+  total       Float           @default(0)
+
+  @@map("pr_items")
+}
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  poNo        String   @unique @map("po_no")
+  refNo       String?  @map("ref_no")
+  supplierId  String   @map("supplier_id")
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  warehouse   String?
+  status      String   @default("DRAFT") // DRAFT / SENT / PARTIAL / RECEIVED
+  total       Float    @default(0)
+  date        DateTime @default(now())
+  dueAt       DateTime? @map("due_at")
+  isClosed    Boolean  @default(false) @map("is_closed")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  items      POItem[]
+  deliveries PurchaseDelivery[]
+  invoices   PurchaseInvoice[]
+  returns    PurchaseReturn[]
+
+  @@map("purchase_orders")
+}
+
+model POItem {
+  id          String        @id @default(cuid())
+  poId        String        @map("po_id")
+  po          PurchaseOrder @relation(fields: [poId], references: [id])
+  sparepartId String        @map("sparepart_id")
+  sparepart   Sparepart     @relation(fields: [sparepartId], references: [id])
+  qty         Int           @default(1)
+  unitPrice   Float         @default(0) @map("unit_price")
+  total       Float         @default(0)
+
+  @@map("po_items")
+}
+
+model PurchaseDelivery {
+  id          String        @id @default(cuid())
+  deliveryNo  String        @unique @map("delivery_no")
+  poId        String        @map("po_id")
+  po          PurchaseOrder @relation(fields: [poId], references: [id])
+  storeId     String        @map("store_id")
+  store       Store         @relation(fields: [storeId], references: [id])
+  receivedAt  DateTime?     @map("received_at")
+  status      String        @default("Draft") // Draft / Received
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  items DeliveryItem[]
+
+  @@map("purchase_deliveries")
+}
+
+model DeliveryItem {
+  id          String           @id @default(cuid())
+  deliveryId  String           @map("delivery_id")
+  delivery    PurchaseDelivery @relation(fields: [deliveryId], references: [id])
+  sparepartId String           @map("sparepart_id")
+  sparepart   Sparepart        @relation(fields: [sparepartId], references: [id])
+  qtyOrdered  Int              @default(0) @map("qty_ordered")
+  qtyReceived Int              @default(0) @map("qty_received")
+
+  @@map("delivery_items")
+}
+
+model PurchaseInvoice {
+  id         String        @id @default(cuid())
+  docNo      String        @unique @map("doc_no")
+  poId       String        @map("po_id")
+  po         PurchaseOrder @relation(fields: [poId], references: [id])
+  supplierId String        @map("supplier_id")
+  supplier   Supplier      @relation(fields: [supplierId], references: [id])
+  total      Float         @default(0)
+  status     String        @default("UNPAID") // UNPAID / PAID
+  date       DateTime      @default(now())
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  ap AccountPayable[]
+
+  @@map("purchase_invoices")
+}
+
+model PurchaseReturn {
+  id         String        @id @default(cuid())
+  docNo      String        @unique @map("doc_no")
+  poId       String        @map("po_id")
+  po         PurchaseOrder @relation(fields: [poId], references: [id])
+  supplierId String        @map("supplier_id")
+  supplier   Supplier      @relation(fields: [supplierId], references: [id])
+  total      Float         @default(0)
+  status     String        @default("Draft")
+  reason     String?
+  date       DateTime      @default(now())
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@map("purchase_returns")
+}
+
+model StockOrder {
+  id        String    @id @default(cuid())
+  orderNo   String    @unique @map("order_no") // OPO/xxx
+  woId      String?   @map("wo_id")
+  wo        WorkOrder? @relation(fields: [woId], references: [id])
+  storeId   String    @map("store_id")
+  store     Store     @relation(fields: [storeId], references: [id])
+  warehouse String?
+  status    String    @default("PENDING") // PENDING / CONFIRMED / RECEIVED / CANCELLED
+  date      DateTime  @default(now())
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  items StockOrderItem[]
+
+  @@map("stock_orders")
+}
+
+model StockOrderItem {
+  id          String     @id @default(cuid())
+  stockOrderId String    @map("stock_order_id")
+  stockOrder  StockOrder @relation(fields: [stockOrderId], references: [id])
+  sparepartId String     @map("sparepart_id")
+  sparepart   Sparepart  @relation(fields: [sparepartId], references: [id])
+  qty         Int        @default(1)
+
+  @@map("stock_order_items")
+}
+
+model StockTransfer {
+  id            String   @id @default(cuid())
+  transferNo    String   @unique @map("transfer_no")
+  storeId       String   @map("store_id")
+  store         Store    @relation(fields: [storeId], references: [id])
+  fromWarehouse String   @map("from_warehouse")
+  toStore       String   @map("to_store")
+  status        String   @default("Draft") // Draft / In Transit / Received
+  date          DateTime @default(now())
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  items TransferItem[]
+
+  @@map("stock_transfers")
+}
+
+model TransferItem {
+  id            String        @id @default(cuid())
+  transferId    String        @map("transfer_id")
+  transfer      StockTransfer @relation(fields: [transferId], references: [id])
+  sparepartId   String        @map("sparepart_id")
+  sparepart     Sparepart     @relation(fields: [sparepartId], references: [id])
+  qty           Int           @default(1)
+
+  @@map("transfer_items")
+}
+
+model StockOpname {
+  id        String   @id @default(cuid())
+  refCode   String   @unique @map("ref_code")
+  storeId   String   @map("store_id")
+  store     Store    @relation(fields: [storeId], references: [id])
+  warehouse String?
+  status    String   @default("Draft") // Draft / Completed
+  date      DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  items OpnameItem[]
+
+  @@map("stock_opnames")
+}
+
+model OpnameItem {
+  id           String      @id @default(cuid())
+  opnameId     String      @map("opname_id")
+  opname       StockOpname @relation(fields: [opnameId], references: [id])
+  sparepartId  String      @map("sparepart_id")
+  sparepart    Sparepart   @relation(fields: [sparepartId], references: [id])
+  systemQty    Int         @default(0) @map("system_qty")
+  physicalQty  Int         @default(0) @map("physical_qty")
+  adjustment   Int         @default(0)
+  reason       String?
+
+  @@map("opname_items")
+}
+
+model StockHistory {
+  id          String    @id @default(cuid())
+  sparepartId String    @map("sparepart_id")
+  sparepart   Sparepart @relation(fields: [sparepartId], references: [id])
+  storeId     String    @map("store_id")
+  store       Store     @relation(fields: [storeId], references: [id])
+  changeType  String    @map("change_type") // in / out / adjust
+  qtyChange   Int       @map("qty_change")
+  qtyBefore   Int       @map("qty_before")
+  qtyAfter    Int       @map("qty_after")
+  refDoc      String?   @map("ref_doc") // SO / WO / PO / OPNAME
+  refNo       String?   @map("ref_no")
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("stock_histories")
+}
+
+// ─── FINANCE & ACCOUNTING ───
+model COA {
+  id           String  @id @default(cuid())
+  code         String  @unique
+  name         String
+  kategori     String  // Asset / Liability / Equity / Revenue / Expense
+  normalBalance String @map("normal_balance") // Debit / Kredit
+  parentId     String? @map("parent_id")
+  parent       COA?    @relation("COATree", fields: [parentId], references: [id])
+  children     COA[]   @relation("COATree")
+  level        Int     @default(1)
+  isActive     Boolean @default(true) @map("is_active")
+
+  journalDetails JournalDetail[]
+  bankAccounts   BankAccount[]
+
+  @@map("coa")
+}
+
+model JournalEntry {
+  id          String   @id @default(cuid())
+  jeNo        String   @unique @map("je_no")
+  date        DateTime @default(now())
+  description String
+  refType     String?  @map("ref_type") // invoice / payment / purchase / adjustment / manual
+  refId       String?  @map("ref_id")
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  status      String   @default("Draft") // Draft / Posted / Approved
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
+  approvedById String? @map("approved_by_id")
+  approvedBy   User?   @relation("ApprovedBy", fields: [approvedById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  details           JournalDetail[]
+  projectExpenses   ProjectExpense[]
+  reconciliationItems ReconciliationItem[]
+
+  @@map("journal_entries")
+}
+
+model JournalDetail {
+  id         String       @id @default(cuid())
+  jeId       String       @map("je_id")
+  je         JournalEntry @relation(fields: [jeId], references: [id])
+  coaId      String       @map("coa_id")
+  coa        COA          @relation(fields: [coaId], references: [id])
+  description String?
+  debit      Float        @default(0)
+  credit     Float        @default(0)
+
+  @@map("journal_details")
+}
+
+model AccountReceivable {
+  id        String   @id @default(cuid())
+  invoiceId String   @map("invoice_id")
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+  customerId String  @map("customer_id")
+  customer  Customer @relation(fields: [customerId], references: [id])
+  amount    Float
+  balance   Float
+  dueDate   DateTime @map("due_date")
+  status    String   @default("OPEN") // OPEN / OVERDUE / PAID
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("accounts_receivable")
+}
+
+model AccountPayable {
+  id                 String          @id @default(cuid())
+  purchaseInvoiceId  String          @map("purchase_invoice_id")
+  purchaseInvoice    PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id])
+  supplierId         String          @map("supplier_id")
+  supplier           Supplier        @relation(fields: [supplierId], references: [id])
+  amount             Float
+  balance            Float
+  dueDate            DateTime        @map("due_date")
+  status             String          @default("OPEN") // OPEN / OVERDUE / PAID
+  createdAt          DateTime        @default(now()) @map("created_at")
+
+  @@map("accounts_payable")
+}
+
+model BankAccount {
+  id          String   @id @default(cuid())
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  bankName    String   @map("bank_name")
+  accountNo   String   @map("account_no")
+  accountName String   @map("account_name")
+  balance     Float    @default(0)
+  coaId       String?  @map("coa_id")
+  coa         COA?     @relation(fields: [coaId], references: [id])
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  receipts         Receipt[]
+  fromTransfers    Transfer[]       @relation("FromBank")
+  toTransfers      Transfer[]       @relation("ToBank")
+  reconciliations  BankReconciliation[]
+
+  @@map("bank_accounts")
+}
+
+model Receipt {
+  id            String      @id @default(cuid())
+  receiptNo     String      @unique @map("receipt_no")
+  bankAccountId String      @map("bank_account_id")
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+  storeId       String      @map("store_id")
+  store         Store       @relation(fields: [storeId], references: [id])
+  customerName  String      @map("customer_name")
+  amount        Float
+  description   String?
+  date          DateTime    @default(now())
+  createdById   String      @map("created_by_id")
+  createdBy     User        @relation(fields: [createdById], references: [id])
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@map("receipts")
+}
+
+model Transfer {
+  id              String      @id @default(cuid())
+  transferNo      String      @unique @map("transfer_no")
+  fromBankId      String      @map("from_bank_id")
+  fromBankAccount BankAccount @relation("FromBank", fields: [fromBankId], references: [id])
+  toBankId        String      @map("to_bank_id")
+  toBankAccount   BankAccount @relation("ToBank", fields: [toBankId], references: [id])
+  amount          Float
+  description     String?
+  date            DateTime    @default(now())
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  @@map("transfers")
+}
+
+model BankReconciliation {
+  id            String      @id @default(cuid())
+  bankAccountId String      @map("bank_account_id")
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+  statementDate DateTime    @map("statement_date")
+  closingBalance Float      @map("closing_balance")
+  status        String      @default("Draft") // Draft / Completed
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  items ReconciliationItem[]
+
+  @@map("bank_reconciliations")
+}
+
+model ReconciliationItem {
+  id              String             @id @default(cuid())
+  reconciliationId String            @map("reconciliation_id")
+  reconciliation  BankReconciliation @relation(fields: [reconciliationId], references: [id])
+  journalId       String?            @map("journal_id")
+  journal         JournalEntry?      @relation(fields: [journalId], references: [id])
+  description     String?
+  amount          Float
+  matched         Boolean            @default(false)
+
+  @@map("reconciliation_items")
+}
+
+model PettyCash {
+  id          String   @id @default(cuid())
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  date        DateTime @default(now())
+  description String
+  type        String   // in / out
+  amount      Float
+  balance     Float
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("petty_cash")
+}
+
+model PaymentRequest {
+  id          String   @id @default(cuid())
+  prNo        String   @unique @map("pr_no")
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  requestedBy String   @map("requested_by")
+  amount      Float
+  purpose     String
+  vendor      String?
+  status      String   @default("pending") // pending / approved / rejected / paid
+  dueDate     DateTime? @map("due_date")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("payment_requests")
+}
+
+// ─── PROJECT ───
+model Project {
+  id             String   @id @default(cuid())
+  name           String
+  customerId     String   @map("customer_id")
+  customer       Customer @relation(fields: [customerId], references: [id])
+  storeId        String   @map("store_id")
+  store          Store    @relation(fields: [storeId], references: [id])
+  contractValue  Float    @default(0) @map("contract_value")
+  startDate      DateTime? @map("start_date")
+  endDate        DateTime? @map("end_date")
+  status         String   @default("active") // active / completed / cancelled
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  expenses ProjectExpense[]
+
+  @@map("projects")
+}
+
+model ProjectExpense {
+  id          String       @id @default(cuid())
+  projectId   String       @map("project_id")
+  project     Project      @relation(fields: [projectId], references: [id])
+  journalId   String?      @map("journal_id")
+  journal     JournalEntry? @relation(fields: [journalId], references: [id])
+  description String
+  amount      Float
+  date        DateTime     @default(now())
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@map("project_expenses")
+}
+
+// ─── LOG ───
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  details   String?
+  timestamp DateTime @default(now())
+
+  @@map("activity_logs")
+}
