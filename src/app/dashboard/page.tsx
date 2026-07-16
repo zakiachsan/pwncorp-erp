@@ -1,29 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Wrench,
   ClipboardList,
   DollarSign,
-  Users,
   TrendingUp,
   AlertTriangle,
-  Package,
 } from "lucide-react";
 
-const stats = [
-  { label: "WO Hari Ini", value: "12", icon: ClipboardList, color: "bg-[--color-brand]" },
-  { label: "Dalam Proses", value: "8", icon: Wrench, color: "bg-[--color-warning]" },
-  { label: "Selesai", value: "24", icon: TrendingUp, color: "bg-[--color-success]" },
-  { label: "Pendapatan Hari Ini", value: "Rp 4.5jt", icon: DollarSign, color: "bg-[--color-brand-secondary]" },
-];
-
-const recentOrders = [
-  { no: "SO-001", customer: "Toyota Avanza", status: "Approved", amount: "Rp 2.500.000", date: "26 Jun 2026" },
-  { no: "SO-002", customer: "Honda Civic", status: "Draft", amount: "Rp 1.800.000", date: "26 Jun 2026" },
-  { no: "SO-003", customer: "Mitsubishi Pajero", status: "In Progress", amount: "Rp 5.200.000", date: "25 Jun 2026" },
-  { no: "SO-004", customer: "Suzuki Ertiga", status: "Completed", amount: "Rp 3.100.000", date: "25 Jun 2026" },
-  { no: "SO-005", customer: "Daihatsu Xenia", status: "Waiting", amount: "Rp 950.000", date: "24 Jun 2026" },
-];
+interface DashboardData {
+  stats: {
+    woToday: number;
+    woInProgress: number;
+    woCompleted: number;
+    revenueToday: number;
+    revenueMonth: number;
+  };
+  woStatusBreakdown: { status: string; count: number }[];
+  recentSO: {
+    soNo: string;
+    customer: string;
+    vehicle: string;
+    status: string;
+    total: number;
+    date: string;
+  }[];
+  lowStock: { sku: string; name: string; stockQty: number; minStock: number }[];
+  masterCounts: { customers: number; vehicles: number; spareparts: number };
+  financialSummary: {
+    unpaidInvoices: number;
+    unpaidAmount: number;
+    overdueAR: number;
+    overdueAmount: number;
+  };
+  monthlyRevenue: number[];
+}
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -31,16 +43,65 @@ const statusPill = (status: string) => {
     Approved: "pill pill--approved",
     "In Progress": "pill pill--in-progress",
     Completed: "pill pill--completed",
-    Waiting: "pill pill--waiting",
+    "Waiting Stock": "pill pill--waiting",
     Cancelled: "pill pill--cancelled",
+    Delivered: "pill pill--completed",
   };
   return map[status] || "pill pill--draft";
 };
 
+function fmt(n: number): string {
+  if (n >= 1_000_000) return `Rp ${(n / 1_000_000).toFixed(1)}jt`;
+  if (n >= 1_000) return `Rp ${(n / 1_000).toFixed(0)}rb`;
+  return `Rp ${n.toLocaleString("id-ID")}`;
+}
+
+function fmtFull(n: number): string {
+  return `Rp ${n.toLocaleString("id-ID")}`;
+}
+
+function fmtDate(d: string): string {
+  return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
+
 export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then(r => r.json())
+      .then(d => { setData(d.data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="view-header"><div className="view-title">Dashboard</div></div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="view-header">
+        <div className="view-title">
+          <LayoutDashboardIcon /> Dashboard
+        </div>
+      </div>
+    );
+  }
+
+  const stats = [
+    { label: "WO Hari Ini", value: data.stats.woToday.toString(), icon: ClipboardList, color: "bg-[--color-brand]" },
+    { label: "Dalam Proses", value: data.stats.woInProgress.toString(), icon: Wrench, color: "bg-[--color-warning]" },
+    { label: "Selesai (Bulan Ini)", value: data.stats.woCompleted.toString(), icon: TrendingUp, color: "bg-[--color-success]" },
+    { label: "Pendapatan Hari Ini", value: fmt(data.stats.revenueToday), icon: DollarSign, color: "bg-[--color-brand-secondary]" },
+  ];
+
+  const maxRevenue = Math.max(...data.monthlyRevenue, 1);
+
   return (
     <div>
-      {/* Page Header */}
       <div className="view-header">
         <div className="view-title">
           <LayoutDashboardIcon />
@@ -63,50 +124,106 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Charts Row */}
+      {/* Charts + Alerts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        {/* Monthly Revenue Chart */}
         <div className="card-slds">
           <div className="card__header">
-            <div className="card__title">Pendapatan Bulanan</div>
+            <div className="card__title">Pendapatan 6 Bulan Terakhir</div>
           </div>
-          <div className="h-48 flex items-center justify-center text-[--color-text-secondary] text-sm">
-            {/* TODO: Chart component */}
-            <div className="flex items-end gap-2 h-36">
-              {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 95, 100].map((h, i) => (
-                <div key={i} className="w-6 bg-[--color-brand] rounded-t-sm" style={{ height: `${h}%` }} />
-              ))}
-            </div>
+          <div className="h-48 flex items-end justify-center gap-2 p-4">
+            {data.monthlyRevenue.map((h, i) => (
+              <div key={i} className="flex flex-col items-center gap-1 flex-1">
+                <div
+                  className="w-full bg-[--color-brand] rounded-t-sm min-h-[4px]"
+                  style={{ height: `${Math.max((h / maxRevenue) * 100, 4)}%` }}
+                />
+                <span className="text-[10px] text-[--color-text-secondary]">{fmt(h)}</span>
+              </div>
+            ))}
           </div>
         </div>
+
+        {/* WO Status Distribution */}
         <div className="card-slds">
           <div className="card__header">
             <div className="card__title">WO Status Distribution</div>
           </div>
-          <div className="h-48 flex items-center justify-center text-[--color-text-secondary] text-sm">
-            {/* TODO: Pie chart */}
-            <div className="flex gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-[--color-warning]" />
-                <span>In Progress (8)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-[--color-success]" />
-                <span>Completed (24)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-gray-400" />
-                <span>Draft (5)</span>
-              </div>
+          <div className="p-4">
+            <div className="flex flex-wrap gap-4">
+              {data.woStatusBreakdown.map((s) => (
+                <div key={s.status} className="flex items-center gap-2">
+                  <span className={`${statusPill(s.status)} text-xs`}>{s.status}</span>
+                  <span className="font-bold">{s.count}</span>
+                </div>
+              ))}
             </div>
+          </div>
+
+          {/* Financial Summary */}
+          <div className="card__header mt-2">
+            <div className="card__title">Ringkasan Keuangan</div>
+          </div>
+          <div className="p-4 space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Pendapatan Bulan Ini</span>
+              <span className="font-bold text-[--color-success]">{fmtFull(data.stats.revenueMonth)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Invoice Belum Dibayar ({data.financialSummary.unpaidInvoices})</span>
+              <span className="font-bold text-[--color-warning]">{fmtFull(data.financialSummary.unpaidAmount)}</span>
+            </div>
+            {data.financialSummary.overdueAR > 0 && (
+              <div className="flex justify-between">
+                <span className="flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-red-500" />
+                  AR Jatuh Tempo ({data.financialSummary.overdueAR})
+                </span>
+                <span className="font-bold text-red-500">{fmtFull(data.financialSummary.overdueAmount)}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Low Stock Alerts */}
+      {data.lowStock.length > 0 && (
+        <div className="card-slds mb-6 border-[--color-warning]">
+          <div className="card__header">
+            <div className="card__title flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-[--color-warning]" />
+              Stok Menipis
+            </div>
+          </div>
+          <div className="table-wrap border-0 shadow-none">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Nama</th>
+                  <th>Stok</th>
+                  <th>Min</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.lowStock.map((s) => (
+                  <tr key={s.sku}>
+                    <td className="font-mono text-xs">{s.sku}</td>
+                    <td>{s.name}</td>
+                    <td className="text-red-500 font-bold">{s.stockQty}</td>
+                    <td className="text-[--color-text-secondary]">{s.minStock}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Recent Service Orders */}
       <div className="card-slds">
         <div className="card__header">
           <div className="card__title">Recent Service Orders</div>
-          <button className="btn btn--sm">View All</button>
         </div>
         <div className="table-wrap border-0 shadow-none">
           <table className="data-table">
@@ -114,19 +231,21 @@ export default function DashboardPage() {
               <tr>
                 <th>No. SO</th>
                 <th>Customer</th>
+                <th>Vehicle</th>
                 <th>Status</th>
                 <th>Amount</th>
                 <th>Date</th>
               </tr>
             </thead>
             <tbody>
-              {recentOrders.map((order) => (
-                <tr key={order.no}>
-                  <td className="font-medium text-[--color-brand]">{order.no}</td>
-                  <td>{order.customer}</td>
-                  <td><span className={statusPill(order.status)}>{order.status}</span></td>
-                  <td>{order.amount}</td>
-                  <td className="text-[--color-text-secondary]">{order.date}</td>
+              {data.recentSO.map((so) => (
+                <tr key={so.soNo}>
+                  <td className="font-medium text-[--color-brand]">{so.soNo}</td>
+                  <td>{so.customer}</td>
+                  <td className="text-[--color-text-secondary]">{so.vehicle}</td>
+                  <td><span className={statusPill(so.status)}>{so.status}</span></td>
+                  <td>{fmt(so.total)}</td>
+                  <td className="text-[--color-text-secondary]">{fmtDate(so.date)}</td>
                 </tr>
               ))}
             </tbody>
