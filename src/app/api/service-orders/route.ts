@@ -46,7 +46,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { customerId, vehicleId, complaint, spareparts, services } = body;
+  const { customerId, vehicleId, complaint, bookingSource, referenceNumber, planServiceTime, spareparts, services } = body;
 
   if (!customerId || !vehicleId) {
     return NextResponse.json({ error: "customerId and vehicleId are required" }, { status: 400 });
@@ -83,6 +83,9 @@ export const POST = withAuth(async (req: NextRequest) => {
       saId: user.id,
       storeId: user.storeId,
       complaint,
+      bookingSource,
+      referenceNumber,
+      planServiceTime,
       total,
       spareparts: { create: spItems },
       services: { create: svItems },

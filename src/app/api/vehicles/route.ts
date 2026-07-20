@@ -31,14 +31,14 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { customerId, plateNo, brand, model, year, chassisNo, engineNo } = body;
+  const { customerId, plateNo, brand, model, year, color, odometer, chassisNo, engineNo } = body;
 
   if (!customerId || !plateNo || !brand) {
     return NextResponse.json({ error: "customerId, plateNo, and brand are required" }, { status: 400 });
   }
 
   const vehicle = await prisma.vehicle.create({
-    data: { storeId: user.storeId, customerId, plateNo, brand, model, year, chassisNo, engineNo },
+    data: { storeId: user.storeId, customerId, plateNo, brand, model, year, color, odometer, chassisNo, engineNo },
   });
 
   return NextResponse.json({ data: vehicle }, { status: 201 });

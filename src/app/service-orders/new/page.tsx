@@ -138,6 +138,9 @@ export default function NewServiceOrderPage() {
         customerId: form.customerId,
         vehicleId: form.vehicleId,
         complaint: form.complaint || null,
+        bookingSource: form.bookingSource || null,
+        referenceNumber: form.referenceNumber || null,
+        planServiceTime: form.planServiceTime || null,
         spareparts: sparepartItems.filter((sp) => sp.sparepartId),
         services: serviceItems.filter((sv) => sv.serviceId),
       };

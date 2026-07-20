@@ -50,8 +50,8 @@ export const POST = withAuth(async (req: NextRequest) => {
     include: { spareparts: true, services: true },
   });
   if (!so) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
-  if (so.status !== "Approved") {
-    return NextResponse.json({ error: "Service order must be Approved before creating work order" }, { status: 400 });
+  if (so.status !== "Approved" && so.status !== "Delivered") {
+    return NextResponse.json({ error: "Service order must be Approved or Delivered before creating work order" }, { status: 400 });
   }
 
   // Check if WO already exists for this SO

@@ -231,15 +231,45 @@ export default function ServiceOrderDetailPage() {
   if (error) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#ea001e", fontSize: 14 }}>{error}</p></div></div>;
   if (!order) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {orderNo}</p></div></div>;
 
-  const handleApprove = () => { setOrder((prev: any) => ({ ...prev, status: "APPROVED" })); setShowApproveConfirm(false); };
+  const handleApprove = async () => {
+    setShowApproveConfirm(false);
+    await fetch(`/api/service-orders/${order.id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Approved" }),
+    });
+    setOrder((prev: any) => ({ ...prev, status: "Approved" }));
+  };
 
-  const handleDeliver = () => { setOrder((prev: any) => ({ ...prev, status: "DELIVERED" })); setShowDeliverConfirm(false); };
-  const handleCreateWO = () => {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
-    const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", hour12: true });
-    setOrder((prev: any) => ({ ...prev, workOrders: [{ documentNumber: `WO-${orderNo}`, createdDate: `${dateStr} ${timeStr}`, status: "CREATED" }] }));
+  const handleDeliver = async () => {
+    setShowDeliverConfirm(false);
+    await fetch(`/api/service-orders/${order.id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Delivered" }),
+    });
+    setOrder((prev: any) => ({ ...prev, status: "Delivered" }));
+    // Auto-create work order
+    try {
+      const res = await fetch("/api/work-orders", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ soId: order.id }),
+      });
+      if (res.ok) {
+        const j = await res.json();
+        setOrder((prev: any) => ({ ...prev, workOrders: [j.data] }));
+      }
+    } catch {}
+  };
+
+  const handleCreateWO = async () => {
     setShowCreateWOConfirm(false);
+    const res = await fetch("/api/work-orders", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ soId: order.id }),
+    });
+    if (res.ok) {
+      const j = await res.json();
+      setOrder((prev: any) => ({ ...prev, workOrders: [j.data] }));
+    }
   };
 
   const totalQty = (order.services || []).reduce((s: number, x: any) => s + (x.quantity || x.qty || 0), 0);
@@ -261,7 +291,7 @@ export default function ServiceOrderDetailPage() {
     vehicleType: order.vehicle?.brand ? "CAR" : (order.vehicleType || "-"),
     vehicleMake: order.vehicle?.brand || order.vehicleMake || "-",
     vehicleModel: order.vehicle?.model || order.vehicleModel || "-",
-    odometer: order.odometer || "-",
+    odometer: order.vehicle?.odometer || order.odometer || "-",
     year: order.vehicle?.year || order.year || "-",
     color: order.vehicle?.color || order.color || "-",
   };
@@ -298,7 +328,7 @@ export default function ServiceOrderDetailPage() {
           {/* Workflow Actions */}
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Deliver</button>}
-            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button><button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button></>}
+            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{!hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button>}{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View Work Orders</button>}</>}
             {isApproved && !hasWO && (order.services || []).length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button>}
             {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View Work Orders</button>}
             <button style={S.actionBtn}><Printer size={14} /> Print</button>
@@ -369,7 +399,7 @@ export default function ServiceOrderDetailPage() {
               <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Work Orders</div>
               <div style={S.tableWrap}>
                 <table style={S.table}><thead><tr><th style={S.th}>Document Number</th><th style={S.th}>Created Date</th><th style={S.th}>Status</th></tr></thead>
-                  <tbody><tr style={S.tr}><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/${wo!.documentNumber}`)}>{wo!.documentNumber}</td><td style={S.td}>{wo!.createdDate}</td><td style={S.td}><span style={{ ...S.pill, background: wo!.status === "COMPLETED" ? "#2e844a" : wo!.status === "IN PROGRESS" ? "#0176d3" : "#fe9339" }}>{wo!.status}</span></td></tr></tbody>
+                  <tbody><tr style={S.tr}><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)}>{wo.woNo || wo.documentNumber || "-"}</td><td style={S.td}>{wo.createdAt ? new Date(wo.createdAt).toLocaleDateString("id-ID") : (wo.createdDate || "-")}</td><td style={S.td}><span style={{ ...S.pill, background: wo.status === "COMPLETED" || wo.status === "Completed" ? "#2e844a" : wo.status === "IN PROGRESS" || wo.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{wo.status}</span></td></tr></tbody>
                 </table>
               </div>
             </div>

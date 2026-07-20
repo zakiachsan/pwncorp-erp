@@ -102,6 +102,8 @@ model Vehicle {
   brand      String
   model      String?
   year       Int?
+  color      String?
+  odometer   String?
   chassisNo  String?  @map("chassis_no")
   engineNo   String?  @map("engine_no")
   createdAt  DateTime @default(now()) @map("created_at")
@@ -213,6 +215,9 @@ model ServiceOrder {
   storeId     String   @map("store_id")
   store       Store    @relation(fields: [storeId], references: [id])
   complaint   String?
+  bookingSource String?  @map("booking_source")
+  referenceNumber String? @map("reference_number")
+  planServiceTime String? @map("plan_service_time")
   status      String   @default("Draft") // Draft / Approved / Cancelled / Delivered
   total       Float    @default(0)
   date        DateTime @default(now())

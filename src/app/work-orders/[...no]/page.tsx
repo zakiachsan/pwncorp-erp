@@ -37,35 +37,41 @@ export default function WorkOrderDetailPage() {
       .then((r) => r.json())
       .then((json) => {
         const found = (json.data || [])[0];
-        if (!found) { setError("Work Order tidak ditemukan: " + woNo); setLoading(false); return; }
-        // If the search found a different WO, try fetching by ID
-        // Map API fields
-        const items = found.items || [];
+        if (!found || !found.id) { setError("Work Order tidak ditemukan"); setLoading(false); return; }
+        // Fetch full detail
+        return fetch(`/api/work-orders/${found.id}`)
+          .then((r2) => r2.json())
+          .then((j2) => {
+            if (!j2.data) { setError("Gagal memuat detail"); setLoading(false); return; }
+            const w = j2.data;
+            const so = w.so || {};
+            // Map API fields
+        const items = w.items || [];
         const services = items
-          .filter((it: any) => it.type === "SERVICE" || it.service)
+          .filter((it: any) => it.itemType === "service" || it.itemType === "SERVICE")
           .map((it: any, i: number) => ({
-            item: it.name || it.service?.name || it.description || "-",
-            description: it.description || it.service?.name || "-",
+            item: it.name || it.itemName || it.description || "-",
+            description: it.description || it.itemName || "-",
             quantity: it.qty || it.quantity || 1,
             priceExTax: it.price || it.unitPrice || 0,
             discount: it.discount || "-",
             subtotal: (it.qty || 1) * (it.price || 0),
             total: it.total || (it.qty || 1) * (it.price || 0),
-            assignedTo: it.assignedTo || found.mekanik?.name || "-",
+            assignedTo: it.assignedTo || w.mekanik?.name || "-",
             status: it.status || "Waiting",
             estimatedTime: it.estimatedTime || "-",
           }));
         const spareparts = items
-          .filter((it: any) => it.type === "SPAREPART" || it.sparepart)
+          .filter((it: any) => it.itemType === "sparepart" || it.itemType === "SPAREPART")
           .map((it: any) => ({
             code: it.sparepart?.sku || it.sku || it.code || "-",
-            name: it.sparepart?.name || it.name || "-",
+            name: it.itemName?.name || it.name || "-",
             qty: it.qty || it.quantity || 0,
-            price: it.price || it.sparepart?.sellPrice || 0,
+            price: it.price?.sellPrice || 0,
             total: it.total || (it.qty || 0) * (it.price || 0),
           }));
 
-        const invoices = (found.invoices || []).map((inv: any) => ({
+        const invoices = (w.invoices || []).map((inv: any) => ({
           docNo: inv.invoiceNo || inv.id,
           invoiceDate: inv.date || inv.invoiceDate || "-",
           status: inv.status || "UNPAID",
@@ -73,36 +79,38 @@ export default function WorkOrderDetailPage() {
         }));
 
         setWo({
-          documentNumber: found.woNo || woNo,
-          soNumber: found.so?.soNo || found.soNumber || "-",
-          soDocument: found.so?.soNo || found.soNumber || "-",
-          customer: found.customer || found.so?.customer || { name: "-", phone: "-" },
-          registrationNo: found.registrationNo || found.vehicle?.plate || "-",
-          vehicleMake: found.vehicleMake || found.vehicle?.make || "-",
-          vehicleModel: found.vehicleModel || found.vehicle?.model || "-",
-          vehicleType: found.vehicleType || found.vehicle?.type || "CAR",
-          year: found.year || found.vehicle?.year || "-",
-          color: found.color || found.vehicle?.color || "-",
-          odometer: found.odometer || found.vehicle?.odometer || "-",
-          store: found.store?.name || found.store || "-",
-          serviceAdvisor: found.serviceAdvisor || found.so?.serviceAdvisor || "-",
-          mekanik: found.mekanik?.name || found.assignedTo || "-",
-          status: found.status || "DRAFT",
-          planStartDate: found.planStartDate || "-",
-          planEndDate: found.planEndDate || "-",
+          documentNumber: w.woNo || woNo,
+          soNumber: so.soNo || found.soNumber || "-",
+          soDocument: so.soNo || found.soNumber || "-",
+          customer: so.customer || { name: "-", phone: "-" },
+          registrationNo: so.vehicle?.plateNo || found.registrationNo || "-",
+          vehicleMake: so.vehicle.brand || found.vehicleMake || found.vehicle?.make || "-",
+          vehicleModel: so.vehicle.model || found.vehicleModel || found.vehicle?.model || "-",
+          vehicleType: so.vehicle?.brand ? "CAR" : (found.vehicleType || found.vehicle?.type || "CAR"),
+          year: so.vehicle?.year || found.vehicle?.year || "-",
+          color: so.vehicle?.color || found.vehicle?.color || "-",
+          odometer: so.vehicle?.odometer || found.vehicle?.odometer || "-",
+          store: w.store?.name || w.store || "-",
+          serviceAdvisor: so.sa?.name || found.so?.serviceAdvisor || "-",
+          mekanik: w.mekanik?.name || found.assignedTo || "-",
+          status: w.status || "DRAFT",
+          planStartDate: w.startDate || found.planStartDate || "-",
+          planEndDate: w.targetDate || found.planEndDate || "-",
           actualStartDate: found.actualStartDate || "-",
           actualEndDate: found.actualEndDate || "-",
           services,
           spareparts,
           invoices,
-          createdBy: found.createdBy || "-",
-          updatedBy: found.updatedBy || "-",
-          createdAt: found.createdAt || "-",
-          updatedAt: found.updatedAt || "-",
+          createdBy: w.createdBy || "-",
+          updatedBy: w.updatedBy || "-",
+          createdAt: w.createdAt || "-",
+          updatedAt: w.updatedAt || "-",
         });
         setLoading(false);
       })
       .catch(() => { setError("Failed to load work order"); setLoading(false); });
+      })
+      .catch(() => { setError("Work Order tidak ditemukan"); setLoading(false); });
   }, [woNo]);
 
   if (loading) {

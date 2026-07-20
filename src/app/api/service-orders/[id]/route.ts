@@ -38,10 +38,10 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   // Validate status transition
   if (status) {
     const validTransitions: Record<string, string[]> = {
-      "Draft": ["Approved", "Cancelled"],
-      "Approved": ["Cancelled", "Delivered"],
+      "Draft": ["Delivered", "Approved", "Cancelled"],
+      "Delivered": ["Approved", "Cancelled"],
+      "Approved": ["Cancelled"],
       "Cancelled": [],
-      "Delivered": [],
     };
     if (!validTransitions[existing.status]?.includes(status)) {
       return NextResponse.json({
