@@ -244,9 +244,30 @@ export default function ServiceOrderDetailPage() {
 
   const totalQty = (order.services || []).reduce((s: number, x: any) => s + (x.quantity || x.qty || 0), 0);
   const grandTotal = (order.services || []).reduce((s: number, x: any) => s + (x.total || 0), 0);
-  const isDraft = order.status === "DRAFT";
-  const isDelivered = order.status === "DELIVERED";
-  const isApproved = order.status === "APPROVED";
+
+  // Map API format to display format
+  const d = {
+    documentNumber: order.soNo || order.documentNumber || "-",
+    store: order.store?.name || order.store || "-",
+    customer: order.customer || {},
+    registrationNo: order.vehicle?.plateNo || order.registrationNo || "-",
+    bookingSource: order.bookingSource || "-",
+    planServiceDate: order.date ? new Date(order.date).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : (order.planServiceDate || "-"),
+    planServiceTime: order.planServiceTime || "-",
+    serviceAdvisor: order.sa?.name || order.serviceAdvisor || "-",
+    salesperson: order.salesperson || "-",
+    referenceNumber: order.referenceNumber || "-",
+    project: order.project || null,
+    vehicleType: order.vehicle?.brand ? "CAR" : (order.vehicleType || "-"),
+    vehicleMake: order.vehicle?.brand || order.vehicleMake || "-",
+    vehicleModel: order.vehicle?.model || order.vehicleModel || "-",
+    odometer: order.odometer || "-",
+    year: order.vehicle?.year || order.year || "-",
+    color: order.vehicle?.color || order.color || "-",
+  };
+  const isDraft = order.status === "Draft";
+  const isDelivered = order.status === "Delivered";
+  const isApproved = order.status === "Approved";
   const hasWO = (order.workOrders || []).length > 0;
   const wo = hasWO ? (order.workOrders || [])[0] : null;
 
@@ -257,9 +278,9 @@ export default function ServiceOrderDetailPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
           <div style={{ display: "flex", gap: 6 }}>
-            <span style={{ ...S.badge, ...(order.status === "DRAFT" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
-            <span style={{ ...S.badge, ...(order.status === "DELIVERED" ? S.badgeActive : S.badgeInactive) }}>DELIVERED</span>
-            <span style={{ ...S.badge, ...(order.status === "APPROVED" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
+            <span style={{ ...S.badge, ...(order.status === "Draft" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
+            <span style={{ ...S.badge, ...(order.status === "Delivered" ? S.badgeActive : S.badgeInactive) }}>DELIVERED</span>
+            <span style={{ ...S.badge, ...(order.status === "Approved" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
           </div>
         </div>
       </div>
@@ -288,29 +309,29 @@ export default function ServiceOrderDetailPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
             <div style={S.infoCol}>
               <div style={S.infoColTitle}>Customer & Store</div>
-              <F2 label="Document Number" value={order.documentNumber} />
-              <F2 label="Store" value={order.store} />
-              <F2 label="Customer" value={order.customer.name} />
-              <F2 label="Phone" value={order.customer.phone} />
-              <F2 label="Registration No" value={order.registrationNo} />
-              <F2 label="Booking Source" value={order.bookingSource} />
+              <F2 label="Document Number" value={d.documentNumber} />
+              <F2 label="Store" value={d.store} />
+              <F2 label="Customer" value={d.customer.name} />
+              <F2 label="Phone" value={d.customer.phone} />
+              <F2 label="Registration No" value={d.registrationNo} />
+              <F2 label="Booking Source" value={d.bookingSource} />
             </div>
             <div style={S.infoCol}>
               <div style={S.infoColTitle}>Schedule & Advisor</div>
-              <F2 label="Plan Service Date" value={order.planServiceDate} />
-              <F2 label="Plan Service Time" value={order.planServiceTime} />
-              <F2 label="Service Advisor" value={order.serviceAdvisor} />
-              <F2 label="Salesperson" value={order.salesperson} />
-              <F2 label="Reference Number" value={order.referenceNumber} />
-              <F2 label="Project" value={order.project ? order.project.name : "-"} />
+              <F2 label="Plan Service Date" value={d.planServiceDate} />
+              <F2 label="Plan Service Time" value={d.planServiceTime} />
+              <F2 label="Service Advisor" value={d.serviceAdvisor} />
+              <F2 label="Salesperson" value={d.salesperson} />
+              <F2 label="Reference Number" value={d.referenceNumber} />
+              <F2 label="Project" value={d.project ? d.project.name : "-"} />
             </div>
             <div style={S.infoCol}>
               <div style={S.infoColTitle}>Vehicle</div>
-              <F2 label="Vehicle Type" value={order.vehicleType} />
-              <F2 label="Make / Model" value={`${order.vehicleMake} ${order.vehicleModel}`} />
-              <F2 label="Odometer" value={order.odometer} />
-              <F2 label="Year" value={order.year} />
-              <F2 label="Color" value={order.color} />
+              <F2 label="Vehicle Type" value={d.vehicleType} />
+              <F2 label="Make / Model" value={`${d.vehicleMake} ${d.vehicleModel}`} />
+              <F2 label="Odometer" value={d.odometer} />
+              <F2 label="Year" value={d.year} />
+              <F2 label="Color" value={d.color} />
             </div>
           </div>
 
@@ -387,13 +408,27 @@ function F2({ label, value }: { label: string; value: string }) {
 
 /* ─── Services Table ─── */
 function ServicesTable({ services, totalQty, grandTotal, router }: { services: any[]; totalQty: number; grandTotal: number; router: any }) {
+  const isApiFormat = services.length > 0 && services[0].service;
   return (
     <div style={S.tableWrap}>
       <table style={S.table}>
-        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Item</th><th style={S.th}>Description</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th style={{ ...S.th, textAlign: "right" }}>Price Ex Tax</th><th style={{ ...S.th, textAlign: "center" }}>Disc</th><th style={{ ...S.th, textAlign: "right" }}>Subtotal</th><th style={{ ...S.th, textAlign: "right" }}>Tax</th><th style={{ ...S.th, textAlign: "right" }}>Other Tax</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
+        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Item</th><th style={S.th}>Description</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
         <tbody>
           {services.map((svc: any, i: number) => {
-            const code = svc.item.split(" - ")[0].trim();
+            if (isApiFormat) {
+              const s = svc.service || {};
+              return (
+                <tr key={i} style={S.tr}>
+                  <td style={S.td}>{i + 1}</td>
+                  <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/master-data/services/${s.sku || ""}`)}>{s.sku} - {s.name}</td>
+                  <td style={S.td}>-</td>
+                  <td style={{ ...S.td, textAlign: "right" }}>{svc.qty}</td>
+                  <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.unitPrice)}</td>
+                  <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+                </tr>
+              );
+            }
+            const code = (svc.item || "").split(" - ")[0]?.trim?.();
             return (
               <tr key={i} style={S.tr}>
                 <td style={S.td}>{i + 1}</td>
@@ -401,16 +436,12 @@ function ServicesTable({ services, totalQty, grandTotal, router }: { services: a
                 <td style={S.td}>{svc.description}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.priceExTax)}</td>
-                <td style={{ ...S.td, textAlign: "center" }}>{svc.discount}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.subtotal)}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{svc.tax}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{svc.otherTax}</td>
-                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
               </tr>
             );
           })}
         </tbody>
-        <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}><td colSpan={3} style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalQty}</td><td colSpan={2} style={S.td}></td><td colSpan={2} style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700, fontSize: 13 }}>{fmt(grandTotal)}</td></tr></tfoot>
+        <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}><td colSpan={3} style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalQty}</td><td style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700, fontSize: 13 }}>{fmt(grandTotal)}</td></tr></tfoot>
       </table>
     </div>
   );
@@ -419,15 +450,25 @@ function ServicesTable({ services, totalQty, grandTotal, router }: { services: a
 /* ─── Sparepart Table ─── */
 function SparepartTable({ spareparts }: { spareparts: any[] }) {
   if (spareparts.length === 0) return <div style={{ ...S.tableWrap, padding: 24, textAlign: "center", color: "#8e8f8e", fontSize: 13 }}>Belum ada sparepart</div>;
-  const total = spareparts.reduce((s: number, sp: any) => s + sp.total, 0);
+  const isApiFormat = spareparts[0].sparepart;
+  const total = spareparts.reduce((s: number, sp: any) => s + (sp.total || 0), 0);
   return (
     <div style={S.tableWrap}>
       <table style={S.table}>
         <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Code</th><th style={S.th}>Name</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
         <tbody>
-          {spareparts.map((sp, i) => (
-            <tr key={i} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{sp.code}</td><td style={S.td}>{sp.name}</td><td style={{ ...S.td, textAlign: "right" }}>{sp.qty}</td><td style={{ ...S.td, textAlign: "right" }}>{fmt(sp.price)}</td><td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td></tr>
-          ))}
+          {spareparts.map((sp, i) => {
+            const data = isApiFormat ? {
+              code: sp.sparepart?.sku || "-",
+              name: sp.sparepart?.name || "-",
+              qty: sp.qty,
+              price: sp.unitPrice,
+              total: sp.total,
+            } : sp;
+            return (
+              <tr key={i} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{data.code}</td><td style={S.td}>{data.name}</td><td style={{ ...S.td, textAlign: "right" }}>{data.qty}</td><td style={{ ...S.td, textAlign: "right" }}>{fmt(data.price)}</td><td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(data.total)}</td></tr>
+            );
+          })}
         </tbody>
         <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}><td colSpan={5} style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(total)}</td></tr></tfoot>
       </table>
