@@ -22,7 +22,29 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
     },
   });
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });
-  return NextResponse.json({ data: wo });
+
+  // Enrich items with sparepart/service details
+  const enrichedItems = await Promise.all(
+    (wo.items || []).map(async (item) => {
+      if (item.itemType === "sparepart") {
+        const sp = await prisma.sparepart.findUnique({
+          where: { id: item.itemId },
+          select: { sku: true, name: true, code: true, sellPrice: true },
+        });
+        return { ...item, sku: sp?.sku || null, code: sp?.code || null, sparepartName: sp?.name || null };
+      }
+      if (item.itemType === "service") {
+        const svc = await prisma.service.findUnique({
+          where: { id: item.itemId },
+          select: { sku: true, name: true },
+        });
+        return { ...item, sku: svc?.sku || null, code: null, sparepartName: svc?.name || null };
+      }
+      return item;
+    })
+  );
+
+  return NextResponse.json({ data: { ...wo, items: enrichedItems } });
 });
 
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
@@ -39,8 +61,8 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   // Validate status transition
   if (status) {
     const validTransitions: Record<string, string[]> = {
-      "Draft": ["Waiting Stock", "Cancelled"],
-      "Waiting Stock": ["Confirmed", "Cancelled"],
+      "Draft": ["In Progress", "Waiting Stock", "Cancelled"],
+      "Waiting Stock": ["In Progress", "Confirmed", "Cancelled"],
       "Confirmed": ["In Progress", "Cancelled"],
       "In Progress": ["QC", "Cancelled"],
       "QC": ["Completed", "In Progress"],

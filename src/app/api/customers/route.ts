@@ -26,7 +26,17 @@ export const GET = withAuth(async (req: NextRequest) => {
     prisma.customer.count({ where }),
   ]);
 
-  return NextResponse.json({ data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  // Attach display codes
+  const enriched = await Promise.all(
+    data.map(async (c) => {
+      const cc = await prisma.$queryRawUnsafe<{ code: string }[]>(
+        `SELECT code FROM customer_codes WHERE customer_id = $1`, c.id
+      );
+      return { ...c, code: cc[0]?.code || c.id.slice(-6) };
+    })
+  );
+
+  return NextResponse.json({ data: enriched, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
 });
 
 export const POST = withAuth(async (req: NextRequest) => {
@@ -40,5 +50,10 @@ export const POST = withAuth(async (req: NextRequest) => {
     data: { storeId: user.storeId, name, type: type || "retail", phone, whatsapp, email, address },
   });
 
-  return NextResponse.json({ data: customer }, { status: 201 });
+  // Generate display code
+  const nextVal = await prisma.$queryRawUnsafe<{ nextval: number }[]>(`SELECT nextval('customer_code_seq') as nextval`);
+  const code = `CTR-${String(nextVal[0].nextval).padStart(3, '0')}`;
+  await prisma.$executeRawUnsafe(`INSERT INTO customer_codes (customer_id, code) VALUES ($1, $2)`, customer.id, code);
+
+  return NextResponse.json({ data: { ...customer, code } }, { status: 201 });
 });

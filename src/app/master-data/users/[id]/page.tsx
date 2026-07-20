@@ -29,7 +29,7 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div style={{ padding: "0 24px 24px" }}>
+    <div className="sm:px-6" style={{ padding: "0 12px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <button onClick={() => router.push("/master-data/users")} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" }}>
           <ArrowLeft size={16} />
@@ -38,7 +38,7 @@ export default function UserDetailPage() {
           <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>User Details</h1>
           <div style={{ fontSize: 13, color: "#0176d3", marginTop: 2 }}>{item.name}</div>
         </div>
-        <button style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 12, fontWeight: 500, color: "#fff", background: "#0176d3", border: "1px solid #0176d3", borderRadius: 6, cursor: "pointer" }}>
+        <button onClick={() => router.push(`/master-data/users/${params.id}/edit`)} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 12, fontWeight: 500, color: "#fff", background: "#0176d3", border: "1px solid #0176d3", borderRadius: 6, cursor: "pointer" }}>
           <Edit size={14} /> Edit
         </button>
       </div>

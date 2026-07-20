@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Search, Edit } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
@@ -100,32 +100,35 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div style={{ padding: "0 24px 24px" }}>
-      <button onClick={() => router.push("/products")} style={S.backBtn}>
-        <ArrowLeft size={16} /> Kembali ke Products
-      </button>
+    <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
+      <div className="flex items-center gap-3 mb-3">
+        <button onClick={() => router.push("/products")} style={S.backBtn}>
+          <ArrowLeft size={16} />
+        </button>
+      </div>
 
-      <div style={S.identifierBar}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-[10px_16px] bg-[#e6f0fa] border border-[#b8d4f0] rounded-lg mb-4">
         <span style={{ fontSize: 15, fontWeight: 700, color: "#0176d3" }}>{product.sku} - {product.name}</span>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => router.push(`/products/${product.sku}/edit`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Edit size={14} /> Edit</button>
           <button style={S.actionBtn}>QR Codes</button>
           <button style={S.actionBtn}>Barcodes</button>
         </div>
       </div>
 
-      <div style={S.tabBar}>
+      <div className="flex gap-0 mb-4 bg-[#ecebea] rounded-lg p-1 overflow-x-auto">
         {tabList.map((key) => (
           <button key={key} onClick={() => setActiveTab(key)} style={{
             ...S.tab, color: activeTab === key ? "#fff" : "#444746",
             background: activeTab === key ? "#0176d3" : "transparent",
             fontWeight: activeTab === key ? 600 : 400,
-          }}>{tabLabels[key]}</button>
+          }} className="whitespace-nowrap">{tabLabels[key]}</button>
         ))}
       </div>
 
       {/* Product Tab */}
       {activeTab === "product" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 24, alignItems: "start" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-start">
           <div>
             <h3 style={S.sectionTitle}>Details</h3>
             <div style={S.card}>
@@ -201,10 +204,10 @@ export default function ProductDetailPage() {
       {/* Store Stocks Tab */}
       {activeTab === "storeStocks" && (
         <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "flex-end" }}>
+          <div className="flex flex-wrap gap-2 mb-3 items-end">
             <div><label style={S.filterLabel}>Store</label><select style={S.filterInput}><option value="">All Stores</option></select></div>
             <div><label style={S.filterLabel}>Name</label><input type="text" style={S.filterInput} /></div>
-            <div><label style={S.filterLabel}>Store Code</label><input type="text" style={S.filterInput} /></div>
+            <div className="hidden sm:block"><label style={S.filterLabel}>Store Code</label><input type="text" style={S.filterInput} /></div>
             <div><label style={S.filterLabel}>Show Stock</label><select style={S.filterInput}><option value="">All</option></select></div>
             <button style={S.searchBtn}><Search size={14} /> Search</button>
           </div>
@@ -231,10 +234,10 @@ export default function ProductDetailPage() {
       {/* Warehouse Stocks Tab */}
       {activeTab === "warehouseStocks" && (
         <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "flex-end" }}>
+          <div className="flex flex-wrap gap-2 mb-3 items-end">
             <div><label style={S.filterLabel}>Warehouse</label><select style={S.filterInput}><option value="">All Warehouses</option></select></div>
             <div><label style={S.filterLabel}>Name</label><input type="text" style={S.filterInput} /></div>
-            <div><label style={S.filterLabel}>Warehouse Code</label><input type="text" style={S.filterInput} /></div>
+            <div className="hidden sm:block"><label style={S.filterLabel}>Warehouse Code</label><input type="text" style={S.filterInput} /></div>
             <button style={S.searchBtn}><Search size={14} /> Search</button>
           </div>
           <div style={{ ...S.card, marginBottom: 12, padding: "8px 16px" }}>
@@ -260,7 +263,7 @@ export default function ProductDetailPage() {
       {/* Warehouse History Tab */}
       {activeTab === "warehouseHistory" && (
         <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "flex-end" }}>
+          <div className="flex flex-wrap gap-2 mb-3 items-end">
             <div><label style={S.filterLabel}>Warehouse</label><select style={S.filterInput}><option value="">Gudang Wijaya</option></select></div>
             <div><label style={S.filterLabel}>Type</label><input type="text" style={S.filterInput} placeholder="Type" /></div>
             <div>
@@ -327,7 +330,7 @@ export default function ProductDetailPage() {
       {/* Purchase History Tab */}
       {activeTab === "purchaseHistory" && (
         <div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "flex-end" }}>
+          <div className="flex flex-wrap gap-2 mb-3 items-end">
             <div><label style={S.filterLabel}>Supplier</label><select style={S.filterInput}><option value="">All Suppliers</option></select></div>
             <button style={S.searchBtn}><Search size={14} /> Search</button>
           </div>

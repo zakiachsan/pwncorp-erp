@@ -21,6 +21,18 @@ const statusColor = (s: string) => {
 
 const workflowSteps = ["DRAFT", "IN PROGRESS", "QC", "COMPLETED"];
 
+function getWorkflowStepIndex(status: string): number {
+  if (!status) return -1;
+  const s = status.toUpperCase();
+  if (s === "DRAFT") return 0;
+  if (["WAITING STOCK", "CONFIRMED"].includes(s)) return 0;
+  if (s === "IN PROGRESS") return 1;
+  if (s === "QC") return 2;
+  if (s === "COMPLETED") return 3;
+  if (s === "CANCELLED") return -2;
+  return -1;
+}
+
 export default function WorkOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -31,6 +43,8 @@ export default function WorkOrderDetailPage() {
   const [activeTab, setActiveTab] = useState<"details" | "docRef" | "stockOrders" | "changes" | "photos">("details");
   const [showPrint, setShowPrint] = useState(false);
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
+  const [photoDesc, setPhotoDesc] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetch(`/api/work-orders?search=${encodeURIComponent(woNo)}&limit=1`)
@@ -64,11 +78,11 @@ export default function WorkOrderDetailPage() {
         const spareparts = items
           .filter((it: any) => it.itemType === "sparepart" || it.itemType === "SPAREPART")
           .map((it: any) => ({
-            code: it.sparepart?.sku || it.sku || it.code || "-",
-            name: it.itemName?.name || it.name || "-",
+            code: it.sku || it.code || it.itemId || "-",
+            name: it.sparepartName || it.itemName || "-",
             qty: it.qty || it.quantity || 0,
-            price: it.price?.sellPrice || 0,
-            total: it.total || (it.qty || 0) * (it.price || 0),
+            price: it.unitPrice || it.price?.sellPrice || 0,
+            total: it.total || (it.qty || 0) * (it.unitPrice || 0),
           }));
 
         const invoices = (w.invoices || []).map((inv: any) => ({
@@ -79,6 +93,7 @@ export default function WorkOrderDetailPage() {
         }));
 
         setWo({
+          id: w.id,
           documentNumber: w.woNo || woNo,
           soNumber: so.soNo || found.soNumber || "-",
           soDocument: so.soNo || found.soNumber || "-",
@@ -93,7 +108,7 @@ export default function WorkOrderDetailPage() {
           store: w.store?.name || w.store || "-",
           serviceAdvisor: so.sa?.name || found.so?.serviceAdvisor || "-",
           mekanik: w.mekanik?.name || found.assignedTo || "-",
-          status: w.status || "DRAFT",
+          status: (w.status || "DRAFT").toUpperCase(),
           planStartDate: w.startDate || found.planStartDate || "-",
           planEndDate: w.targetDate || found.planEndDate || "-",
           actualStartDate: found.actualStartDate || "-",
@@ -135,35 +150,66 @@ export default function WorkOrderDetailPage() {
     );
   }
 
-  const currentStepIdx = workflowSteps.indexOf(wo.status);
+  const currentStepIdx = getWorkflowStepIndex(wo.status);
   const totalServiceCost = wo.services.reduce((s: number, x: any) => s + x.total, 0);
   const totalSparepartCost = wo.spareparts.reduce((s: number, x: any) => s + x.total, 0);
   const grandTotal = totalServiceCost + totalSparepartCost;
 
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!wo?.id) return;
+    try {
+      const res = await fetch(`/api/work-orders/${wo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setWo((prev: any) => ({ ...prev, status: newStatus.toUpperCase() }));
+      } else {
+        const err = await res.json();
+        alert(err.error || "Gagal update status");
+      }
+    } catch {
+      alert("Gagal update status");
+    }
+  };
+
   return (
-    <div style={{ padding: "0 24px 24px" }}>
+    <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       {/* Workflow Bar */}
-      <div style={S.workflowBar}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-[8px_14px] bg-[#f9f9f9] border border-[#ecebea] rounded-lg mb-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
-          <div style={{ display: "flex", gap: 6 }}>
-            {workflowSteps.map((step, i) => (
-              <span key={step} style={{
-                ...S.badge,
-                background: i <= currentStepIdx ? statusColor(step) : "transparent",
-                color: i <= currentStepIdx ? "#fff" : "#8e8f8e",
-                border: `1px solid ${i <= currentStepIdx ? statusColor(step) : "#d8d8d8"}`,
-              }}>{step}</span>
-            ))}
+          <div className="flex flex-wrap gap-1.5">
+            {workflowSteps.map((step, i) => {
+              const isActive = i <= currentStepIdx;
+              const canClick = !isActive && i === currentStepIdx + 1;
+              return (
+                <span
+                  key={step}
+                  onClick={canClick ? () => handleStatusUpdate(step) : undefined}
+                  style={{
+                    ...S.badge,
+                    background: isActive ? statusColor(step) : "transparent",
+                    color: isActive ? "#fff" : "#8e8f8e",
+                    border: `1px solid ${isActive ? statusColor(step) : "#d8d8d8"}`,
+                    cursor: canClick ? "pointer" : "default",
+                    opacity: canClick ? 0.85 : 1,
+                  }}
+                  onMouseEnter={(e) => { if (canClick) { e.currentTarget.style.opacity = "1"; e.currentTarget.style.boxShadow = "0 0 0 2px rgba(1,118,211,0.3)"; } }}
+                  onMouseLeave={(e) => { if (canClick) { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.boxShadow = "none"; } }}
+                >{step}</span>
+              );
+            })}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
         </div>
       </div>
 
       {/* Top Tabs */}
-      <div style={S.tabBar}>
+      <div className="flex gap-0 mb-4 bg-[#ecebea] rounded-lg p-1 overflow-x-auto">
         {([
           { key: "details", label: "Details" },
           { key: "docRef", label: "Document Reference" },
@@ -185,8 +231,15 @@ export default function WorkOrderDetailPage() {
       {/* Details Tab */}
       {activeTab === "details" && (
         <div>
+          {/* Status Action Buttons */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {wo.status === "DRAFT" && <StatusBtn label="In Progress" color="#0176d3" onClick={() => handleStatusUpdate("In Progress")} />}
+            {wo.status === "IN PROGRESS" && <StatusBtn label="QC" color="#8b5cf6" onClick={() => handleStatusUpdate("QC")} />}
+            {wo.status === "QC" && <StatusBtn label="Completed" color="#2e844a" onClick={() => handleStatusUpdate("Completed")} />}
+          </div>
+
           {/* 3-Column Info Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div style={S.infoCol}>
               <div style={S.infoColTitle}>Info</div>
               <F2 label="Document Number" value={wo.documentNumber} />
@@ -194,7 +247,7 @@ export default function WorkOrderDetailPage() {
                 <span style={{ fontSize: 11, color: "#8e8f8e", textTransform: "uppercase" }}>SERVICE ORDER</span>
                 <span
                   onClick={() => router.push(`/service-orders/${wo.soNumber}`)}
-                  style={{ fontSize: 12, fontWeight: 500, color: "#0176d3", textAlign: "right", maxWidth: "55%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}
+                  className="text-right max-w-[55%] truncate text-[12px] font-medium text-[#0176d3] flex items-center gap-1 cursor-pointer"
                 >
                   {wo.soDocument}
                   <ChevronRight size={12} style={{ color: "#0176d3", flexShrink: 0 }} />
@@ -240,17 +293,17 @@ export default function WorkOrderDetailPage() {
 
           {svcLineTab === "services" && (
           /* Services Table */
-          <div style={S.tableWrap}>
+          <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
             <table style={S.table}>
               <thead>
                 <tr>
                   <th style={{ ...S.th, width: 36 }}>No.</th>
                   <th style={S.th}>Item</th>
-                  <th style={S.th}>Description</th>
-                  <th style={S.th}>Qty</th>
-                  <th style={S.th}>Assigned To</th>
-                  <th style={S.th}>Est. Time</th>
-                  <th style={S.th}>Status</th>
+                  <th className="hidden sm:table-cell" style={S.th}>Description</th>
+                  <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+                  <th className="hidden md:table-cell" style={S.th}>Assigned To</th>
+                  <th className="hidden md:table-cell" style={S.th}>Est. Time</th>
+                  <th className="hidden sm:table-cell" style={S.th}>Status</th>
                   <th style={{ ...S.th, textAlign: "right" }}>Total</th>
                 </tr>
               </thead>
@@ -262,11 +315,11 @@ export default function WorkOrderDetailPage() {
                   <tr key={i} style={S.tr}>
                     <td style={S.td}>{i + 1}</td>
                     <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
-                    <td style={S.td}>{svc.description}</td>
-                    <td style={S.td}>{svc.quantity}</td>
-                    <td style={S.td}>{svc.assignedTo}</td>
-                    <td style={S.td}>{svc.estimatedTime}</td>
-                    <td style={S.td}>
+                    <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
+                    <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
+                    <td className="hidden md:table-cell" style={S.td}>{svc.assignedTo}</td>
+                    <td className="hidden md:table-cell" style={S.td}>{svc.estimatedTime}</td>
+                    <td className="hidden sm:table-cell" style={S.td}>
                       <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
                     </td>
                     <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
@@ -287,7 +340,7 @@ export default function WorkOrderDetailPage() {
             <>
           {/* Spareparts Table */}
           {wo.spareparts.length > 0 ? (
-            <div style={{ ...S.tableWrap, marginTop: 16 }}>
+            <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white" style={{ marginTop: 16 }}>
               <table style={S.table}>
                 <thead>
                   <tr>
@@ -295,7 +348,7 @@ export default function WorkOrderDetailPage() {
                     <th style={S.th}>Code</th>
                     <th style={S.th}>Name</th>
                     <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Price</th>
+                    <th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th>
                     <th style={{ ...S.th, textAlign: "right" }}>Total</th>
                   </tr>
                 </thead>
@@ -306,7 +359,7 @@ export default function WorkOrderDetailPage() {
                       <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{sp.code}</td>
                       <td style={S.td}>{sp.name}</td>
                       <td style={{ ...S.td, textAlign: "right" }}>{sp.qty}</td>
-                      <td style={{ ...S.td, textAlign: "right" }}>{fmt(sp.price)}</td>
+                      <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(sp.price)}</td>
                       <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td>
                     </tr>
                   ))}
@@ -327,13 +380,13 @@ export default function WorkOrderDetailPage() {
 
           {/* Stock Outgoings */}
           <h3 style={{ ...S.sectionTitle, marginTop: 20 }}>Stock Outgoings</h3>
-          <div style={S.tableWrap}>
+          <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
             <table style={S.table}>
               <thead>
                 <tr>
                   <th style={{ ...S.th, width: 36 }}>No.</th>
                   <th style={S.th}>SKU</th>
-                  <th style={S.th}>Product Code</th>
+                  <th className="hidden sm:table-cell" style={S.th}>Product Code</th>
                   <th style={S.th}>Service</th>
                   <th style={{ ...S.th, textAlign: "right" }}>Quantity</th>
                 </tr>
@@ -358,13 +411,13 @@ export default function WorkOrderDetailPage() {
       {activeTab === "docRef" && (
         <div>
           <h3 style={S.sectionTitle}>Service Order</h3>
-          <div style={S.tableWrap}>
+          <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
             <table style={S.table}>
               <thead>
                 <tr>
                   <th style={{ ...S.th, width: 36 }}>No.</th>
                   <th style={S.th}>Document Number</th>
-                  <th style={S.th}>Created Date</th>
+                  <th className="hidden sm:table-cell" style={S.th}>Created Date</th>
                   <th style={S.th}>Status</th>
                 </tr>
               </thead>
@@ -376,7 +429,7 @@ export default function WorkOrderDetailPage() {
                       style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
                       onClick={() => router.push(`/service-orders/${wo.soNumber}`)}
                     >{wo.soDocument}</td>
-                    <td style={S.td}>{wo.createdAt || "-"}</td>
+                    <td className="hidden sm:table-cell" style={S.td}>{wo.createdAt || "-"}</td>
                     <td style={S.td}>
                       <span style={{ ...S.pill, background: "#fe9339" }}>APPROVED</span>
                     </td>
@@ -391,13 +444,13 @@ export default function WorkOrderDetailPage() {
           {/* Service Invoices */}
           <h3 style={{ ...S.sectionTitle, marginTop: 20 }}>Service Invoices</h3>
           {wo.invoices.length > 0 ? (
-            <div style={S.tableWrap}>
+            <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
               <table style={S.table}>
                 <thead>
                   <tr>
                     <th style={{ ...S.th, width: 36 }}>No.</th>
                     <th style={S.th}>Document Number</th>
-                    <th style={S.th}>Invoice Date</th>
+                    <th className="hidden sm:table-cell" style={S.th}>Invoice Date</th>
                     <th style={S.th}>Status</th>
                     <th style={{ ...S.th, textAlign: "right" }}>Total</th>
                   </tr>
@@ -410,7 +463,7 @@ export default function WorkOrderDetailPage() {
                         style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
                         onClick={() => router.push(`/finance/invoices/service/${sri.docNo}`)}
                       >{sri.docNo}</td>
-                      <td style={S.td}>{sri.invoiceDate}</td>
+                      <td className="hidden sm:table-cell" style={S.td}>{sri.invoiceDate}</td>
                       <td style={S.td}>
                         <span style={{ ...S.pill, background: sri.status === "PAID" ? "#2e844a" : sri.status === "PARTIAL" ? "#f59e0b" : "#ea001e" }}>{sri.status}</span>
                       </td>
@@ -463,7 +516,46 @@ export default function WorkOrderDetailPage() {
       {activeTab === "photos" && (
         <div>
           <h3 style={S.sectionTitle}>Foto Service</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+
+          {/* Upload Form */}
+          <div style={{ ...S.card, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#001526", marginBottom: 8 }}>Upload Foto Baru</div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                placeholder="Masukkan deskripsi foto..."
+                value={photoDesc}
+                onChange={(e) => setPhotoDesc(e.target.value)}
+                className="flex-1 h-9 px-3 border border-[#d8d8d8] rounded-lg text-sm outline-none focus:border-[#0176d3]"
+              />
+              <label className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-[#0176d3] rounded-lg cursor-pointer hover:bg-[#0165b3] transition-colors whitespace-nowrap">
+                <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploading(true);
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  formData.append("description", photoDesc || "Foto");
+                  try {
+                    const res = await fetch(`/api/upload?woId=${wo.id}`, { method: "POST", body: formData });
+                    if (res.ok) {
+                      alert("Foto berhasil diupload");
+                      setPhotoDesc("");
+                    } else {
+                      alert("Gagal upload foto");
+                    }
+                  } catch {
+                    alert("Gagal upload foto");
+                  }
+                  setUploading(false);
+                }} />
+                {uploading ? "Uploading..." : "Upload Foto"}
+              </label>
+            </div>
+          </div>
+
+          {/* Photo List as Links */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { id: 1, photo: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=300&fit=crop", caption: "Pengecekan mesin sebelum service", uploadedBy: "Hendra", date: "24 Jun 2026 09:15 AM" },
               { id: 2, photo: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop", caption: "Proses penggantian oli mesin", uploadedBy: "Hendra", date: "24 Jun 2026 10:30 AM" },
@@ -471,16 +563,29 @@ export default function WorkOrderDetailPage() {
               { id: 4, photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&h=300&fit=crop", caption: "Balancing ring >19 inch", uploadedBy: "Toha", date: "24 Jun 2026 02:15 PM" },
               { id: 5, photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&h=300&fit=crop", caption: "Pengecekan akhir sebelum serah terima", uploadedBy: "Bambang", date: "25 Jun 2026 08:00 AM" },
             ].map((p) => (
-              <div key={p.id} style={{ background: "#fff", border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden" }}>
-                <img
-                  src={p.photo}
-                  alt={p.caption}
-                  style={{ width: "100%", height: 200, objectFit: "cover" }}
-                />
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: "#001526", marginBottom: 4 }}>{p.caption}</div>
-                  <div style={{ fontSize: 11, color: "#8e8f8e" }}>Oleh: {p.uploadedBy} • {p.date}</div>
+              <div key={p.id} style={{ ...S.card, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <div className="flex-1 min-w-0">
+                  <a
+                    href={p.photo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 13, fontWeight: 500, color: "#0176d3", textDecoration: "none", cursor: "pointer" }}
+                    className="hover:underline"
+                  >
+                    📷 {p.caption}
+                  </a>
+                  <div style={{ fontSize: 11, color: "#8e8f8e", marginTop: 2 }}>
+                    Oleh: {p.uploadedBy} • {p.date}
+                  </div>
                 </div>
+                <a
+                  href={p.photo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "4px 10px", fontSize: 11, fontWeight: 500, color: "#0176d3", background: "#f0f7ff", borderRadius: 4, textDecoration: "none", whiteSpace: "nowrap" }}
+                >
+                  Lihat Foto ↗
+                </a>
               </div>
             ))}
           </div>
@@ -681,3 +786,27 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 10, fontWeight: 600, color: "#fff",
   },
 };
+
+/* ─── Status Action Button ─── */
+function StatusBtn({ label, color, onClick }: { label: string; color: string; onClick: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  if (confirming) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span style={{ fontSize: 11, color: "#444746" }}>Yakin {label}?</span>
+        <button onClick={() => { setConfirming(false); onClick(); }} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: color, border: "none", borderRadius: 4, cursor: "pointer" }}>Ya</button>
+        <button onClick={() => setConfirming(false)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 500, color: "#444746", background: "#ecebea", border: "none", borderRadius: 4, cursor: "pointer" }}>Batal</button>
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={() => setConfirming(true)}
+      style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 12px", fontSize: 12, fontWeight: 600, color: "#fff", background: color, border: "none", borderRadius: 6, cursor: "pointer", transition: "opacity 150ms" }}
+      onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
+      onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+    >
+      Mark {label}
+    </button>
+  );
+}

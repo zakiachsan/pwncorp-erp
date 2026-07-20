@@ -102,8 +102,6 @@ model Vehicle {
   brand      String
   model      String?
   year       Int?
-  color      String?
-  odometer   String?
   chassisNo  String?  @map("chassis_no")
   engineNo   String?  @map("engine_no")
   createdAt  DateTime @default(now()) @map("created_at")

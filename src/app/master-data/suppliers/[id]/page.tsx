@@ -7,8 +7,11 @@ import { ArrowLeft, Edit } from "lucide-react";
 interface SupplierDetail {
   id: string;
   companyName: string;
+  contactPerson: string;
   phone: string;
+  email: string;
   address: string;
+  paymentTerms: string;
   storeId: string;
   _count?: { spareparts: number; purchaseOrders: number };
 }
@@ -54,7 +57,7 @@ export default function SupplierDetailPage() {
   }
 
   return (
-    <div style={{ padding: "0 24px 24px" }}>
+    <div className="sm:px-6" style={{ padding: "0 12px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <button onClick={() => router.push("/master-data/suppliers")} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" }}>
           <ArrowLeft size={16} />
@@ -63,25 +66,30 @@ export default function SupplierDetailPage() {
           <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Supplier Details</h1>
           <div style={{ fontSize: 13, color: "#0176d3", marginTop: 2 }}>{item.companyName}</div>
         </div>
-        <button style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 12, fontWeight: 500, color: "#fff", background: "#0176d3", border: "1px solid #0176d3", borderRadius: 6, cursor: "pointer" }}>
+        <button onClick={() => router.push(`/master-data/suppliers/${id}/edit`)} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 12, fontWeight: 500, color: "#fff", background: "#0176d3", border: "1px solid #0176d3", borderRadius: 6, cursor: "pointer" }}>
           <Edit size={14} /> Edit
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: 0, marginBottom: 16, background: "#ecebea", borderRadius: 8, padding: 3, width: "fit-content" }}>
+      <div style={{ overflowX: "auto", marginBottom: 16 }}>
+        <div style={{ display: "flex", gap: 0, background: "#ecebea", borderRadius: 8, padding: 3, width: "fit-content" }}>
         {(["details", "history"] as const).map((t) => (
           <button key={t} onClick={() => setActiveTab(t)} style={{ padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", color: activeTab === t ? "#fff" : "#444746", background: activeTab === t ? "#0176d3" : "transparent", fontWeight: activeTab === t ? 600 : 400 }}>
             {t === "details" ? "Details" : "Purchase History"}
           </button>
         ))}
       </div>
+      </div>
 
       {activeTab === "details" && (
         <div style={{ background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 16 }}>
           <F label="ID" value={item.id} />
           <F label="NAMA" value={item.companyName} />
+          <F label="CONTACT PERSON" value={item.contactPerson || "—"} />
           <F label="TELEPON" value={item.phone || "—"} />
+          <F label="EMAIL" value={item.email || "—"} />
           <F label="ALAMAT" value={item.address || "—"} />
+          <F label="PAYMENT TERMS" value={item.paymentTerms || "—"} />
         </div>
       )}
 

@@ -6,6 +6,7 @@ import { Plus, Search } from "lucide-react";
 
 interface Customer {
   id: string;
+  code?: string;
   name: string;
   phone: string;
   type: string;
@@ -93,7 +94,7 @@ export default function CustomersPage() {
               )}
               {data.map((c) => (
                 <tr key={c.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/customers/${c.id}`)}>
-                  <td className="font-medium" style={{ color: "#0176d3", whiteSpace: "nowrap" }}>{c.id}</td>
+                  <td className="font-medium" style={{ color: "#0176d3", whiteSpace: "nowrap" }}>{c.code || c.id.slice(-6)}</td>
                   <td className="font-medium" style={{ color: "#0176d3", cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); router.push(`/master-data/customers/${c.id}`); }}>{c.name}</td>
                   <td>{c.phone}</td>
                   <td>

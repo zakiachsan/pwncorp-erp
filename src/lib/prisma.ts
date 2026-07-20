@@ -5,10 +5,10 @@ import pg from "pg";
 const { Pool } = pg;
 const pool = new Pool({
   host: "127.0.0.1",
-  port: 5435,
+  port: 5432,
   database: "pwncorp_erp",
   user: "pwncorp",
-  password: "test",
+  password: "pwncorp2026",
 });
 const adapter = new PrismaPg(pool);
 

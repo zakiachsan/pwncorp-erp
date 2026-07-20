@@ -1,13 +1,22 @@
 "use client";
 
-import { Bell, Search, ChevronDown } from "lucide-react";
+import { Bell, Search, ChevronDown, Menu } from "lucide-react";
 import { useState } from "react";
 
-export default function Header() {
+export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const [search, setSearch] = useState("");
 
   return (
     <header className="h-14 flex items-center px-4 lg:px-6 bg-white border-b border-[--color-border-light] flex-shrink-0 gap-4 z-20">
+      {/* Mobile Hamburger */}
+      <button
+        className="lg:hidden p-1.5 -ml-1 text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
+        onClick={onMenuClick}
+        aria-label="Open menu"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* Search */}
       <div className="relative flex-1 max-w-md hidden sm:block">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[--color-text-placeholder]" />

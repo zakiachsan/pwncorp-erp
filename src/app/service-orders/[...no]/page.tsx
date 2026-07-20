@@ -302,12 +302,12 @@ export default function ServiceOrderDetailPage() {
   const wo = hasWO ? (order.workOrders || [])[0] : null;
 
   return (
-    <div style={{ padding: "0 24px 24px" }}>
+    <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       {/* Workflow Bar */}
-      <div style={S.workflowBar}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-[8px_14px] bg-[#f9f9f9] border border-[#ecebea] rounded-lg mb-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
-          <div style={{ display: "flex", gap: 6 }}>
+          <div className="flex flex-wrap gap-1.5">
             <span style={{ ...S.badge, ...(order.status === "Draft" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
             <span style={{ ...S.badge, ...(order.status === "Delivered" ? S.badgeActive : S.badgeInactive) }}>DELIVERED</span>
             <span style={{ ...S.badge, ...(order.status === "Approved" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
@@ -316,7 +316,7 @@ export default function ServiceOrderDetailPage() {
       </div>
 
       {/* Tab Bar */}
-      <div style={S.tabBar}>
+      <div className="flex gap-0 mb-4 border-b-2 border-[#ecebea] overflow-x-auto">
         <button onClick={() => setActiveTab("details")} style={activeTab === "details" ? S.tabActive : S.tab}>Details</button>
         <button onClick={() => setActiveTab("docref")} style={activeTab === "docref" ? S.tabActive : S.tab}>Document Reference</button>
         <button onClick={() => setActiveTab("changes")} style={activeTab === "changes" ? S.tabActive : S.tab}>Changes</button>
@@ -326,17 +326,17 @@ export default function ServiceOrderDetailPage() {
       {activeTab === "details" && (
         <>
           {/* Workflow Actions */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <div className="flex flex-wrap gap-2 mb-4">
             {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Deliver</button>}
-            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{!hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button>}{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View Work Orders</button>}</>}
-            {isApproved && !hasWO && (order.services || []).length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button>}
-            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View Work Orders</button>}
+            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{!hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}</>}
+            {isApproved && !hasWO && (order.services || []).length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
+            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
             <button style={S.actionBtn}><Printer size={14} /> Print</button>
-            <button style={S.actionBtn}><FileText size={14} /> Proforma Invoice</button>
+            <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
           </div>
 
           {/* 3-Column Info Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div style={S.infoCol}>
               <div style={S.infoColTitle}>Customer & Store</div>
               <F2 label="Document Number" value={d.documentNumber} />
@@ -397,9 +397,9 @@ export default function ServiceOrderDetailPage() {
           {hasWO && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Work Orders</div>
-              <div style={S.tableWrap}>
-                <table style={S.table}><thead><tr><th style={S.th}>Document Number</th><th style={S.th}>Created Date</th><th style={S.th}>Status</th></tr></thead>
-                  <tbody><tr style={S.tr}><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)}>{wo.woNo || wo.documentNumber || "-"}</td><td style={S.td}>{wo.createdAt ? new Date(wo.createdAt).toLocaleDateString("id-ID") : (wo.createdDate || "-")}</td><td style={S.td}><span style={{ ...S.pill, background: wo.status === "COMPLETED" || wo.status === "Completed" ? "#2e844a" : wo.status === "IN PROGRESS" || wo.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{wo.status}</span></td></tr></tbody>
+              <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
+                <table style={S.table}><thead><tr><th style={S.th}>Document Number</th><th className="hidden sm:table-cell" style={S.th}>Created Date</th><th style={S.th}>Status</th></tr></thead>
+                  <tbody><tr style={S.tr}><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)}>{wo.woNo || wo.documentNumber || "-"}</td><td className="hidden sm:table-cell" style={S.td}>{wo.createdAt ? new Date(wo.createdAt).toLocaleDateString("id-ID") : (wo.createdDate || "-")}</td><td style={S.td}><span style={{ ...S.pill, background: wo.status === "COMPLETED" || wo.status === "Completed" ? "#2e844a" : wo.status === "IN PROGRESS" || wo.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{wo.status}</span></td></tr></tbody>
                 </table>
               </div>
             </div>
@@ -440,9 +440,9 @@ function F2({ label, value }: { label: string; value: string }) {
 function ServicesTable({ services, totalQty, grandTotal, router }: { services: any[]; totalQty: number; grandTotal: number; router: any }) {
   const isApiFormat = services.length > 0 && services[0].service;
   return (
-    <div style={S.tableWrap}>
+    <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
-        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Item</th><th style={S.th}>Description</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
+        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Item</th><th className="hidden sm:table-cell" style={S.th}>Description</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
         <tbody>
           {services.map((svc: any, i: number) => {
             if (isApiFormat) {
@@ -451,9 +451,9 @@ function ServicesTable({ services, totalQty, grandTotal, router }: { services: a
                 <tr key={i} style={S.tr}>
                   <td style={S.td}>{i + 1}</td>
                   <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/master-data/services/${s.sku || ""}`)}>{s.sku} - {s.name}</td>
-                  <td style={S.td}>-</td>
+                  <td className="hidden sm:table-cell" style={S.td}>-</td>
                   <td style={{ ...S.td, textAlign: "right" }}>{svc.qty}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.unitPrice)}</td>
+                  <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(svc.unitPrice)}</td>
                   <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
                 </tr>
               );
@@ -463,9 +463,9 @@ function ServicesTable({ services, totalQty, grandTotal, router }: { services: a
               <tr key={i} style={S.tr}>
                 <td style={S.td}>{i + 1}</td>
                 <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/master-data/services/${code}`)}>{svc.item}</td>
-                <td style={S.td}>{svc.description}</td>
+                <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.priceExTax)}</td>
+                <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(svc.priceExTax)}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.subtotal)}</td>
               </tr>
             );
@@ -479,13 +479,13 @@ function ServicesTable({ services, totalQty, grandTotal, router }: { services: a
 
 /* ─── Sparepart Table ─── */
 function SparepartTable({ spareparts }: { spareparts: any[] }) {
-  if (spareparts.length === 0) return <div style={{ ...S.tableWrap, padding: 24, textAlign: "center", color: "#8e8f8e", fontSize: 13 }}>Belum ada sparepart</div>;
+  if (spareparts.length === 0) return <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white p-6 text-center text-[#8e8f8e] text-[13px]">Belum ada sparepart</div>;
   const isApiFormat = spareparts[0].sparepart;
   const total = spareparts.reduce((s: number, sp: any) => s + (sp.total || 0), 0);
   return (
-    <div style={S.tableWrap}>
+    <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
-        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Code</th><th style={S.th}>Name</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
+        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Code</th><th style={S.th}>Name</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
         <tbody>
           {spareparts.map((sp, i) => {
             const data = isApiFormat ? {
@@ -496,7 +496,7 @@ function SparepartTable({ spareparts }: { spareparts: any[] }) {
               total: sp.total,
             } : sp;
             return (
-              <tr key={i} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{data.code}</td><td style={S.td}>{data.name}</td><td style={{ ...S.td, textAlign: "right" }}>{data.qty}</td><td style={{ ...S.td, textAlign: "right" }}>{fmt(data.price)}</td><td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(data.total)}</td></tr>
+              <tr key={i} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{data.code}</td><td style={S.td}>{data.name}</td><td style={{ ...S.td, textAlign: "right" }}>{data.qty}</td><td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(data.price)}</td><td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(data.total)}</td></tr>
             );
           })}
         </tbody>

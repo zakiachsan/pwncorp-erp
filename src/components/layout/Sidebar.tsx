@@ -429,10 +429,14 @@ const S = {
   },
 };
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  setMobileOpen?: (v: boolean) => void;
+}
+
+export default function Sidebar({ mobileOpen = false, setMobileOpen = () => {} }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const activeTab: "operasional" | "finance" = pathname.startsWith("/finance") ? "finance" : "operasional";
 
