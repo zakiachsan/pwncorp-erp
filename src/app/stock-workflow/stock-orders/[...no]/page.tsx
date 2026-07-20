@@ -1,30 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Printer, Search } from "lucide-react";
-
-const stockOrderData: Record<string, any> = {
-  "OPO/WM/26060060": { refCode: "OPO/WM/26060060", referenceNumber: "B6232TQB", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "Adjusment Stock", createdAt: "24-Jun-2026 03:38 PM", updatedAt: "24-Jun-2026 04:00 PM", confirmedDate: "24-Jun-2026 03:38 PM", sentDate: "24-Jun-2026 04:00 PM", receivedDate: "24-Jun-2026 04:00 PM", source: "Web", journals: ["13852764", "13852766"], status: "STORE RECEIVED", items: [{ no: 1, sku: "WURTH-CARBCLEANER", product: "CARBURATOR CLEANER", productCode: "", order: 1, sent: 1, receive: 1, avgCost: 18717 }] },
-  "OPO/WM/26060059": { refCode: "OPO/WM/26060059", referenceNumber: "B1234ABC", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "24-Jun-2026 10:15 AM", updatedAt: "24-Jun-2026 11:00 AM", confirmedDate: "24-Jun-2026 10:15 AM", sentDate: "24-Jun-2026 11:00 AM", receivedDate: "24-Jun-2026 11:00 AM", source: "Web", journals: ["13852770"], status: "STORE RECEIVED", items: [{ no: 1, sku: "OLM-5W30", product: "OLI MESIN 5W-30", productCode: "OLI MESIN 4T", order: 2, sent: 2, receive: 2, avgCost: 50340 }] },
-  "OPO/WM/26060058": { refCode: "OPO/WM/26060058", referenceNumber: "C5678DEF", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "23-Jun-2026 02:00 PM", updatedAt: "23-Jun-2026 03:00 PM", confirmedDate: "23-Jun-2026 02:00 PM", sentDate: "23-Jun-2026 03:00 PM", receivedDate: "23-Jun-2026 03:00 PM", source: "Web", journals: ["13852780"], status: "STORE RECEIVED", items: [{ no: 1, sku: "KP-REM-DEP", product: "KAMPAS REM DEPAN", productCode: "KAMPAS REM DISC", order: 4, sent: 4, receive: 4, avgCost: 130601 }] },
-  "OPO/PJ/26060092": { refCode: "OPO/PJ/26060092", referenceNumber: "D9012GHI", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putro Joyo Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "24-Jun-2026 09:00 AM", updatedAt: "24-Jun-2026 10:00 AM", confirmedDate: "24-Jun-2026 09:00 AM", sentDate: "24-Jun-2026 10:00 AM", receivedDate: "24-Jun-2026 10:00 AM", source: "Web", journals: ["13852790"], status: "STORE RECEIVED", items: [{ no: 1, sku: "SP-PST-KIT", product: "PISTON KIT", productCode: "PISTON ASSY", order: 2, sent: 2, receive: 2, avgCost: 168919 }] },
-  "OPO/WM/26060057": { refCode: "OPO/WM/26060057", referenceNumber: "E3456JKL", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "YUSRO IQBAL", notes: "", createdAt: "22-Jun-2026 08:00 AM", updatedAt: "22-Jun-2026 09:30 AM", confirmedDate: "22-Jun-2026 08:00 AM", sentDate: "22-Jun-2026 09:30 AM", receivedDate: "22-Jun-2026 09:30 AM", source: "Web", journals: ["13852800"], status: "STORE RECEIVED", items: [{ no: 1, sku: "GLT-KIT-01", product: "GASKET KIT", productCode: "GASKET SET", order: 1, sent: 1, receive: 1, avgCost: 768468 }] },
-  "OPO/WM/26020049": { refCode: "OPO/WM/26020049", referenceNumber: "F7890MNO", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "13-Feb-2026 01:49 PM", updatedAt: "23-Jun-2026 01:41 PM", confirmedDate: "13-Feb-2026 01:49 PM", sentDate: "13-Feb-2026 02:00 PM", receivedDate: "23-Jun-2026 01:41 PM", source: "Web", journals: ["13801234"], status: "STORE RECEIVED", items: [{ no: 1, sku: "OLM-0W20", product: "OLI MESIN 0W-20", productCode: "OLI MESIN FULLY SYNTH", order: 3, sent: 3, receive: 3, avgCost: 141141 }] },
-  "OPO/WM/26020038": { refCode: "OPO/WM/26020038", referenceNumber: "G1234PQR", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "11-Feb-2026 09:00 AM", updatedAt: "13-Feb-2026 10:30 AM", confirmedDate: "11-Feb-2026 09:00 AM", sentDate: "11-Feb-2026 10:00 AM", receivedDate: "13-Feb-2026 10:30 AM", source: "Web", journals: ["13801200"], status: "STORE RECEIVED", items: [{ no: 1, sku: "FLT-UDARA", product: "FILTER UDARA", productCode: "AIR FILTER ASSY", order: 2, sent: 2, receive: 2, avgCost: 223181 }] },
-  "OPO/WM/26010092": { refCode: "OPO/WM/26010092", referenceNumber: "H5678STU", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "YUSRO IQBAL", notes: "", createdAt: "22-Jan-2026 08:00 AM", updatedAt: "22-Jan-2026 09:00 AM", confirmedDate: "22-Jan-2026 08:00 AM", sentDate: "22-Jan-2026 09:00 AM", receivedDate: "22-Jan-2026 09:00 AM", source: "Web", journals: ["13780100"], status: "STORE RECEIVED", items: [{ no: 1, sku: "PLG-BUSI", product: "PLUG BUSI", productCode: "SPARK PLUG IRIDIUM", order: 4, sent: 4, receive: 4, avgCost: 192117 }] },
-  "OPO/WM/25110138": { refCode: "OPO/WM/25110138", referenceNumber: "I9012VWX", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "YUSRO IQBAL", notes: "Pengiriman rutin", createdAt: "24-Nov-2025 10:00 AM", updatedAt: "24-Nov-2025 11:30 AM", confirmedDate: "24-Nov-2025 10:00 AM", sentDate: "24-Nov-2025 11:00 AM", receivedDate: "24-Nov-2025 11:30 AM", source: "Web", journals: ["13650200"], status: "STORE RECEIVED", items: [{ no: 1, sku: "OLT-MESIN-4L", product: "OLI MESIN 4L 5W-30", productCode: "ENGINE OIL 4L", order: 10, sent: 10, receive: 10, avgCost: 716724 }] },
-  "OPO/WM/25100216": { refCode: "OPO/WM/25100216", referenceNumber: "J3456YZA", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "25-Oct-2025 08:30 AM", updatedAt: "25-Oct-2025 09:00 AM", confirmedDate: "25-Oct-2025 08:30 AM", sentDate: "25-Oct-2025 09:00 AM", receivedDate: "25-Oct-2025 09:00 AM", source: "Web", journals: ["13620100"], status: "STORE RECEIVED", items: [{ no: 1, sku: "KP-REM-BLK", product: "KAMPAS REM BELAKANG", productCode: "BRAKE SHOE REAR", order: 2, sent: 2, receive: 2, avgCost: 22859 }] },
-  "OPO/WM/25100183": { refCode: "OPO/WM/25100183", referenceNumber: "K7890BCD", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "22-Oct-2025 10:00 AM", updatedAt: "25-Nov-2025 02:00 PM", confirmedDate: "22-Oct-2025 10:00 AM", sentDate: "22-Oct-2025 11:00 AM", receivedDate: "25-Nov-2025 02:00 PM", source: "Web", journals: ["13620150"], status: "STORE RECEIVED", items: [{ no: 1, sku: "V-BELT", product: "V-BELT MESIN", productCode: "DRIVE BELT", order: 3, sent: 3, receive: 3, avgCost: 323594 }] },
-  "OPO/PJ/25100034": { refCode: "OPO/PJ/25100034", referenceNumber: "L1234EFG", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putro Joyo Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "21-Oct-2025 09:00 AM", updatedAt: "25-Nov-2025 03:00 PM", confirmedDate: "21-Oct-2025 09:00 AM", sentDate: "21-Oct-2025 10:00 AM", receivedDate: "25-Nov-2025 03:00 PM", source: "Web", journals: ["13620080"], status: "STORE RECEIVED", items: [{ no: 1, sku: "FLT-OLI", product: "FILTER OLI", productCode: "OIL FILTER", order: 5, sent: 5, receive: 4, avgCost: 218630 }] },
-  "OPO/WM/25100171": { refCode: "OPO/WM/25100171", referenceNumber: "M5678HIJ", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "21-Oct-2025 08:00 AM", updatedAt: "25-Nov-2025 01:00 PM", confirmedDate: "21-Oct-2025 08:00 AM", sentDate: "21-Oct-2025 09:00 AM", receivedDate: "25-Nov-2025 01:00 PM", source: "Web", journals: ["13620070"], status: "STORE RECEIVED", items: [{ no: 1, sku: "RME-BRK-SET", product: "REMEDY BRAKE SET", productCode: "BRAKE CALIPER REPAIR", order: 2, sent: 2, receive: 2, avgCost: 2160886 }] },
-  "OPO/WM/25100111": { refCode: "OPO/WM/25100111", referenceNumber: "N9012KLM", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "Pengiriman besar", createdAt: "13-Oct-2025 07:30 AM", updatedAt: "25-Nov-2025 10:00 AM", confirmedDate: "13-Oct-2025 07:30 AM", sentDate: "13-Oct-2025 08:30 AM", receivedDate: "25-Nov-2025 10:00 AM", source: "Web", journals: ["13610050", "13610051"], status: "STORE RECEIVED", items: [{ no: 1, sku: "KMPLT-OLI", product: "KOMPLETE OLI", productCode: "FULL SERVICE KIT", order: 15, sent: 15, receive: 15, avgCost: 832432 }] },
-  "OPO/WM/25100110": { refCode: "OPO/WM/25100110", referenceNumber: "O3456NOP", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "13-Oct-2025 08:00 AM", updatedAt: "25-Nov-2025 11:00 AM", confirmedDate: "13-Oct-2025 08:00 AM", sentDate: "13-Oct-2025 09:00 AM", receivedDate: "25-Nov-2025 11:00 AM", source: "Web", journals: ["13610040"], status: "CONFIRMED", items: [{ no: 1, sku: "CLN-INTK", product: "CLEANER INTAKE", productCode: "INTAKE VALVE CLEANER", order: 3, sent: 3, receive: 0, avgCost: 95702 }] },
-  "OPO/WM/25100011": { refCode: "OPO/WM/25100011", referenceNumber: "P7890QRS", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "01-Oct-2025 09:00 AM", updatedAt: "01-Oct-2025 10:00 AM", confirmedDate: "01-Oct-2025 09:00 AM", sentDate: "01-Oct-2025 10:00 AM", receivedDate: "01-Oct-2025 10:00 AM", source: "Web", journals: ["13600010"], status: "STORE RECEIVED", items: [{ no: 1, sku: "BRG-TMS", product: "BELT TIMING", productCode: "TIMING BELT KIT", order: 1, sent: 1, receive: 1, avgCost: 45718 }] },
-  "OPO/WM/25080340": { refCode: "OPO/WM/25080340", referenceNumber: "Q1234TUV", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "27-Aug-2025 10:00 AM", updatedAt: "27-Aug-2025 11:00 AM", confirmedDate: "27-Aug-2025 10:00 AM", sentDate: "27-Aug-2025 10:30 AM", receivedDate: "27-Aug-2025 11:00 AM", source: "Web", journals: ["13560100"], status: "STORE RECEIVED", items: [{ no: 1, sku: "SP-OLI-MTR", product: "OLI MOTOR 10W/40", productCode: "MOTORCYCLE OIL", order: 5, sent: 5, receive: 5, avgCost: 265453 }] },
-  "OPO/WM/25080007": { refCode: "OPO/WM/25080007", referenceNumber: "R5678WXY", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "02-Aug-2025 08:00 AM", updatedAt: "02-Aug-2025 09:00 AM", confirmedDate: "02-Aug-2025 08:00 AM", sentDate: "02-Aug-2025 08:30 AM", receivedDate: "02-Aug-2025 09:00 AM", source: "Web", journals: ["13550010"], status: "STORE RECEIVED", items: [{ no: 1, sku: "LMP-HDLM", product: "LAMPU HEADLAMP", productCode: "HEADLIGHT BULB", order: 2, sent: 2, receive: 2, avgCost: 2092 }] },
-  "OPO/WM/25070234": { refCode: "OPO/WM/25070234", referenceNumber: "S9012ZAB", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "ANGGA NOVIANTO", notes: "", createdAt: "28-Jul-2025 09:00 AM", updatedAt: "28-Jul-2025 10:00 AM", confirmedDate: "28-Jul-2025 09:00 AM", sentDate: "28-Jul-2025 09:30 AM", receivedDate: "28-Jul-2025 10:00 AM", source: "Web", journals: ["13540050"], status: "CONFIRMED", items: [{ no: 1, sku: "CLT-AC", product: "CHEMICAL AC", productCode: "AC REFRIGERANT", order: 4, sent: 4, receive: 0, avgCost: 11430 }] },
-  "OPO/WM/25070196": { refCode: "OPO/WM/25070196", referenceNumber: "T3456CDE", fromWarehouse: "Gudang Wijaya", deliverTo: "PT Putra Wijaya Motor", createdBy: "Andi Yahya", updatedBy: "YUSRO IQBAL", notes: "Dibatalkan - stok kosong", createdAt: "21-Jul-2025 08:00 AM", updatedAt: "22-Jul-2025 09:00 AM", confirmedDate: "21-Jul-2025 08:00 AM", sentDate: "-", receivedDate: "-", source: "Web", journals: [], status: "CANCELLED", items: [{ no: 1, sku: "GR-SKT-01", product: "GEAR SET", productCode: "FINAL GEAR KIT", order: 2, sent: 0, receive: 0, avgCost: 2023786 }] },
-};
 
 const statusWorkflow = ["DRAFT", "STORE CONFIRMED", "WAREHOUSE SENT", "STORE RECEIVED"];
 
@@ -35,16 +13,66 @@ export default function StockOrderDetailPage() {
   const router = useRouter();
   const rawNo = params.no as string[];
   const orderNo = rawNo ? rawNo.join("/") : "";
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const order = stockOrderData[orderNo];
+  useEffect(() => {
+    fetch(`/api/stock-orders?search=${encodeURIComponent(orderNo)}&limit=1`)
+      .then((r) => r.json())
+      .then((json) => {
+        const found = (json.data || [])[0];
+        if (!found) { setError("Stock Order tidak ditemukan: " + orderNo); setLoading(false); return; }
+        setOrder({
+          refCode: found.orderNo || orderNo,
+          referenceNumber: found.refNo || "-",
+          fromWarehouse: found.warehouse || "-",
+          deliverTo: found.deliverTo || found.store || "-",
+          createdBy: found.createdBy || "-",
+          updatedBy: found.updatedBy || "-",
+          notes: found.notes || "",
+          createdAt: found.createdAt || found.date || "-",
+          updatedAt: found.updatedAt || "-",
+          confirmedDate: found.confirmedDate || "-",
+          sentDate: found.sentDate || "-",
+          receivedDate: found.receivedAt || "-",
+          source: found.source || "Web",
+          journals: found.journals || [],
+          status: found.status || "DRAFT",
+          items: (found.items || []).map((it: any, i: number) => ({
+            no: i + 1,
+            sku: it.sku || it.sparepart?.sku || "-",
+            product: it.name || it.sparepart?.name || "-",
+            productCode: it.productCode || it.sparepart?.code || "",
+            order: it.orderQty || it.qty || 0,
+            sent: it.sentQty || 0,
+            receive: it.receiveQty || 0,
+            avgCost: it.avgCost || it.price || 0,
+          })),
+        });
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load stock order"); setLoading(false); });
+  }, [orderNo]);
 
-  if (!order) {
+  if (loading) {
     return (
       <div style={{ padding: 24 }}>
         <button onClick={() => router.push("/stock-workflow/stock-orders")} style={S.backBtn}>
           <ArrowLeft size={16} /> Stock Orders
         </button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Stock Order tidak ditemukan: {orderNo}</p></div>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Loading...</p></div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div style={{ padding: 24 }}>
+        <button onClick={() => router.push("/stock-workflow/stock-orders")} style={S.backBtn}>
+          <ArrowLeft size={16} /> Stock Orders
+        </button>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>{error || "Stock Order tidak ditemukan: " + orderNo}</p></div>
       </div>
     );
   }
@@ -129,6 +157,11 @@ export default function StockOrderDetailPage() {
             </tr>
           </thead>
           <tbody>
+            {order.items.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada item</td>
+              </tr>
+            )}
             {order.items.map((item: any) => (
               <tr key={item.no} style={S.tr}>
                 <td style={S.td}>{item.no}</td>

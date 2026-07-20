@@ -1,16 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ReceiptText, Star, Search, Download } from "lucide-react";
-
-/* ── data from Excel ── */
-const data = [
-  { no: 1, invoiceDate: "07-Jul-2026", store: "Wijaya Motor - One Stop Service", serviceInvoice: "SRI/003/26070028", type: "Service Sale", status: "Completed", customer: "BPK. IKO", company: "", customerGroup: "", membership: "", customerPhone: "0811105007", salesperson: "", bookingSource: "", referenceNumber: "", insuranceProvider: "", serviceAdvisor: "NANDA SALSA", vehicleType: "Car", registration: "B1992B", hullNumber: "", vin: "", vehicleMake: "TOYOTA", vehicleModel: "ALL NEW CAMRY 2.5", qty: 5, discount: 32500, subtotal: 617500, tax: 0, otherTax: 0, total: 617500, tradeIn: 0, swo: "SWO/003/26070030", sro: "SRO/003/26070031", serviceReservation: "", notes: "BRI 039801003070566 a/n PUTRA WIJAYA MOTOR", serviceRecommendations: "", paymentTypes: "BRI QRIS" },
-  { no: 2, invoiceDate: "07-Jul-2026", store: "Wijaya Motor - One Stop Service", serviceInvoice: "SRI/003/26070029", type: "Service Sale", status: "Completed", customer: "BPK. RICKY", company: "", customerGroup: "", membership: "", customerPhone: "0811857555", salesperson: "", bookingSource: "", referenceNumber: "", insuranceProvider: "", serviceAdvisor: "NANDA SALSA", vehicleType: "Car", registration: "B9525PAM", hullNumber: "", vin: "", vehicleMake: "SUZUKI", vehicleModel: "NEW CARRY PICK UP", qty: 5, discount: 21750, subtotal: 413250, tax: 0, otherTax: 0, total: 413250, tradeIn: 0, swo: "SWO/003/26070031", sro: "SRO/003/26070032", serviceReservation: "", notes: "BRI 039801003070566 a/n PUTRA WIJAYA MOTOR", serviceRecommendations: "", paymentTypes: "BRI QRIS" },
-  { no: 3, invoiceDate: "07-Jul-2026", store: "Wijaya Motor - One Stop Service", serviceInvoice: "SRI/003/26070030", type: "Service Sale", status: "Completed", customer: "LUPIN MOTOR", company: "", customerGroup: "", membership: "", customerPhone: "081314778809", salesperson: "", bookingSource: "", referenceNumber: "", insuranceProvider: "", serviceAdvisor: "NANDA SALSA", vehicleType: "Car", registration: "B1800TP", hullNumber: "", vin: "", vehicleMake: "RANGE ROVER", vehicleModel: "EVOQUE", qty: 20, discount: 136000, subtotal: 1224000, tax: 0, otherTax: 0, total: 1224000, tradeIn: 0, swo: "SWO/003/26070029", sro: "SRO/003/26070029", serviceReservation: "", notes: "BRI 039801003070566 a/n PUTRA WIJAYA MOTOR", serviceRecommendations: "", paymentTypes: "BRI QRIS" },
-  { no: 4, invoiceDate: "07-Jul-2026", store: "Wijaya Motor - One Stop Service", serviceInvoice: "SRI/003/26070031", type: "Service Sale", status: "Completed", customer: "BPK. ALDO", company: "", customerGroup: "", membership: "", customerPhone: "0895610488742", salesperson: "", bookingSource: "", referenceNumber: "", insuranceProvider: "", serviceAdvisor: "NANDA SALSA", vehicleType: "Car", registration: "KH1863GI", hullNumber: "", vin: "", vehicleMake: "TOYOTA", vehicleModel: "LAND CRUISER", qty: 2, discount: 0, subtotal: 400000, tax: 0, otherTax: 0, total: 400000, tradeIn: 0, swo: "SWO/003/26070032", sro: "SRO/003/26070033", serviceReservation: "", notes: "BRI 039801003070566 a/n PUTRA WIJAYA MOTOR", serviceRecommendations: "", paymentTypes: "BRI QRIS" },
-  { no: 5, invoiceDate: "07-Jul-2026", store: "Wijaya Motor - One Stop Service", serviceInvoice: "SRI/003/26070032", type: "Service Sale", status: "Completed", customer: "AUTO PRIMA", company: "", customerGroup: "", membership: "", customerPhone: "081298280218", salesperson: "", bookingSource: "", referenceNumber: "", insuranceProvider: "", serviceAdvisor: "NANDA SALSA", vehicleType: "Car", registration: "B819BEN", hullNumber: "", vin: "", vehicleMake: "BYD", vehicleModel: "SEAL", qty: 1, discount: 5000, subtotal: 45000, tax: 0, otherTax: 0, total: 45000, tradeIn: 0, swo: "SWO/003/26070033", sro: "SRO/003/26070034", serviceReservation: "", notes: "BRI 039801003070566 a/n PUTRA WIJAYA MOTOR", serviceRecommendations: "", paymentTypes: "BRI QRIS" },
-];
 
 function fmt(n: number): string {
   return n.toLocaleString("id-ID").replace(/,/g, ".");
@@ -40,6 +32,60 @@ const TD: React.CSSProperties = {
 
 export default function SummaryServiceInvoicesPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-invoices&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const invoices: any[] = j.data || [];
+        const mapped = invoices.map((inv: any, i: number) => ({
+          no: i + 1,
+          invoiceDate: inv.invoiceDate ? new Date(inv.invoiceDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+          store: inv.store?.name || "—",
+          serviceInvoice: inv.invNo || "—",
+          type: inv.type || "Service Sale",
+          status: inv.status || "—",
+          customer: inv.customer?.name || "—",
+          company: "",
+          customerGroup: "",
+          membership: "",
+          customerPhone: "",
+          salesperson: "",
+          bookingSource: "",
+          referenceNumber: "",
+          insuranceProvider: "",
+          serviceAdvisor: "",
+          vehicleType: "",
+          registration: "",
+          hullNumber: "",
+          vin: "",
+          vehicleMake: "",
+          vehicleModel: "",
+          qty: 0,
+          discount: 0,
+          subtotal: inv.subtotal || inv.total || 0,
+          tax: inv.tax || 0,
+          otherTax: 0,
+          total: inv.total || 0,
+          tradeIn: 0,
+          swo: "",
+          sro: "",
+          serviceReservation: "",
+          notes: "",
+          serviceRecommendations: "",
+          paymentTypes: inv._count?.payments ? `${inv._count.payments} payment(s)` : "—",
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load summary service invoices"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -66,7 +112,7 @@ export default function SummaryServiceInvoicesPage() {
           <Field label="Status"><select className="form-select" style={{ minWidth: 120 }}><option>All Status</option><option>Completed</option><option>Draft</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>LUPIN MOTOR</option><option>BPK. ALDO</option><option>AUTO PRIMA</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option></select></Field>
           <Field label="Customer Group"><select className="form-select" style={{ minWidth: 140 }}><option>All Customer Groups</option></select></Field>
           <Field label="Membership"><select className="form-select" style={{ minWidth: 120 }}><option>Any</option><option>Yes</option><option>No</option></select></Field>
           <Field label="Registration"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
@@ -139,27 +185,27 @@ export default function SummaryServiceInvoicesPage() {
                 <td style={TD}>{row.company || "—"}</td>
                 <td style={TD}>{row.customerGroup || "—"}</td>
                 <td style={TD}>{row.membership || "—"}</td>
-                <td style={TD}>{row.customerPhone}</td>
+                <td style={TD}>{row.customerPhone || "—"}</td>
                 <td style={TD}>{row.salesperson || "—"}</td>
                 <td style={TD}>{row.bookingSource || "—"}</td>
                 <td style={TD}>{row.referenceNumber || "—"}</td>
                 <td style={TD}>{row.insuranceProvider || "—"}</td>
-                <td style={TD}>{row.serviceAdvisor}</td>
-                <td style={TD}>{row.vehicleType}</td>
-                <td style={{ ...TD, ...L }}>{row.registration}</td>
+                <td style={TD}>{row.serviceAdvisor || "—"}</td>
+                <td style={TD}>{row.vehicleType || "—"}</td>
+                <td style={{ ...TD, ...L }}>{row.registration || "—"}</td>
                 <td style={TD}>{row.hullNumber || "—"}</td>
                 <td style={TD}>{row.vin || "—"}</td>
-                <td style={TD}>{row.vehicleMake}</td>
-                <td style={TD}>{row.vehicleModel}</td>
-                <td style={{ ...TD, textAlign: "right" }}>{row.qty}</td>
+                <td style={TD}>{row.vehicleMake || "—"}</td>
+                <td style={TD}>{row.vehicleModel || "—"}</td>
+                <td style={{ ...TD, textAlign: "right" }}>{row.qty || "—"}</td>
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.discount)}</td>
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.subtotal)}</td>
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.tax)}</td>
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.otherTax)}</td>
                 <td style={{ ...TD, textAlign: "right", fontWeight: 600 }}>{fmt(row.total)}</td>
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.tradeIn)}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/work-orders/${row.swo}`)}>{row.swo}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/service-orders/${row.sro}`)}>{row.sro}</td>
+                <td style={{ ...TD, ...L }}>{row.swo || "—"}</td>
+                <td style={{ ...TD, ...L }}>{row.sro || "—"}</td>
                 <td style={TD}>{row.serviceReservation || "—"}</td>
                 <td style={{ ...TD, maxWidth: 250 }}>{row.notes || "—"}</td>
                 <td style={TD}>{row.serviceRecommendations || "—"}</td>

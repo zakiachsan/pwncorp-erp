@@ -1,17 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Wrench, Star, Search, Download } from "lucide-react";
-
-/* ── data from Excel ── */
-const data = [
-  { no: 1, swo: "SWO/WM/26070010", store: "PT Putra Wijaya Motor", createdDate: "06-Jul-2026", serviceDate: "07-Jul-2026", serviceTime: "12:28", startAt: "", completedDate: "", status: "Waiting", leadTime: "", leadTimeMin: 0, customer: "SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN", vehicleType: "Car", registration: "B9118SSC", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "MARDOTO", assignee: "AGUNG PRATAMA, Pak Hasan", odometer: 0, serviceOrder: "SRO/WM/26070010", serviceReservation: "", insuranceProvider: "" },
-  { no: 2, swo: "SWO/003/26070030", store: "Wijaya Motor - One Stop Service", createdDate: "07-Jul-2026", serviceDate: "07-Jul-2026", serviceTime: "08:55", startAt: "07-Jul-2026 08:31 AM", completedDate: "07-Jul-2026 09:33 AM", status: "Completed", leadTime: "0 Minute(s)", leadTimeMin: 0, customer: "BPK. IKO", vehicleType: "Car", registration: "B1992B", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", assignee: "NENDY, WOYO", odometer: 22171, serviceOrder: "SRO/003/26070031", serviceReservation: "", insuranceProvider: "" },
-  { no: 3, swo: "SWO/003/26070031", store: "Wijaya Motor - One Stop Service", createdDate: "07-Jul-2026", serviceDate: "07-Jul-2026", serviceTime: "10:55", startAt: "07-Jul-2026 10:02 AM", completedDate: "07-Jul-2026 10:57 AM", status: "Completed", leadTime: "0 Minute(s)", leadTimeMin: 0, customer: "BPK. RICKY", vehicleType: "Car", registration: "B9525PAM", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", assignee: "NENDY, WOYO", odometer: 18157, serviceOrder: "SRO/003/26070032", serviceReservation: "", insuranceProvider: "" },
-  { no: 4, swo: "SWO/003/26070032", store: "Wijaya Motor - One Stop Service", createdDate: "07-Jul-2026", serviceDate: "07-Jul-2026", serviceTime: "11:35", startAt: "07-Jul-2026 11:26 AM", completedDate: "07-Jul-2026 12:06 PM", status: "Completed", leadTime: "0 Minute(s)", leadTimeMin: 0, customer: "BPK. ALDO", vehicleType: "Car", registration: "KH1863GI", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", assignee: "MIFTA ARIFIN", odometer: 0, serviceOrder: "SRO/003/26070033", serviceReservation: "", insuranceProvider: "" },
-  { no: 5, swo: "SWO/003/26070033", store: "Wijaya Motor - One Stop Service", createdDate: "07-Jul-2026", serviceDate: "07-Jul-2026", serviceTime: "13:55", startAt: "07-Jul-2026 01:43 PM", completedDate: "07-Jul-2026 02:00 PM", status: "Completed", leadTime: "0 Minute(s)", leadTimeMin: 0, customer: "AUTO PRIMA", vehicleType: "Car", registration: "B819BEN", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", assignee: "NENDY", odometer: 0, serviceOrder: "SRO/003/26070034", serviceReservation: "", insuranceProvider: "" },
-  { no: 6, swo: "SWO/003/26070034", store: "Wijaya Motor - One Stop Service", createdDate: "07-Jul-2026", serviceDate: "07-Jul-2026", serviceTime: "14:05", startAt: "07-Jul-2026 01:57 PM", completedDate: "", status: "In Progress", leadTime: "0 Minute(s)", leadTimeMin: 0, customer: "PROMOTOR", vehicleType: "Car", registration: "B1537BIR", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", assignee: "NENDY, WOYO", odometer: 114166, serviceOrder: "SRO/003/26070035", serviceReservation: "", insuranceProvider: "" },
-];
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -45,6 +36,48 @@ const TD: React.CSSProperties = {
 
 export default function SummaryServiceWorkOrdersPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-wo&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const wos: any[] = j.data || [];
+        const mapped = wos.map((wo: any, i: number) => ({
+          no: i + 1,
+          swo: wo.woNo || "—",
+          store: wo.store?.name || wo.so?.store?.name || "—",
+          createdDate: wo.createdAt ? new Date(wo.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+          serviceDate: wo.serviceDate ? new Date(wo.serviceDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+          serviceTime: wo.serviceTime || "—",
+          startAt: wo.startAt ? new Date(wo.startAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : "—",
+          completedDate: wo.completedDate ? new Date(wo.completedDate).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : "",
+          status: wo.status || "Waiting",
+          leadTime: wo.leadTime || "",
+          leadTimeMin: wo.leadTimeMin || 0,
+          customer: wo.so?.customer?.name || "—",
+          vehicleType: wo.so?.vehicle?.type || "Car",
+          registration: wo.so?.vehicle?.plateNo || "—",
+          hullNumber: "",
+          vin: "",
+          estimatedTime: wo.estimatedTime || "",
+          serviceAdvisor: wo.so?.sa?.name || "—",
+          assignee: wo.mekanik?.name || "—",
+          odometer: wo.odometer || 0,
+          serviceOrder: wo.so?.soNo || "—",
+          serviceReservation: "",
+          insuranceProvider: "",
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load summary work orders"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -68,14 +101,14 @@ export default function SummaryServiceWorkOrdersPage() {
           <Field label="Store"><select className="form-select" style={{ minWidth: 170 }}><option>All Stores</option><option>PT Putra Wijaya Motor</option><option>Wijaya Motor - One Stop Service</option></select></Field>
           <Field label="Service Work Order"><input type="text" className="form-input" placeholder="Service Work Order" style={{ minWidth: 160 }} /></Field>
           <Field label="Status"><select className="form-select" style={{ minWidth: 120 }}><option>All Status</option><option>Waiting</option><option>In Progress</option><option>Completed</option></select></Field>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 180 }}><option>All Customers</option><option>SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>BPK. ALDO</option><option>AUTO PRIMA</option><option>PROMOTOR</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 180 }}><option>All Customers</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
           <Field label="Registration"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="Hull Number"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="VIN"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
-          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option><option>MARDOTO</option><option>NANDA SALSA</option></select></Field>
-          <Field label="Assignee"><select className="form-select" style={{ minWidth: 140 }}><option>All Assignee</option><option>AGUNG PRATAMA</option><option>NENDY</option><option>WOYO</option><option>MIFTA ARIFIN</option></select></Field>
+          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option></select></Field>
+          <Field label="Assignee"><select className="form-select" style={{ minWidth: 140 }}><option>All Assignee</option></select></Field>
           <Field label="">&nbsp;</Field>
           <button className="btn btn--sm" style={{ minWidth: 90, justifyContent: "center", gap: 6 }}><Search size={14} /> Show</button>
           <button className="btn btn--brand btn--sm" style={{ minWidth: 110, justifyContent: "center", gap: 6, background: "#014486" }}><Download size={14} /> Download</button>

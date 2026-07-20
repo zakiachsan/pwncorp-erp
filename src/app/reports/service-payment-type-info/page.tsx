@@ -1,15 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard, Star, Search, Download } from "lucide-react";
-
-const data = [
-  { no: 1, date: "07/07/26", serviceInvoice: "SRI/003/26070028", invoiceReceivable: "IR/003/26070028", store: "Wijaya Motor", customer: "BPK. IKO", paymentProvider: "BRI QRIS", amount: 617500, chargeFee: 0, nettAmount: 617500 },
-  { no: 2, date: "07/07/26", serviceInvoice: "SRI/003/26070029", invoiceReceivable: "IR/003/26070029", store: "Wijaya Motor", customer: "BPK. RICKY", paymentProvider: "BRI QRIS", amount: 413250, chargeFee: 0, nettAmount: 413250 },
-  { no: 3, date: "07/07/26", serviceInvoice: "SRI/003/26070030", invoiceReceivable: "IR/003/26070030", store: "Wijaya Motor", customer: "LUPIN MOTOR", paymentProvider: "BRI QRIS", amount: 1224000, chargeFee: 0, nettAmount: 1224000 },
-  { no: 4, date: "07/07/26", serviceInvoice: "SRI/003/26070031", invoiceReceivable: "IR/003/26070031", store: "Wijaya Motor", customer: "BPK. ALDO", paymentProvider: "BRI QRIS", amount: 400000, chargeFee: 0, nettAmount: 400000 },
-  { no: 5, date: "07/07/26", serviceInvoice: "SRI/003/26070032", invoiceReceivable: "IR/003/26070032", store: "Wijaya Motor", customer: "AUTO PRIMA", paymentProvider: "BRI QRIS", amount: 45000, chargeFee: 0, nettAmount: 45000 },
-];
 
 function fmt(n: number): string {
   return n.toLocaleString("id-ID").replace(/,/g, ".");
@@ -39,6 +32,35 @@ const TD: React.CSSProperties = {
 
 export default function ServicePaymentTypeInfoPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=daily-payments&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const payments: any[] = j.data || [];
+        const mapped = payments.map((p: any, i: number) => ({
+          no: i + 1,
+          date: (p.paymentDate || "").slice(0, 10),
+          serviceInvoice: p.invoice?.invNo || "—",
+          invoiceReceivable: p.invoice?.invNo ? `IR/${p.invoice.invNo.split("/").slice(1).join("/")}` : "—",
+          store: p.invoice?.store?.name || "—",
+          customer: p.invoice?.customer?.name || "—",
+          paymentProvider: p.paymentType || p.method || "—",
+          amount: p.amount || 0,
+          chargeFee: p.chargeFee || 0,
+          nettAmount: (p.amount || 0) - (p.chargeFee || 0),
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment type info"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -60,7 +82,7 @@ export default function ServicePaymentTypeInfoPage() {
           <Field label="To Date"><input type="date" className="form-input" defaultValue="2026-07-07" style={{ minWidth: 130 }} /></Field>
           <Field label="Store"><select className="form-select" style={{ minWidth: 170 }}><option>All Stores</option><option>Wijaya Motor</option></select></Field>
           <Field label="Service Invoice"><input type="text" className="form-input" placeholder="Service Invoice" style={{ minWidth: 140 }} /></Field>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>LUPIN MOTOR</option><option>BPK. ALDO</option><option>AUTO PRIMA</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option></select></Field>
           <Field label="Bank"><select className="form-select" style={{ minWidth: 120 }}><option>All</option></select></Field>
           <Field label="Payment Provider"><select className="form-select" style={{ minWidth: 150 }}><option>All</option></select></Field>
         </div>

@@ -1,14 +1,29 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, Search } from "lucide-react";
 
-const purchaseOrders = [
-  { no: "PO-004", supplier: "PT Auto Parts", status: "Draft", total: "Rp 3.500.000", date: "26 Jun 2026", items: 15 },
-  { no: "PO-001", supplier: "PT Auto Parts", status: "Sent", total: "Rp 4.250.000", date: "25 Jun 2026", items: 12 },
-  { no: "PO-002", supplier: "CV Ban Sehat", status: "Partial Received", total: "Rp 2.800.000", date: "24 Jun 2026", items: 8 },
-  { no: "PO-003", supplier: "UD Oli Jaya", status: "Received", total: "Rp 1.200.000", date: "22 Jun 2026", items: 5 },
-];
+interface ApiPO {
+  id: string;
+  poNo: string;
+  date: string;
+  supplier: { companyName: string } | null;
+  total: number;
+  status: string;
+  _count: { items: number; deliveries: number };
+}
+
+interface PurchaseOrder {
+  no: string;
+  supplier: string;
+  status: string;
+  total: string;
+  date: string;
+  items: number;
+}
+
+const formatIDR = (val: number) => "Rp " + val.toLocaleString("id-ID");
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -23,6 +38,48 @@ const statusPill = (status: string) => {
 
 export default function PurchaseOrdersPage() {
   const router = useRouter();
+  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [supplierFilter, setSupplierFilter] = useState("");
+  const [search, setSearch] = useState("");
+
+  const fetchPOs = (params?: Record<string, string>) => {
+    setLoading(true);
+    const qs = new URLSearchParams({ limit: "1000", ...params }).toString();
+    fetch(`/api/purchase-orders?${qs}`)
+      .then((r) => r.json())
+      .then((j) => {
+        const data: ApiPO[] = j.data || [];
+        setOrders(data.map((po) => ({
+          no: po.poNo,
+          supplier: po.supplier?.companyName || "-",
+          status: po.status,
+          total: formatIDR(po.total || 0),
+          date: po.date || "-",
+          items: po._count?.items || 0,
+        })));
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load purchase orders");
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => { fetchPOs(); }, []);
+
+  const handleSearch = () => {
+    const params: Record<string, string> = {};
+    if (statusFilter) params.status = statusFilter;
+    if (supplierFilter) params.supplierId = supplierFilter;
+    if (search) params.search = search;
+    fetchPOs(params);
+  };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -44,30 +101,27 @@ export default function PurchaseOrdersPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>Draft</option>
-              <option>Sent</option>
-              <option>Partial Received</option>
-              <option>Received</option>
+            <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">All Status</option>
+              <option value="DRAFT">Draft</option>
+              <option value="SENT">Sent</option>
+              <option value="PARTIAL_RECEIVED">Partial Received</option>
+              <option value="RECEIVED">Received</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Supplier</label>
-            <select className="form-select">
-              <option>All Suppliers</option>
-              <option>PT Auto Parts</option>
-              <option>CV Ban Sehat</option>
-              <option>UD Oli Jaya</option>
+            <select className="form-select" value={supplierFilter} onChange={(e) => setSupplierFilter(e.target.value)}>
+              <option value="">All Suppliers</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="No. PO / Supplier..." />
+            <input type="text" className="form-input" placeholder="No. PO / Supplier..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>
-            <button className="btn btn--brand btn--sm flex-1 justify-center">
+            <button className="btn btn--brand btn--sm flex-1 justify-center" onClick={handleSearch}>
               <Search size={14} /> Cari
             </button>
           </div>
@@ -88,7 +142,7 @@ export default function PurchaseOrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {purchaseOrders.map((po) => (
+            {orders.map((po) => (
               <tr
                 key={po.no}
                 onClick={() => router.push(`/inventory/po/${po.no}`)}

@@ -1,15 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
-
-const receipts = [
-  { no: "PT.2026.06.00001", date: "26 Jun 2026", cashBank: "Bank BCA", description: "Pembayaran dari Budi Santoso - Invoice INV-001", amount: 2500000, status: "Lunas" },
-  { no: "PT.2026.06.00002", date: "26 Jun 2026", cashBank: "Bank Mandiri", description: "Pembayaran dari Siti Rahmawati - Invoice INV-003", amount: 2600000, status: "Lunas" },
-  { no: "PT.2026.06.00003", date: "25 Jun 2026", cashBank: "Kas", description: "Penjualan tunai Ahmad Fauzi - Invoice INV-004", amount: 950000, status: "Lunas" },
-  { no: "PT.2026.05.00004", date: "31 May 2026", cashBank: "Bank BCA", description: "Pembayaran dari PT Transport Jaya", amount: 4800000, status: "Pending" },
-  { no: "PT.2026.05.00005", date: "28 May 2026", cashBank: "Kas", description: "Penjualan tunai sparepart", amount: 550000, status: "Dibatalkan" },
-];
 
 const formatIDR = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
 
@@ -20,6 +13,20 @@ const statusPill = (status: string) => {
 
 export default function ReceiptsPage() {
   const router = useRouter();
+  const [receipts, setReceipts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/receipts")
+      .then((r) => r.json())
+      .then((j) => { setReceipts(j.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load receipts"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">
@@ -79,16 +86,22 @@ export default function ReceiptsPage() {
             </tr>
           </thead>
           <tbody>
-            {receipts.map((r) => (
-              <tr key={r.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/receipts/${r.no}`)}>
-                <td className="font-medium text-[--color-brand]">{r.no}</td>
-                <td className="text-[--color-text-secondary]">{r.date}</td>
-                <td>{r.cashBank}</td>
-                <td>{r.description}</td>
+            {receipts.map((r) => {
+              const fmtD = (d: string) => {
+                const dt = new Date(d);
+                return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+              };
+              return (
+              <tr key={r.receiptNo || r.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/receipts/${r.receiptNo}`)}>
+                <td className="font-medium text-[--color-brand]">{r.receiptNo}</td>
+                <td className="text-[--color-text-secondary]">{fmtD(r.date)}</td>
+                <td>{r.bankAccount?.bankName || "-"}</td>
+                <td>{r.description || r.customerName || "-"}</td>
                 <td className="text-right font-medium">{formatIDR(r.amount)}</td>
-                <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(r.status), color: "#fff" }}>{r.status}</span></td>
+                <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: "#2e844a", color: "#fff" }}>Lunas</span></td>
               </tr>
-            ))}
+              );
+              })}
           </tbody>
         </table>
       </div>

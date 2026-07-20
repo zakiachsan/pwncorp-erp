@@ -1,27 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, Search } from "lucide-react";
 
-interface Project {
-  id: string;
-  noPesanan: string;
-  name: string;
-  customer: string;
-  periode: string;
-  totalAnggaran: number;
-  totalRealisasi: number;
-  status: string;
-  sroCount: number;
-  swoCount: number;
-}
+const statusMap: Record<string, string> = {
+  active: "Aktif",
+  completed: "Selesai",
+  cancelled: "Batal",
+};
 
-const projects: Project[] = [
-  { id: "PRJ/001/26040410", noPesanan: "PO-2026-0012", name: "Service Berkala Fleet PT Maju Jaya", customer: "PT Maju Jaya", periode: "10 Apr — 10 Jun 2026", totalAnggaran: 35000000, totalRealisasi: 18000000, status: "Aktif", sroCount: 2, swoCount: 1 },
-  { id: "PRJ/002/26050501", noPesanan: "PO-2026-0018", name: "Overhaul Mesin Isuzu Elf", customer: "PT Transport Jaya", periode: "01 Mei — 30 Jun 2026", totalAnggaran: 20500000, totalRealisasi: 12500000, status: "Aktif", sroCount: 1, swoCount: 1 },
-  { id: "PRJ/003/26060601", noPesanan: "", name: "Perawatan Berkala Q3 2026", customer: "CV Berkah Abadi", periode: "01 Jun — 30 Sep 2026", totalAnggaran: 15000000, totalRealisasi: 0, status: "Aktif", sroCount: 1, swoCount: 0 },
-  { id: "PRJ/004/26060620", noPesanan: "PO-2026-0025", name: "Ganti Oli & Tune Up Fleet", customer: "Budi Santoso", periode: "20 Jun — 27 Jun 2026", totalAnggaran: 2500000, totalRealisasi: 2500000, status: "Selesai", sroCount: 1, swoCount: 1 },
-];
+function fmtDate(d: string | null) {
+  if (!d) return "-";
+  const dt = new Date(d);
+  return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 const fmtShort = (n: number) => {
@@ -41,6 +34,19 @@ const statusPill = (status: string) => {
 
 export default function ProjectListPage() {
   const router = useRouter();
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((r) => r.json())
+      .then((j) => { setProjects(j.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load projects"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -67,15 +73,15 @@ export default function ProjectListPage() {
         </div>
         <div className="card-slds" style={{ textAlign: "center" }}>
           <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Project Aktif</div>
-          <div className="text-2xl font-bold" style={{ color: "var(--color-warning)" }}>{projects.filter(p => p.status === "Aktif").length}</div>
+          <div className="text-2xl font-bold" style={{ color: "var(--color-warning)" }}>{projects.filter(p => p.status === "active").length}</div>
         </div>
         <div className="card-slds" style={{ textAlign: "center" }}>
           <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Anggaran</div>
-          <div className="text-2xl font-bold text-[--color-brand]">{fmtShort(projects.reduce((s, p) => s + p.totalAnggaran, 0))}</div>
+          <div className="text-2xl font-bold text-[--color-brand]">{fmtShort(projects.reduce((s, p) => s + (p.contractValue || 0), 0))}</div>
         </div>
         <div className="card-slds" style={{ textAlign: "center" }}>
           <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Realisasi</div>
-          <div className="text-2xl font-bold" style={{ color: "var(--color-brand)" }}>{fmtShort(projects.reduce((s, p) => s + p.totalRealisasi, 0))}</div>
+          <div className="text-2xl font-bold" style={{ color: "var(--color-brand)" }}>{fmtShort(0)}</div>
         </div>
       </div>
 
@@ -135,8 +141,12 @@ export default function ProjectListPage() {
           </thead>
           <tbody>
             {projects.map((p) => {
-              const sisa = p.totalAnggaran - p.totalRealisasi;
+              const totalAnggaran = p.contractValue || 0;
+              const totalRealisasi = 0; // api doesn't track realisasi separately
+              const sisa = totalAnggaran - totalRealisasi;
               const sisaColor = sisa > 0 ? "var(--color-success)" : sisa === 0 ? "var(--color-text-placeholder)" : "var(--color-error)";
+              const displayStatus = statusMap[p.status] || p.status;
+              const periode = p.startDate ? `${fmtDate(p.startDate)} — ${fmtDate(p.endDate)}` : "-";
               return (
                 <tr key={p.id}>
                   <td
@@ -144,20 +154,20 @@ export default function ProjectListPage() {
                     style={{ color: "var(--color-brand)", whiteSpace: "nowrap" }}
                     onClick={() => router.push(`/project/${p.id}`)}
                   >{p.id}</td>
-                  <td className="text-sm">{p.noPesanan || <span style={{ color: "#8e8f8e" }}>-</span>}</td>
+                  <td className="text-sm"><span style={{ color: "#8e8f8e" }}>-</span></td>
                   <td className="font-medium">{p.name}</td>
-                  <td>{p.customer}</td>
-                  <td className="text-[--color-text-secondary] text-sm">{p.periode}</td>
-                  <td className="font-medium">{fmt(p.totalAnggaran)}</td>
-                  <td className="font-medium" style={{ color: "var(--color-brand)" }}>{fmt(p.totalRealisasi)}</td>
+                  <td>{p.customer?.name || "-"}</td>
+                  <td className="text-[--color-text-secondary] text-sm">{periode}</td>
+                  <td className="font-medium">{fmt(totalAnggaran)}</td>
+                  <td className="font-medium" style={{ color: "var(--color-brand)" }}>{fmt(totalRealisasi)}</td>
                   <td className="font-medium" style={{ color: sisaColor }}>{fmt(sisa)}</td>
                   <td>
-                    <span style={{ color: "var(--color-brand)", fontWeight: 500, cursor: p.sroCount > 0 ? "pointer" : "default" }}>{p.sroCount}</span>
+                    <span style={{ color: "var(--color-text-placeholder)", fontWeight: 500 }}>0</span>
                   </td>
                   <td>
-                    <span style={{ color: "var(--color-brand)", fontWeight: 500, cursor: p.swoCount > 0 ? "pointer" : "default" }}>{p.swoCount}</span>
+                    <span style={{ color: "var(--color-text-placeholder)", fontWeight: 500 }}>0</span>
                   </td>
-                  <td><span className={statusPill(p.status)}>{p.status}</span></td>
+                  <td><span className={statusPill(displayStatus)}>{displayStatus}</span></td>
                 </tr>
               );
             })}

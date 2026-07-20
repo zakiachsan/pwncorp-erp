@@ -1,28 +1,33 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Star, Truck, ArrowUpDown } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const returns = [
-  { docNumber: "PR/HO/26060001", refNo: "PR-2026-0001", purchaseInvoice: "PI/HO/26060001", date: "25 Jun 2026", warehouse: "Head Office - WH Main", supplier: "PT Astra Otoparts", status: "DRAFT" },
-  { docNumber: "PR/HO/26060002", refNo: "PR-2026-0002", purchaseInvoice: "PI/HO/26060002", date: "25 Jun 2026", warehouse: "Head Office - WH Main", supplier: "PT Toyota Astra Motor", status: "APPROVED" },
-  { docNumber: "PR/HO/26060003", refNo: "PR-2026-0003", purchaseInvoice: "PI/HO/26060003", date: "26 Jun 2026", warehouse: "Head Office - WH Main", supplier: "CV Surya Gemilang", status: "SENT" },
-  { docNumber: "PR/HO/26060004", refNo: "PR-2026-0004", purchaseInvoice: "PI/HO/26060004", date: "26 Jun 2026", warehouse: "Head Office - WH Parts", supplier: "PT Maju Jaya Sparepart", status: "DRAFT" },
-  { docNumber: "PR/HO/26060005", refNo: "PR-2026-0005", purchaseInvoice: "PI/HO/26060005", date: "26 Jun 2026", warehouse: "Head Office - WH Main", supplier: "PT Bengkel Abadi", status: "APPROVED" },
-  { docNumber: "PR/HO/26060006", refNo: "PR-2026-0006", purchaseInvoice: "PI/HO/26060006", date: "27 Jun 2026", warehouse: "Head Office - WH Main", supplier: "PT Astra Otoparts", status: "SENT" },
-  { docNumber: "PR/HO/26060007", refNo: "PR-2026-0007", purchaseInvoice: "PI/HO/26060007", date: "27 Jun 2026", warehouse: "Head Office - WH Parts", supplier: "CV Berkah Sparepart", status: "DRAFT" },
-  { docNumber: "PR/HO/26060008", refNo: "PR-2026-0008", purchaseInvoice: "PI/HO/26060008", date: "27 Jun 2026", warehouse: "Head Office - WH Main", supplier: "PT Toyota Astra Motor", status: "APPROVED" },
-  { docNumber: "PR/HO/26060009", refNo: "PR-2026-0009", purchaseInvoice: "PI/HO/26060009", date: "28 Jun 2026", warehouse: "Head Office - WH Main", supplier: "PT Maju Jaya Sparepart", status: "SENT" },
-  { docNumber: "PR/HO/26060010", refNo: "PR-2026-0010", purchaseInvoice: "PI/HO/26060010", date: "28 Jun 2026", warehouse: "Head Office - WH Parts", supplier: "PT Bengkel Abadi", status: "DRAFT" },
-];
+const fmtDate = (d: string) => {
+  const dt = new Date(d);
+  return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+};
 
 export default function PurchaseReturnsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"standard" | "fixedAssets">("standard");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/purchase-returns")
+      .then((r) => r.json())
+      .then((j) => { setData(j.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load purchase returns"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -99,7 +104,6 @@ export default function PurchaseReturnsPage() {
           <thead>
             <tr>
               <th>Document Number</th>
-
               <th>Purchase Invoice</th>
               <th>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
@@ -112,25 +116,24 @@ export default function PurchaseReturnsPage() {
             </tr>
           </thead>
           <tbody>
-            {returns.map((r) => (
-              <tr key={r.docNumber}>
+            {data.map((r) => (
+              <tr key={r.docNo || r.id}>
                 <td
                   className="font-medium cursor-pointer"
                   style={{ color: "var(--color-brand)" }}
-                  onClick={() => router.push(`/warehouse/purchase-returns/${r.docNumber}`)}
+                  onClick={() => router.push(`/warehouse/purchase-returns/${r.docNo}`)}
                 >
-                  {r.docNumber}
+                  {r.docNo}
                 </td>
-
                 <td
                   className="cursor-pointer font-medium"
                   style={{ color: "var(--color-brand)" }}
                 >
-                  {r.purchaseInvoice}
+                  {r.po?.poNo || "-"}
                 </td>
-                <td className="text-[--color-text-secondary]">{r.date}</td>
-                <td>{r.warehouse}</td>
-                <td>{r.supplier}</td>
+                <td className="text-[--color-text-secondary]">{fmtDate(r.date)}</td>
+                <td>{r.po?.warehouse || "-"}</td>
+                <td>{r.supplier?.companyName || "-"}</td>
                 <td>
                   <span
                     style={{

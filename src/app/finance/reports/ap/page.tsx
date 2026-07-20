@@ -1,12 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Download, BarChart3, Star } from "lucide-react";
 
 /* ── helpers ──────────────────────────────────────────────────────── */
 function fmtRp(n: number): string {
   return "Rp " + n.toLocaleString("id-ID").replace(/,/g, ".");
 }
+
+const num = (v: any): number => {
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  return typeof n === "number" && !isNaN(n) ? n : 0;
+};
+const fmtNum = (v: any): string => num(v).toLocaleString("id-ID");
+const fmtDate = (v: any): string => (v ? new Date(v).toLocaleDateString("id-ID") : "-");
+const pick = (o: any, ...keys: string[]): any => {
+  if (!o) return undefined;
+  for (const k of keys) if (o[k] !== undefined && o[k] !== null) return o[k];
+  return undefined;
+};
+const pickName = (o: any, ...paths: string[]): string => {
+  if (!o) return "-";
+  for (const p of paths) {
+    const v = p.split(".").reduce((a: any, k: string) => (a ? a[k] : undefined), o);
+    if (v) return String(v);
+  }
+  return "-";
+};
 
 const statusPillColor = (s: string): string => {
   const map: Record<string, string> = {
@@ -76,38 +96,7 @@ const TABS: TabConfig[] = [
       { header: "Paid", key: "paid", align: "right" },
       { header: "Due", key: "due", align: "right" },
     ],
-    data: [
-      { invoiceDate: "30 Jun 2026", dueDate: "30 Jul 2026", supplier: "PT Auto Parts", docNo: "AP-INV-2026/0030", refNo: "REF-AP030", taxRefNo: "TAX-030", status: "Approved", subtotal: "5.000.000", credited: "0", netSubtotal: "5.000.000", tax: "550.000", total: "5.550.000", paid: "0", due: "5.550.000" },
-      { invoiceDate: "29 Jun 2026", dueDate: "29 Jul 2026", supplier: "CV Ban Sehat", docNo: "AP-INV-2026/0029", refNo: "REF-AP029", taxRefNo: "TAX-029", status: "Paid", subtotal: "2.200.000", credited: "0", netSubtotal: "2.200.000", tax: "242.000", total: "2.442.000", paid: "2.442.000", due: "0" },
-      { invoiceDate: "28 Jun 2026", dueDate: "28 Jul 2026", supplier: "UD Oli Jaya", docNo: "AP-INV-2026/0028", refNo: "REF-AP028", taxRefNo: "TAX-028", status: "Approved", subtotal: "1.600.000", credited: "500.000", netSubtotal: "1.100.000", tax: "121.000", total: "1.221.000", paid: "0", due: "1.221.000" },
-      { invoiceDate: "27 Jun 2026", dueDate: "27 Jul 2026", supplier: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0027", refNo: "REF-AP027", taxRefNo: "TAX-027", status: "Approved", subtotal: "8.500.000", credited: "0", netSubtotal: "8.500.000", tax: "935.000", total: "9.435.000", paid: "0", due: "9.435.000" },
-      { invoiceDate: "25 Jun 2026", dueDate: "25 Jul 2026", supplier: "PT Maju Jaya", docNo: "AP-INV-2026/0026", refNo: "REF-AP026", taxRefNo: "TAX-026", status: "Paid", subtotal: "3.900.000", credited: "0", netSubtotal: "3.900.000", tax: "429.000", total: "4.329.000", paid: "4.329.000", due: "0" },
-      { invoiceDate: "24 Jun 2026", dueDate: "24 Jul 2026", supplier: "CV Berkah Abadi", docNo: "AP-INV-2026/0025", refNo: "REF-AP025", taxRefNo: "TAX-025", status: "Approved", subtotal: "1.200.000", credited: "0", netSubtotal: "1.200.000", tax: "132.000", total: "1.332.000", paid: "0", due: "1.332.000" },
-      { invoiceDate: "23 Jun 2026", dueDate: "23 Jul 2026", supplier: "PT Auto Parts", docNo: "AP-INV-2026/0024", refNo: "REF-AP024", taxRefNo: "TAX-024", status: "Approved", subtotal: "6.700.000", credited: "1.000.000", netSubtotal: "5.700.000", tax: "627.000", total: "6.327.000", paid: "0", due: "6.327.000" },
-      { invoiceDate: "22 Jun 2026", dueDate: "22 Jul 2026", supplier: "CV Ban Sehat", docNo: "AP-INV-2026/0023", refNo: "REF-AP023", taxRefNo: "TAX-023", status: "Paid", subtotal: "900.000", credited: "0", netSubtotal: "900.000", tax: "99.000", total: "999.000", paid: "999.000", due: "0" },
-      { invoiceDate: "20 Jun 2026", dueDate: "20 Jul 2026", supplier: "UD Oli Jaya", docNo: "AP-INV-2026/0022", refNo: "REF-AP022", taxRefNo: "TAX-022", status: "Approved", subtotal: "4.100.000", credited: "0", netSubtotal: "4.100.000", tax: "451.000", total: "4.551.000", paid: "1.500.000", due: "3.051.000" },
-      { invoiceDate: "19 Jun 2026", dueDate: "19 Jul 2026", supplier: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0021", refNo: "REF-AP021", taxRefNo: "TAX-021", status: "Paid", subtotal: "7.200.000", credited: "0", netSubtotal: "7.200.000", tax: "792.000", total: "7.992.000", paid: "7.992.000", due: "0" },
-      { invoiceDate: "18 Jun 2026", dueDate: "18 Jul 2026", supplier: "PT Maju Jaya", docNo: "AP-INV-2026/0020", refNo: "REF-AP020", taxRefNo: "TAX-020", status: "Approved", subtotal: "2.800.000", credited: "500.000", netSubtotal: "2.300.000", tax: "253.000", total: "2.553.000", paid: "0", due: "2.553.000" },
-      { invoiceDate: "17 Jun 2026", dueDate: "17 Jul 2026", supplier: "CV Berkah Abadi", docNo: "AP-INV-2026/0019", refNo: "REF-AP019", taxRefNo: "TAX-019", status: "Approved", subtotal: "5.400.000", credited: "0", netSubtotal: "5.400.000", tax: "594.000", total: "5.994.000", paid: "0", due: "5.994.000" },
-      { invoiceDate: "15 Jun 2026", dueDate: "15 Jul 2026", supplier: "PT Auto Parts", docNo: "AP-INV-2026/0018", refNo: "REF-AP018", taxRefNo: "TAX-018", status: "Paid", subtotal: "1.500.000", credited: "0", netSubtotal: "1.500.000", tax: "165.000", total: "1.665.000", paid: "1.665.000", due: "0" },
-      { invoiceDate: "14 Jun 2026", dueDate: "14 Jul 2026", supplier: "CV Ban Sehat", docNo: "AP-INV-2026/0017", refNo: "REF-AP017", taxRefNo: "TAX-017", status: "Approved", subtotal: "3.600.000", credited: "0", netSubtotal: "3.600.000", tax: "396.000", total: "3.996.000", paid: "0", due: "3.996.000" },
-      { invoiceDate: "13 Jun 2026", dueDate: "13 Jul 2026", supplier: "UD Oli Jaya", docNo: "AP-INV-2026/0016", refNo: "REF-AP016", taxRefNo: "TAX-016", status: "Approved", subtotal: "800.000", credited: "0", netSubtotal: "800.000", tax: "88.000", total: "888.000", paid: "0", due: "888.000" },
-      { invoiceDate: "12 Jun 2026", dueDate: "12 Jul 2026", supplier: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0015", refNo: "REF-AP015", taxRefNo: "TAX-015", status: "Paid", subtotal: "4.800.000", credited: "0", netSubtotal: "4.800.000", tax: "528.000", total: "5.328.000", paid: "5.328.000", due: "0" },
-      { invoiceDate: "11 Jun 2026", dueDate: "11 Jul 2026", supplier: "PT Maju Jaya", docNo: "AP-INV-2026/0014", refNo: "REF-AP014", taxRefNo: "TAX-014", status: "Approved", subtotal: "2.500.000", credited: "500.000", netSubtotal: "2.000.000", tax: "220.000", total: "2.220.000", paid: "0", due: "2.220.000" },
-      { invoiceDate: "10 Jun 2026", dueDate: "10 Jul 2026", supplier: "CV Berkah Abadi", docNo: "AP-INV-2026/0013", refNo: "REF-AP013", taxRefNo: "TAX-013", status: "Approved", subtotal: "7.800.000", credited: "0", netSubtotal: "7.800.000", tax: "858.000", total: "8.658.000", paid: "2.000.000", due: "6.658.000" },
-      { invoiceDate: "09 Jun 2026", dueDate: "09 Jul 2026", supplier: "PT Auto Parts", docNo: "AP-INV-2026/0012", refNo: "REF-AP012", taxRefNo: "TAX-012", status: "Paid", subtotal: "1.100.000", credited: "0", netSubtotal: "1.100.000", tax: "121.000", total: "1.221.000", paid: "1.221.000", due: "0" },
-      { invoiceDate: "08 Jun 2026", dueDate: "08 Jul 2026", supplier: "CV Ban Sehat", docNo: "AP-INV-2026/0011", refNo: "REF-AP011", taxRefNo: "TAX-011", status: "Approved", subtotal: "3.450.000", credited: "0", netSubtotal: "3.450.000", tax: "379.500", total: "3.829.500", paid: "1.500.000", due: "2.329.500" },
-      { invoiceDate: "07 Jun 2026", dueDate: "07 Jul 2026", supplier: "UD Oli Jaya", docNo: "AP-INV-2026/0010", refNo: "REF-AP010", taxRefNo: "TAX-010", status: "Approved", subtotal: "6.100.000", credited: "0", netSubtotal: "6.100.000", tax: "671.000", total: "6.771.000", paid: "0", due: "6.771.000" },
-      { invoiceDate: "06 Jun 2026", dueDate: "06 Jul 2026", supplier: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0009", refNo: "REF-AP009", taxRefNo: "TAX-009", status: "Paid", subtotal: "2.600.000", credited: "500.000", netSubtotal: "2.100.000", tax: "231.000", total: "2.331.000", paid: "2.331.000", due: "0" },
-      { invoiceDate: "05 Jun 2026", dueDate: "05 Jul 2026", supplier: "PT Maju Jaya", docNo: "AP-INV-2026/0008", refNo: "REF-AP008", taxRefNo: "TAX-008", status: "Approved", subtotal: "1.800.000", credited: "0", netSubtotal: "1.800.000", tax: "198.000", total: "1.998.000", paid: "0", due: "1.998.000" },
-      { invoiceDate: "04 Jun 2026", dueDate: "04 Jul 2026", supplier: "CV Berkah Abadi", docNo: "AP-INV-2026/0007", refNo: "REF-AP007", taxRefNo: "TAX-007", status: "Paid", subtotal: "4.250.000", credited: "0", netSubtotal: "4.250.000", tax: "467.500", total: "4.717.500", paid: "4.717.500", due: "0" },
-      { invoiceDate: "03 Jun 2026", dueDate: "03 Jul 2026", supplier: "PT Auto Parts", docNo: "AP-INV-2026/0006", refNo: "REF-AP006", taxRefNo: "TAX-006", status: "Approved", subtotal: "3.200.000", credited: "0", netSubtotal: "3.200.000", tax: "352.000", total: "3.552.000", paid: "0", due: "3.552.000" },
-      { invoiceDate: "02 Jun 2026", dueDate: "02 Jul 2026", supplier: "CV Ban Sehat", docNo: "AP-INV-2026/0005", refNo: "REF-AP005", taxRefNo: "TAX-005", status: "Approved", subtotal: "5.800.000", credited: "1.000.000", netSubtotal: "4.800.000", tax: "528.000", total: "5.328.000", paid: "0", due: "5.328.000" },
-      { invoiceDate: "01 Jun 2026", dueDate: "01 Jul 2026", supplier: "UD Oli Jaya", docNo: "AP-INV-2026/0004", refNo: "REF-AP004", taxRefNo: "TAX-004", status: "Paid", subtotal: "1.450.000", credited: "0", netSubtotal: "1.450.000", tax: "159.500", total: "1.609.500", paid: "1.609.500", due: "0" },
-      { invoiceDate: "30 May 2026", dueDate: "30 Jun 2026", supplier: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0003", refNo: "REF-AP003", taxRefNo: "TAX-003", status: "Approved", subtotal: "7.500.000", credited: "0", netSubtotal: "7.500.000", tax: "825.000", total: "8.325.000", paid: "3.000.000", due: "5.325.000" },
-      { invoiceDate: "28 May 2026", dueDate: "28 Jun 2026", supplier: "PT Maju Jaya", docNo: "AP-INV-2026/0002", refNo: "REF-AP002", taxRefNo: "TAX-002", status: "Paid", subtotal: "2.100.000", credited: "0", netSubtotal: "2.100.000", tax: "231.000", total: "2.331.000", paid: "2.331.000", due: "0" },
-      { invoiceDate: "25 May 2026", dueDate: "25 Jun 2026", supplier: "CV Berkah Abadi", docNo: "AP-INV-2026/0001", refNo: "REF-AP001", taxRefNo: "TAX-001", status: "Approved", subtotal: "4.500.000", credited: "0", netSubtotal: "4.500.000", tax: "495.000", total: "4.995.000", paid: "0", due: "4.995.000" },
-    ],
+    data: [],
   },
 
   /* ── B  Invoice Payables ──────────────────────────── */
@@ -135,38 +124,7 @@ const TABS: TabConfig[] = [
       { header: "Tax", key: "tax", align: "right" },
       { header: "Total", key: "total", align: "right" },
     ],
-    data: [
-      { invoiceDate: "30 Jun 2026", entity: "PT Pencorp Motor", supplier: "PT Auto Parts", docNo: "INV-AP/2026/030", refNo: "REF-030", sourceRefCode: "SRC-030", itemDesc: "Kampas Rem Depan - Honda Brio", qty: 8, unitPrice: "220.000", subTotal: "1.760.000", tax: "193.600", total: "1.953.600" },
-      { invoiceDate: "29 Jun 2026", entity: "PT Pencorp Spare", supplier: "CV Ban Sehat", docNo: "INV-AP/2026/029", refNo: "REF-029", sourceRefCode: "SRC-029", itemDesc: "Filter Oli Mobil - Toyota Avanza", qty: 10, unitPrice: "75.000", subTotal: "750.000", tax: "82.500", total: "832.500" },
-      { invoiceDate: "28 Jun 2026", entity: "PT Pencorp Motor", supplier: "UD Oli Jaya", docNo: "INV-AP/2026/028", refNo: "REF-028", sourceRefCode: "SRC-028", itemDesc: "Ban Michelin Pilot Sport 4", qty: 4, unitPrice: "2.800.000", subTotal: "11.200.000", tax: "1.232.000", total: "12.432.000" },
-      { invoiceDate: "27 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Suku Cadang Jaya", docNo: "INV-AP/2026/027", refNo: "REF-027", sourceRefCode: "SRC-027", itemDesc: "Oli Mesin 5W-40 SN Plus", qty: 20, unitPrice: "185.000", subTotal: "3.700.000", tax: "407.000", total: "4.107.000" },
-      { invoiceDate: "25 Jun 2026", entity: "PT Pencorp Motor", supplier: "PT Maju Jaya", docNo: "INV-AP/2026/026", refNo: "REF-026", sourceRefCode: "SRC-026", itemDesc: "Busi NGK Iridium", qty: 15, unitPrice: "45.000", subTotal: "675.000", tax: "74.250", total: "749.250" },
-      { invoiceDate: "24 Jun 2026", entity: "PT Pencorp Spare", supplier: "CV Berkah Abadi", docNo: "INV-AP/2026/025", refNo: "REF-025", sourceRefCode: "SRC-025", itemDesc: "V-Belt Honda Vario", qty: 12, unitPrice: "85.000", subTotal: "1.020.000", tax: "112.200", total: "1.132.200" },
-      { invoiceDate: "23 Jun 2026", entity: "PT Pencorp Motor", supplier: "PT Auto Parts", docNo: "INV-AP/2026/024", refNo: "REF-024", sourceRefCode: "SRC-024", itemDesc: "Master Rem Depan - Yamaha Mio", qty: 6, unitPrice: "320.000", subTotal: "1.920.000", tax: "211.200", total: "2.131.200" },
-      { invoiceDate: "22 Jun 2026", entity: "PT Pencorp Spare", supplier: "CV Ban Sehat", docNo: "INV-AP/2026/023", refNo: "REF-023", sourceRefCode: "SRC-023", itemDesc: "Filter Udara - Suzuki Ertiga", qty: 9, unitPrice: "95.000", subTotal: "855.000", tax: "94.050", total: "949.050" },
-      { invoiceDate: "20 Jun 2026", entity: "PT Pencorp Motor", supplier: "UD Oli Jaya", docNo: "INV-AP/2026/022", refNo: "REF-022", sourceRefCode: "SRC-022", itemDesc: "Lampu LED H4 Philips", qty: 10, unitPrice: "150.000", subTotal: "1.500.000", tax: "165.000", total: "1.665.000" },
-      { invoiceDate: "19 Jun 2026", entity: "PT Pencorp Motor", supplier: "PT Suku Cadang Jaya", docNo: "INV-AP/2026/021", refNo: "REF-021", sourceRefCode: "SRC-021", itemDesc: "Kampas Rem Belakang - Toyota Avanza", qty: 8, unitPrice: "180.000", subTotal: "1.440.000", tax: "158.400", total: "1.598.400" },
-      { invoiceDate: "18 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Maju Jaya", docNo: "INV-AP/2026/020", refNo: "REF-020", sourceRefCode: "SRC-020", itemDesc: "Bearing Roda Depan - Honda Jazz", qty: 7, unitPrice: "275.000", subTotal: "1.925.000", tax: "211.750", total: "2.136.750" },
-      { invoiceDate: "17 Jun 2026", entity: "PT Pencorp Motor", supplier: "CV Berkah Abadi", docNo: "INV-AP/2026/019", refNo: "REF-019", sourceRefCode: "SRC-019", itemDesc: "Alternator Rebuilt - Toyota Kijang", qty: 2, unitPrice: "1.250.000", subTotal: "2.500.000", tax: "275.000", total: "2.775.000" },
-      { invoiceDate: "15 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Auto Parts", docNo: "INV-AP/2026/018", refNo: "REF-018", sourceRefCode: "SRC-018", itemDesc: "Shock Breaker Depan - Honda Beat", qty: 5, unitPrice: "410.000", subTotal: "2.050.000", tax: "225.500", total: "2.275.500" },
-      { invoiceDate: "14 Jun 2026", entity: "PT Pencorp Motor", supplier: "CV Ban Sehat", docNo: "INV-AP/2026/017", refNo: "REF-017", sourceRefCode: "SRC-017", itemDesc: "Spion Universal Honda Civic", qty: 4, unitPrice: "175.000", subTotal: "700.000", tax: "77.000", total: "777.000" },
-      { invoiceDate: "13 Jun 2026", entity: "PT Pencorp Spare", supplier: "UD Oli Jaya", docNo: "INV-AP/2026/016", refNo: "REF-016", sourceRefCode: "SRC-016", itemDesc: "Radiator Coolant - Toyota Innova", qty: 14, unitPrice: "65.000", subTotal: "910.000", tax: "100.100", total: "1.010.100" },
-      { invoiceDate: "12 Jun 2026", entity: "PT Pencorp Motor", supplier: "PT Suku Cadang Jaya", docNo: "INV-AP/2026/015", refNo: "REF-015", sourceRefCode: "SRC-015", itemDesc: "Kampas Rem Depan - Honda Brio", qty: 8, unitPrice: "220.000", subTotal: "1.760.000", tax: "193.600", total: "1.953.600" },
-      { invoiceDate: "11 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Maju Jaya", docNo: "INV-AP/2026/014", refNo: "REF-014", sourceRefCode: "SRC-014", itemDesc: "Filter Oli Mobil - Toyota Avanza", qty: 10, unitPrice: "75.000", subTotal: "750.000", tax: "82.500", total: "832.500" },
-      { invoiceDate: "10 Jun 2026", entity: "PT Pencorp Motor", supplier: "CV Berkah Abadi", docNo: "INV-AP/2026/013", refNo: "REF-013", sourceRefCode: "SRC-013", itemDesc: "Ban Michelin Pilot Sport 4", qty: 4, unitPrice: "2.800.000", subTotal: "11.200.000", tax: "1.232.000", total: "12.432.000" },
-      { invoiceDate: "09 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Auto Parts", docNo: "INV-AP/2026/012", refNo: "REF-012", sourceRefCode: "SRC-012", itemDesc: "Oli Mesin 5W-40 SN Plus", qty: 20, unitPrice: "185.000", subTotal: "3.700.000", tax: "407.000", total: "4.107.000" },
-      { invoiceDate: "08 Jun 2026", entity: "PT Pencorp Motor", supplier: "CV Ban Sehat", docNo: "INV-AP/2026/011", refNo: "REF-011", sourceRefCode: "SRC-011", itemDesc: "Busi NGK Iridium", qty: 15, unitPrice: "45.000", subTotal: "675.000", tax: "74.250", total: "749.250" },
-      { invoiceDate: "07 Jun 2026", entity: "PT Pencorp Spare", supplier: "UD Oli Jaya", docNo: "INV-AP/2026/010", refNo: "REF-010", sourceRefCode: "SRC-010", itemDesc: "V-Belt Honda Vario", qty: 12, unitPrice: "85.000", subTotal: "1.020.000", tax: "112.200", total: "1.132.200" },
-      { invoiceDate: "06 Jun 2026", entity: "PT Pencorp Motor", supplier: "PT Suku Cadang Jaya", docNo: "INV-AP/2026/009", refNo: "REF-009", sourceRefCode: "SRC-009", itemDesc: "Master Rem Depan - Yamaha Mio", qty: 6, unitPrice: "320.000", subTotal: "1.920.000", tax: "211.200", total: "2.131.200" },
-      { invoiceDate: "05 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Maju Jaya", docNo: "INV-AP/2026/008", refNo: "REF-008", sourceRefCode: "SRC-008", itemDesc: "Filter Udara - Suzuki Ertiga", qty: 9, unitPrice: "95.000", subTotal: "855.000", tax: "94.050", total: "949.050" },
-      { invoiceDate: "04 Jun 2026", entity: "PT Pencorp Motor", supplier: "CV Berkah Abadi", docNo: "INV-AP/2026/007", refNo: "REF-007", sourceRefCode: "SRC-007", itemDesc: "Lampu LED H4 Philips", qty: 10, unitPrice: "150.000", subTotal: "1.500.000", tax: "165.000", total: "1.665.000" },
-      { invoiceDate: "03 Jun 2026", entity: "PT Pencorp Spare", supplier: "PT Auto Parts", docNo: "INV-AP/2026/006", refNo: "REF-006", sourceRefCode: "SRC-006", itemDesc: "Kampas Rem Belakang - Toyota Avanza", qty: 8, unitPrice: "180.000", subTotal: "1.440.000", tax: "158.400", total: "1.598.400" },
-      { invoiceDate: "02 Jun 2026", entity: "PT Pencorp Motor", supplier: "CV Ban Sehat", docNo: "INV-AP/2026/005", refNo: "REF-005", sourceRefCode: "SRC-005", itemDesc: "Bearing Roda Depan - Honda Jazz", qty: 7, unitPrice: "275.000", subTotal: "1.925.000", tax: "211.750", total: "2.136.750" },
-      { invoiceDate: "01 Jun 2026", entity: "PT Pencorp Motor", supplier: "UD Oli Jaya", docNo: "INV-AP/2026/004", refNo: "REF-004", sourceRefCode: "SRC-004", itemDesc: "Alternator Rebuilt - Toyota Kijang", qty: 2, unitPrice: "1.250.000", subTotal: "2.500.000", tax: "275.000", total: "2.775.000" },
-      { invoiceDate: "30 May 2026", entity: "PT Pencorp Spare", supplier: "PT Suku Cadang Jaya", docNo: "INV-AP/2026/003", refNo: "REF-003", sourceRefCode: "SRC-003", itemDesc: "Shock Breaker Depan - Honda Beat", qty: 5, unitPrice: "410.000", subTotal: "2.050.000", tax: "225.500", total: "2.275.500" },
-      { invoiceDate: "28 May 2026", entity: "PT Pencorp Motor", supplier: "PT Maju Jaya", docNo: "INV-AP/2026/002", refNo: "REF-002", sourceRefCode: "SRC-002", itemDesc: "Spion Universal Honda Civic", qty: 4, unitPrice: "175.000", subTotal: "700.000", tax: "77.000", total: "777.000" },
-      { invoiceDate: "25 May 2026", entity: "PT Pencorp Spare", supplier: "CV Berkah Abadi", docNo: "INV-AP/2026/001", refNo: "REF-001", sourceRefCode: "SRC-001", itemDesc: "Radiator Coolant - Toyota Innova", qty: 14, unitPrice: "65.000", subTotal: "910.000", tax: "100.100", total: "1.010.100" },
-    ],
+    data: [],
   },
 
   /* ── C  AP Aging ──────────────────────────────────── */
@@ -196,12 +154,7 @@ const TABS: TabConfig[] = [
       { header: "Over 90", key: "over90", align: "right" },
       { header: "Balance", key: "balance", align: "right" },
     ],
-    data: [
-      { entity: "PT Pencorp Motor", supplierCode: "SUP-002", supplierName: "CV Ban Sehat", docNo: "AP-INV-2026/0002", refNo: "REF-AP002", sourceRefCode: "SRC-002", invoiceDate: "05 Jun 2026", dueDate: "05 Jul 2026", current: "1.998.000", d1_30: "0", d31_60: "0", d61_90: "0", over90: "0", balance: "1.998.000" },
-      { entity: "PT Pencorp Motor", supplierCode: "SUP-001", supplierName: "PT Auto Parts", docNo: "AP-INV-2026/0001", refNo: "REF-AP001", sourceRefCode: "SRC-001", invoiceDate: "01 Jun 2026", dueDate: "01 Jul 2026", current: "4.717.500", d1_30: "0", d31_60: "0", d61_90: "0", over90: "0", balance: "4.717.500" },
-      { entity: "PT Pencorp Spare", supplierCode: "SUP-003", supplierName: "UD Oli Jaya", docNo: "AP-INV-2026/0003", refNo: "REF-AP003", sourceRefCode: "SRC-003", invoiceDate: "10 Apr 2026", dueDate: "10 May 2026", current: "0", d1_30: "0", d31_60: "0", d61_90: "2.331.000", over90: "0", balance: "2.331.000" },
-      { entity: "PT Pencorp Motor", supplierCode: "SUP-004", supplierName: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0004", refNo: "REF-AP004", sourceRefCode: "SRC-004", invoiceDate: "01 Feb 2026", dueDate: "03 Mar 2026", current: "0", d1_30: "0", d31_60: "0", d61_90: "0", over90: "6.771.000", balance: "6.771.000" },
-    ],
+    data: [],
   },
 
   /* ── D  AP Payments ───────────────────────────────── */
@@ -234,12 +187,7 @@ const TABS: TabConfig[] = [
       { header: "Payment", key: "payment", align: "right" },
       { header: "Account", key: "account" },
     ],
-    data: [
-      { paymentDate: "15 Jul 2026", docNo: "PAY-2026/004", payRef: "TRF-BRI-004", invoiceReturn: "AP-INV-2026/0004", invoiceRef: "REF-AP004", invoiceSrcRefCode: "SRC-004", supplier: "PT Suku Cadang Jaya", status: "Cleared", payment: "6.771.000", account: "BRI - 1122334455" },
-      { paymentDate: "10 Jul 2026", docNo: "PAY-2026/003", payRef: "TRF-BCA-003", invoiceReturn: "AP-INV-2026/0003", invoiceRef: "REF-AP003", invoiceSrcRefCode: "SRC-003", supplier: "UD Oli Jaya", status: "Pending", payment: "1.200.000", account: "BCA - 1234567890" },
-      { paymentDate: "05 Jul 2026", docNo: "PAY-2026/002", payRef: "TRF-MDR-002", invoiceReturn: "AP-INV-2026/0002", invoiceRef: "REF-AP002", invoiceSrcRefCode: "SRC-002", supplier: "CV Ban Sehat", status: "Cleared", payment: "1.998.000", account: "Mandiri - 0987654321" },
-      { paymentDate: "01 Jul 2026", docNo: "PAY-2026/001", payRef: "TRF-BCA-001", invoiceReturn: "AP-INV-2026/0001", invoiceRef: "REF-AP001", invoiceSrcRefCode: "SRC-001", supplier: "PT Auto Parts", status: "Cleared", payment: "4.717.500", account: "BCA - 1234567890" },
-    ],
+    data: [],
   },
 
   /* ── E  AP Credit ─────────────────────────────────── */
@@ -297,13 +245,7 @@ const TABS: TabConfig[] = [
       { header: "Due Date", key: "dueDate" },
       { header: "Credit Balance (Rp)", key: "creditBalance", align: "right" },
     ],
-    data: [
-      { supplier: "PT Auto Parts", docNo: "AP-INV-2026/0010", entity: "PT Pencorp Motor", refNo: "REF-AP010", sourceRefCode: "SRC-010", creditTerm: 30, overdueDays: 15, date: "01 Jun 2026", dueDate: "01 Jul 2026", creditBalance: "3.200.000" },
-      { supplier: "PT Suku Cadang Jaya", docNo: "AP-INV-2026/0009", entity: "PT Pencorp Motor", refNo: "REF-AP009", sourceRefCode: "SRC-009", creditTerm: 30, overdueDays: 45, date: "10 May 2026", dueDate: "09 Jun 2026", creditBalance: "6.100.000" },
-      { supplier: "UD Oli Jaya", docNo: "AP-INV-2026/0008", entity: "PT Pencorp Spare", refNo: "REF-AP008", sourceRefCode: "SRC-008", creditTerm: 45, overdueDays: 75, date: "01 Apr 2026", dueDate: "16 May 2026", creditBalance: "2.850.000" },
-      { supplier: "CV Ban Sehat", docNo: "AP-INV-2026/0007", entity: "PT Pencorp Motor", refNo: "REF-AP007", sourceRefCode: "SRC-007", creditTerm: 30, overdueDays: 95, date: "15 Mar 2026", dueDate: "14 Apr 2026", creditBalance: "4.200.000" },
-      { supplier: "PT Auto Parts", docNo: "AP-INV-2026/0006", entity: "PT Pencorp Motor", refNo: "REF-AP006", sourceRefCode: "SRC-006", creditTerm: 30, overdueDays: 120, date: "01 Feb 2026", dueDate: "03 Mar 2026", creditBalance: "7.500.000" },
-    ],
+    data: [],
   },
 
   /* ── G  AP Overlimit ──────────────────────────────── */
@@ -345,12 +287,7 @@ const TABS: TabConfig[] = [
       { header: "Due Amount", key: "dueAmount", align: "right" },
       { header: "Paid Date", key: "paidDate" },
     ],
-    data: [
-      { entity: "PT Pencorp Motor", supplier: "PT Suku Cadang Jaya", invoiceNo: "AP-INV-2026/0004", invoiceDate: "15 Jun 2026", netSubtotal: "6.771.000", credited: "0", paid: "6.771.000", dueAmount: "0", paidDate: "15 Jul 2026" },
-      { entity: "PT Pencorp Spare", supplier: "UD Oli Jaya", invoiceNo: "AP-INV-2026/0003", invoiceDate: "10 Jun 2026", netSubtotal: "2.331.000", credited: "500.000", paid: "1.200.000", dueAmount: "631.000", paidDate: "-" },
-      { entity: "PT Pencorp Motor", supplier: "CV Ban Sehat", invoiceNo: "AP-INV-2026/0002", invoiceDate: "05 Jun 2026", netSubtotal: "1.998.000", credited: "0", paid: "0", dueAmount: "1.998.000", paidDate: "-" },
-      { entity: "PT Pencorp Motor", supplier: "PT Auto Parts", invoiceNo: "AP-INV-2026/0001", invoiceDate: "01 Jun 2026", netSubtotal: "4.717.500", credited: "0", paid: "4.717.500", dueAmount: "0", paidDate: "01 Jul 2026" },
-    ],
+    data: [],
   },
 
   /* ── I  AP Cheque/BG ──────────────────────────────── */
@@ -392,10 +329,141 @@ const TABS: TabConfig[] = [
 export default function APReportsPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
+  const [tabData, setTabData] = useState<Record<string, any>[]>([]);
+  const [loading, setLoading] = useState(false);
   const cfg = TABS[activeTab];
+
+  useEffect(() => {
+    setLoading(true);
+    setTabData([]);
+    const tabId = TABS[activeTab].id;
+    let url = "";
+    if (tabId === "account-payables") url = "/api/purchase-invoices?limit=100";
+    else if (tabId === "ap-aging") url = "/api/reports/finance?report=ap-aging";
+    else if (tabId === "ap-payments") url = "/api/payments?limit=100";
+    else if (tabId === "invoice-payables") url = "/api/reports/finance?report=invoice-payables";
+    else if (tabId === "ap-credit") url = "/api/reports/finance?report=ap-credit";
+    else if (tabId === "ap-overdue") url = "/api/reports/finance?report=ap-overdue";
+    else if (tabId === "ap-overlimit") url = "/api/reports/finance?report=ap-overlimit";
+    else if (tabId === "ap-subledger") url = "/api/reports/finance?report=ap-subledger";
+    else if (tabId === "ap-cheque") url = "/api/reports/finance?report=ap-cheque";
+
+    if (!url) { setLoading(false); return; }
+
+    fetch(url)
+      .then((r) => r.json())
+      .then((j) => {
+        const raw = j.data?.items || j.data || [];
+        if (tabId === "account-payables") {
+          setTabData(raw.map((pi: any) => ({
+            invoiceDate: pi.date ? new Date(pi.date).toLocaleDateString("id-ID") : "-",
+            dueDate: "-",
+            supplier: pi.supplier?.companyName || "-",
+            docNo: pi.docNo || "-",
+            refNo: "-",
+            taxRefNo: "-",
+            status: pi.status || "-",
+            subtotal: (pi.total || 0).toLocaleString("id-ID"),
+            credited: "0",
+            netSubtotal: (pi.total || 0).toLocaleString("id-ID"),
+            tax: "0",
+            total: (pi.total || 0).toLocaleString("id-ID"),
+            paid: "0",
+            due: (pi.total || 0).toLocaleString("id-ID"),
+          })));
+        } else if (tabId === "ap-aging") {
+          setTabData(raw.map((ap: any) => ({
+            supplier: ap.purchaseInvoice?.supplier?.companyName || "-",
+            docNo: ap.purchaseInvoice?.docNo || "-",
+            dueDate: ap.dueDate ? new Date(ap.dueDate).toLocaleDateString("id-ID") : "-",
+            status: ap.status || "-",
+            total: (ap.balance || 0).toLocaleString("id-ID"),
+          })));
+        } else if (tabId === "invoice-payables") {
+          setTabData(raw.map((r: any) => ({
+            invoiceDate: fmtDate(pick(r, "invoiceDate", "date")),
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            supplier: pickName(r, "supplier", "supplier.companyName", "supplierName", "supplier.name", "purchaseInvoice.supplier.companyName"),
+            docNo: pick(r, "docNo", "documentNo", "invoiceNo") || "-",
+            refNo: pick(r, "refNo", "referenceNo") || "-",
+            sourceRefCode: pick(r, "sourceRefCode", "sourceRef") || "-",
+            itemDesc: pick(r, "itemDesc", "item", "description") || "-",
+            qty: fmtNum(pick(r, "qty", "quantity")),
+            unitPrice: fmtNum(pick(r, "unitPrice", "unit_price")),
+            subTotal: fmtNum(pick(r, "subTotal", "subtotal", "total")),
+            tax: fmtNum(pick(r, "tax", "taxAmount")),
+            total: fmtNum(pick(r, "total", "grandTotal")),
+          })));
+        } else if (tabId === "ap-credit") {
+          setTabData(raw.map((r: any) => ({
+            invoiceDate: fmtDate(pick(r, "invoiceDate", "date")),
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            supplier: pickName(r, "supplier", "supplier.companyName", "supplierName", "supplier.name", "purchaseInvoice.supplier.companyName"),
+            supplierTax: pick(r, "supplierTax", "taxNo", "npwp") || "-",
+            docNo: pick(r, "docNo", "documentNo", "invoiceNo") || "-",
+            status: pick(r, "status") || "-",
+            subtotal: fmtNum(pick(r, "subtotal", "subTotal")),
+            tax: fmtNum(pick(r, "tax", "taxAmount")),
+            wht: fmtNum(pick(r, "wht", "withholdingTax", "withholding")),
+            total: fmtNum(pick(r, "total", "grandTotal")),
+          })));
+        } else if (tabId === "ap-overdue") {
+          setTabData(raw.map((r: any) => ({
+            supplier: pickName(r, "supplier", "supplier.companyName", "supplierName", "supplier.name", "purchaseInvoice.supplier.companyName"),
+            docNo: pick(r, "docNo", "documentNo", "invoiceNo", "purchaseInvoice.docNo") || "-",
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            refNo: pick(r, "refNo", "referenceNo") || "-",
+            sourceRefCode: pick(r, "sourceRefCode", "sourceRef") || "-",
+            creditTerm: fmtNum(pick(r, "creditTerm", "creditTermDays", "termDays")),
+            overdueDays: fmtNum(pick(r, "overdueDays", "daysOverdue")),
+            date: fmtDate(pick(r, "date", "invoiceDate")),
+            dueDate: fmtDate(pick(r, "dueDate")),
+            creditBalance: fmtNum(pick(r, "creditBalance", "balance", "amountDue", "outstanding")),
+          })));
+        } else if (tabId === "ap-overlimit") {
+          setTabData(raw.map((r: any) => ({
+            supplier: pickName(r, "supplier", "supplier.companyName", "supplierName", "supplier.name"),
+            creditLimit: fmtNum(pick(r, "creditLimit")),
+            purchaseInvoices: fmtNum(pick(r, "purchaseInvoices", "purchaseInvoiceTotal")),
+            invoicePayables: fmtNum(pick(r, "invoicePayables", "invoicePayableTotal")),
+            balance: fmtNum(pick(r, "balance", "outstanding")),
+          })));
+        } else if (tabId === "ap-subledger") {
+          setTabData(raw.map((r: any) => ({
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            supplier: pickName(r, "supplier", "supplier.companyName", "supplierName", "supplier.name", "purchaseInvoice.supplier.companyName"),
+            invoiceNo: pick(r, "invoiceNo", "docNo", "documentNo", "purchaseInvoice.docNo") || "-",
+            invoiceDate: fmtDate(pick(r, "invoiceDate", "date")),
+            netSubtotal: fmtNum(pick(r, "netSubtotal", "netSubTotal", "subtotal")),
+            credited: fmtNum(pick(r, "credited", "creditAmount")),
+            paid: fmtNum(pick(r, "paid", "amountPaid", "paidAmount")),
+            dueAmount: fmtNum(pick(r, "dueAmount", "balance", "amountDue")),
+            paidDate: fmtDate(pick(r, "paidDate", "lastPaidDate")),
+          })));
+        } else if (tabId === "ap-cheque") {
+          setTabData(raw.map((r: any) => ({
+            supplier: pickName(r, "supplier", "supplier.companyName", "supplierName", "supplier.name"),
+            apPayment: pick(r, "apPayment", "paymentNo", "paymentDocNo", "docNo") || "-",
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            paymentDate: fmtDate(pick(r, "paymentDate")),
+            status: pick(r, "status") || "-",
+            issuedDate: fmtDate(pick(r, "issuedDate")),
+            disbursementDate: fmtDate(pick(r, "disbursementDate")),
+            chequeNo: pick(r, "chequeNo", "chequeNumber", "bgNo") || "-",
+            amountPaid: fmtNum(pick(r, "amountPaid", "amount")),
+          })));
+        } else {
+          setTabData(raw);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [activeTab]);
+
+  const displayData = tabData;
   const PER_PAGE = 20;
-  const totalPages = Math.ceil(cfg.data.length / PER_PAGE);
-  const pagedData = cfg.data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const totalPages = Math.ceil(displayData.length / PER_PAGE);
+  const pagedData = displayData.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -518,7 +586,7 @@ export default function APReportsPage() {
 
       {/* ── data table ── */}
       <div style={{ margin: "0 24px 24px", overflowX: "auto" }}>
-        {cfg.data.length === 0 ? (
+        {displayData.length === 0 ? (
           <div style={{ padding: "40px 0", textAlign: "center", fontSize: 14, color: "#444746", background: "#f9f9f9", borderRadius: 8, border: "1px solid #ecebea" }}>
             No data available
           </div>

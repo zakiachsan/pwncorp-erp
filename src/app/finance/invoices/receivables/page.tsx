@@ -1,15 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-const receivables = [
-  { docNo: "IR/SO/26060001", refNo: "INV-001", sriNo: "SRI/004/26060149", customer: "Budi Santoso", invoiceDate: "24-Jun-2026", dueDate: "30-Jun-2026", status: "PAID", total: 2500000, amountPaid: 2500000, amountDue: 0, journalNo: "13801161" },
-  { docNo: "IR/SO/26060002", refNo: "INV-002", sriNo: "SRI/003/26060150", customer: "PT Maju Jaya", invoiceDate: "25-Jun-2026", dueDate: "28-Jun-2026", status: "UNPAID", total: 1800000, amountPaid: 0, amountDue: 1800000, journalNo: "-" },
-  { docNo: "IR/SO/26060003", refNo: "INV-003", sriNo: "SRI/002/26060152", customer: "Siti Rahmawati", invoiceDate: "26-Jun-2026", dueDate: "02-Jul-2026", status: "PARTIAL", total: 5200000, amountPaid: 2600000, amountDue: 2600000, journalNo: "13801162" },
-  { docNo: "IR/SO/26060004", refNo: "INV-004", sriNo: "SRI/005/26060154", customer: "Ahmad Fauzi", invoiceDate: "26-Jun-2026", dueDate: "28-Jun-2026", status: "PAID", total: 950000, amountPaid: 950000, amountDue: 0, journalNo: "13801163" },
-  { docNo: "IR/SO/26060005", refNo: "INV-005", sriNo: "SRI/001/26060155", customer: "PT Transport Jaya", invoiceDate: "26-Jun-2026", dueDate: "30-Jun-2026", status: "DRAFT", total: 4800000, amountPaid: 0, amountDue: 4800000, journalNo: "-" },
-];
+import { useEffect, useState } from "react";
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 
@@ -25,16 +17,28 @@ const statusColor = (s: string) => {
 
 export default function InvoiceReceivablesPage() {
   const router = useRouter();
+  const [receivables, setReceivables] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  const filtered = receivables.filter((inv) => {
-    if (statusFilter && inv.status !== statusFilter) return false;
-    return true;
-  });
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    fetch(`/api/accounts-receivable?${params.toString()}`)
+      .then((r) => r.json())
+      .then((json) => { setReceivables(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load receivables"); setLoading(false); });
+  }, [statusFilter]);
 
-  const totalReceivable = filtered.reduce((s, x) => s + x.total, 0);
-  const totalDue = filtered.reduce((s, x) => s + x.amountDue, 0);
-  const totalPaid = filtered.reduce((s, x) => s + x.amountPaid, 0);
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const filtered = receivables;
+  const totalReceivable = filtered.reduce((s: number, x: any) => s + (x.amount || 0), 0);
+  const totalDue = filtered.reduce((s: number, x: any) => s + (x.amount || 0) - (x.paidAmount || 0), 0);
+  const totalPaid = filtered.reduce((s: number, x: any) => s + (x.paidAmount || 0), 0);
 
   return (
     <div>
@@ -122,37 +126,40 @@ export default function InvoiceReceivablesPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((inv) => (
+            {filtered.map((inv: any) => {
+              const amountDue = (inv.amount || 0) - (inv.paidAmount || 0);
+              return (
               <tr
-                key={inv.docNo}
+                key={inv.id}
                 style={{ ...S.tr, cursor: "pointer" }}
-                onClick={() => router.push(`/finance/invoices/${inv.docNo}`)}
+                onClick={() => router.push(`/finance/invoices/${inv.invoice?.invNo || inv.id}`)}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >
-                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.invoice?.invNo || inv.id}</td>
                 <td style={S.td}>
                   <span
-                    onClick={(e) => { e.stopPropagation(); router.push(`/finance/invoices/service/${inv.sriNo}`); }}
+                    onClick={(e) => { e.stopPropagation(); router.push(`/finance/invoices/service/${inv.invoice?.invNo}`); }}
                     style={{ color: "#0176d3", fontWeight: 500, cursor: "pointer", textDecoration: "underline", textDecorationColor: "#0176d3" }}
                   >
-                    {inv.sriNo}
+                    {inv.invoice?.invNo || "-"}
                   </span>
                 </td>
-                <td style={{ ...S.td, color: "#0176d3" }}>{inv.customer}</td>
-                <td style={S.td}>{inv.invoiceDate}</td>
-                <td style={S.td}>{inv.dueDate}</td>
+                <td style={{ ...S.td, color: "#0176d3" }}>{inv.customer?.name || "-"}</td>
+                <td style={S.td}>{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-GB") : "-"}</td>
+                <td style={S.td}>{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-GB") : "-"}</td>
                 <td style={S.td}>
                   <span style={{ ...S.pill, background: statusColor(inv.status) }}>{inv.status}</span>
                 </td>
-                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.total)}</td>
-                <td style={{ ...S.td, textAlign: "right", color: "#2e844a" }}>{fmt(inv.amountPaid)}</td>
-                <td style={{ ...S.td, textAlign: "right", color: inv.amountDue > 0 ? "#ea001e" : "#444746", fontWeight: inv.amountDue > 0 ? 600 : 400 }}>
-                  {fmt(inv.amountDue)}
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.amount || 0)}</td>
+                <td style={{ ...S.td, textAlign: "right", color: "#2e844a" }}>{fmt(inv.paidAmount || 0)}</td>
+                <td style={{ ...S.td, textAlign: "right", color: amountDue > 0 ? "#ea001e" : "#444746", fontWeight: amountDue > 0 ? 600 : 400 }}>
+                  {fmt(amountDue)}
                 </td>
-                <td style={{ ...S.td, color: inv.journalNo !== "-" ? "#0176d3" : "#444746" }}>{inv.journalNo}</td>
+                <td style={{ ...S.td, color: "#444746" }}>-</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

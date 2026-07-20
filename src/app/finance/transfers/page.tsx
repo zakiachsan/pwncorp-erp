@@ -1,13 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Plus, Search, Download, ArrowLeftRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Download, ArrowLeftRight } from "lucide-react";
 
-const transfers = [
-  { no: "TF.2026.06.00001", date: "26 Jun 2026", from: "Bank BCA", to: "Kas", amount: 5000000, description: "Setor kas operasional", status: "Selesai" },
-  { no: "TF.2026.06.00002", date: "25 Jun 2026", from: "Bank Mandiri", to: "Bank BCA", amount: 10000000, description: "Transfer antar rekening", status: "Selesai" },
-  { no: "TF.2026.05.00003", date: "31 May 2026", from: "Kas", to: "Bank BCA", amount: 2500000, description: "Setor tunai", status: "Pending" },
-];
+interface Transfer {
+  no: string;
+  date: string;
+  from: string;
+  to: string;
+  amount: number;
+  description: string;
+  status: string;
+}
 
 const formatIDR = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
 
@@ -18,6 +23,39 @@ const statusPill = (status: string) => {
 
 export default function TransfersPage() {
   const router = useRouter();
+  const [transfers, setTransfers] = useState<Transfer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/stock-transfers?limit=1000")
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.data && j.data.length > 0) {
+          const mapped: Transfer[] = j.data.map((t: any) => ({
+            no: t.no || t.refCode || "-",
+            date: t.date || "-",
+            from: t.from || t.sourceWarehouse || "-",
+            to: t.to || t.destWarehouse || "-",
+            amount: t.amount || 0,
+            description: t.description || t.notes || "-",
+            status: t.status || "Selesai",
+          }));
+          setTransfers(mapped);
+        } else {
+          setTransfers([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Gagal memuat data transfer");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">

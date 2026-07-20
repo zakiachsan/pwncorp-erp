@@ -1,32 +1,8 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useState } from "react";
-import { ArrowLeft, Printer, Barcode, ChevronRight } from "lucide-react";
-
-const deliveryData: Record<string, any> = {
-  "PD/WJY/26060041": {
-    refCode: "PD/WJY/26060041",
-    referenceNumber: "PO-2026-0041",
-    purchaseOrder: "PO/WJY/26060101",
-    purchaseInvoice: "PI/WJY/26060021",
-    supplier: { name: "PT Astra Otoparts", address: "Jl. Raya Bogor Km 30, Jakarta Timur" },
-    deliverTo: { name: "CV Berkah Abadi", address: "Jl. Sudirman No 45, Jakarta Pusat" },
-    warehouse: "Wijaya Motor - WH Main",
-    notes: "Pengiriman sparepart untuk kebutuhan workshop bulan Juni 2026.",
-    createdBy: "Nanda Salsa",
-    updatedBy: "Nanda Salsa",
-    createdAt: "25 Jun 2026 09:00 AM",
-    updatedAt: "25 Jun 2026 10:30 AM",
-    receivedDate: "25 Jun 2026 11:00 AM",
-    journal: "JRN/WJY/26060101",
-    status: "RECEIVED",
-    items: [
-      { no: 1, sku: "SKU/LK/STB/001", product: "LINK STABILIZER FR", productCode: "LK-STB-FR-001", qty: 2, price: 450000, discount: 5, amount: 855000 },
-      { no: 2, sku: "SKU/BRG/RD/002", product: "BEARING RODA FRONT", productCode: "BRG-RD-FR-002", qty: 4, price: 325000, discount: 0, amount: 1300000 },
-    ],
-  },
-};
+import { useState, useEffect } from "react";
+import { ArrowLeft, Printer, Barcode } from "lucide-react";
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 
@@ -37,8 +13,25 @@ export default function PurchaseDeliveryDetailPage() {
   const params = useParams();
   const refCodeArray = params.refCode as string[];
   const refCode = refCodeArray ? refCodeArray.join("/") : "";
-  const delivery = deliveryData[refCode];
+  const [delivery, setDelivery] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "fixedAssets">("details");
+
+  useEffect(() => {
+    fetch(`/api/purchase-deliveries?search=${encodeURIComponent(refCode)}&limit=1`)
+      .then((r) => r.json())
+      .then((json) => {
+        const found = (json.data || [])[0];
+        if (!found) { setError("Purchase Delivery tidak ditemukan: " + refCode); setLoading(false); return; }
+        setDelivery(found);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, [refCode]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   if (!delivery) {
     return (
@@ -52,9 +45,14 @@ export default function PurchaseDeliveryDetailPage() {
   }
 
   const currentStepIdx = workflowSteps.indexOf(delivery.status);
-  const subtotal = delivery.items.reduce((s: number, x: any) => s + x.amount, 0);
+  const items = delivery.items || [];
+  const subtotal = items.reduce((s: number, x: any) => s + (x.amount || 0), 0);
   const tax = Math.round(subtotal * 0.11);
   const total = subtotal + tax;
+  const allQty = items.reduce((s: number, x: any) => s + (x.qty || x.quantity || 0), 0);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -124,29 +122,25 @@ export default function PurchaseDeliveryDetailPage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, marginBottom: 20 }}>
             {/* Left Column */}
             <div>
-              <F label="REF CODE" value={delivery.refCode} />
-              <F label="REFERENCE NUMBER" value={delivery.referenceNumber} />
-              <F label="PURCHASE ORDER" value={delivery.purchaseOrder} link onClick={() => {}} />
-              <F label="PURCHASE INVOICE" value={delivery.purchaseInvoice} link onClick={() => {}} />
-              <F label="SUPPLIER" value={delivery.supplier.name} link onClick={() => {}} />
-              <div style={{ fontSize: 12, color: "#444746", marginBottom: 10, marginLeft: 0, paddingLeft: 0, marginTop: -4 }}>
-                {delivery.supplier.address}
-              </div>
-              <F label="DELIVER TO" value={delivery.deliverTo.name} link onClick={() => {}} />
-              <div style={{ fontSize: 12, color: "#444746", marginBottom: 10, marginTop: -4 }}>
-                {delivery.deliverTo.address}
-              </div>
-              <F label="WAREHOUSE" value={delivery.warehouse} link onClick={() => {}} />
-              <F label="NOTES" value={delivery.notes} />
+              <F label="REF CODE" value={delivery.deliveryNo || delivery.refCode || refCode} />
+              <F label="REFERENCE NUMBER" value={delivery.deliveryNo || delivery.referenceNumber || "-"} />
+              <F label="PURCHASE ORDER" value={delivery.po?.poNo || delivery.purchaseOrder || "-"} link onClick={() => {}} />
+              <F label="PURCHASE INVOICE" value={delivery.purchaseInvoice || "-"} link onClick={() => {}} />
+              <F label="SUPPLIER" value={delivery.po?.supplier?.companyName || delivery.supplier?.name || delivery.supplier || "-"} link onClick={() => {}} />
+              {delivery.supplier?.address && <div style={{ fontSize: 12, color: "#444746", marginBottom: 10, marginLeft: 0, paddingLeft: 0, marginTop: -4 }}>{delivery.supplier.address}</div>}
+              <F label="DELIVER TO" value={delivery.deliverTo?.name || delivery.deliverTo || "-"} link onClick={() => {}} />
+              {delivery.deliverTo?.address && <div style={{ fontSize: 12, color: "#444746", marginBottom: 10, marginTop: -4 }}>{delivery.deliverTo.address}</div>}
+              <F label="WAREHOUSE" value={delivery.warehouse || "-"} link onClick={() => {}} />
+              <F label="NOTES" value={delivery.notes || "-"} />
             </div>
             {/* Right Column */}
             <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-              <F label="CREATED BY" value={delivery.createdBy} />
-              <F label="UPDATED BY" value={delivery.updatedBy} />
-              <F label="CREATED AT" value={delivery.createdAt} />
-              <F label="UPDATED AT" value={delivery.updatedAt} />
-              <F label="RECEIVED DATE" value={delivery.receivedDate} />
-              <F label="JOURNAL" value={delivery.journal} link onClick={() => {}} />
+              <F label="CREATED BY" value={delivery.createdBy || "-"} />
+              <F label="UPDATED BY" value={delivery.updatedBy || "-"} />
+              <F label="CREATED AT" value={delivery.createdAt ? new Date(delivery.createdAt).toLocaleString() : "-"} />
+              <F label="UPDATED AT" value={delivery.updatedAt ? new Date(delivery.updatedAt).toLocaleString() : "-"} />
+              <F label="RECEIVED DATE" value={delivery.receivedDate || "-"} />
+              <F label="JOURNAL" value={delivery.journal || "-"} link onClick={() => {}} />
             </div>
           </div>
 
@@ -167,18 +161,21 @@ export default function PurchaseDeliveryDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {delivery.items.map((item: any) => (
-                  <tr key={item.no} style={S.tr}>
-                    <td style={S.td}>{item.no}</td>
-                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}>{item.sku}</td>
-                    <td style={S.td}>{item.product}</td>
-                    <td style={S.td}>{item.productCode}</td>
-                    <td style={{ ...S.td, textAlign: "right" }}>{item.qty}</td>
-                    <td style={{ ...S.td, textAlign: "right" }}>{fmt(item.price)}</td>
-                    <td style={{ ...S.td, textAlign: "right" }}>{item.discount}%</td>
-                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(item.amount)}</td>
+                {items.map((item: any, idx: number) => (
+                  <tr key={item.id || idx} style={S.tr}>
+                    <td style={S.td}>{item.no || idx + 1}</td>
+                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}>{item.sku || "-"}</td>
+                    <td style={S.td}>{item.product?.name || item.product || "-"}</td>
+                    <td style={S.td}>{item.productCode || "-"}</td>
+                    <td style={{ ...S.td, textAlign: "right" }}>{item.qty || item.quantity || 0}</td>
+                    <td style={{ ...S.td, textAlign: "right" }}>{fmt(item.price || 0)}</td>
+                    <td style={{ ...S.td, textAlign: "right" }}>{item.discount || 0}%</td>
+                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(item.amount || 0)}</td>
                   </tr>
                 ))}
+                {items.length === 0 && (
+                  <tr><td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e" }}>No items</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -188,7 +185,7 @@ export default function PurchaseDeliveryDetailPage() {
             <div style={{ width: 320 }}>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 12px", fontSize: 13 }}>
                 <span style={{ color: "#444746" }}>All Pages Qty</span>
-                <span style={{ fontWeight: 600 }}>{delivery.items.reduce((s: number, x: any) => s + x.qty, 0)}</span>
+                <span style={{ fontWeight: 600 }}>{allQty}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 12px", fontSize: 13 }}>
                 <span style={{ color: "#444746" }}>SubTotal</span>
@@ -223,7 +220,6 @@ function F({ label, value, link = false, onClick }: { label: string; value: stri
       <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 2 }}>{label}</div>
       <div style={{ fontSize: 13, fontWeight: 500, color: link ? "#0176d3" : "#001526", display: "flex", alignItems: "center", gap: 4 }}>
         {value}
-        {link && <ChevronRight size={13} style={{ color: "#0176d3" }} />}
       </div>
     </div>
   );

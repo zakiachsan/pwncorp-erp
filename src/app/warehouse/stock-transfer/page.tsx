@@ -1,53 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Star, ArrowUpDown } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const transfers = [
-  {
-    refCode: "WTF/WJY/25050004",
-    date: "04 May 2025",
-    approvedAt: "05 May 2025 10:30 AM",
-    from: "Gudang Wijaya",
-    to: "Gudang PJ Motor",
-    status: "RECEIVED",
-    user: "Nanda Salsa",
-  },
-  {
-    refCode: "WTF/WJY/25050005",
-    date: "08 May 2025",
-    approvedAt: "09 May 2025 11:15 AM",
-    from: "Gudang Wijaya",
-    to: "Gudang PJ Motor",
-    status: "RECEIVED",
-    user: "Rizky Pratama",
-  },
-  {
-    refCode: "WJY/WJY/25050006",
-    date: "15 May 2025",
-    approvedAt: "16 May 2025 09:45 AM",
-    from: "Gudang Wijaya",
-    to: "Gudang PJ Motor",
-    status: "RECEIVED",
-    user: "Nanda Salsa",
-  },
-  {
-    refCode: "WJY/WJY/25050007",
-    date: "22 May 2025",
-    approvedAt: "23 May 2025 02:00 PM",
-    from: "Gudang Wijaya",
-    to: "Gudang PJ Motor",
-    status: "RECEIVED",
-    user: "Andi Kurniawan",
-  },
-];
-
 export default function StockTransferPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+
+  useEffect(() => {
+    fetch("/api/stock-transfers")
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -65,11 +39,7 @@ export default function StockTransferPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div className="form-group">
             <label className="form-label">Ref Code</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="WTF/WJY/..."
-            />
+            <input type="text" className="form-input" placeholder="WTF/WJY/..." />
           </div>
           <div className="form-group">
             <label className="form-label">Tanggal</label>
@@ -124,13 +94,7 @@ export default function StockTransferPage() {
             <tr>
               <th>Ref.Code</th>
               <th>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                   Date <ArrowUpDown size={12} style={{ opacity: 0.5 }} />
                 </span>
               </th>
@@ -142,40 +106,29 @@ export default function StockTransferPage() {
             </tr>
           </thead>
           <tbody>
-            {transfers.map((t) => (
-              <tr key={t.refCode}>
+            {data.map((t) => (
+              <tr key={t.id}>
                 <td
                   className="font-medium cursor-pointer"
                   style={{ color: "var(--color-brand)" }}
-                  onClick={() =>
-                    router.push(`/warehouse/stock-transfer/${t.refCode}`)
-                  }
+                  onClick={() => router.push(`/warehouse/stock-transfer/${t.transferNo}`)}
                 >
-                  {t.refCode}
+                  {t.transferNo}
                 </td>
-                <td className="text-[--color-text-secondary]">{t.date}</td>
-                <td className="text-[--color-text-secondary]">
-                  {t.approvedAt}
-                </td>
-                <td>{t.from}</td>
-                <td>{t.to}</td>
+                <td className="text-[--color-text-secondary]">{t.date ? new Date(t.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td className="text-[--color-text-secondary]">-</td>
+                <td>{t.fromWarehouse || "-"}</td>
+                <td>{t.toStore || "-"}</td>
                 <td>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 8px",
-                      borderRadius: 9999,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      color: "#fff",
-                      background:
-                        t.status === "RECEIVED" ? "#2e844a" : "#6b7280",
-                    }}
-                  >
+                  <span style={{
+                    display: "inline-block", padding: "2px 8px", borderRadius: 9999,
+                    fontSize: 10, fontWeight: 600, color: "#fff",
+                    background: t.status === "RECEIVED" ? "#2e844a" : "#6b7280",
+                  }}>
                     {t.status}
                   </span>
                 </td>
-                <td>{t.user}</td>
+                <td>-</td>
               </tr>
             ))}
           </tbody>

@@ -1,36 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, Star, ArrowUpDown, Search } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const stockOpname = [
-  { refCode: "WST/WJY/26060001", date: "01 Jun 2026", completedAt: "02 Jun 2026 10:30 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060002", date: "03 Jun 2026", completedAt: "04 Jun 2026 11:15 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060003", date: "05 Jun 2026", completedAt: "06 Jun 2026 09:45 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060004", date: "07 Jun 2026", completedAt: "08 Jun 2026 13:00 PM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060005", date: "09 Jun 2026", completedAt: "10 Jun 2026 14:30 PM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060006", date: "11 Jun 2026", completedAt: "12 Jun 2026 08:15 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060007", date: "13 Jun 2026", completedAt: "14 Jun 2026 10:00 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060008", date: "15 Jun 2026", completedAt: "16 Jun 2026 11:45 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060009", date: "17 Jun 2026", completedAt: "18 Jun 2026 09:30 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060010", date: "19 Jun 2026", completedAt: "20 Jun 2026 15:00 PM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060011", date: "21 Jun 2026", completedAt: "22 Jun 2026 10:15 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060012", date: "23 Jun 2026", completedAt: "24 Jun 2026 08:45 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060013", date: "24 Jun 2026", completedAt: "25 Jun 2026 12:30 PM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060014", date: "25 Jun 2026", completedAt: "26 Jun 2026 14:15 PM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-  { refCode: "WST/WJY/26060086", date: "27 Jun 2026", completedAt: "28 Jun 2026 09:00 AM", warehouse: "Gudang Wijaya", notes: "adjusment stock", status: "APPROVED", user: "ANGGA NOVIANTO" },
-];
-
 export default function StockOpnamePage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
 
+  useEffect(() => {
+    fetch("/api/stock-opnames")
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
-      {/* Header */}
       <div className="view-header">
         <div className="view-title">
           <CheckCircle className="w-6 h-6 text-[#2e844a]" />
@@ -39,24 +33,15 @@ export default function StockOpnamePage() {
         </div>
       </div>
 
-      {/* Filter Section */}
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <div className="form-group">
             <label className="form-label">Ref Code</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="WST/WJY/..."
-            />
+            <input type="text" className="form-input" placeholder="WST/WJY/..." />
           </div>
           <div className="form-group">
             <label className="form-label">Tanggal</label>
-            <DateRangePicker
-              from={dateFrom}
-              to={dateTo}
-              onChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
-            />
+            <DateRangePicker from={dateFrom} to={dateTo} onChange={(from, to) => { setDateFrom(from); setDateTo(to); }} />
           </div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>
@@ -85,20 +70,13 @@ export default function StockOpnamePage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="table-wrap">
         <table className="data-table">
           <thead>
             <tr>
               <th>Ref. Code</th>
               <th>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                   Date <ArrowUpDown size={12} style={{ opacity: 0.5 }} />
                 </span>
               </th>
@@ -110,38 +88,22 @@ export default function StockOpnamePage() {
             </tr>
           </thead>
           <tbody>
-            {stockOpname.map((s) => (
-              <tr key={s.refCode}>
-                <td
-                  className="font-medium cursor-pointer"
-                  style={{ color: "var(--color-brand)" }}
-                  onClick={() =>
-                    router.push(`/warehouse/stock-opname/${s.refCode}`)
-                  }
-                >
+            {data.map((s) => (
+              <tr key={s.id}>
+                <td className="font-medium cursor-pointer" style={{ color: "var(--color-brand)" }}
+                  onClick={() => router.push(`/warehouse/stock-opname/${s.refCode}`)}>
                   {s.refCode}
                 </td>
-                <td className="text-[--color-text-secondary]">{s.date}</td>
-                <td className="text-[--color-text-secondary]">{s.completedAt}</td>
-                <td>{s.warehouse}</td>
-                <td>{s.notes}</td>
+                <td className="text-[--color-text-secondary]">{s.date ? new Date(s.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td className="text-[--color-text-secondary]">-</td>
+                <td>-</td>
+                <td>{s.notes || "-"}</td>
                 <td>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 8px",
-                      borderRadius: 9999,
-                      fontSize: 10,
-                      fontWeight: 600,
-                      color: "#fff",
-                      background:
-                        s.status === "APPROVED" ? "#2e844a" : "#6b7280",
-                    }}
-                  >
+                  <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, color: "#fff", background: s.status === "APPROVED" ? "#2e844a" : "#6b7280" }}>
                     {s.status}
                   </span>
                 </td>
-                <td>{s.user}</td>
+                <td>{s.user || "-"}</td>
               </tr>
             ))}
           </tbody>

@@ -6,10 +6,56 @@ import { ArrowLeft, Save, ChevronDown, Plus, X } from "lucide-react";
 
 export default function NewSparepartPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
-  const handleSave = () => {
-    alert("Sparepart berhasil ditambahkan!");
-    router.push("/inventory");
+  const updateField = (label: string, value: string) => {
+    setFieldValues((prev) => ({ ...prev, [label]: value }));
+  };
+
+  const handleSave = async () => {
+    setError("");
+    const sku = fieldValues["CODE"] || "";
+    const name = fieldValues["NAME"] || "";
+    const brand = fieldValues["BRAND"] || "";
+    const category = fieldValues["CATEGORY"] || "";
+    const unit = fieldValues["UNIT"] || "";
+    const buyPrice = fieldValues["BUY PRICE"] || "0";
+    const sellPrice = fieldValues["SELL PRICE"] || "0";
+    const minStock = fieldValues["MIN STOCK"] || "0";
+    const location = fieldValues["LOCATION"] || "";
+
+    if (!sku || !name) {
+      setError("Code dan Name wajib diisi");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/spareparts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sku,
+          name,
+          brand,
+          category,
+          unit,
+          buyPrice: parseFloat(buyPrice) || 0,
+          sellPrice: parseFloat(sellPrice) || 0,
+          minStock: parseInt(minStock) || 0,
+          location,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menyimpan sparepart");
+      router.push("/inventory");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,25 +73,29 @@ export default function NewSparepartPage() {
         <button style={{ ...S.tab, color: "#fff", background: "#0176d3", fontWeight: 600 }}>Details</button>
       </div>
 
+      {error && (
+        <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#dc2626", fontSize: 13 }}>{error}</div>
+      )}
+
       {/* Form */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
         {/* Left Column */}
         <div>
-          <FInput label="CODE" placeholder="Contoh: SP-007" />
-          <FCreatable label="NAME" placeholder="Ketik nama sparepart" presets={["Oli Mesin", "Filter Oli", "Kampas Rem", "Busi", "Aki", "V-Belt", "Bearing", "Seal"]} />
-          <FCreatable label="BRAND" placeholder="Pilih / ketik brand" presets={["Shell", "Toyota Genuine", "Bendix", "NGK", "GS Battery", "Mitsuboshi", "SKF", "NTN"]} />
-          <FCreatable label="CATEGORY" placeholder="Pilih kategori" presets={["Oli", "Filter", "Rem", "Pengapian", "Kelistrikan", "Mesin", "Body", "Suspensi"]} />
-          <FInput label="UNIT" placeholder="Contoh: Pcs, Ltr, Set" />
+          <FInput label="CODE" placeholder="Contoh: SP-007" value={fieldValues["CODE"] || ""} onChange={(v) => updateField("CODE", v)} />
+          <FCreatable label="NAME" placeholder="Ketik nama sparepart" presets={["Oli Mesin", "Filter Oli", "Kampas Rem", "Busi", "Aki", "V-Belt", "Bearing", "Seal"]} value={fieldValues["NAME"] || ""} onChange={(v) => updateField("NAME", v)} />
+          <FCreatable label="BRAND" placeholder="Pilih / ketik brand" presets={["Shell", "Toyota Genuine", "Bendix", "NGK", "GS Battery", "Mitsuboshi", "SKF", "NTN"]} value={fieldValues["BRAND"] || ""} onChange={(v) => updateField("BRAND", v)} />
+          <FCreatable label="CATEGORY" placeholder="Pilih kategori" presets={["Oli", "Filter", "Rem", "Pengapian", "Kelistrikan", "Mesin", "Body", "Suspensi"]} value={fieldValues["CATEGORY"] || ""} onChange={(v) => updateField("CATEGORY", v)} />
+          <FInput label="UNIT" placeholder="Contoh: Pcs, Ltr, Set" value={fieldValues["UNIT"] || ""} onChange={(v) => updateField("UNIT", v)} />
         </div>
         {/* Right Column */}
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-          <FInput label="BUY PRICE" placeholder="Contoh: 75000" type="number" />
-          <FInput label="SELL PRICE" placeholder="Contoh: 85000" type="number" />
-          <FInput label="MIN STOCK" placeholder="Contoh: 10" type="number" />
-          <FInput label="LOCATION" placeholder="Contoh: Rak A-01" />
+          <FInput label="BUY PRICE" placeholder="Contoh: 75000" type="number" value={fieldValues["BUY PRICE"] || ""} onChange={(v) => updateField("BUY PRICE", v)} />
+          <FInput label="SELL PRICE" placeholder="Contoh: 85000" type="number" value={fieldValues["SELL PRICE"] || ""} onChange={(v) => updateField("SELL PRICE", v)} />
+          <FInput label="MIN STOCK" placeholder="Contoh: 10" type="number" value={fieldValues["MIN STOCK"] || ""} onChange={(v) => updateField("MIN STOCK", v)} />
+          <FInput label="LOCATION" placeholder="Contoh: Rak A-01" value={fieldValues["LOCATION"] || ""} onChange={(v) => updateField("LOCATION", v)} />
           <div style={{ marginTop: 20 }}>
-            <button onClick={handleSave} style={{ ...S.saveBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
-              <Save size={14} /> Simpan
+            <button onClick={handleSave} disabled={loading} style={{ ...S.saveBtn, background: loading ? "#a0c4e8" : "#0176d3", color: "#fff", border: "1px solid #0176d3", cursor: loading ? "not-allowed" : "pointer" }}>
+              <Save size={14} /> {loading ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
         </div>
@@ -55,9 +105,8 @@ export default function NewSparepartPage() {
 }
 
 /* ─── Creatable Dropdown ─── */
-function FCreatable({ label, placeholder, presets }: { label: string; placeholder: string; presets: string[] }) {
+function FCreatable({ label, placeholder, presets, value, onChange }: { label: string; placeholder: string; presets: string[]; value: string; onChange: (v: string) => void }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useState("");
   const [options, setOptions] = useState(presets);
   const [filter, setFilter] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -86,7 +135,7 @@ function FCreatable({ label, placeholder, presets }: { label: string; placeholde
   const filtered = options.filter((o) => o.toLowerCase().includes(filter.toLowerCase()));
 
   const handleSelect = (opt: string) => {
-    setValue(opt);
+    onChange(opt);
     setIsOpen(false);
     setFilter("");
     setIsAdding(false);
@@ -97,7 +146,7 @@ function FCreatable({ label, placeholder, presets }: { label: string; placeholde
     if (newValue.trim()) {
       const val = newValue.trim();
       setOptions([...options, val]);
-      setValue(val);
+      onChange(val);
       setIsOpen(false);
       setIsAdding(false);
       setNewValue("");
@@ -227,11 +276,11 @@ function FCreatable({ label, placeholder, presets }: { label: string; placeholde
   );
 }
 
-function FInput({ label, placeholder, type = "text" }: { label: string; placeholder: string; type?: string }) {
+function FInput({ label, placeholder, type = "text", value, onChange }: { label: string; placeholder: string; type?: string; value: string; onChange: (v: string) => void }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>{label}</div>
-      <input type={type} placeholder={placeholder} style={{
+      <input type={type} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} style={{
         width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526",
         border: "1px solid #d8d8d8", borderRadius: 6, outline: "none",
       }} />

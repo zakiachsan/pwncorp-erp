@@ -1,16 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart3, Star, Search, Download } from "lucide-react";
-
-/* ── data from Excel ── */
-const data = [
-  { no: 1, serviceOrder: "SRO/WM/26050083", store: "PT Putra Wijaya Motor", type: "Service Sale", createdDate: "25-May-2026", approvedDate: "07-Jul-2026", planServiceDate: "25-May-2026", planServiceTime: "16:00", status: "Approved", customer: "UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA", company: "", vehicleType: "Car", registration: "B1005PQP", hullNumber: "", vin: "", estimatedTime: "01:00:00", serviceAdvisor: "MARDOTO", salesperson: "", bookingSource: "", serviceReservation: "", insuranceProvider: "", qty: 5, subtotal: 1874310, tax: 206174, otherTax: 0, total: 2080484, tradeIn: 0, swo: "SWO/WM/26070014", woStatus: "Waiting", sri: "", invStatus: "", hasProforma: "No", hasDown: "No", cancelReasonType: "", cancelReasonNotes: "" },
-  { no: 2, serviceOrder: "SRO/003/26070031", store: "Wijaya Motor - One Stop Service", type: "Service Sale", createdDate: "07-Jul-2026", approvedDate: "07-Jul-2026", planServiceDate: "07-Jul-2026", planServiceTime: "08:55", status: "Approved", customer: "BPK. IKO", company: "", vehicleType: "Car", registration: "B1992B", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", salesperson: "", bookingSource: "", serviceReservation: "", insuranceProvider: "", qty: 5, subtotal: 617500, tax: 0, otherTax: 0, total: 617500, tradeIn: 0, swo: "SWO/003/26070030", woStatus: "Completed", sri: "SRI/003/26070028", invStatus: "Completed", hasProforma: "No", hasDown: "No", cancelReasonType: "", cancelReasonNotes: "" },
-  { no: 3, serviceOrder: "SRO/003/26070032", store: "Wijaya Motor - One Stop Service", type: "Service Sale", createdDate: "07-Jul-2026", approvedDate: "07-Jul-2026", planServiceDate: "07-Jul-2026", planServiceTime: "10:55", status: "Approved", customer: "BPK. RICKY", company: "", vehicleType: "Car", registration: "B9525PAM", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", salesperson: "", bookingSource: "", serviceReservation: "", insuranceProvider: "", qty: 5, subtotal: 413250, tax: 0, otherTax: 0, total: 413250, tradeIn: 0, swo: "SWO/003/26070031", woStatus: "Completed", sri: "SRI/003/26070029", invStatus: "Completed", hasProforma: "No", hasDown: "No", cancelReasonType: "", cancelReasonNotes: "" },
-  { no: 4, serviceOrder: "SRO/003/26070033", store: "Wijaya Motor - One Stop Service", type: "Service Sale", createdDate: "07-Jul-2026", approvedDate: "07-Jul-2026", planServiceDate: "07-Jul-2026", planServiceTime: "11:35", status: "Approved", customer: "BPK. ALDO", company: "", vehicleType: "Car", registration: "KH1863GI", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", salesperson: "", bookingSource: "", serviceReservation: "", insuranceProvider: "", qty: 2, subtotal: 400000, tax: 0, otherTax: 0, total: 400000, tradeIn: 0, swo: "SWO/003/26070032", woStatus: "Completed", sri: "SRI/003/26070031", invStatus: "Completed", hasProforma: "No", hasDown: "No", cancelReasonType: "", cancelReasonNotes: "" },
-  { no: 5, serviceOrder: "SRO/003/26070034", store: "Wijaya Motor - One Stop Service", type: "Service Sale", createdDate: "07-Jul-2026", approvedDate: "07-Jul-2026", planServiceDate: "07-Jul-2026", planServiceTime: "13:55", status: "Approved", customer: "AUTO PRIMA", company: "", vehicleType: "Car", registration: "B819BEN", hullNumber: "", vin: "", estimatedTime: "", serviceAdvisor: "NANDA SALSA", salesperson: "", bookingSource: "", serviceReservation: "", insuranceProvider: "", qty: 1, subtotal: 45000, tax: 0, otherTax: 0, total: 45000, tradeIn: 0, swo: "SWO/003/26070033", woStatus: "In Progress", sri: "", invStatus: "", hasProforma: "No", hasDown: "No", cancelReasonType: "", cancelReasonNotes: "" },
-];
 
 function fmt(n: number): string {
   return n.toLocaleString("id-ID").replace(/,/g, ".");
@@ -20,6 +12,60 @@ const linkStyle: React.CSSProperties = { color: "#0176d3", cursor: "pointer", fo
 
 export default function SummaryServiceOrdersPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-so&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const orders: any[] = j.data || [];
+        const mapped = orders.map((so: any, i: number) => ({
+          no: i + 1,
+          serviceOrder: so.soNo || "—",
+          store: so.store?.name || "—",
+          type: so.type || "Service Sale",
+          createdDate: so.date ? new Date(so.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+          approvedDate: so.approvedDate ? new Date(so.approvedDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+          planServiceDate: so.planServiceDate ? new Date(so.planServiceDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+          planServiceTime: so.planServiceTime || "—",
+          status: so.status || "Approved",
+          customer: so.customer?.name || "—",
+          company: "",
+          vehicleType: so.vehicle?.type || "Car",
+          registration: so.vehicle?.plateNo || "—",
+          hullNumber: "",
+          vin: "",
+          estimatedTime: so.estimatedTime || "",
+          serviceAdvisor: so.sa?.name || "—",
+          salesperson: "",
+          bookingSource: "",
+          serviceReservation: "",
+          insuranceProvider: "",
+          qty: so.items?.length || 0,
+          subtotal: so.subtotal || so.total || 0,
+          tax: so.tax || 0,
+          otherTax: 0,
+          total: so.total || 0,
+          tradeIn: 0,
+          swo: "—",
+          woStatus: "—",
+          sri: "—",
+          invStatus: "—",
+          hasProforma: "No",
+          hasDown: "No",
+          cancelReasonType: "",
+          cancelReasonNotes: "",
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load summary service orders"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -49,11 +95,11 @@ export default function SummaryServiceOrdersPage() {
 
         {/* Row 2 */}
         <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option><option>UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>BPK. ALDO</option><option>AUTO PRIMA</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option></select></Field>
           <Field label="Registration"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="Hull Number"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="VIN"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
-          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option><option>MARDOTO</option><option>NANDA SALSA</option></select></Field>
+          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option></select></Field>
           <Field label="Salesperson"><select className="form-select" style={{ minWidth: 140 }}><option>All Salespersons</option></select></Field>
           <Field label="Booking Source"><select className="form-select" style={{ minWidth: 140 }}><option>All Booking Source</option></select></Field>
         </div>

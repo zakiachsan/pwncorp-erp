@@ -1,22 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
-
-const historyData = [
-  { id: "RFP/003/260703", tanggal: "03 Jul 2026", keperluan: "Biaya Operasional Bengkel", penerima: "PLN / PDAM", jumlah: 3200000, metode: "Transfer Bank BCA", status: "Paid", tglBayar: "03 Jul 2026" },
-  { id: "RFP/008/260630", tanggal: "30 Jun 2026", keperluan: "Pembayaran Vendor IT", penerima: "PT Digital Solusi", jumlah: 5500000, metode: "Transfer Bank Mandiri", status: "Paid", tglBayar: "30 Jun 2026" },
-  { id: "RFP/009/260628", tanggal: "28 Jun 2026", keperluan: "Biaya Kebersihan", penerima: "CV Clean Service", jumlah: 1800000, metode: "Transfer Bank BRI", status: "Paid", tglBayar: "28 Jun 2026" },
-  { id: "RFP/010/260625", tanggal: "25 Jun 2026", keperluan: "Pembelian ATK", penerima: "Toko Buku Maju", jumlah: 750000, metode: "Kas Tunai", status: "Paid", tglBayar: "25 Jun 2026" },
-  { id: "RFP/006/260706", tanggal: "06 Jul 2026", keperluan: "Biaya Listrik Bengkel", penerima: "PLN", jumlah: 2800000, metode: "Transfer Bank BCA", status: "Rejected", tglBayar: "-" },
-];
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function PaymentHistoryPage() {
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+
+  useEffect(() => {
+    fetch("/api/payment-requests")
+      .then((r) => r.json())
+      .then((json) => {
+        const mapped = (json.data || []).map((pr: any) => ({
+          id: pr.prNo || pr.id?.toString() || "",
+          tanggal: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
+          keperluan: pr.purpose || "",
+          penerima: pr.recipient || "-",
+          jumlah: pr.amount || 0,
+          metode: pr.method || "-",
+          status: pr.status || "Pending",
+          tglBayar: pr.paidAt ? new Date(pr.paidAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
+        }));
+        setHistoryData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment history"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">

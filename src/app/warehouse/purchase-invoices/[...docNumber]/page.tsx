@@ -1,77 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, ChevronDown } from "lucide-react";
-
-const piDetail: Record<string, any> = {
-  "PI/HO/26050143": {
-    docNumber: "PI/HO/26050143",
-    referenceNumber: "PI-2026-143",
-    taxNumber: "001234567890",
-    purchaseOrder: "PO/HO/26050082",
-    supplier: { name: "PT Auto Parts Sejahtera", address: "Jl. Raya Bogor No. 123, Jakarta Selatan 12345" },
-    invoiceDate: "01 May 2026",
-    dueDate: "31 May 2026",
-    plannedPaymentDate: "31 May 2026",
-    creditTerm: 30,
-    supplierBankDetails: "BCA - 1234567890 a.n PT Auto Parts Sejahtera",
-    notes: "Pembayaran harus tepat waktu sesuai jatuh tempo.",
-    source: "Manual Entry",
-    status: "APPROVED",
-    amounts: {
-      subTotal: 2850000,
-      creditNote: 0,
-      netSubTotal: 2850000,
-      tax: 0,
-      total: 2850000,
-    },
-    payments: {
-      amountDue: 2850000,
-      amountPaid: 0,
-    },
-    items: [
-      {
-        no: 1,
-        sku: "SKU-DR-001",
-        product: "DRYER-AC",
-        productCode: "DRYER-AC-001",
-        quantity: 5,
-        price: 350000,
-        discount: 0,
-        amount: 1750000,
-      },
-      {
-        no: 2,
-        sku: "SKU-EM-002",
-        product: "EM-F05",
-        productCode: "EM-F05-001",
-        quantity: 10,
-        price: 110000,
-        discount: 0,
-        amount: 1100000,
-      },
-    ],
-    journals: [
-      { no: 1, journalId: "JRN-2026-00521", refCode: "PI/HO/26050143", amount: 2850000, createdBy: "ANGGA NOVIANTO" },
-      { no: 2, journalId: "JRN-2026-00522", refCode: "PI/HO/26050143", amount: 2850000, createdBy: "YUSRO IQBAL" },
-    ],
-    deliveries: [
-      { refCode: "PD/HO/26050082", date: "28 Apr 2026", warehouse: "Gudang Utama", status: "RECEIVED", total: 2850000 },
-    ],
-    paymentsList: [
-      { refCode: "PAY/HO/26050041", date: "15 May 2026", amount: 0, status: "PENDING", method: "Bank Transfer" },
-    ],
-    returns: [],
-    changes: {
-      createdBy: "ANGGA NOVIANTO",
-      updatedBy: "YUSRO IQBAL",
-      createdAt: "01 May 2026 09:30",
-      updatedAt: "02 May 2026 14:15",
-      approvedDate: "01 May 2026 10:00",
-    },
-  },
-};
 
 const workflowSteps = ["DRAFT", "SUBMITTED", "APPROVED", "PAID"];
 
@@ -93,13 +24,27 @@ const formatIDR = (n: number | undefined | null) => {
 export default function PurchaseInvoiceDetailPage() {
   const params = useParams();
   const router = useRouter();
-  // params.docNumber is an array for catch-all routes
   const docNumber = Array.isArray(params.docNumber) ? params.docNumber.join("/") : (params.docNumber as string);
   const [activeTab, setActiveTab] = useState<"details" | "journals" | "deliveriesPayments" | "returns" | "changes">("details");
   const [printOpen, setPrintOpen] = useState(false);
+  const [pi, setPi] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const pi = piDetail[docNumber];
-  const currentStepIndex = getStepIndex(pi?.status || "DRAFT");
+  useEffect(() => {
+    fetch(`/api/purchase-invoices?search=${encodeURIComponent(docNumber)}&limit=1`)
+      .then((r) => r.json())
+      .then((json) => {
+        const found = (json.data || [])[0];
+        if (!found) { setError("Purchase Invoice tidak ditemukan: " + docNumber); setLoading(false); return; }
+        setPi(found);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, [docNumber]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   if (!pi) {
     return (
@@ -113,6 +58,10 @@ export default function PurchaseInvoiceDetailPage() {
       </div>
     );
   }
+
+  const currentStepIndex = getStepIndex(pi.status || "DRAFT");
+  const items = pi.items || [];
+  const subTotal = items.reduce((s: number, x: any) => s + (x.amount || 0), 0);
 
   return (
     <div>
@@ -180,7 +129,7 @@ export default function PurchaseInvoiceDetailPage() {
           </div>
           <div>
             <span className="text-xs text-[--color-text-secondary]">Supplier: </span>
-            <span className="text-xs font-semibold">{pi.supplier.name}</span>
+            <span className="text-xs font-semibold">{pi.supplier?.companyName || pi.supplier?.name || "-"}</span>
           </div>
         </div>
       </div>
@@ -221,9 +170,9 @@ export default function PurchaseInvoiceDetailPage() {
               </div>
               <div className="space-y-3">
                 {[
-                  ["DOCUMENT NUMBER", pi.docNumber],
-                  ["REFERENCE NUMBER", pi.referenceNumber],
-                  ["TAX NUMBER", pi.taxNumber],
+                  ["DOCUMENT NUMBER", pi.docNo || docNumber || "-"],
+                  ["REFERENCE NUMBER", pi.referenceNumber || pi.docNo || "-"],
+                  ["TAX NUMBER", pi.taxNumber || "-"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between py-2 border-b border-[--color-border]">
                     <span className="text-sm text-[--color-text-secondary] font-medium">{label}</span>
@@ -236,7 +185,7 @@ export default function PurchaseInvoiceDetailPage() {
                     className="font-semibold text-sm cursor-pointer"
                     style={{ color: "var(--color-brand)" }}
                   >
-                    {pi.purchaseOrder}
+                    {pi.po?.poNo || pi.purchaseOrder || "-"}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-[--color-border]">
@@ -246,15 +195,15 @@ export default function PurchaseInvoiceDetailPage() {
                       className="font-semibold text-sm cursor-pointer"
                       style={{ color: "var(--color-brand)" }}
                     >
-                      {pi.supplier.name}
+                      {pi.supplier?.companyName || pi.supplier?.name || "-"}
                     </span>
-                    <div className="text-xs text-[--color-text-secondary]">{pi.supplier.address}</div>
+                    <div className="text-xs text-[--color-text-secondary]">{pi.supplier?.address || ""}</div>
                   </div>
                 </div>
                 {[
-                  ["INVOICE DATE", pi.invoiceDate],
-                  ["DUE DATE", pi.dueDate],
-                  ["PLANNED PAYMENT DATE", pi.plannedPaymentDate],
+                  ["INVOICE DATE", pi.date ? new Date(pi.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "-"],
+                  ["DUE DATE", pi.dueDate || "-"],
+                  ["PLANNED PAYMENT DATE", pi.plannedPaymentDate || "-"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between py-2 border-b border-[--color-border]">
                     <span className="text-sm text-[--color-text-secondary] font-medium">{label}</span>
@@ -263,11 +212,11 @@ export default function PurchaseInvoiceDetailPage() {
                 ))}
                 <div className="flex justify-between py-2 border-b border-[--color-border]">
                   <span className="text-sm text-[--color-text-secondary] font-medium">CREDIT TERM (DAYS)</span>
-                  <span className="font-medium text-sm">{pi.creditTerm}</span>
+                  <span className="font-medium text-sm">{pi.creditTerm || "-"}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-[--color-border]">
                   <span className="text-sm text-[--color-text-secondary] font-medium">SUPPLIER BANK DETAILS</span>
-                  <span className="font-medium text-sm text-right max-w-[250px]">{pi.supplierBankDetails}</span>
+                  <span className="font-medium text-sm text-right max-w-[250px]">{pi.supplierBankDetails || "-"}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-[--color-border]">
                   <span className="text-sm text-[--color-text-secondary] font-medium">NOTES</span>
@@ -275,7 +224,7 @@ export default function PurchaseInvoiceDetailPage() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-[--color-border]">
                   <span className="text-sm text-[--color-text-secondary] font-medium">SOURCE</span>
-                  <span className="font-medium text-sm">{pi.source}</span>
+                  <span className="font-medium text-sm">{pi.source || "-"}</span>
                 </div>
               </div>
             </div>
@@ -289,19 +238,19 @@ export default function PurchaseInvoiceDetailPage() {
                 </div>
                 <div className="space-y-3">
                   {[
-                    ["SubTotal", pi.amounts.subTotal],
-                    ["Credit Note", pi.amounts.creditNote],
-                    ["Net SubTotal", pi.amounts.netSubTotal],
-                    ["Tax", pi.amounts.tax],
+                    ["SubTotal", subTotal],
+                    ["Credit Note", 0],
+                    ["Net SubTotal", subTotal],
+                    ["Tax", 0],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between py-2 border-b border-[--color-border]">
                       <span className="text-sm text-[--color-text-secondary] font-medium">{label}</span>
-                      <span className="font-semibold text-sm">{formatIDR(value)}</span>
+                      <span className="font-semibold text-sm">{formatIDR(value as number)}</span>
                     </div>
                   ))}
                   <div className="flex justify-between py-2 border-b-2 border-[--color-text-primary]">
                     <span className="text-sm font-bold text-[--color-text-secondary]">Total</span>
-                    <span className="font-bold text-lg text-[--color-brand]">{formatIDR(pi.amounts.total)}</span>
+                    <span className="font-bold text-lg text-[--color-brand]">{formatIDR(pi.total || subTotal)}</span>
                   </div>
                 </div>
               </div>
@@ -314,11 +263,11 @@ export default function PurchaseInvoiceDetailPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between py-2 border-b border-[--color-border]">
                     <span className="text-sm text-[--color-text-secondary] font-medium">Amount Due</span>
-                    <span className="font-semibold text-sm">{formatIDR(pi.payments.amountDue)}</span>
+                    <span className="font-semibold text-sm">{formatIDR(pi.total || subTotal)}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-[--color-border]">
                     <span className="text-sm text-[--color-text-secondary] font-medium">Amount Paid</span>
-                    <span className="font-semibold text-sm">{formatIDR(pi.payments.amountPaid)}</span>
+                    <span className="font-semibold text-sm">{formatIDR(pi.amountPaid || 0)}</span>
                   </div>
                 </div>
               </div>
@@ -345,28 +294,31 @@ export default function PurchaseInvoiceDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pi.items.map((item: any) => (
-                    <tr key={item.no}>
-                      <td>{item.no}</td>
+                  {items.map((item: any, idx: number) => (
+                    <tr key={item.id || idx}>
+                      <td>{item.no || idx + 1}</td>
                       <td
                         className="font-medium cursor-pointer"
                         style={{ color: "var(--color-brand)" }}
                       >
-                        {item.sku}
+                        {item.sku || "-"}
                       </td>
-                      <td>{item.product}</td>
-                      <td>{item.productCode}</td>
-                      <td className="text-right">{item.quantity}</td>
-                      <td className="text-right">{formatIDR(item.price)}</td>
-                      <td className="text-right">{item.discount}%</td>
-                      <td className="text-right font-semibold">{formatIDR(item.amount)}</td>
+                      <td>{item.product?.name || item.product || "-"}</td>
+                      <td>{item.productCode || "-"}</td>
+                      <td className="text-right">{item.quantity || item.qty || 0}</td>
+                      <td className="text-right">{formatIDR(item.price || 0)}</td>
+                      <td className="text-right">{item.discount || 0}%</td>
+                      <td className="text-right font-semibold">{formatIDR(item.amount || 0)}</td>
                     </tr>
                   ))}
+                  {items.length === 0 && (
+                    <tr><td colSpan={8} className="text-center text-sm text-[--color-text-secondary] py-4">No items</td></tr>
+                  )}
                 </tbody>
                 <tfoot>
                   <tr className="font-bold border-t-2 border-[--color-text-primary]">
                     <td colSpan={7} className="text-sm text-right">TOTAL</td>
-                    <td className="text-right text-lg text-[--color-brand]">{formatIDR(pi.amounts.total)}</td>
+                    <td className="text-right text-lg text-[--color-brand]">{formatIDR(pi.total || subTotal)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -393,20 +345,19 @@ export default function PurchaseInvoiceDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {pi.journals.map((j: any) => (
-                  <tr key={j.no}>
-                    <td>{j.no}</td>
-                    <td
-                      className="font-medium cursor-pointer"
-                      style={{ color: "var(--color-brand)" }}
-                    >
-                      {j.journalId}
-                    </td>
-                    <td>{j.refCode}</td>
-                    <td className="text-right font-semibold">{formatIDR(j.amount)}</td>
-                    <td>{j.createdBy}</td>
-                  </tr>
-                ))}
+                {pi.journals && pi.journals.length > 0 ? (
+                  pi.journals.map((j: any) => (
+                    <tr key={j.no}>
+                      <td>{j.no}</td>
+                      <td className="font-medium cursor-pointer" style={{ color: "var(--color-brand)" }}>{j.journalId}</td>
+                      <td>{j.refCode}</td>
+                      <td className="text-right font-semibold">{formatIDR(j.amount)}</td>
+                      <td>{j.createdBy}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={5} className="text-center text-sm text-[--color-text-secondary] py-8">No journals recorded.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -416,118 +367,17 @@ export default function PurchaseInvoiceDetailPage() {
       {/* Deliveries / Payments Tab */}
       {activeTab === "deliveriesPayments" && (
         <div className="space-y-6">
-          {/* Purchase Deliveries */}
           <div className="card-slds">
             <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">
               Purchase Deliveries
             </div>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Ref Code</th>
-                    <th>Date</th>
-                    <th>Warehouse</th>
-                    <th>Status</th>
-                    <th className="text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pi.deliveries.map((d: any, idx: number) => (
-                    <tr key={idx}>
-                      <td
-                        className="font-medium cursor-pointer"
-                        style={{ color: "var(--color-brand)" }}
-                      >
-                        {d.refCode}
-                      </td>
-                      <td className="text-[--color-text-secondary]">{d.date}</td>
-                      <td>{d.warehouse}</td>
-                      <td>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: 9999,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            color: "#fff",
-                            background: "#2e844a",
-                          }}
-                        >
-                          {d.status}
-                        </span>
-                      </td>
-                      <td className="text-right font-semibold">{formatIDR(d.total)}</td>
-                    </tr>
-                  ))}
-                  {pi.deliveries.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="text-center text-sm text-[--color-text-secondary] py-8">
-                        No deliveries recorded.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <p className="text-sm text-[--color-text-secondary]">Deliveries data will be displayed here.</p>
           </div>
-
-          {/* Payments */}
           <div className="card-slds">
             <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">
               Payments
             </div>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Ref Code</th>
-                    <th>Date</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                    <th className="text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pi.paymentsList.map((p: any, idx: number) => (
-                    <tr key={idx}>
-                      <td
-                        className="font-medium cursor-pointer"
-                        style={{ color: "var(--color-brand)" }}
-                      >
-                        {p.refCode}
-                      </td>
-                      <td className="text-[--color-text-secondary]">{p.date}</td>
-                      <td>{p.method}</td>
-                      <td>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "2px 8px",
-                            borderRadius: 9999,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            color: "#fff",
-                            background: p.status === "PAID" ? "#2e844a" : "#6b7280",
-                          }}
-                        >
-                          {p.status}
-                        </span>
-                      </td>
-                      <td className="text-right font-semibold">{formatIDR(p.amount)}</td>
-                    </tr>
-                  ))}
-                  {pi.payments.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="text-center text-sm text-[--color-text-secondary] py-8">
-                        No payments recorded.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <p className="text-sm text-[--color-text-secondary]">Payments data will be displayed here.</p>
           </div>
         </div>
       )}
@@ -538,28 +388,7 @@ export default function PurchaseInvoiceDetailPage() {
           <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">
             Purchase Returns
           </div>
-          <div className="table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Ref Code</th>
-                  <th>Date</th>
-                  <th>Reason</th>
-                  <th>Status</th>
-                  <th className="text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pi.returns.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="text-center text-sm text-[--color-text-secondary] py-8">
-                      No returns recorded.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <p className="text-sm text-[--color-text-secondary]">No returns recorded.</p>
         </div>
       )}
 
@@ -571,11 +400,11 @@ export default function PurchaseInvoiceDetailPage() {
           </div>
           <div className="space-y-3">
             {[
-              ["CREATED BY", pi.changes.createdBy],
-              ["UPDATED BY", pi.changes.updatedBy],
-              ["CREATED AT", pi.changes.createdAt],
-              ["UPDATED AT", pi.changes.updatedAt],
-              ["APPROVED DATE", pi.changes.approvedDate],
+              ["CREATED BY", pi.createdBy || "-"],
+              ["UPDATED BY", pi.updatedBy || "-"],
+              ["CREATED AT", pi.createdAt ? new Date(pi.createdAt).toLocaleString() : "-"],
+              ["UPDATED AT", pi.updatedAt ? new Date(pi.updatedAt).toLocaleString() : "-"],
+              ["APPROVED DATE", pi.approvedDate || "-"],
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between py-2 border-b border-[--color-border]">
                 <span className="text-sm text-[--color-text-secondary] font-medium">{label}</span>

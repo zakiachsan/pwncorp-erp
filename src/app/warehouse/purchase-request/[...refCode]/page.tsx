@@ -2,62 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Printer, Star } from "lucide-react";
-import { useState } from "react";
-
-const purchaseRequestData: Record<string, any> = {
-  "PRQ/HO/26010014": {
-    refCode: "PRQ/HO/26010014",
-    supplier: "PT Bearing Jaya",
-    deliverTo: "Workshop Utama - Area Mekanik",
-    warehouse: "Workshop Utama",
-    supplierRefCode: "SUP/BJ/2026/001",
-    notes: "Penggantian bearing yang sudah aus pada mesin press",
-    createdBy: "Budi Santoso",
-    updatedBy: "Siti Rahmawati",
-    approvedBy: "-",
-    dueDate: "21 Jan 2026",
-    closed: false,
-    status: "PENDING APPROVAL",
-    items: [
-      {
-        no: 1,
-        sku: "BRG-001",
-        product: "BEARING SUPPORT SHOCK",
-        productCode: "BSS-2026-01",
-        requestQty: 4,
-        orderedQty: 0,
-        price: 1250000,
-        discount: 5,
-        amount: 4750000,
-      },
-      {
-        no: 2,
-        sku: "BRG-002",
-        product: "BEARING 6205-2RS",
-        productCode: "B6205-2RS",
-        requestQty: 10,
-        orderedQty: 0,
-        price: 85000,
-        discount: 0,
-        amount: 850000,
-      },
-      {
-        no: 3,
-        sku: "BRG-003",
-        product: "BEARING 6208-ZZ",
-        productCode: "B6208-ZZ",
-        requestQty: 6,
-        orderedQty: 0,
-        price: 150000,
-        discount: 10,
-        amount: 810000,
-      },
-    ],
-    subTotal: 6410000,
-    tax: 641000,
-    total: 7051000,
-  },
-};
+import { useState, useEffect } from "react";
 
 const workflowSteps = ["DRAFT", "CONFIRMED", "PENDING APPROVAL", "APPROVED", "ORDERED"];
 
@@ -67,10 +12,26 @@ export default function PurchaseRequestDetailPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.refCode as string[];
-  const refCode = refCodeArray ? decodeURIComponent(refCodeArray.join("/")) : "";
-  const pr = purchaseRequestData[refCode];
-
+  const refCode = refCodeArray ? refCodeArray.join("/") : "";
+  const [pr, setPr] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("details");
+
+  useEffect(() => {
+    fetch(`/api/purchase-requests?search=${encodeURIComponent(refCode)}&limit=1`)
+      .then((r) => r.json())
+      .then((json) => {
+        const found = (json.data || [])[0];
+        if (!found) { setError("Purchase Request tidak ditemukan: " + refCode); setLoading(false); return; }
+        setPr(found);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, [refCode]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   if (!pr) {
     return (
@@ -86,6 +47,10 @@ export default function PurchaseRequestDetailPage() {
   }
 
   const currentStepIdx = workflowSteps.indexOf(pr.status);
+  const items = pr.items || [];
+  const subTotal = items.reduce((s: number, x: any) => s + (x.amount || 0), 0);
+  const tax = Math.round(subTotal * 0.1);
+  const total = subTotal + tax;
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -153,21 +118,21 @@ export default function PurchaseRequestDetailPage() {
               <div style={{ fontSize: 11, fontWeight: 600, color: "#0176d3", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 12 }}>
                 Informasi Purchase Request
               </div>
-              <F label="REF CODE" value={pr.refCode} />
-              <F label="SUPPLIER" value={pr.supplier} link />
-              <F label="DELIVER TO" value={pr.deliverTo} />
-              <F label="WAREHOUSE" value={pr.warehouse} link />
-              <F label="SUPPLIER REF CODE" value={pr.supplierRefCode} />
-              <F label="NOTES" value={pr.notes} />
+              <F label="REF CODE" value={pr.prNo || pr.refCode || refCode || "-"} />
+              <F label="SUPPLIER" value={pr.supplier?.companyName || pr.supplier?.name || pr.supplier || "-"} link />
+              <F label="DELIVER TO" value={pr.deliverTo?.name || pr.deliverTo || "-"} />
+              <F label="WAREHOUSE" value={pr.warehouse?.name || pr.warehouse || "-"} link />
+              <F label="SUPPLIER REF CODE" value={pr.supplierRefCode || "-"} />
+              <F label="NOTES" value={pr.notes || "-"} />
             </div>
             <div style={S.card}>
               <div style={{ fontSize: 11, fontWeight: 600, color: "#0176d3", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 12 }}>
                 Audit Trail
               </div>
-              <F label="CREATED BY" value={pr.createdBy} />
-              <F label="UPDATED BY" value={pr.updatedBy} />
-              <F label="APPROVED BY" value={pr.approvedBy} />
-              <F label="DUE DATE" value={pr.dueDate} />
+              <F label="CREATED BY" value={pr.createdBy || "-"} />
+              <F label="UPDATED BY" value={pr.updatedBy || "-"} />
+              <F label="APPROVED BY" value={pr.approvedBy || "-"} />
+              <F label="DUE DATE" value={pr.dueDate || pr.date ? new Date(pr.dueDate || pr.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "-"} />
               <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 2 }}>
                   CLOSED
@@ -206,21 +171,24 @@ export default function PurchaseRequestDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pr.items.map((item: any) => (
-                    <tr key={item.no} style={S.tr}>
-                      <td style={S.td}>{item.no}</td>
-                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{item.sku}</td>
-                      <td style={S.td}>{item.product}</td>
-                      <td style={S.td}>{item.productCode}</td>
-                      <td style={{ ...S.td, textAlign: "right" }}>{item.requestQty}</td>
-                      <td style={{ ...S.td, textAlign: "right", color: item.orderedQty === 0 ? "#ea001e" : "#001526", fontWeight: item.orderedQty === 0 ? 600 : 400 }}>
-                        {item.orderedQty}
+                  {items.map((item: any, idx: number) => (
+                    <tr key={item.id || idx} style={S.tr}>
+                      <td style={S.td}>{item.no || idx + 1}</td>
+                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{item.sku || "-"}</td>
+                      <td style={S.td}>{item.product?.name || item.product || "-"}</td>
+                      <td style={S.td}>{item.productCode || "-"}</td>
+                      <td style={{ ...S.td, textAlign: "right" }}>{item.requestQty || item.quantity || 0}</td>
+                      <td style={{ ...S.td, textAlign: "right", color: (item.orderedQty || 0) === 0 ? "#ea001e" : "#001526", fontWeight: (item.orderedQty || 0) === 0 ? 600 : 400 }}>
+                        {item.orderedQty || 0}
                       </td>
-                      <td style={{ ...S.td, textAlign: "right" }}>{fmt(item.price)}</td>
-                      <td style={{ ...S.td, textAlign: "right" }}>{item.discount}%</td>
-                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(item.amount)}</td>
+                      <td style={{ ...S.td, textAlign: "right" }}>{fmt(item.price || 0)}</td>
+                      <td style={{ ...S.td, textAlign: "right" }}>{item.discount || 0}%</td>
+                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(item.amount || 0)}</td>
                     </tr>
                   ))}
+                  {items.length === 0 && (
+                    <tr><td colSpan={9} style={{ ...S.td, textAlign: "center", color: "#8e8f8e" }}>No items</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -230,15 +198,15 @@ export default function PurchaseRequestDetailPage() {
               <div style={{ width: 300 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
                   <span style={{ fontSize: 13, color: "#444746" }}>SubTotal</span>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{fmt(pr.subTotal)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500 }}>{fmt(subTotal)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
                   <span style={{ fontSize: 13, color: "#444746" }}>Tax (10%)</span>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{fmt(pr.tax)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500 }}>{fmt(tax)}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", fontWeight: 700, fontSize: 15 }}>
                   <span>Total</span>
-                  <span>{fmt(pr.total)}</span>
+                  <span>{fmt(total)}</span>
                 </div>
               </div>
             </div>

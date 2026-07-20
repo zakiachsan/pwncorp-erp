@@ -1,17 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Save, ChevronDown, Plus, Trash2, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Save, Plus, Trash2, AlertTriangle } from "lucide-react";
+
+type Sparepart = { id: string; sku: string; code?: string | null; name: string; stockQty: number; unit?: string };
+type OpnameRow = { sparepartId: string; name: string; systemStock: string; actualStock: string; reason: string };
+
+const emptyRow = (): OpnameRow => ({ sparepartId: "", name: "", systemStock: "", actualStock: "", reason: "" });
 
 export default function NewStockOpnamePage() {
   const router = useRouter();
-  const [items, setItems] = useState<{ code: string; name: string; systemStock: string; actualStock: string; reason: string }[]>([
-    { code: "", name: "", systemStock: "", actualStock: "", reason: "" },
-  ]);
+  const [spareparts, setSpareparts] = useState<Sparepart[]>([]);
+  const [loadingParts, setLoadingParts] = useState(true);
+  const [items, setItems] = useState<OpnameRow[]>([emptyRow()]);
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/spareparts?limit=200")
+      .then((r) => r.json())
+      .then((j) => {
+        const list = j.data?.items || j.data || [];
+        setSpareparts(list);
+        setLoadingParts(false);
+      })
+      .catch(() => setLoadingParts(false));
+  }, []);
 
   const handleAddItem = () => {
-    setItems([...items, { code: "", name: "", systemStock: "", actualStock: "", reason: "" }]);
+    setItems([...items, emptyRow()]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -20,15 +39,65 @@ export default function NewStockOpnamePage() {
     }
   };
 
-  const handleItemChange = (index: number, field: string, value: string) => {
+  const handleSparepartSelect = (index: number, sparepartId: string) => {
     const newItems = [...items];
-    (newItems[index] as any)[field] = value;
+    const sp = spareparts.find((s) => s.id === sparepartId);
+    newItems[index] = {
+      ...newItems[index],
+      sparepartId,
+      name: sp ? sp.name : "",
+      systemStock: sp ? String(sp.stockQty) : "",
+    };
     setItems(newItems);
   };
 
-  const handleSave = () => {
-    alert("Stock Opname berhasil disimpan!");
-    router.push("/inventory/stock-opname");
+  const handleItemChange = (index: number, field: keyof OpnameRow, value: string) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setItems(newItems);
+  };
+
+  const handleSave = async () => {
+    setErrorMsg("");
+    const validItems = items.filter((i) => i.sparepartId && i.actualStock !== "");
+    if (validItems.length === 0) {
+      setErrorMsg("Pilih minimal 1 sparepart dan isi stok fisik sebelum disimpan.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        warehouse: null,
+        notes,
+        items: validItems.map((i) => {
+          const systemQty = parseInt(i.systemStock) || 0;
+          const physicalQty = parseInt(i.actualStock) || 0;
+          return {
+            sparepartId: i.sparepartId,
+            systemQty,
+            physicalQty,
+            actualQty: physicalQty,
+            diff: physicalQty - systemQty,
+            reason: i.reason || null,
+          };
+        }),
+      };
+
+      const res = await fetch("/api/stock-opnames", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const j = await res.json();
+      if (!res.ok) {
+        throw new Error(j.error || `Gagal menyimpan (HTTP ${res.status})`);
+      }
+      router.push("/inventory/stock-opname");
+    } catch (e: any) {
+      setErrorMsg(e.message || "Terjadi kesalahan saat menyimpan.");
+      setSaving(false);
+    }
   };
 
   const hasSelisih = items.some((item) => {
@@ -47,6 +116,13 @@ export default function NewStockOpnamePage() {
         <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>New Stock Opname</h1>
       </div>
 
+      {/* Error */}
+      {errorMsg && (
+        <div style={{ ...S.alertBox, background: "#fde8e8", border: "1px solid #ea001e", color: "#9f1239", marginBottom: 16 }}>
+          <AlertTriangle size={14} /> {errorMsg}
+        </div>
+      )}
+
       {/* Alert */}
       {hasSelisih && (
         <div style={{ ...S.alertBox, background: "#fef3cd", border: "1px solid #ffc107", color: "#856404", marginBottom: 16 }}>
@@ -58,14 +134,14 @@ export default function NewStockOpnamePage() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, marginBottom: 24 }}>
         <div>
           <FInput label="DATE" type="date" value={new Date().toISOString().split("T")[0]} disabled />
-          <FInput label="NOTES" placeholder="Catatan stock opname" />
+          <FInput label="NOTES" placeholder="Catatan stock opname" value={notes} onChange={setNotes} />
         </div>
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>SUMMARY</div>
           <div style={{ display: "flex", gap: 24, marginTop: 8 }}>
             <div>
               <div style={{ fontSize: 12, color: "#444746" }}>Total Items</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#001526" }}>{items.filter(i => i.code).length}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#001526" }}>{items.filter(i => i.sparepartId).length}</div>
             </div>
             <div>
               <div style={{ fontSize: 12, color: "#444746" }}>Selisih</div>
@@ -105,76 +181,89 @@ export default function NewStockOpnamePage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item, i) => {
-                const sys = parseInt(item.systemStock) || 0;
-                const act = parseInt(item.actualStock) || 0;
-                const selisih = item.systemStock && item.actualStock ? act - sys : null;
-                return (
-                  <tr key={i} style={S.tr}>
-                    <td style={S.td}>{i + 1}</td>
-                    <td style={S.td}>
-                      <input
-                        type="text"
-                        placeholder="Code"
-                        value={item.code}
-                        onChange={(e) => handleItemChange(i, "code", e.target.value)}
-                        style={S.input}
-                      />
-                    </td>
-                    <td style={S.td}>
-                      <input
-                        type="text"
-                        placeholder="Name"
-                        value={item.name}
-                        onChange={(e) => handleItemChange(i, "name", e.target.value)}
-                        style={S.input}
-                      />
-                    </td>
-                    <td style={S.td}>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={item.systemStock}
-                        onChange={(e) => handleItemChange(i, "systemStock", e.target.value)}
-                        style={{ ...S.input, textAlign: "right" }}
-                      />
-                    </td>
-                    <td style={S.td}>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        value={item.actualStock}
-                        onChange={(e) => handleItemChange(i, "actualStock", e.target.value)}
-                        style={{ ...S.input, textAlign: "right" }}
-                      />
-                    </td>
-                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>
-                      {selisih !== null && (
-                        <span style={{ color: selisih !== 0 ? "#ea001e" : "#2e844a" }}>
-                          {selisih === 0 ? "0" : selisih > 0 ? `+${selisih}` : selisih}
-                        </span>
-                      )}
-                    </td>
-                    <td style={S.td}>
-                      <input
-                        type="text"
-                        placeholder="-"
-                        value={item.reason}
-                        onChange={(e) => handleItemChange(i, "reason", e.target.value)}
-                        style={S.input}
-                      />
-                    </td>
-                    <td style={S.td}>
-                      <button
-                        onClick={() => handleRemoveItem(i)}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 4 }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {loadingParts ? (
+                <tr>
+                  <td colSpan={8} style={{ ...S.td, textAlign: "center", padding: 24, color: "#444746" }}>
+                    Memuat daftar sparepart…
+                  </td>
+                </tr>
+              ) : (
+                items.map((item, i) => {
+                  const sys = parseInt(item.systemStock) || 0;
+                  const act = parseInt(item.actualStock) || 0;
+                  const selisih = item.systemStock && item.actualStock ? act - sys : null;
+                  return (
+                    <tr key={i} style={S.tr}>
+                      <td style={S.td}>{i + 1}</td>
+                      <td style={S.td}>
+                        <select
+                          value={item.sparepartId}
+                          onChange={(e) => handleSparepartSelect(i, e.target.value)}
+                          style={{ ...S.input, color: item.sparepartId ? "#001526" : "#8e8f8e" }}
+                        >
+                          <option value="">-- Pilih Sparepart --</option>
+                          {spareparts.map((sp) => (
+                            <option key={sp.id} value={sp.id}>
+                              {sp.code || sp.sku} — {sp.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td style={S.td}>
+                        <input
+                          type="text"
+                          placeholder="Name"
+                          value={item.name}
+                          readOnly
+                          style={{ ...S.input, background: "#f9f9f9", color: item.name ? "#001526" : "#8e8f8e" }}
+                        />
+                      </td>
+                      <td style={S.td}>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={item.systemStock}
+                          readOnly
+                          style={{ ...S.input, textAlign: "right", background: "#f9f9f9" }}
+                        />
+                      </td>
+                      <td style={S.td}>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={item.actualStock}
+                          onChange={(e) => handleItemChange(i, "actualStock", e.target.value)}
+                          style={{ ...S.input, textAlign: "right" }}
+                        />
+                      </td>
+                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>
+                        {selisih !== null && (
+                          <span style={{ color: selisih !== 0 ? "#ea001e" : "#2e844a" }}>
+                            {selisih === 0 ? "0" : selisih > 0 ? `+${selisih}` : selisih}
+                          </span>
+                        )}
+                      </td>
+                      <td style={S.td}>
+                        <input
+                          type="text"
+                          placeholder="-"
+                          value={item.reason}
+                          onChange={(e) => handleItemChange(i, "reason", e.target.value)}
+                          style={S.input}
+                        />
+                      </td>
+                      <td style={S.td}>
+                        <button
+                          onClick={() => handleRemoveItem(i)}
+                          style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 4 }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -182,11 +271,15 @@ export default function NewStockOpnamePage() {
 
       {/* Save Button */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-        <button onClick={() => router.push("/inventory/stock-opname")} style={S.actionBtn}>
+        <button onClick={() => router.push("/inventory/stock-opname")} style={S.actionBtn} disabled={saving}>
           Batal
         </button>
-        <button onClick={handleSave} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
-          <Save size={14} /> Simpan
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3", opacity: saving ? 0.6 : 1 }}
+        >
+          <Save size={14} /> {saving ? "Menyimpan…" : "Simpan"}
         </button>
       </div>
     </div>

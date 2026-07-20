@@ -1,13 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Search, Download } from "lucide-react";
 
-const apData = [
-  { no: "PO-001", supplier: "PT Suku Cadang Jaya", amount: "Rp 4.250.000", due: "15 Jul 2026", daysOverdue: 0, status: "Unpaid" },
-  { no: "PO-002", supplier: "CV Autoparts", amount: "Rp 1.500.000", due: "10 Jul 2026", daysOverdue: 0, status: "Unpaid" },
-];
-
+const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Unpaid: "#ea001e", Partial: "#f59e0b", Paid: "#2e844a" };
   return map[status] || "#6b7280";
@@ -15,6 +12,26 @@ const statusPill = (status: string) => {
 
 export default function APPage() {
   const router = useRouter();
+  const [apData, setApData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    fetch(`/api/purchase-invoices?${params.toString()}`)
+      .then((r) => r.json())
+      .then((json) => { setApData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load AP data"); setLoading(false); });
+  }, [statusFilter]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const totalHutang = apData.reduce((s: number, ap: any) => s + (ap.total || 0), 0);
+
   return (
     <div>
       <div className="view-header">
@@ -29,11 +46,11 @@ export default function APPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Total Hutang</div>
-          <div className="text-xl font-bold text-[--color-error]">Rp 5.750.000</div>
+          <div className="text-xl font-bold text-[--color-error]">{fmt(totalHutang)}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Current (0-30 days)</div>
-          <div className="text-xl font-bold text-[--color-success]">Rp 5.750.000</div>
+          <div className="text-xl font-bold text-[--color-success]">{fmt(totalHutang)}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Overdue (31-60 days)</div>
@@ -42,6 +59,29 @@ export default function APPage() {
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Overdue (60+ days)</div>
           <div className="text-xl font-bold text-[--color-error]">Rp 0</div>
+        </div>
+      </div>
+
+      {/* Filter */}
+      <div className="filter-section">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="form-group">
+            <label className="form-label">Status</label>
+            <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">All Status</option>
+              <option value="DRAFT">Draft</option>
+              <option value="APPROVED">Approved</option>
+              <option value="PAID">Paid</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Cari</label>
+            <input type="text" className="form-input" placeholder="No. PO / Supplier..." />
+          </div>
+          <div className="form-group">
+            <label className="form-label">&nbsp;</label>
+            <button className="btn btn--brand btn--sm flex-1 justify-center"><Search size={14} /> Cari</button>
+          </div>
         </div>
       </div>
 
@@ -59,13 +99,13 @@ export default function APPage() {
             </tr>
           </thead>
           <tbody>
-            {apData.map((ap) => (
-              <tr key={ap.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${ap.no}`)}>
-                <td className="font-medium text-[--color-brand]">{ap.no}</td>
-                <td>{ap.supplier}</td>
-                <td className="text-right font-medium">{ap.amount}</td>
-                <td>{ap.due}</td>
-                <td className="text-right">{ap.daysOverdue}</td>
+            {apData.map((ap: any) => (
+              <tr key={ap.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${ap.id}`)}>
+                <td className="font-medium text-[--color-brand]">{ap.po?.poNo || ap.poId || "-"}</td>
+                <td>{ap.supplier?.companyName || "-"}</td>
+                <td className="text-right font-medium">{fmt(ap.total || 0)}</td>
+                <td>{ap.dueDate ? new Date(ap.dueDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td className="text-right">0</td>
                 <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(ap.status), color: "#fff" }}>{ap.status}</span></td>
               </tr>
             ))}

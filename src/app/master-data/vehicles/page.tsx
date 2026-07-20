@@ -1,49 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
 interface Vehicle {
-  plate: string;
+  id: string;
+  plateNo: string;
   brand: string;
   model: string;
   year: string;
-  color: string;
-  customer: string;
   customerId: string;
-  storeTerbanyak: string;
+  customer: { id: string; name: string } | null;
 }
-
-const vehicles: Vehicle[] = [
-  { plate: "B 1234 CD", brand: "Toyota", model: "Avanza", year: "2022", color: "Silver", customer: "Budi Santoso", customerId: "C-001", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat" },
-  { plate: "B 5678 EF", brand: "Honda", model: "Civic", year: "2021", color: "Hitam", customer: "PT Maju Jaya", customerId: "C-002", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Selatan" },
-  { plate: "B 9012 GH", brand: "Mitsubishi", model: "Pajero", year: "2020", color: "Putih", customer: "Siti Rahmawati", customerId: "C-003", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung" },
-  { plate: "B 3456 IJ", brand: "Suzuki", model: "Ertiga", year: "2022", color: "Silver", customer: "CV Berkah Abadi", customerId: "C-004", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung" },
-  { plate: "B 7890 KL", brand: "Daihatsu", model: "Xenia", year: "2021", color: "Merah", customer: "Ahmad Fauzi", customerId: "C-005", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat" },
-  { plate: "B 1112 MN", brand: "Isuzu", model: "Elf", year: "2019", color: "Biru", customer: "PT Transport Jaya", customerId: "C-006", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat" },
-  { plate: "B 1314 OP", brand: "Mitsubishi", model: "L300", year: "2020", color: "Putih", customer: "CV Berkah Abadi", customerId: "C-004", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung" },
-  { plate: "B 2468 QR", brand: "Toyota", model: "Innova", year: "2023", color: "Putih", customer: "Dewi Lestari", customerId: "C-007", storeTerbanyak: "Wijaya Motor One Stop Service - Surabaya" },
-  { plate: "B 3690 ST", brand: "Honda", model: "CR-V", year: "2021", color: "Hitam", customer: "PT Sinar Auto", customerId: "C-008", storeTerbanyak: "Wijaya Motor One Stop Service - Surabaya" },
-  { plate: "B 4812 UV", brand: "Toyota", model: "Fortuner", year: "2020", color: "Silver", customer: "PT Karya Mandiri", customerId: "C-010", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat" },
-  { plate: "B 5934 WX", brand: "Daihatsu", model: "Ayla", year: "2023", color: "Kuning", customer: "Nina Anggraini", customerId: "C-011", storeTerbanyak: "Wijaya Motor One Stop Service - Bandung" },
-  { plate: "B 6056 YZ", brand: "Suzuki", model: "APV", year: "2021", color: "Abu-abu", customer: "PT Karya Mandiri", customerId: "C-010", storeTerbanyak: "Wijaya Motor One Stop Service - Jakarta Pusat" },
-];
 
 export default function VehiclesPage() {
   const router = useRouter();
+  const [data, setData] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [brandFilter, setBrandFilter] = useState("All");
   const [search, setSearch] = useState("");
 
-  const filtered = vehicles.filter((v) => {
-    const matchBrand = brandFilter === "All" || v.brand === brandFilter;
-    const matchSearch = !search || v.plate.toLowerCase().includes(search.toLowerCase()) || v.customer.toLowerCase().includes(search.toLowerCase());
-    return matchBrand && matchSearch;
-  });
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (brandFilter !== "All") params.set("search", brandFilter);
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    fetch(`/api/vehicles${qs ? "?" + qs : ""}`)
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load vehicles"); setLoading(false); });
+  }, [brandFilter, search]);
 
-  const handleClickPlate = (e: React.MouseEvent, plate: string) => {
+  const handleClickPlate = (e: React.MouseEvent, plateNo: string) => {
     e.stopPropagation();
-    router.push(`/master-data/vehicles/${plate}`);
+    router.push(`/master-data/vehicles/${encodeURIComponent(plateNo)}`);
   };
 
   const handleClickCustomer = (e: React.MouseEvent, customerId: string) => {
@@ -91,46 +84,53 @@ export default function VehiclesPage() {
           </div>
         </div>
       </div>
-      <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Plat Nomor</th>
-              <th>Merk</th>
-              <th>Model</th>
-              <th>Tahun</th>
-              <th>Warna</th>
-              <th>Customer</th>
-              <th>Store Terbanyak</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((v) => (
-              <tr key={v.plate} className="hover:bg-[#f0f7ff] transition-colors">
-                <td
-                  className="font-medium"
-                  style={{ color: "#0176d3", cursor: "pointer" }}
-                  onClick={(e) => handleClickPlate(e, v.plate)}
-                >
-                  {v.plate}
-                </td>
-                <td className="font-medium">{v.brand}</td>
-                <td>{v.model}</td>
-                <td>{v.year}</td>
-                <td>{v.color}</td>
-                <td
-                  className="font-medium"
-                  style={{ color: "#0176d3", cursor: "pointer" }}
-                  onClick={(e) => handleClickCustomer(e, v.customerId)}
-                >
-                  {v.customer}
-                </td>
-                <td style={{ color: "#444746" }}>{v.storeTerbanyak}</td>
+
+      {loading && <div className="p-8 text-center text-[--color-text-secondary]">Loading...</div>}
+      {error && <div className="p-8 text-center text-red-500">{error}</div>}
+
+      {!loading && !error && (
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Plat Nomor</th>
+                <th>Merk</th>
+                <th>Model</th>
+                <th>Tahun</th>
+                <th>Customer</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-[--color-text-secondary]">No vehicles found</td>
+                </tr>
+              )}
+              {data.map((v) => (
+                <tr key={v.id} className="hover:bg-[#f0f7ff] transition-colors">
+                  <td
+                    className="font-medium"
+                    style={{ color: "#0176d3", cursor: "pointer" }}
+                    onClick={(e) => handleClickPlate(e, v.plateNo)}
+                  >
+                    {v.plateNo}
+                  </td>
+                  <td className="font-medium">{v.brand}</td>
+                  <td>{v.model}</td>
+                  <td>{v.year}</td>
+                  <td
+                    className="font-medium"
+                    style={{ color: "#0176d3", cursor: "pointer" }}
+                    onClick={(e) => handleClickCustomer(e, v.customerId)}
+                  >
+                    {v.customer?.name || "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

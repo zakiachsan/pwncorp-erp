@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 const { Pool } = pg;
 const pool = new Pool({ 
   host: "127.0.0.1",
-  port: 5432,
+  port: 5435,
   database: "pwncorp_erp",
   user: "pwncorp",
   password: "test",

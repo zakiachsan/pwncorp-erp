@@ -1,249 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { ArrowLeft, Printer, ChevronRight } from "lucide-react";
-
-const woData: Record<string, any> = {
-  "SWO/001/26060149": {
-    documentNumber: "SWO/001/26060149",
-    soNumber: "SRO/001/26060149",
-    soDocument: "SRO/001/26060149",
-    customer: { name: "Budi Santoso", phone: "0812-3456-7890" },
-    registrationNo: "B 1234 CD",
-    vehicleMake: "TOYOTA",
-    vehicleModel: "AVANZA",
-    vehicleType: "CAR",
-    year: "2022",
-    color: "SILVER",
-    odometer: "45.230",
-    store: "Wijaya Motor - One Stop Service",
-    serviceAdvisor: "Rudi",
-    mekanik: "Hendra",
-    status: "IN PROGRESS",
-    planStartDate: "Senin, 26 Juni 2026",
-    planEndDate: "Selasa, 27 Juni 2026",
-    actualStartDate: "Senin, 26 Juni 2026 08:30",
-    services: [
-      { item: "A3 - Spooring Mobil Kelas I", description: "Spooring", quantity: 1, priceExTax: 375000, discount: "10%", subtotal: 337500, total: 337500, assignedTo: "Hendra", status: "In Progress", estimatedTime: "60 menit" },
-      { item: "B4 - Balancing Ring >19\"", description: "Balancing", quantity: 4, priceExTax: 60000, discount: "10%", subtotal: 216000, total: 216000, assignedTo: "Agus", status: "Waiting", estimatedTime: "30 menit" },
-      { item: "JAS.NT.001 - JASA NON TRACKING", description: "NITRO FILL (BARU)", quantity: 4, priceExTax: 20000, discount: "-", subtotal: 80000, total: 80000, assignedTo: "Hendra", status: "Waiting", estimatedTime: "15 menit" },
-    ],
-    spareparts: [
-      { code: "OLM-001", name: "Oli Mesin 5W-30", qty: 3, price: 85000, total: 255000 },
-    ],
-  },
-  "SWO/002/26060151": {
-    documentNumber: "SWO/002/26060151",
-    soNumber: "SRO/002/26060150",
-    soDocument: "SRO/002/26060150",
-    customer: { name: "PT Maju Jaya", phone: "021-555-1234" },
-    registrationNo: "B 5678 EF",
-    vehicleMake: "HONDA",
-    vehicleModel: "CIVIC",
-    vehicleType: "CAR",
-    year: "2021",
-    color: "HITAM",
-    odometer: "78.450",
-    store: "Wijaya Motor - One Stop Service",
-    serviceAdvisor: "Ani",
-    mekanik: "Agus",
-    status: "WAITING STOCK",
-    planStartDate: "Senin, 26 Juni 2026",
-    planEndDate: "Rabu, 28 Juni 2026",
-    actualStartDate: "Senin, 26 Juni 2026 10:45",
-    services: [
-      { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, total: 250000, assignedTo: "Agus", status: "In Progress", estimatedTime: "30 menit" },
-    ],
-    spareparts: [
-      { code: "OLM-002", name: "Oli Mesin 0W-20", qty: 1, price: 120000, total: 120000 },
-    ],
-  },
-  "SWO/003/26060152": {
-    documentNumber: "SWO/003/26060152", soNumber: "SRO/003/26060152", soDocument: "SRO/003/26060152",
-    customer: { name: "Siti Rahmawati", phone: "0813-5678-9012" }, registrationNo: "B 9012 GH",
-    vehicleMake: "MITSUBISHI", vehicleModel: "PAJERO", vehicleType: "CAR", year: "2020", color: "PUTIH", odometer: "62.100",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "Rudi", mekanik: "Hendra",
-    status: "QC", planStartDate: "Minggu, 25 Juni 2026", planEndDate: "Senin, 26 Juni 2026",
-    actualStartDate: "Minggu, 25 Juni 2026 09:00",
-    services: [
-      { item: "C1 - Service Berkala 10K", description: "Service Umum", quantity: 1, priceExTax: 450000, discount: "-", subtotal: 450000, total: 450000, assignedTo: "Hendra", status: "Completed", estimatedTime: "90 menit" },
-    ],
-    spareparts: [],
-  },
-  "SWO/004/26060153": {
-    documentNumber: "SWO/004/26060153", soNumber: "SRO/004/26060153", soDocument: "SRO/004/26060153",
-    customer: { name: "CV Berkah Abadi", phone: "021-777-8888" }, registrationNo: "B 3456 IJ",
-    vehicleMake: "SUZUKI", vehicleModel: "ERTIGA", vehicleType: "CAR", year: "2023", color: "MERAH", odometer: "15.200",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "Ani", mekanik: "Bambang",
-    status: "COMPLETED", planStartDate: "Sabtu, 24 Juni 2026", planEndDate: "Minggu, 25 Juni 2026",
-    actualStartDate: "Sabtu, 24 Juni 2026 08:00",
-    services: [
-      { item: "D1 - Tune Up", description: "Tune Up Mesin", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, total: 350000, assignedTo: "Bambang", status: "Completed", estimatedTime: "120 menit" },
-    ],
-    spareparts: [],
-  },
-  "SWO/005/26060154": {
-    documentNumber: "SWO/005/26060154", soNumber: "SRO/005/26060154", soDocument: "SRO/005/26060154",
-    customer: { name: "Ahmad Fauzi", phone: "0812-999-0000" }, registrationNo: "B 7890 KL",
-    vehicleMake: "DAIHATSU", vehicleModel: "XENIA", vehicleType: "CAR", year: "2022", color: "ABU-ABU", odometer: "33.500",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "Rudi", mekanik: "Agus",
-    status: "DRAFT", planStartDate: "Senin, 26 Juni 2026", planEndDate: "Rabu, 28 Juni 2026",
-    actualStartDate: "-",
-    services: [
-      { item: "E1 - Rem Mobil", description: "Ganti Kampas Rem", quantity: 1, priceExTax: 280000, discount: "-", subtotal: 280000, total: 280000, assignedTo: "Agus", status: "Waiting", estimatedTime: "45 menit" },
-    ],
-    spareparts: [],
-  },
-  "SWO/006/26060155": {
-    documentNumber: "SWO/006/26060155", soNumber: "SRO/006/26060155", soDocument: "SRO/006/26060155",
-    customer: { name: "PT Transport Jaya", phone: "021-333-4444" }, registrationNo: "B 1112 MN",
-    vehicleMake: "ISUZU", vehicleModel: "ELF", vehicleType: "TRUCK", year: "2019", color: "BIRU", odometer: "120.000",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "Ani", mekanik: "Bambang",
-    status: "IN PROGRESS", planStartDate: "Minggu, 25 Juni 2026", planEndDate: "Selasa, 27 Juni 2026",
-    actualStartDate: "Minggu, 25 Juni 2026 07:30",
-    services: [
-      { item: "F1 - Overhaul", description: "Overhaul Mesin", quantity: 1, priceExTax: 2500000, discount: "5%", subtotal: 2375000, total: 2375000, assignedTo: "Bambang", status: "In Progress", estimatedTime: "480 menit" },
-    ],
-    spareparts: [
-      { code: "PST-001", name: "Piston Kit", qty: 4, price: 450000, total: 1800000 },
-      { code: "GLK-001", name: "Gasket Kit", qty: 1, price: 350000, total: 350000 },
-    ],
-  },
-  "SWO/003/26070029": {
-    documentNumber: "SWO/003/26070029", soNumber: "SRO/003/26070029", soDocument: "SRO/003/26070029",
-    customer: { name: "LUPIN MOTOR", phone: "081314778809" }, registrationNo: "B1800TP",
-    vehicleMake: "RANGE ROVER", vehicleModel: "EVOQUE", vehicleType: "CAR", year: "-", color: "-", odometer: "-",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "NANDA SALSA", mekanik: "NENDY, WOYO",
-    status: "COMPLETED", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "Selasa, 07 Juli 2026",
-    actualStartDate: "Selasa, 07 Juli 2026",
-    actualEndDate: "Selasa, 07 Juli 2026",
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", quantity: 20, priceExTax: 61200, discount: "6.800", subtotal: 1224000, total: 1224000, assignedTo: "NENDY", status: "Completed" },
-    ],
-    spareparts: [],
-  },
-  "SWO/WM/26070010": {
-    documentNumber: "SWO/WM/26070010", soNumber: "SRO/WM/26070010", soDocument: "SRO/WM/26070010",
-    customer: { name: "SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN", phone: "" }, registrationNo: "B9118SSC",
-    vehicleMake: "-", vehicleModel: "-", vehicleType: "CAR", year: "-", color: "-", odometer: "0",
-    store: "PT Putra Wijaya Motor", serviceAdvisor: "MARDOTO", mekanik: "AGUNG PRATAMA, Pak Hasan",
-    status: "WAITING", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "-",
-    services: [],
-    spareparts: [],
-  },
-  "SWO/003/26070030": {
-    documentNumber: "SWO/003/26070030", soNumber: "SRO/003/26070031", soDocument: "SRO/003/26070031",
-    customer: { name: "BPK. IKO", phone: "" }, registrationNo: "B1992B",
-    vehicleMake: "-", vehicleModel: "-", vehicleType: "CAR", year: "-", color: "-", odometer: "22.171",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "NANDA SALSA", mekanik: "NENDY, WOYO",
-    status: "COMPLETED", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "Selasa, 07 Juli 2026",
-    actualStartDate: "Selasa, 07 Juli 2026 08:31",
-    actualEndDate: "Selasa, 07 Juli 2026 09:33",
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", quantity: 1, priceExTax: 617500, discount: "-", subtotal: 617500, total: 617500, assignedTo: "NENDY", status: "Completed" },
-    ],
-    spareparts: [],
-  },
-  "SWO/003/26070031": {
-    documentNumber: "SWO/003/26070031", soNumber: "SRO/003/26070032", soDocument: "SRO/003/26070032",
-    customer: { name: "BPK. RICKY", phone: "" }, registrationNo: "B9525PAM",
-    vehicleMake: "-", vehicleModel: "-", vehicleType: "CAR", year: "-", color: "-", odometer: "18.157",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "NANDA SALSA", mekanik: "NENDY, WOYO",
-    status: "COMPLETED", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "Selasa, 07 Juli 2026",
-    actualStartDate: "Selasa, 07 Juli 2026 10:02",
-    actualEndDate: "Selasa, 07 Juli 2026 10:57",
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", quantity: 1, priceExTax: 413250, discount: "-", subtotal: 413250, total: 413250, assignedTo: "NENDY", status: "Completed" },
-    ],
-    spareparts: [],
-  },
-  "SWO/003/26070032": {
-    documentNumber: "SWO/003/26070032", soNumber: "SRO/003/26070033", soDocument: "SRO/003/26070033",
-    customer: { name: "BPK. ALDO", phone: "" }, registrationNo: "KH1863GI",
-    vehicleMake: "-", vehicleModel: "-", vehicleType: "CAR", year: "-", color: "-", odometer: "0",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "NANDA SALSA", mekanik: "MIFTA ARIFIN",
-    status: "COMPLETED", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "Selasa, 07 Juli 2026",
-    actualStartDate: "Selasa, 07 Juli 2026 11:26",
-    actualEndDate: "Selasa, 07 Juli 2026 12:06",
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", quantity: 1, priceExTax: 400000, discount: "-", subtotal: 400000, total: 400000, assignedTo: "MIFTA ARIFIN", status: "Completed" },
-    ],
-    spareparts: [],
-  },
-  "SWO/003/26070033": {
-    documentNumber: "SWO/003/26070033", soNumber: "SRO/003/26070034", soDocument: "SRO/003/26070034",
-    customer: { name: "AUTO PRIMA", phone: "" }, registrationNo: "B819BEN",
-    vehicleMake: "-", vehicleModel: "-", vehicleType: "CAR", year: "-", color: "-", odometer: "0",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "NANDA SALSA", mekanik: "NENDY",
-    status: "COMPLETED", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "Selasa, 07 Juli 2026",
-    actualStartDate: "Selasa, 07 Juli 2026 13:43",
-    actualEndDate: "Selasa, 07 Juli 2026 14:00",
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", quantity: 1, priceExTax: 45000, discount: "-", subtotal: 45000, total: 45000, assignedTo: "NENDY", status: "Completed" },
-    ],
-    spareparts: [],
-  },
-  "SWO/003/26070034": {
-    documentNumber: "SWO/003/26070034", soNumber: "SRO/003/26070035", soDocument: "SRO/003/26070035",
-    customer: { name: "PROMOTOR", phone: "" }, registrationNo: "B1537BIR",
-    vehicleMake: "-", vehicleModel: "-", vehicleType: "CAR", year: "-", color: "-", odometer: "114.166",
-    store: "Wijaya Motor - One Stop Service", serviceAdvisor: "NANDA SALSA", mekanik: "NENDY, WOYO",
-    status: "IN PROGRESS", planStartDate: "Selasa, 07 Juli 2026", planEndDate: "-",
-    actualStartDate: "Selasa, 07 Juli 2026 13:57",
-    services: [],
-    spareparts: [],
-  },
-};
-
-// Handle SO-generated WO document numbers (e.g. SWO/002/26060151)
-const soGeneratedWOs: Record<string, any> = {
-  "SWO/002/26060151-alt": {
-    documentNumber: "SWO/002/26060151",
-    soNumber: "SRO/002/26060150",
-    soDocument: "SRO/002/26060150",
-    customer: { name: "PT Maju Jaya", phone: "021-555-1234" },
-    registrationNo: "B 5678 EF",
-    vehicleMake: "HONDA",
-    vehicleModel: "CIVIC",
-    vehicleType: "CAR",
-    year: "2021",
-    color: "HITAM",
-    odometer: "78.450",
-    store: "Wijaya Motor - One Stop Service",
-    serviceAdvisor: "Ani",
-    mekanik: "-",
-    status: "IN PROGRESS",
-    planStartDate: "Rabu, 26 Juni 2026",
-    planEndDate: "Rabu, 26 Juni 2026",
-    actualStartDate: "Rabu, 26 Juni 2026 10:45",
-    services: [
-      { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, total: 250000, assignedTo: "-", status: "In Progress", estimatedTime: "30 menit" },
-    ],
-    spareparts: [],
-  },
-};
-
-const allWOs = { ...woData, ...soGeneratedWOs };
-
-// SWO → SRI mapping for Document Reference tab
-const swoSriMap: Record<string, { docNo: string; invoiceDate: string; status: string; total: number }[]> = {
-  "SWO/006/26060155": [
-    { docNo: "SRI/001/26060155", invoiceDate: "27-Jun-2026", status: "UNPAID", total: 4800000 },
-  ],
-  "SWO/003/26060152": [
-    { docNo: "SRI/002/26060152", invoiceDate: "27-Jun-2026", status: "PAID", total: 5200000 },
-  ],
-  "SWO/002/26060151": [
-    { docNo: "SRI/003/26060150", invoiceDate: "26-Jun-2026", status: "PARTIAL", total: 1800000 },
-  ],
-  "SWO/001/26060149": [
-    { docNo: "SRI/004/26060149", invoiceDate: "24-Jun-2026", status: "PAID", total: 2500000 },
-  ],
-  "SWO/005/26060154": [
-    { docNo: "SRI/005/26060154", invoiceDate: "26-Jun-2026", status: "PAID", total: 950000 },
-  ],
-};
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 
@@ -266,19 +25,104 @@ export default function WorkOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const woNo = Array.isArray(params.no) ? params.no.join("/") : (params.no as string);
+  const [wo, setWo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "docRef" | "stockOrders" | "changes" | "photos">("details");
   const [showPrint, setShowPrint] = useState(false);
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
-  
-  const wo = allWOs[woNo];
 
-  if (!wo) {
+  useEffect(() => {
+    fetch(`/api/work-orders?search=${encodeURIComponent(woNo)}&limit=1`)
+      .then((r) => r.json())
+      .then((json) => {
+        const found = (json.data || [])[0];
+        if (!found) { setError("Work Order tidak ditemukan: " + woNo); setLoading(false); return; }
+        // If the search found a different WO, try fetching by ID
+        // Map API fields
+        const items = found.items || [];
+        const services = items
+          .filter((it: any) => it.type === "SERVICE" || it.service)
+          .map((it: any, i: number) => ({
+            item: it.name || it.service?.name || it.description || "-",
+            description: it.description || it.service?.name || "-",
+            quantity: it.qty || it.quantity || 1,
+            priceExTax: it.price || it.unitPrice || 0,
+            discount: it.discount || "-",
+            subtotal: (it.qty || 1) * (it.price || 0),
+            total: it.total || (it.qty || 1) * (it.price || 0),
+            assignedTo: it.assignedTo || found.mekanik?.name || "-",
+            status: it.status || "Waiting",
+            estimatedTime: it.estimatedTime || "-",
+          }));
+        const spareparts = items
+          .filter((it: any) => it.type === "SPAREPART" || it.sparepart)
+          .map((it: any) => ({
+            code: it.sparepart?.sku || it.sku || it.code || "-",
+            name: it.sparepart?.name || it.name || "-",
+            qty: it.qty || it.quantity || 0,
+            price: it.price || it.sparepart?.sellPrice || 0,
+            total: it.total || (it.qty || 0) * (it.price || 0),
+          }));
+
+        const invoices = (found.invoices || []).map((inv: any) => ({
+          docNo: inv.invoiceNo || inv.id,
+          invoiceDate: inv.date || inv.invoiceDate || "-",
+          status: inv.status || "UNPAID",
+          total: inv.total || 0,
+        }));
+
+        setWo({
+          documentNumber: found.woNo || woNo,
+          soNumber: found.so?.soNo || found.soNumber || "-",
+          soDocument: found.so?.soNo || found.soNumber || "-",
+          customer: found.customer || found.so?.customer || { name: "-", phone: "-" },
+          registrationNo: found.registrationNo || found.vehicle?.plate || "-",
+          vehicleMake: found.vehicleMake || found.vehicle?.make || "-",
+          vehicleModel: found.vehicleModel || found.vehicle?.model || "-",
+          vehicleType: found.vehicleType || found.vehicle?.type || "CAR",
+          year: found.year || found.vehicle?.year || "-",
+          color: found.color || found.vehicle?.color || "-",
+          odometer: found.odometer || found.vehicle?.odometer || "-",
+          store: found.store?.name || found.store || "-",
+          serviceAdvisor: found.serviceAdvisor || found.so?.serviceAdvisor || "-",
+          mekanik: found.mekanik?.name || found.assignedTo || "-",
+          status: found.status || "DRAFT",
+          planStartDate: found.planStartDate || "-",
+          planEndDate: found.planEndDate || "-",
+          actualStartDate: found.actualStartDate || "-",
+          actualEndDate: found.actualEndDate || "-",
+          services,
+          spareparts,
+          invoices,
+          createdBy: found.createdBy || "-",
+          updatedBy: found.updatedBy || "-",
+          createdAt: found.createdAt || "-",
+          updatedAt: found.updatedAt || "-",
+        });
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load work order"); setLoading(false); });
+  }, [woNo]);
+
+  if (loading) {
     return (
       <div style={{ padding: 24 }}>
         <button onClick={() => router.push("/work-orders")} style={S.backBtn}>
           <ArrowLeft size={16} /> Kembali
         </button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Work Order tidak ditemukan: {woNo}</p></div>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Loading...</p></div>
+      </div>
+    );
+  }
+
+  if (error || !wo) {
+    return (
+      <div style={{ padding: 24 }}>
+        <button onClick={() => router.push("/work-orders")} style={S.backBtn}>
+          <ArrowLeft size={16} /> Kembali
+        </button>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>{error || "Work Order tidak ditemukan: " + woNo}</p></div>
       </div>
     );
   }
@@ -403,6 +247,9 @@ export default function WorkOrderDetailPage() {
                 </tr>
               </thead>
               <tbody>
+                {wo.services.length === 0 && (
+                  <tr><td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
+                )}
                 {wo.services.map((svc: any, i: number) => (
                   <tr key={i} style={S.tr}>
                     <td style={S.td}>{i + 1}</td>
@@ -514,24 +361,28 @@ export default function WorkOrderDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr style={S.tr}>
-                  <td style={S.td}>1</td>
-                  <td
-                    style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
-                    onClick={() => router.push(`/service-orders/${wo.soNumber}`)}
-                  >{wo.soDocument}</td>
-                  <td style={S.td}>24-Jun-2026 04:42 PM</td>
-                  <td style={S.td}>
-                    <span style={{ ...S.pill, background: "#fe9339" }}>APPROVED</span>
-                  </td>
-                </tr>
+                {wo.soDocument && wo.soDocument !== "-" ? (
+                  <tr style={S.tr}>
+                    <td style={S.td}>1</td>
+                    <td
+                      style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
+                      onClick={() => router.push(`/service-orders/${wo.soNumber}`)}
+                    >{wo.soDocument}</td>
+                    <td style={S.td}>{wo.createdAt || "-"}</td>
+                    <td style={S.td}>
+                      <span style={{ ...S.pill, background: "#fe9339" }}>APPROVED</span>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr><td colSpan={4} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada Service Order</td></tr>
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Service Invoices */}
           <h3 style={{ ...S.sectionTitle, marginTop: 20 }}>Service Invoices</h3>
-          {swoSriMap[wo.documentNumber] ? (
+          {wo.invoices.length > 0 ? (
             <div style={S.tableWrap}>
               <table style={S.table}>
                 <thead>
@@ -544,7 +395,7 @@ export default function WorkOrderDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {swoSriMap[wo.documentNumber].map((sri: any, i: number) => (
+                  {wo.invoices.map((sri: any, i: number) => (
                     <tr key={sri.docNo} style={S.tr}>
                       <td style={S.td}>{i + 1}</td>
                       <td
@@ -583,18 +434,18 @@ export default function WorkOrderDetailPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>CREATED BY</div>
-                <div style={{ fontSize: 12, color: "#444746" }}>NANDA SALSA (nandasalsakamelia832@gmail.com)</div>
+                <div style={{ fontSize: 12, color: "#444746" }}>{wo.createdBy}</div>
               </div>
-              <div style={{ fontSize: 12, color: "#8e8f8e" }}>24-Jun-2026 04:42 PM</div>
+              <div style={{ fontSize: 12, color: "#8e8f8e" }}>{wo.createdAt}</div>
             </div>
           </div>
           <div style={S.card}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#001526" }}>UPDATED BY</div>
-                <div style={{ fontSize: 12, color: "#444746" }}>NANDA SALSA (nandasalsakamelia832@gmail.com)</div>
+                <div style={{ fontSize: 12, color: "#444746" }}>{wo.updatedBy}</div>
               </div>
-              <div style={{ fontSize: 12, color: "#8e8f8e" }}>24-Jun-2026 04:42 PM</div>
+              <div style={{ fontSize: 12, color: "#8e8f8e" }}>{wo.updatedAt}</div>
             </div>
           </div>
         </div>
@@ -793,10 +644,6 @@ const S: Record<string, React.CSSProperties> = {
   },
   tab: {
     padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6,
-    cursor: "pointer", transition: "all 150ms", whiteSpace: "nowrap" as const,
-  },
-  lineTab: {
-    padding: "8px 20px", fontSize: 13, border: "none", borderBottom: "2px solid transparent",
     cursor: "pointer", transition: "all 150ms", whiteSpace: "nowrap" as const,
   },
   infoCol: { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 12 },

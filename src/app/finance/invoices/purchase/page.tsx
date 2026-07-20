@@ -1,24 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Download, ChevronDown } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
-
-const purchaseInvoices = [
-  { docNo: "PI/HO/26050143", refNo: "B2664EQ", po: "PO-001", createdAt: "24-Jun-2026 10:17 AM", invoiceDate: "12-May-2026", dueDate: "11-Jun-2026", supplier: "PT Auto Parts", status: "APPROVED", total: 1280000 },
-  { docNo: "PI/HO/26050142", refNo: "B9015BTA", po: "PO-002", createdAt: "24-Jun-2026 10:16 AM", invoiceDate: "12-May-2026", dueDate: "11-Jun-2026", supplier: "CV Ban Sehat", status: "APPROVED", total: 1430000 },
-  { docNo: "PI/HO/26060037", refNo: "B1795PQQ", po: "PO-003", createdAt: "15-Jun-2026 04:26 PM", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", supplier: "UD Oli Jaya", status: "PAID", total: 58333 },
-  { docNo: "PI/HO/26060036", refNo: "B2295UQ", po: "PO-004", createdAt: "15-Jun-2026 04:25 PM", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", supplier: "PT Auto Parts", status: "PAID", total: 295774 },
-  { docNo: "PI/HO/26060035", refNo: "B2295UQ", po: "PO-001", createdAt: "15-Jun-2026 04:24 PM", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", supplier: "CV Ban Sehat", status: "PAID", total: 81647 },
-  { docNo: "PI/HO/26060034", refNo: "B9155PQV", po: "PO-002", createdAt: "15-Jun-2026 04:23 PM", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", supplier: "UD Oli Jaya", status: "PAID", total: 8969588 },
-  { docNo: "PI/HO/26060033", refNo: "B1087PQF", po: "PO-003", createdAt: "15-Jun-2026 02:10 PM", invoiceDate: "10-Jun-2026", dueDate: "10-Jun-2026", supplier: "PT Auto Parts", status: "PAID", total: 7000000 },
-  { docNo: "PI/HO/26060032", refNo: "B1935PSD", po: "PO-004", createdAt: "13-Jun-2026 10:45 AM", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", supplier: "CV Ban Sehat", status: "PAID", total: 604200 },
-  { docNo: "PI/HO/26060031", refNo: "B2295UQ", po: "PO-001", createdAt: "13-Jun-2026 10:45 AM", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", supplier: "UD Oli Jaya", status: "PAID", total: 3233020 },
-  { docNo: "PI/HO/26060030", refNo: "STOCK ITEM", po: "PO-002", createdAt: "13-Jun-2026 10:44 AM", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", supplier: "PT Auto Parts", status: "PAID", total: 329500 },
-  { docNo: "PI/HO/26060029", refNo: "B1212LQ", po: "PO-003", createdAt: "13-Jun-2026 10:41 AM", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", supplier: "CV Ban Sehat", status: "PAID", total: 632794 },
-  { docNo: "PI/HO/26060028", refNo: "B2295UQ", po: "PO-004", createdAt: "13-Jun-2026 10:40 AM", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", supplier: "UD Oli Jaya", status: "PAID", total: 30000 },
-];
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 
@@ -35,6 +20,9 @@ const statusColor = (s: string) => {
 
 export default function PurchaseInvoicesPage() {
   const router = useRouter();
+  const [purchaseInvoices, setPurchaseInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState({
     docNo: "",
     refNo: "",
@@ -47,12 +35,25 @@ export default function PurchaseInvoicesPage() {
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
 
-  const filtered = purchaseInvoices.filter((inv) => {
-    if (filters.docNo && !inv.docNo.toLowerCase().includes(filters.docNo.toLowerCase())) return false;
-    if (filters.refNo && !inv.refNo.toLowerCase().includes(filters.refNo.toLowerCase())) return false;
-    if (filters.po && !inv.po.toLowerCase().includes(filters.po.toLowerCase())) return false;
-    if (filters.supplier && !inv.supplier.toLowerCase().includes(filters.supplier.toLowerCase())) return false;
-    if (filters.status && inv.status !== filters.status) return false;
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (filters.status) params.set("status", filters.status);
+    if (filters.supplier) params.set("supplierId", filters.supplier);
+    if (filters.docNo) params.set("search", filters.docNo);
+    fetch(`/api/purchase-invoices?${params.toString()}`)
+      .then((r) => r.json())
+      .then((json) => { setPurchaseInvoices(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load purchase invoices"); setLoading(false); });
+  }, [filters.status, filters.supplier, filters.docNo]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  // Client-side filtering for fields not supported by the API
+  const filtered = purchaseInvoices.filter((inv: any) => {
+    if (filters.refNo && !(inv.po?.poNo || "").toLowerCase().includes(filters.refNo.toLowerCase())) return false;
+    if (filters.po && !(inv.po?.poNo || "").toLowerCase().includes(filters.po.toLowerCase())) return false;
     return true;
   });
 
@@ -160,28 +161,28 @@ export default function PurchaseInvoicesPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((inv) => (
+            {filtered.map((inv: any) => (
               <tr
-                key={inv.docNo}
+                key={inv.id}
                 style={{ ...S.tr, cursor: "pointer" }}
-                onClick={() => router.push(`/finance/invoices/${inv.docNo}`)}
+                onClick={() => router.push(`/finance/invoices/${inv.docNo || inv.id}`)}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >
-                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo}</td>
-                <td style={S.td}>{inv.refNo}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo || inv.id}</td>
+                <td style={S.td}>{inv.po?.poNo || "-"}</td>
                 <td
                   style={{ ...S.td, color: "#0176d3", cursor: "pointer" }}
-                  onClick={(e) => { e.stopPropagation(); router.push(`/inventory/po/${inv.po}`); }}
-                >{inv.po}</td>
-                <td style={S.td}>{inv.createdAt}</td>
-                <td style={S.td}>{inv.invoiceDate}</td>
-                <td style={S.td}>{inv.dueDate}</td>
-                <td style={{ ...S.td, color: "#0176d3" }}>{inv.supplier}</td>
+                  onClick={(e) => { e.stopPropagation(); router.push(`/inventory/po/${inv.po?.poNo || inv.poId}`); }}
+                >{inv.po?.poNo || inv.poId || "-"}</td>
+                <td style={S.td}>{inv.createdAt ? new Date(inv.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}</td>
+                <td style={S.td}>{inv.date ? new Date(inv.date).toLocaleDateString("en-GB") : "-"}</td>
+                <td style={S.td}>{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-GB") : "-"}</td>
+                <td style={{ ...S.td, color: "#0176d3" }}>{inv.supplier?.companyName || "-"}</td>
                 <td style={S.td}>
                   <span style={{ ...S.pill, background: statusColor(inv.status) }}>{inv.status}</span>
                 </td>
-                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.total)}</td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.total || 0)}</td>
               </tr>
             ))}
           </tbody>

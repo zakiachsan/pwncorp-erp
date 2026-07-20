@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Search, X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 interface PaymentRequest {
@@ -31,14 +31,6 @@ interface FormData {
   ketPenerima: string;
 }
 
-const dataAwal: PaymentRequest[] = [
-  { id: "RFP/001/260701", tanggal: "01 Jul 2026", diajukanOleh: "Budi", keperluan: "Gaji Karyawan Juli 2026", jumlah: 45000000, status: "Menunggu Approval", keterangan: "Pembayaran gaji bulanan", penerima: "Seluruh Karyawan", divisi: "HR & GA", kategori: "Gaji & Tunjangan", tglKebutuhan: "01 Jul 2026" },
-  { id: "RFP/002/260702", tanggal: "02 Jul 2026", diajukanOleh: "Ani", keperluan: "Pembelian Sparepart AC", jumlah: 8500000, status: "Proses Finance", keterangan: "Sparepart AC kantor", penerima: "PT CoolTech", divisi: "Sparepart & Gudang", kategori: "Sparepart & Material", tglKebutuhan: "05 Jul 2026" },
-  { id: "RFP/003/260703", tanggal: "03 Jul 2026", diajukanOleh: "Rudi", keperluan: "Biaya Operasional Bengkel", jumlah: 3200000, status: "Selesai Dibayar", keterangan: "Listrik & air bengkel", penerima: "PLN / PDAM", divisi: "Administrasi & CS", kategori: "Utilitas", tglKebutuhan: "03 Jul 2026" },
-  { id: "RFP/004/260704", tanggal: "04 Jul 2026", diajukanOleh: "Budi", keperluan: "Pembelian Oli & Filter", jumlah: 12000000, status: "Menunggu Approval", keterangan: "Restock inventory", penerima: "PT Parts Indo", divisi: "Sparepart & Gudang", kategori: "Sparepart & Material", tglKebutuhan: "08 Jul 2026" },
-  { id: "RFP/005/260705", tanggal: "05 Jul 2026", diajukanOleh: "Ani", keperluan: "Service Kendaraan Operasional", jumlah: 2500000, status: "Proses Finance", keterangan: "Service rutin", penerima: "Bengkel Resmi", divisi: "Service & Perbaikan", kategori: "Transportasi", tglKebutuhan: "06 Jul 2026" },
-];
-
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 const statusStyle = (s: string) => {
@@ -62,12 +54,40 @@ const emptyForm: FormData = {
 };
 
 export default function RequestPaymentPage() {
-  const [data, setData] = useState<PaymentRequest[]>(dataAwal);
+  const [data, setData] = useState<PaymentRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(emptyForm);
+
+  useEffect(() => {
+    fetch("/api/payment-requests")
+      .then((r) => r.json())
+      .then((json) => {
+        const mapped: PaymentRequest[] = (json.data || []).map((pr: any) => ({
+          id: pr.prNo || pr.id?.toString() || "",
+          tanggal: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "",
+          diajukanOleh: pr.diajukanOleh || "-",
+          keperluan: pr.purpose || "",
+          jumlah: pr.amount || 0,
+          status: pr.status || "Menunggu Approval",
+          keterangan: pr.keterangan || "",
+          penerima: pr.penerima || "-",
+          divisi: pr.divisi || "-",
+          kategori: pr.kategori || "-",
+          tglKebutuhan: pr.tglKebutuhan || "-",
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment requests"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   const filtered = data.filter((d) => {
     if (filter !== "All" && d.status !== filter) return false;
@@ -350,7 +370,7 @@ export default function RequestPaymentPage() {
                       <div><span style={{ color: "#8e8f8e" }}>Divisi</span></div>
                       <div style={{ fontWeight: 500 }}>{form.divisi || "-"}</div>
                       <div><span style={{ color: "#8e8f8e" }}>Kategori</span></div>
-                      <div><span style={{ fontWeight: 500, padding: "1px 8px", borderRadius: 4, fontSize: 12, background: "#e3f2fd", color: "#0176d3", display: "inline-block" }}>{form.kategori || "-"}</span></div>
+                      <div style={{ fontWeight: 500, padding: "1px 8px", borderRadius: 4, fontSize: 12, background: "#e3f2fd", color: "#0176d3", display: "inline-block" }}>{form.kategori || "-"}</div>
                       <div><span style={{ color: "#8e8f8e" }}>Keperluan</span></div>
                       <div style={{ fontWeight: 500 }}>{form.keperluan || "-"}</div>
                       <div><span style={{ color: "#8e8f8e" }}>Nominal</span></div>

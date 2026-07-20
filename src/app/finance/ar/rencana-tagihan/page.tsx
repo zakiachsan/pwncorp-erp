@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Search, Check, Calendar } from "lucide-react";
 
 interface CustomerBilling {
@@ -96,8 +96,65 @@ const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 export default function RencanaTagihanPage() {
   const [search, setSearch] = useState("");
   const [year, setYear] = useState(2026);
+  const [apiData, setApiData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filtered = data.filter(
+  // Fetch accounts receivable from API
+  useEffect(() => {
+    fetch("/api/accounts-receivable?limit=100")
+      .then((r) => r.json())
+      .then((j) => { setApiData(j.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load AR data"); setLoading(false); });
+  }, []);
+
+  // Build billing-plan-like data from API response (best-effort mapping)
+  const apiBillingData: CustomerBilling[] = useMemo(() => {
+    if (!apiData || apiData.length === 0) return [];
+    // Group by customer
+    const byCustomer: Record<string, any[]> = {};
+    for (const ar of apiData) {
+      const custName = ar.customer?.name || "Unknown";
+      if (!byCustomer[custName]) byCustomer[custName] = [];
+      byCustomer[custName].push(ar);
+    }
+    return Object.entries(byCustomer).map(([customer, items], idx) => {
+      const totalAmount = items.reduce((s: number, i: any) => s + (i.amount || 0), 0);
+      const paid = items.filter((i: any) => i.status === "PAID").reduce((s: number, i: any) => s + (i.amount || 0), 0);
+      const bulan: Record<string, { ditagihkan: number; dibayar: number | null; status: "paid" | "planned" | null }> = {};
+      bulanLabels.forEach((m) => { bulan[m] = { ditagihkan: 0, dibayar: null, status: null }; });
+      // Map paid items to their months
+      for (const item of items) {
+        if (item.status === "PAID" && item.dueDate) {
+          const monthIdx = new Date(item.dueDate).getMonth();
+          const m = bulanLabels[monthIdx];
+          if (m) {
+            bulan[m] = { ditagihkan: item.amount || 0, dibayar: item.amount || 0, status: "paid" };
+          }
+        } else if (item.status !== "PAID" && item.dueDate) {
+          const monthIdx = new Date(item.dueDate).getMonth();
+          const m = bulanLabels[monthIdx];
+          if (m && !bulan[m].status) {
+            bulan[m] = { ditagihkan: item.amount || 0, dibayar: null, status: "planned" };
+          }
+        }
+      }
+      return {
+        id: `API-${String(idx + 1).padStart(3, "0")}`,
+        customer,
+        store: items[0]?.invoice?.store?.name || "—",
+        projectId: items[0]?.invoice?.invNo || "—",
+        nilaiKontrak: totalAmount,
+        terminJumlah: items.length > 1 ? Math.min(items.length, 3) : 0,
+        bulan,
+      };
+    });
+  }, [apiData]);
+
+  // Use API data if available, otherwise fallback to hardcoded
+  const displayData = apiBillingData.length > 0 ? apiBillingData : data;
+
+  const filtered = displayData.filter(
     (d) => !search || d.customer.toLowerCase().includes(search.toLowerCase()) || d.projectId.toLowerCase().includes(search.toLowerCase())
   );
 

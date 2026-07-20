@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, BarChart3 } from "lucide-react";
 
 /* ── helpers ──────────────────────────────────────────────────────── */
@@ -378,6 +378,18 @@ const TABS: TabConfig[] = [
 export default function AccountingReportsPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
+  const [apiData, setApiData] = useState<any>(null);
+  const [apiLoading, setApiLoading] = useState(false);
+
+  // Fetch finance summary from API
+  useEffect(() => {
+    setApiLoading(true);
+    fetch("/api/reports/finance?report=summary")
+      .then((r) => r.json())
+      .then((j) => { setApiData(j.data); setApiLoading(false); })
+      .catch(() => { setApiLoading(false); });
+  }, []);
+
   const cfg = TABS[activeTab];
   const PER_PAGE = 20;
   const totalPages = Math.ceil(cfg.data.length / PER_PAGE);
@@ -492,7 +504,7 @@ export default function AccountingReportsPage() {
       </div>
 
       {/* ── Per-tab summary cards ── */}
-      <PerTabSummary tabId={cfg.id} data={cfg.data} />
+      <PerTabSummary tabId={cfg.id} data={cfg.data} apiData={apiData} />
 
       {/* ── data table ── */}
       <div style={{ margin: "0 24px 24px", overflowX: "auto" }}>
@@ -582,14 +594,15 @@ export default function AccountingReportsPage() {
 }
 
 /* ─── Per-tab summary cards ─── */
-function PerTabSummary({ tabId, data }: { tabId: string; data: Record<string, any>[] }) {
+function PerTabSummary({ tabId, data, apiData }: { tabId: string; data: Record<string, any>[]; apiData?: any }) {
   const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
   const parseNum = (v: any) => parseInt((v || "0").toString().replace(/[^0-9-]/g, "")) || 0;
 
   if (tabId === "profit-loss") {
-    const pendapatan = data.filter((d: any) => d.category === "Revenue").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    // Use API data if available for summary cards
+    const pendapatan = apiData ? (apiData.totalIncome || 0) : data.filter((d: any) => d.category === "Revenue").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
     const hpp = data.filter((d: any) => d.category === "HPP").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
-    const beban = data.filter((d: any) => d.category === "Expense").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const beban = apiData ? (apiData.totalExpense || 0) : data.filter((d: any) => d.category === "Expense").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
     const labaBersih = pendapatan - hpp - beban;
     const cards = [
       { label: "Total Pendapatan", value: fmt(pendapatan), color: "#2e844a" },

@@ -1,23 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DollarSign, Star, Search, Download } from "lucide-react";
-
-const data = [
-  { no: 1, paymentType: "BRI QRIS", store: "Wijaya Motor - One Stop Service", sri: "SRI/003/26070030", sro: "SRO/003/26070029", refundDoc: "", paymentDate: "07/07/26", createdBy: "NANDA SALSA", amount: 1224000 },
-  { no: 2, paymentType: "BRI QRIS", store: "Wijaya Motor", sri: "SRI/003/26070032", sro: "SRO/003/26070034", refundDoc: "", paymentDate: "07/07/26", createdBy: "NANDA SALSA", amount: 45000 },
-  { no: 3, paymentType: "BRI QRIS", store: "Wijaya Motor", sri: "SRI/003/26070028", sro: "SRO/003/26070031", refundDoc: "", paymentDate: "07/07/26", createdBy: "NANDA SALSA", amount: 617500 },
-  { no: 4, paymentType: "BRI QRIS", store: "Wijaya Motor", sri: "SRI/003/26070029", sro: "SRO/003/26070032", refundDoc: "", paymentDate: "07/07/26", createdBy: "NANDA SALSA", amount: 413250 },
-  { no: 5, paymentType: "BRI QRIS", store: "Wijaya Motor", sri: "SRI/003/26070031", sro: "SRO/003/26070033", refundDoc: "", paymentDate: "07/07/26", createdBy: "NANDA SALSA", amount: 400000 },
-];
-
-const totalAmount = data.reduce((sum, row) => sum + row.amount, 0);
-
-// Group by payment type for totals section
-const paymentTypeTotals: Record<string, number> = {};
-data.forEach((row) => {
-  paymentTypeTotals[row.paymentType] = (paymentTypeTotals[row.paymentType] || 0) + row.amount;
-});
 
 function fmt(n: number): string { return n.toLocaleString("id-ID").replace(/,/g, "."); }
 const L: React.CSSProperties = { color: "#0176d3", cursor: "pointer", fontWeight: 500 };
@@ -31,6 +16,41 @@ const TD: React.CSSProperties = { padding: "7px 10px", color: "#001526", borderB
 
 export default function ServicePaymentReceivedPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=daily-payments&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const payments: any[] = j.data || [];
+        const mapped = payments.map((p: any, i: number) => ({
+          no: i + 1,
+          paymentType: p.paymentType || p.method || "—",
+          store: p.invoice?.store?.name || p.store?.name || "—",
+          sri: p.invoice?.invNo || "—",
+          sro: p.invoice?.serviceOrder?.soNo || "—",
+          refundDoc: p.refundDoc || "",
+          paymentDate: (p.paymentDate || "").slice(0, 10),
+          createdBy: p.createdBy?.name || p.user?.name || "—",
+          amount: p.amount || 0,
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const totalAmount = data.reduce((sum, row) => sum + row.amount, 0);
+  const paymentTypeTotals: Record<string, number> = {};
+  data.forEach((row) => {
+    paymentTypeTotals[row.paymentType] = (paymentTypeTotals[row.paymentType] || 0) + row.amount;
+  });
+
   return (
     <div>
       <div style={{ padding: "6px 16px", background: "#f3f3f3", borderBottom: "1px solid #ecebea", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -48,7 +68,7 @@ export default function ServicePaymentReceivedPage() {
           <Field label="Store"><select className="form-select" style={{ minWidth: 170 }}><option>All Stores</option><option>Wijaya Motor</option><option>PT Putra</option></select></Field>
           <Field label="Payment Type"><input type="text" className="form-input" placeholder="Payment Type" style={{ minWidth: 140 }} /></Field>
           <Field label="Document Type"><select className="form-select" style={{ minWidth: 130 }}><option>All</option></select></Field>
-          <Field label="Created By"><select className="form-select" style={{ minWidth: 150 }}><option>All</option><option>NANDA SALSA</option></select></Field>
+          <Field label="Created By"><select className="form-select" style={{ minWidth: 150 }}><option>All</option></select></Field>
           <Field label="Sort By"><select className="form-select" style={{ minWidth: 150 }}><option>Payment Date</option></select></Field>
           <Field label="Include Return"><select className="form-select" style={{ minWidth: 110 }}><option>No</option><option>Yes</option></select></Field>
         </div>

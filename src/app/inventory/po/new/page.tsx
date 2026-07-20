@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Save, Plus, Trash2, CheckCircle, XCircle } from "lucide-react";
 
 interface ItemRow {
+  sparepartId: string;
   name: string;
   qty: number;
   unit: string;
@@ -12,6 +13,7 @@ interface ItemRow {
 
 interface VendorQuote {
   id: string;
+  supplierId: string;
   supplier: string;
   status: "Dipilih" | "Alternatif";
   items: { hargaSatuan: number }[];
@@ -25,42 +27,75 @@ const formatIDR = (n: number) => {
 
 export default function NewPOPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [spareparts, setSpareparts] = useState<any[]>([]);
 
   // Shared items (what we need to buy)
   const [items, setItems] = useState<ItemRow[]>([
-    { name: "Oli Mesin 10W-40", qty: 20, unit: "Ltr" },
-    { name: "Filter Oli", qty: 10, unit: "Pcs" },
+    { sparepartId: "", name: "Oli Mesin 10W-40", qty: 20, unit: "Ltr" },
+    { sparepartId: "", name: "Filter Oli", qty: 10, unit: "Pcs" },
   ]);
 
   // Vendor quotes
-  const [vendors, setVendors] = useState<VendorQuote[]>([
-    {
-      id: "VND-1",
-      supplier: "PT Auto Parts",
-      status: "Alternatif",
-      items: [{ hargaSatuan: 75000 }, { hargaSatuan: 50000 }],
-      total: 2000000,
-    },
-    {
-      id: "VND-2",
-      supplier: "CV Suku Cadang Jaya",
-      status: "Alternatif",
-      items: [{ hargaSatuan: 72000 }, { hargaSatuan: 48000 }],
-      total: 1920000,
-    },
-  ]);
+  const [vendors, setVendors] = useState<VendorQuote[]>([]);
 
   const [showAddVendor, setShowAddVendor] = useState(false);
-  const [newVendorName, setNewVendorName] = useState("");
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
+
+  // Fetch suppliers and spareparts on mount
+  useEffect(() => {
+    fetch("/api/suppliers?limit=100")
+      .then((r) => r.json())
+      .then((d) => {
+        const supps = d.data || [];
+        setSuppliers(supps);
+        // Initialize with first two suppliers if available
+        if (supps.length >= 2) {
+          setVendors([
+            {
+              id: supps[0].id,
+              supplierId: supps[0].id,
+              supplier: supps[0].companyName,
+              status: "Alternatif",
+              items: [{ hargaSatuan: 0 }, { hargaSatuan: 0 }],
+              total: 0,
+            },
+            {
+              id: supps[1].id,
+              supplierId: supps[1].id,
+              supplier: supps[1].companyName,
+              status: "Alternatif",
+              items: [{ hargaSatuan: 0 }, { hargaSatuan: 0 }],
+              total: 0,
+            },
+          ]);
+        }
+      })
+      .catch(() => {});
+    fetch("/api/spareparts?limit=100")
+      .then((r) => r.json())
+      .then((d) => setSpareparts(d.data || []))
+      .catch(() => {});
+  }, []);
 
   // Update item
   const updateItem = (idx: number, field: keyof ItemRow, value: any) => {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, [field]: value } : it)));
   };
 
+  // Select sparepart for item
+  const selectSparepart = (idx: number, sparepartId: string) => {
+    const sp = spareparts.find((s: any) => s.id === sparepartId);
+    if (sp) {
+      setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, sparepartId, name: sp.name, unit: sp.unit || "Pcs" } : it)));
+    }
+  };
+
   // Add item row
   const addItem = () => {
-    setItems([...items, { name: "Item Baru", qty: 1, unit: "Pcs" }]);
+    setItems([...items, { sparepartId: "", name: "Item Baru", qty: 1, unit: "Pcs" }]);
     setVendors((prev) =>
       prev.map((v) => ({
         ...v,
@@ -105,18 +140,22 @@ export default function NewPOPage() {
     );
   };
 
-  // Add vendor
+  // Add vendor from dropdown
   const addVendor = () => {
-    if (!newVendorName.trim()) return;
+    if (!selectedSupplierId) return;
+    const sup = suppliers.find((s: any) => s.id === selectedSupplierId);
+    if (!sup) return;
+    if (vendors.find((v) => v.supplierId === selectedSupplierId)) return;
     const newVendor: VendorQuote = {
-      id: `VND-${Date.now()}`,
-      supplier: newVendorName.trim(),
+      id: sup.id,
+      supplierId: sup.id,
+      supplier: sup.companyName,
       status: "Alternatif",
       items: items.map(() => ({ hargaSatuan: 0 })),
       total: 0,
     };
     setVendors([...vendors, newVendor]);
-    setNewVendorName("");
+    setSelectedSupplierId("");
     setShowAddVendor(false);
   };
 
@@ -135,9 +174,42 @@ export default function NewPOPage() {
   // Get selected vendor
   const selectedVendor = vendors.find((v) => v.status === "Dipilih");
 
-  const handleSave = () => {
-    alert("Purchase Order berhasil dibuat (Draft)!");
-    router.push("/inventory/po");
+  const handleSave = async () => {
+    setError("");
+    if (!selectedVendor) {
+      setError("Pilih vendor terlebih dahulu");
+      return;
+    }
+    const validItems = items.filter((it) => it.sparepartId);
+    if (validItems.length === 0) {
+      setError("Pilih minimal 1 sparepart");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const svIdx = vendors.findIndex((v) => v.status === "Dipilih");
+      const payload = {
+        supplierId: selectedVendor.supplierId,
+        items: validItems.map((it, i) => ({
+          sparepartId: it.sparepartId,
+          qty: it.qty,
+          unitPrice: selectedVendor.items[items.indexOf(it)]?.hargaSatuan || 0,
+        })),
+      };
+      const res = await fetch("/api/purchase-orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menyimpan PO");
+      router.push("/inventory/po");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,10 +222,14 @@ export default function NewPOPage() {
           </button>
           <div className="view-title">New Purchase Order</div>
         </div>
-        <button className="btn btn--brand btn--sm" onClick={handleSave}>
-          <Save size={14} /> Simpan
+        <button className="btn btn--brand btn--sm" onClick={handleSave} disabled={loading}>
+          <Save size={14} /> {loading ? "Menyimpan..." : "Simpan"}
         </button>
       </div>
+
+      {error && (
+        <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#dc2626", fontSize: 13 }}>{error}</div>
+      )}
 
       {/* Workflow Bar */}
       <div className="card-slds mb-6">
@@ -219,7 +295,17 @@ export default function NewPOPage() {
                     <tr key={idx}>
                       <td>{idx + 1}</td>
                       <td>
-                        <input type="text" className="form-input" value={item.name} onChange={(e) => updateItem(idx, "name", e.target.value)} />
+                        <select
+                          className="form-select"
+                          value={item.sparepartId}
+                          onChange={(e) => selectSparepart(idx, e.target.value)}
+                          style={{ width: "100%" }}
+                        >
+                          <option value="">-- Pilih Sparepart --</option>
+                          {spareparts.map((sp: any) => (
+                            <option key={sp.id} value={sp.id}>{sp.sku} - {sp.name}</option>
+                          ))}
+                        </select>
                       </td>
                       <td className="text-right">
                         <input type="number" className="form-input text-right" value={item.qty} onChange={(e) => updateItem(idx, "qty", parseInt(e.target.value) || 0)} style={{ width: 80 }} />
@@ -366,13 +452,25 @@ export default function NewPOPage() {
             </div>
             <div className="px-6 py-4">
               <div className="form-group">
-                <label className="form-label">Nama Vendor / Supplier *</label>
-                <input type="text" className="form-input" value={newVendorName} onChange={(e) => setNewVendorName(e.target.value)} placeholder="Contoh: PT Sejahtera Abadi" />
+                <label className="form-label">Pilih Supplier *</label>
+                <select
+                  className="form-select"
+                  value={selectedSupplierId}
+                  onChange={(e) => setSelectedSupplierId(e.target.value)}
+                  style={{ width: "100%" }}
+                >
+                  <option value="">-- Pilih Supplier --</option>
+                  {suppliers
+                    .filter((s: any) => !vendors.find((v) => v.supplierId === s.id))
+                    .map((s: any) => (
+                      <option key={s.id} value={s.id}>{s.companyName}</option>
+                    ))}
+                </select>
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-200">
               <button onClick={() => setShowAddVendor(false)} className="btn btn--sm">Batal</button>
-              <button onClick={addVendor} className="btn btn--brand btn--sm">Simpan</button>
+              <button onClick={addVendor} className="btn btn--brand btn--sm" disabled={!selectedSupplierId}>Simpan</button>
             </div>
           </div>
         </div>

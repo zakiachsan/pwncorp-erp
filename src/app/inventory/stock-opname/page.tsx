@@ -1,17 +1,76 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, Search, AlertTriangle } from "lucide-react";
 
-const stockOpnameData = [
-  { date: "25 Jun 2026", code: "SP-001", name: "Oli Mesin 10W-40", systemStock: 45, actualStock: 43, diff: -2, reason: "Kerusakan", user: "Hendra" },
-  { date: "25 Jun 2026", code: "SP-003", name: "Kampas Rem Depan", systemStock: 8, actualStock: 8, diff: 0, reason: "-", user: "Agus" },
-  { date: "24 Jun 2026", code: "SP-005", name: "Aki GS 45Ah", systemStock: 3, actualStock: 2, diff: -1, reason: "Rusak", user: "Bambang" },
-  { date: "24 Jun 2026", code: "SP-002", name: "Filter Oli", systemStock: 22, actualStock: 22, diff: 0, reason: "-", user: "Hendra" },
-];
+interface ApiStockOpname {
+  id: string;
+  refCode: string;
+  date: string;
+  status: string;
+  _count: { items: number };
+}
+
+interface StockOpnameRow {
+  id: string;
+  date: string;
+  code: string;
+  name: string;
+  systemStock: number;
+  actualStock: number;
+  diff: number;
+  reason: string;
+  user: string;
+}
 
 export default function StockOpnamePage() {
   const router = useRouter();
+  const [data, setData] = useState<StockOpnameRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [diffFilter, setDiffFilter] = useState("all");
+
+  useEffect(() => {
+    fetch("/api/stock-opnames?limit=1000")
+      .then((r) => r.json())
+      .then((j) => {
+        const sessions: ApiStockOpname[] = j.data || [];
+        if (sessions.length > 0) {
+          // Map session-level data to item-level rows
+          const rows: StockOpnameRow[] = sessions.map((s) => ({
+            id: s.id,
+            date: s.date || "-",
+            code: s.refCode || "-",
+            name: "-",
+            systemStock: 0,
+            actualStock: 0,
+            diff: 0,
+            reason: "-",
+            user: "-",
+          }));
+          setData(rows);
+        } else {
+          setData([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Gagal memuat data stock opname");
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = diffFilter === "selisih"
+    ? data.filter((item) => item.diff !== 0)
+    : diffFilter === "cocok"
+    ? data.filter((item) => item.diff === 0)
+    : data;
+
+  const diffCount = data.filter((item) => item.diff !== 0).length;
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -44,10 +103,10 @@ export default function StockOpnamePage() {
           </div>
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All</option>
-              <option>Selisih Only</option>
-              <option>Cocok</option>
+            <select className="form-select" value={diffFilter} onChange={(e) => setDiffFilter(e.target.value)}>
+              <option value="all">All</option>
+              <option value="selisih">Selisih Only</option>
+              <option value="cocok">Cocok</option>
             </select>
           </div>
           <div className="form-group">
@@ -64,10 +123,12 @@ export default function StockOpnamePage() {
       </div>
 
       {/* Alert */}
-      <div className="bg-amber-50 border border-amber-200 rounded-slds-md p-3 mb-4 flex items-center gap-2 text-amber-800 text-sm">
-        <AlertTriangle size={16} className="text-amber-500 flex-shrink-0" />
-        <span><strong>2 items</strong> memiliki selisih stok dari stock opname terakhir</span>
-      </div>
+      {diffCount > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-slds-md p-3 mb-4 flex items-center gap-2 text-amber-800 text-sm">
+          <AlertTriangle size={16} className="text-amber-500 flex-shrink-0" />
+          <span><strong>{diffCount} items</strong> memiliki selisih stok dari stock opname terakhir</span>
+        </div>
+      )}
 
       {/* Table */}
       <div className="table-wrap">
@@ -85,8 +146,8 @@ export default function StockOpnamePage() {
             </tr>
           </thead>
           <tbody>
-            {stockOpnameData.map((item, i) => (
-              <tr key={i} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+            {filtered.map((item, i) => (
+              <tr key={item.id || i} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
                 <td className="text-[--color-text-secondary]">{item.date}</td>
                 <td className="font-medium text-[--color-brand]">{item.code}</td>
                 <td>{item.name}</td>

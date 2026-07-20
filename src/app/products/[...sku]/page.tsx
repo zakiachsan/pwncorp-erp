@@ -1,50 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { ArrowLeft, Search } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
-
-const productData: Record<string, any> = {
-  "000-TRS-0371": {
-    sku: "000-TRS-0371", name: "BENDIX STATER", description: "Starter motor assembly for commercial and passenger vehicles.",
-    brand: "VIAR", type: "STATER", tags: ["starter", "electrical"], productCode: "BENDIK STATER VIAR RODA TIGA",
-    supplierProductCode: "BDX-STR-0371", suppliers: ["All Suppliers"],
-    tax: "PPN", taxProductCode: "", companySupplyPrice: 80200, wholesalePrice: 0,
-    supplyPrice: 0, retailPrice: 144360, retailPriceIncTax: 160240,
-    tracking: true, bundleFlexible: false, bundle: false,
-    createdAt: "25-Apr-2026 01:57 PM", updatedAt: "25-Apr-2026 01:57 PM", updatedBy: "ANGGA NOVIANTO",
-    weight: "", volume: "", validFrom: "-", validTo: "-",
-    barcodeType: "code128", isActive: true, isInternal: false, openPrice: true, canOrder: true, productFreeze: false,
-    warrantyPeriod: "-", returnDaysLimit: "-", tradeIn: 0,
-  },
-};
-
-const storeStocks = [
-  { no: 1, code: "NJ", store: "PT Nia Jaya Motor", qty: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 0, totalCost: 0 },
-  { no: 2, code: "WM", store: "PT Putra Wijaya Motor", qty: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 72252, totalCost: 0 },
-  { no: 3, code: "PJ", store: "PT Putro Joyo Motor", qty: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 0, totalCost: 0 },
-  { no: 4, code: "003", store: "Wijaya Motor - One Stop Service", qty: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 0, totalCost: 0 },
-];
-
-const warehouseStocks = [
-  { no: 1, code: "PJ3", warehouse: "Gudang PJ 3", qty: 0, qtyAvail: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 0, totalCost: 0 },
-  { no: 2, code: "PJM", warehouse: "Gudang PJ Motor", qty: 0, qtyAvail: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 0, totalCost: 0 },
-  { no: 3, code: "WJY", warehouse: "Gudang Wijaya", qty: 0, qtyAvail: 0, reserved: 0, inTransit: 0, minQty: 0, maxQty: 0, avgCost: 72252, totalCost: 0 },
-];
-
-const warehouseHistory = [
-  { id: "18176304", date: "23-May-2026 09:18 AM", warehouse: "Gudang Wijaya", type: "Stock Order", typeLink: "/stock-workflow/stock-orders", qtyChanged: -1, notes: "PT Putra Wijaya Motor", createdBy: "ANGGA NOVIANTO" },
-  { id: "18119654", date: "12-May-2026 01:11 PM", warehouse: "Gudang Wijaya", type: "Purchase Delivery", typeLink: "/warehouse/purchase-deliveries", qtyChanged: 1, notes: "VIAR CIPULIR (SUPPLIER)", createdBy: "ANGGA NOVIANTO" },
-];
-
-const productHistory = [
-  { updatedAt: "25/04/26 01:57 PM", updatedBy: "ANGGA NOVIANTO", companySupplyPrice: 80200, wholesalePrice: 0, supplyPrice: 0, retailPrice: 144360, retailIncTax: 160239.6, tradeIn: 0, warranty: 0, active: true, track: true, bundle: false },
-];
-
-const purchaseHistory = [
-  { date: "12-May-2026 01:11 PM", supplier: "VIAR CIPULIR (SUPPLIER)", purchaseDelivery: "PD/WJY/26050075", quantity: 1.0, price: 72252, subtotal: 72252, tax: 7948, total: 80200 },
-];
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
@@ -60,10 +19,85 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const skuArr = Array.isArray(params.sku) ? params.sku : [params.sku];
   const sku = skuArr.join("/");
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<TabKey>("product");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
-  const product = productData["000-TRS-0371"];
+
+  useEffect(() => {
+    fetch(`/api/spareparts?search=${encodeURIComponent(sku)}&limit=1`)
+      .then((r) => r.json())
+      .then((json) => {
+        const found = (json.data || [])[0];
+        if (!found) { setError("Product not found: " + sku); setLoading(false); return; }
+        setProduct({
+          sku: found.sku || sku,
+          name: found.name || "-",
+          description: found.description || "-",
+          brand: found.brand || "-",
+          type: found.type || "-",
+          tags: found.tags || [],
+          productCode: found.code || "-",
+          supplierProductCode: found.supplier?.code || "-",
+          suppliers: found.supplier ? [found.supplier.name || "All Suppliers"] : ["All Suppliers"],
+          tax: found.tax || "PPN",
+          taxProductCode: found.taxProductCode || "",
+          companySupplyPrice: found.buyPrice || 0,
+          wholesalePrice: found.wholesalePrice || 0,
+          supplyPrice: found.supplyPrice || 0,
+          retailPrice: found.sellPrice || 0,
+          retailPriceIncTax: Math.round((found.sellPrice || 0) * 1.11),
+          tracking: found.tracking ?? true,
+          bundleFlexible: found.bundleFlexible ?? false,
+          bundle: found.bundle ?? false,
+          createdAt: found.createdAt || "-",
+          updatedAt: found.updatedAt || "-",
+          updatedBy: found.updatedBy || "-",
+          weight: found.weight || "",
+          volume: found.volume || "",
+          validFrom: found.validFrom || "-",
+          validTo: found.validTo || "-",
+          barcodeType: found.barcodeType || "code128",
+          isActive: found.isActive ?? true,
+          isInternal: found.isInternal ?? false,
+          openPrice: found.openPrice ?? true,
+          canOrder: found.canOrder ?? true,
+          productFreeze: found.productFreeze ?? false,
+          warrantyPeriod: found.warrantyPeriod || "-",
+          returnDaysLimit: found.returnDaysLimit || "-",
+          tradeIn: found.tradeIn || 0,
+          stockQty: found.stockQty || 0,
+          minStock: found.minStock || 0,
+          category: found.category || "-",
+        });
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load product"); setLoading(false); });
+  }, [sku]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: "0 24px 24px" }}>
+        <button onClick={() => router.push("/products")} style={S.backBtn}>
+          <ArrowLeft size={16} /> Kembali ke Products
+        </button>
+        <div style={{ ...S.card, marginTop: 12 }}><p style={{ color: "#444746" }}>Loading...</p></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div style={{ padding: "0 24px 24px" }}>
+        <button onClick={() => router.push("/products")} style={S.backBtn}>
+          <ArrowLeft size={16} /> Kembali ke Products
+        </button>
+        <div style={{ ...S.card, marginTop: 12 }}><p style={{ color: "#ea001e" }}>{error || "Product not found"}</p></div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -175,7 +209,7 @@ export default function ProductDetailPage() {
             <button style={S.searchBtn}><Search size={14} /> Search</button>
           </div>
           <div style={{ ...S.card, marginBottom: 12, padding: "8px 16px" }}>
-            <span style={{ fontSize: 13, color: "#0176d3", fontWeight: 600 }}>Total Qty : 0</span>
+            <span style={{ fontSize: 13, color: "#0176d3", fontWeight: 600 }}>Total Qty : {product.stockQty}</span>
           </div>
           <div style={S.tableWrap}>
             <table style={S.table}>
@@ -186,15 +220,9 @@ export default function ProductDetailPage() {
                 <th style={{ ...S.th, textAlign: "right" }}>Max Qty</th><th style={{ ...S.th, textAlign: "right" }}>Average Cost (Rp)</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Total Cost (Rp)</th>
               </tr></thead>
-              <tbody>{storeStocks.map((r) => (
-                <tr key={r.no} style={S.tr}>
-                  <td style={S.td}>{r.no}</td><td style={S.td}>{r.code}</td><td style={S.td}>{r.store}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.qty}</td><td style={{ ...S.td, textAlign: "right" }}>{r.reserved}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.inTransit}</td><td style={{ ...S.td, textAlign: "right" }}>{r.minQty}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.maxQty}</td><td style={{ ...S.td, textAlign: "right" }}>{r.avgCost > 0 ? r.avgCost.toLocaleString("id-ID") : "0"}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.totalCost.toLocaleString("id-ID")}</td>
-                </tr>
-              ))}</tbody>
+              <tbody>
+                <tr><td colSpan={10} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Data not available via API yet</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -221,16 +249,9 @@ export default function ProductDetailPage() {
                 <th style={{ ...S.th, textAlign: "right" }}>Min Qty</th><th style={{ ...S.th, textAlign: "right" }}>Max Qty</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Average Cost (Rp)</th><th style={{ ...S.th, textAlign: "right" }}>Total Cost (Rp)</th>
               </tr></thead>
-              <tbody>{warehouseStocks.map((r) => (
-                <tr key={r.no} style={S.tr}>
-                  <td style={S.td}>{r.no}</td><td style={S.td}>{r.code}</td><td style={S.td}>{r.warehouse}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.qty}</td><td style={{ ...S.td, textAlign: "right" }}>{r.qtyAvail}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.reserved}</td><td style={{ ...S.td, textAlign: "right" }}>{r.inTransit}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.minQty}</td><td style={{ ...S.td, textAlign: "right" }}>{r.maxQty}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.avgCost > 0 ? r.avgCost.toLocaleString("id-ID") : "0"}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.totalCost.toLocaleString("id-ID")}</td>
-                </tr>
-              ))}</tbody>
+              <tbody>
+                <tr><td colSpan={11} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Data not available via API yet</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -260,14 +281,9 @@ export default function ProductDetailPage() {
                 <th style={S.th}>Type</th><th style={{ ...S.th, textAlign: "right" }}>Qty Changed</th>
                 <th style={S.th}>Notes</th><th style={S.th}>Created By</th>
               </tr></thead>
-              <tbody>{warehouseHistory.map((r) => (
-                <tr key={r.id} style={S.tr}>
-                  <td style={S.td}>{r.id}</td><td style={S.td}>{r.date}</td><td style={S.td}>{r.warehouse}</td>
-                  <td style={{ ...S.td, color: "#0176d3", cursor: "pointer" }} onClick={() => router.push(r.typeLink)}>{r.type}</td>
-                  <td style={{ ...S.td, textAlign: "right", color: r.qtyChanged < 0 ? "#ea001e" : "#2e844a", fontWeight: 600 }}>{r.qtyChanged > 0 ? "+" : ""}{r.qtyChanged}</td>
-                  <td style={S.td}>{r.notes}</td><td style={S.td}>{r.createdBy}</td>
-                </tr>
-              ))}</tbody>
+              <tbody>
+                <tr><td colSpan={7} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Data not available via API yet</td></tr>
+              </tbody>
             </table>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
@@ -300,20 +316,9 @@ export default function ProductDetailPage() {
                 <th style={{ ...S.th, textAlign: "center" }}>Track</th>
                 <th style={{ ...S.th, textAlign: "center" }}>Bundle</th>
               </tr></thead>
-              <tbody>{productHistory.map((r, i) => (
-                <tr key={i} style={S.tr}>
-                  <td style={S.td}>{r.updatedAt}</td><td style={S.td}>{r.updatedBy}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.companySupplyPrice.toLocaleString("id-ID")}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.wholesalePrice}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.supplyPrice}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.retailPrice.toLocaleString("id-ID")} <span style={{ fontSize: 11, color: "#8e8f8e" }}>({r.retailIncTax.toLocaleString("id-ID")} Taxed)</span></td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.tradeIn}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.warranty}</td>
-                  <td style={{ ...S.td, textAlign: "center" }}>{r.active ? <span style={{ color: "#2e844a" }}>✓</span> : <span style={{ color: "#ea001e" }}>✗</span>}</td>
-                  <td style={{ ...S.td, textAlign: "center" }}>{r.track ? <span style={{ color: "#2e844a" }}>✓</span> : <span style={{ color: "#ea001e" }}>✗</span>}</td>
-                  <td style={{ ...S.td, textAlign: "center" }}>{r.bundle ? <span style={{ color: "#2e844a" }}>✓</span> : <span style={{ color: "#ea001e" }}>✗</span>}</td>
-                </tr>
-              ))}</tbody>
+              <tbody>
+                <tr><td colSpan={11} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Data not available via API yet</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -334,17 +339,9 @@ export default function ProductDetailPage() {
                 <th style={{ ...S.th, textAlign: "right" }}>Subtotal</th><th style={{ ...S.th, textAlign: "right" }}>Tax</th>
                 <th style={{ ...S.th, textAlign: "right" }}>Total</th>
               </tr></thead>
-              <tbody>{purchaseHistory.map((r, i) => (
-                <tr key={i} style={S.tr}>
-                  <td style={S.td}>{r.date}</td><td style={S.td}>{r.supplier}</td>
-                  <td style={{ ...S.td, color: "#0176d3", cursor: "pointer" }}>{r.purchaseDelivery}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.quantity}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.price.toLocaleString("id-ID")}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.subtotal.toLocaleString("id-ID")}</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{r.tax.toLocaleString("id-ID")}</td>
-                  <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{r.total.toLocaleString("id-ID")}</td>
-                </tr>
-              ))}</tbody>
+              <tbody>
+                <tr><td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Data not available via API yet</td></tr>
+              </tbody>
             </table>
           </div>
         </div>

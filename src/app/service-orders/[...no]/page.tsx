@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, FileText, Phone, CheckCircle, Wrench, ExternalLink, Briefcase } from "lucide-react";
 
 const initialOrdersData: Record<string, any> = {
@@ -196,33 +196,59 @@ export default function ServiceOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderNo = Array.isArray(params.no) ? params.no.join("/") : (params.no as string);
-  const [orders, setOrders] = useState(initialOrdersData);
-  const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
-  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showDeliverConfirm, setShowDeliverConfirm] = useState(false);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showCreateWOConfirm, setShowCreateWOConfirm] = useState(false);
+  const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
 
-  const order = orders[orderNo];
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/service-orders?search=${encodeURIComponent(orderNo)}&limit=1`)
+      .then((r) => r.json())
+      .then((j) => {
+        const found = j.data?.[0];
+        if (found && found.id) {
+          // Fetch full detail with services, spareparts, workOrders
+          return fetch(`/api/service-orders/${found.id}`)
+            .then((r2) => r2.json())
+            .then((j2) => {
+              setOrder(j2.data || found);
+              setLoading(false);
+            });
+        }
+        if (found) setOrder(found);
+        else setError("Data tidak ditemukan");
+        setLoading(false);
+      })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, [orderNo]);
+
+    if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#ea001e", fontSize: 14 }}>{error}</p></div></div>;
   if (!order) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {orderNo}</p></div></div>;
 
-  const handleApprove = () => { setOrders((prev) => ({ ...prev, [orderNo]: { ...prev[orderNo], status: "APPROVED" } })); setShowApproveConfirm(false); };
-  const handleDeliver = () => { setOrders((prev) => ({ ...prev, [orderNo]: { ...prev[orderNo], status: "DELIVERED" } })); setShowDeliverConfirm(false); };
+  const handleApprove = () => { setOrder((prev: any) => ({ ...prev, status: "APPROVED" })); setShowApproveConfirm(false); };
+
+  const handleDeliver = () => { setOrder((prev: any) => ({ ...prev, status: "DELIVERED" })); setShowDeliverConfirm(false); };
   const handleCreateWO = () => {
     const now = new Date();
     const dateStr = now.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }).replace(/\s/g, "-");
     const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", hour12: true });
-    setOrders((prev) => ({ ...prev, [orderNo]: { ...prev[orderNo], workOrders: [{ documentNumber: `WO-${orderNo.replace("SO-", "")}`, createdDate: `${dateStr} ${timeStr}`, status: "CREATED" }] } }));
+    setOrder((prev: any) => ({ ...prev, workOrders: [{ documentNumber: `WO-${orderNo}`, createdDate: `${dateStr} ${timeStr}`, status: "CREATED" }] }));
     setShowCreateWOConfirm(false);
   };
 
-  const totalQty = order.services.reduce((s: number, x: any) => s + x.quantity, 0);
-  const grandTotal = order.services.reduce((s: number, x: any) => s + x.total, 0);
+  const totalQty = (order.services || []).reduce((s: number, x: any) => s + (x.quantity || x.qty || 0), 0);
+  const grandTotal = (order.services || []).reduce((s: number, x: any) => s + (x.total || 0), 0);
   const isDraft = order.status === "DRAFT";
   const isDelivered = order.status === "DELIVERED";
   const isApproved = order.status === "APPROVED";
-  const hasWO = order.workOrders.length > 0;
-  const wo = hasWO ? order.workOrders[0] : null;
+  const hasWO = (order.workOrders || []).length > 0;
+  const wo = hasWO ? (order.workOrders || [])[0] : null;
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -252,7 +278,7 @@ export default function ServiceOrderDetailPage() {
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Deliver</button>}
             {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button><button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button></>}
-            {isApproved && !hasWO && order.services.length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button>}
+            {isApproved && !hasWO && (order.services || []).length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create Work Orders</button>}
             {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View Work Orders</button>}
             <button style={S.actionBtn}><Printer size={14} /> Print</button>
             <button style={S.actionBtn}><FileText size={14} /> Proforma Invoice</button>
@@ -305,7 +331,7 @@ export default function ServiceOrderDetailPage() {
           </div>
 
           {svcLineTab === "services" && (
-            <ServicesTable services={order.services} totalQty={totalQty} grandTotal={grandTotal} router={router} />
+            <ServicesTable services={order.services || []} totalQty={totalQty} grandTotal={grandTotal} router={router} />
           )}
           {svcLineTab === "spareparts" && (
             <SparepartTable spareparts={order.spareparts || []} />
@@ -330,7 +356,7 @@ export default function ServiceOrderDetailPage() {
 
           {/* Services Table */}
           <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Services</div>
-          <ServicesTable services={order.services} totalQty={totalQty} grandTotal={grandTotal} router={router} />
+          <ServicesTable services={order.services || []} totalQty={totalQty} grandTotal={grandTotal} router={router} />
         </>
       )}
 
@@ -344,7 +370,7 @@ export default function ServiceOrderDetailPage() {
       {/* Modals */}
       {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DELIVERED ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
       {showDeliverConfirm && <Modal title="Deliver Service Order?" message="Status akan berubah dari DRAFT ke DELIVERED." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Deliver" />}
-      {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${order.services.length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
+      {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${(order.services || []).length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
     </div>
   );
 }

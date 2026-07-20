@@ -1,96 +1,36 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Printer, CheckCircle, Plus, Trash2 } from "lucide-react";
 
-const poData: Record<string, any> = {
-  "PO-001": {
-    no: "PO-001",
-    supplier: "PT Auto Parts",
-    supplierPhone: "021-555-1234",
-    supplierAddress: "Jl. Raya Bogor No. 123, Jakarta",
-    status: "SENT",
-    date: "25 Jun 2026",
-    expectedDate: "28 Jun 2026",
-    notes: "Pengiriman ke gudang utama",
-    items: [
-      { code: "SP-001", name: "Oli Mesin 10W-40", qty: 20, unit: "Ltr", price: 75000, subtotal: 1500000 },
-      { code: "SP-002", name: "Filter Oli", qty: 10, unit: "Pcs", price: 50000, subtotal: 500000 },
-      { code: "SP-004", name: "Busi Iridium", qty: 20, unit: "Pcs", price: 35000, subtotal: 700000 },
-      { code: "SP-006", name: "V-Belt", qty: 5, unit: "Pcs", price: 90000, subtotal: 450000 },
-    ],
-    receivedItems: [
-      { code: "SP-001", name: "Oli Mesin 10W-40", ordered: 20, received: 20, date: "27 Jun 2026" },
-      { code: "SP-002", name: "Filter Oli", ordered: 10, received: 10, date: "27 Jun 2026" },
-    ],
-    vendors: [
-      { id: "V1", name: "PT Auto Parts", status: "Dipilih", prices: [75000, 50000, 35000, 90000] },
-      { id: "V2", name: "CV Suku Cadang Jaya", status: "Alternatif", prices: [72000, 48000, 38000, 85000] },
-      { id: "V3", name: "UD Oli Jaya", status: "Alternatif", prices: [70000, 52000, 36000, 95000] },
-    ],
-  },
-  "PO-002": {
-    no: "PO-002",
-    supplier: "CV Ban Sehat",
-    supplierPhone: "022-888-5678",
-    supplierAddress: "Jl. Soekarno Hatta No. 45, Bandung",
-    status: "PARTIAL RECEIVED",
-    date: "24 Jun 2026",
-    expectedDate: "27 Jun 2026",
-    notes: "",
-    items: [
-      { code: "SP-005", name: "Aki GS 45Ah", qty: 5, unit: "Pcs", price: 700000, subtotal: 3500000 },
-      { code: "SP-003", name: "Kampas Rem Depan", qty: 8, unit: "Set", price: 150000, subtotal: 1200000 },
-    ],
-    receivedItems: [
-      { code: "SP-005", name: "Aki GS 45Ah", ordered: 5, received: 3, date: "26 Jun 2026" },
-    ],
-    vendors: [
-      { id: "V1", name: "CV Ban Sehat", status: "Dipilih", prices: [700000, 150000] },
-      { id: "V2", name: "PT Aki Jaya", status: "Alternatif", prices: [720000, 160000] },
-    ],
-  },
-  "PO-003": {
-    no: "PO-003",
-    supplier: "UD Oli Jaya",
-    supplierPhone: "021-777-9012",
-    supplierAddress: "Jl. Gatot Subroto No. 67, Jakarta",
-    status: "RECEIVED",
-    date: "22 Jun 2026",
-    expectedDate: "25 Jun 2026",
-    notes: "Sudah diterima lengkap",
-    items: [
-      { code: "SP-001", name: "Oli Mesin 10W-40", qty: 30, unit: "Ltr", price: 72000, subtotal: 2160000 },
-    ],
-    receivedItems: [
-      { code: "SP-001", name: "Oli Mesin 10W-40", ordered: 30, received: 30, date: "24 Jun 2026" },
-    ],
-    vendors: [
-      { id: "V1", name: "UD Oli Jaya", status: "Dipilih", prices: [72000] },
-    ],
-  },
-  "PO-004": {
-    no: "PO-004",
-    supplier: "PT Auto Parts",
-    supplierPhone: "021-555-1234",
-    supplierAddress: "Jl. Raya Bogor No. 123, Jakarta",
-    status: "DRAFT",
-    date: "26 Jun 2026",
-    expectedDate: "-",
-    notes: "Menunggu approval",
-    items: [
-      { code: "SP-003", name: "Kampas Rem Depan", qty: 10, unit: "Set", price: 150000, subtotal: 1500000 },
-      { code: "SP-005", name: "Aki GS 45Ah", qty: 5, unit: "Pcs", price: 700000, subtotal: 3500000 },
-      { code: "SP-006", name: "V-Belt", qty: 10, unit: "Pcs", price: 90000, subtotal: 900000 },
-    ],
-    receivedItems: [],
-    vendors: [
-      { id: "V1", name: "PT Auto Parts", status: "Alternatif", prices: [150000, 700000, 90000] },
-      { id: "V2", name: "CV Sparepart Murah", status: "Alternatif", prices: [140000, 680000, 85000] },
-    ],
-  },
-};
+interface ApiPODetail {
+  id: string;
+  poNo: string;
+  date: string;
+  expectedDate?: string;
+  status: string;
+  notes?: string;
+  supplier: { companyName: string; phone?: string; address?: string } | null;
+  total: number;
+  items?: { code: string; name: string; qty: number; unit: string; price: number; subtotal: number }[];
+  receivedItems?: { code: string; name: string; ordered: number; received: number; date: string }[];
+  vendors?: { id: string; name: string; status: string; prices: number[] }[];
+}
+
+interface POData {
+  no: string;
+  supplier: string;
+  supplierPhone: string;
+  supplierAddress: string;
+  status: string;
+  date: string;
+  expectedDate: string;
+  notes: string;
+  items: { code: string; name: string; qty: number; unit: string; price: number; subtotal: number }[];
+  receivedItems: { code: string; name: string; ordered: number; received: number; date: string }[];
+  vendors: { id: string; name: string; status: string; prices: number[] }[];
+}
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 const formatIDR = (n: number) => "Rp " + n.toLocaleString("id-ID");
@@ -99,24 +39,49 @@ export default function PODetailPage() {
   const params = useParams();
   const router = useRouter();
   const poNo = params.no as string;
+  const [po, setPo] = useState<POData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "items" | "vendors" | "received">("details");
   const [vendors, setVendors] = useState<any[]>([]);
 
-  const po = poData[poNo];
-  const workflowSteps = ["DRAFT", "SENT", "PARTIAL RECEIVED", "RECEIVED"];
-  const getStepIndex = (status: string) => {
-    const map: Record<string, number> = { "DRAFT": 0, "SENT": 1, "PARTIAL RECEIVED": 2, "RECEIVED": 3 };
-    return map[status] ?? 0;
-  };
-  const currentStepIndex = getStepIndex(po?.status || "DRAFT");
+  useEffect(() => {
+    fetch(`/api/purchase-orders?search=${encodeURIComponent(poNo)}&limit=1`)
+      .then((r) => r.json())
+      .then((j) => {
+        const found = (j.data || [])[0];
+        if (!found) { setError("Purchase Order tidak ditemukan: " + poNo); setLoading(false); return; }
+        const d: ApiPODetail = found;
+        const mapped: POData = {
+          no: d.poNo || poNo,
+          supplier: d.supplier?.companyName || "-",
+          supplierPhone: d.supplier?.phone || "-",
+          supplierAddress: d.supplier?.address || "-",
+          status: d.status || "DRAFT",
+          date: d.date || "-",
+          expectedDate: d.expectedDate || "-",
+          notes: d.notes || "",
+          items: d.items || [],
+          receivedItems: d.receivedItems || [],
+          vendors: d.vendors || [],
+        };
+        setPo(mapped);
+        if (d.vendors?.length) setVendors([...d.vendors]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load purchase order");
+        setLoading(false);
+      });
+  }, [poNo]);
 
-  // Init vendors from PO data
-  useState(() => {
-    if (po?.vendors) setVendors([...po.vendors]);
-  });
-
-  const totalQty = po?.items?.reduce((s: number, x: any) => s + x.qty, 0) || 0;
-  const grandTotal = po?.items?.reduce((s: number, x: any) => s + x.subtotal, 0) || 0;
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return (
+    <div className="p-6">
+      <button onClick={() => router.push("/inventory/po")} className="btn btn--sm mb-4"><ArrowLeft size={16} /> Kembali</button>
+      <div className="p-8 text-center text-red-500">{error}</div>
+    </div>
+  );
 
   if (!po) {
     return (
@@ -127,19 +92,29 @@ export default function PODetailPage() {
     );
   }
 
+  const workflowSteps = ["DRAFT", "SENT", "PARTIAL RECEIVED", "RECEIVED"];
+  const getStepIndex = (status: string) => {
+    const map: Record<string, number> = { "DRAFT": 0, "SENT": 1, "PARTIAL RECEIVED": 2, "RECEIVED": 3 };
+    return map[status] ?? 0;
+  };
+  const currentStepIndex = getStepIndex(po.status);
+
+  const totalQty = po.items?.reduce((s, x) => s + x.qty, 0) || 0;
+  const grandTotal = po.items?.reduce((s, x) => s + x.subtotal, 0) || 0;
+
   const selectVendor = (vendorIdx: number) => {
-    setVendors((prev) => prev.map((v: any, i: number) => ({
+    setVendors((prev) => prev.map((v, i) => ({
       ...v,
       status: i === vendorIdx ? "Dipilih" : "Alternatif",
     })));
   };
 
   const getLowest = (itemIdx: number) => {
-    const prices = vendors.map((v: any) => v.prices[itemIdx] || Infinity);
+    const prices = vendors.map((v) => v.prices[itemIdx] || Infinity);
     return Math.min(...prices);
   };
 
-  const selectedVendor = vendors.find((v: any) => v.status === "Dipilih");
+  const selectedVendor = vendors.find((v) => v.status === "Dipilih");
 
   const tabs = ["details", "items", "vendors", "received"] as const;
 
@@ -254,7 +229,7 @@ export default function PODetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {po.items.map((item: any, i: number) => (
+                {po.items.map((item, i) => (
                   <tr key={i}>
                     <td>{i + 1}</td>
                     <td className="font-medium text-[--color-brand]">{item.code}</td>
@@ -291,7 +266,7 @@ export default function PODetailPage() {
                   <tr>
                     <th style={{ minWidth: 130 }}>Item</th>
                     <th className="text-right" style={{ width: 50 }}>Qty</th>
-                    {vendors.map((v: any) => (
+                    {vendors.map((v) => (
                       <th key={v.id} className="text-center" style={{ minWidth: 120 }}>
                         <div className="flex flex-col items-center gap-1">
                           <span className="text-xs">{v.name}</span>
@@ -308,13 +283,13 @@ export default function PODetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {po.items.map((item: any, itemIdx: number) => {
+                  {po.items.map((item, itemIdx) => {
                     const lowest = getLowest(itemIdx);
                     return (
                       <tr key={itemIdx}>
                         <td className="text-xs">{item.name}</td>
                         <td className="text-right text-xs">{item.qty}</td>
-                        {vendors.map((v: any, vIdx: number) => {
+                        {vendors.map((v, vIdx) => {
                           const price = v.prices[itemIdx] || 0;
                           const isLowest = price === lowest && price > 0;
                           return (
@@ -334,9 +309,9 @@ export default function PODetailPage() {
                   <tr className="font-bold border-t-2 border-[--color-text-primary]">
                     <td className="text-xs">TOTAL</td>
                     <td></td>
-                    {vendors.map((v: any) => {
+                    {vendors.map((v) => {
                       const total = v.prices.reduce((s: number, p: number, i: number) => s + p * (po.items[i]?.qty || 0), 0);
-                      const cheapest = vendors.reduce((min: any, cur: any) => {
+                      const cheapest = vendors.reduce((min, cur) => {
                         const curTotal = cur.prices.reduce((s: number, p: number, i: number) => s + p * (po.items[i]?.qty || 0), 0);
                         const minTotal = min.prices.reduce((s: number, p: number, i: number) => s + p * (po.items[i]?.qty || 0), 0);
                         return curTotal < minTotal ? cur : min;
@@ -378,7 +353,7 @@ export default function PODetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {po.receivedItems.map((item: any, i: number) => (
+                    {po.receivedItems.map((item, i) => (
                       <tr key={i}>
                         <td>{i + 1}</td>
                         <td className="font-medium text-[--color-brand]">{item.code}</td>

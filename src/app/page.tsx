@@ -1,17 +1,35 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Wrench } from "lucide-react";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/dashboard");
+    setError("");
+    setLoading(true);
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    setLoading(false);
+
+    if (result?.error) {
+      setError("Email atau password salah");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   return (
@@ -31,17 +49,22 @@ export default function LoginPage() {
         {/* Login Card */}
         <div className="bg-white border border-[--color-border-light] rounded-slds-md shadow-slds-md p-6">
           <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-slds-sm text-sm">
+                {error}
+              </div>
+            )}
             <div className="form-group">
-              <label className="form-label" htmlFor="username">
-                Username
+              <label className="form-label" htmlFor="email">
+                Email
               </label>
               <input
-                id="username"
-                type="text"
+                id="email"
+                type="email"
                 className="form-input"
-                placeholder="Masukkan username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Masukkan email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoFocus
               />
             </div>
@@ -60,8 +83,12 @@ export default function LoginPage() {
               />
             </div>
 
-            <button type="submit" className="btn btn--brand w-full justify-center h-10">
-              Masuk
+            <button
+              type="submit"
+              className="btn btn--brand w-full justify-center h-10"
+              disabled={loading}
+            >
+              {loading ? "Memproses..." : "Masuk"}
             </button>
           </form>
         </div>

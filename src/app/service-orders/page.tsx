@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Filter, Download } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const orders = [
-  { no: "SRO/007/26060143", customerNo: "C-007", customerName: "CV Berkah Abadi", merkMobil: "Mitsubishi L300", platNo: "B 1314 OP", sa: "Rudi", store: "PT Putra Wijaya Motor", status: "Cancelled", total: "Rp 2.100.000", date: "23 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/006/26060155", customerNo: "C-006", customerName: "PT Transport Jaya", merkMobil: "Isuzu Elf", platNo: "B 1112 MN", sa: "Budi", store: "PT Putro Joyo Motor", status: "Delivered", total: "Rp 4.800.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/005/26060154", customerNo: "C-005", customerName: "Ahmad Fauzi", merkMobil: "Daihatsu Xenia", platNo: "B 7890 KL", sa: "Ani", store: "PT Nia Jaya Motor", status: "Cancelled", total: "Rp 950.000", date: "24 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/004/26060153", customerNo: "C-004", customerName: "CV Berkah Abadi", merkMobil: "Suzuki Ertiga", platNo: "B 3456 IJ", sa: "Budi", store: "Wijaya Motor", status: "Draft", total: "Rp 3.100.000", date: "25 Jun 2026", hasWO: false, hasInvoice: false },
-  { no: "SRO/003/26060152", customerNo: "C-003", customerName: "Siti Rahmawati", merkMobil: "Mitsubishi Pajero", platNo: "B 9012 GH", sa: "Rudi", store: "PT Putra Wijaya Motor", status: "Approved", total: "Rp 5.200.000", date: "25 Jun 2026", hasWO: true, hasInvoice: false },
-  { no: "SRO/002/26060150", customerNo: "C-002", customerName: "PT Maju Jaya", merkMobil: "Honda Civic", platNo: "B 5678 EF", sa: "Ani", store: "PT Putro Joyo Motor", status: "Approved", total: "Rp 1.800.000", date: "26 Jun 2026", hasWO: true, hasInvoice: true },
-  { no: "SRO/001/26060149", customerNo: "C-001", customerName: "Budi Santoso", merkMobil: "Toyota Avanza", platNo: "B 1234 CD", sa: "Rudi", store: "PT Nia Jaya Motor", status: "Draft", total: "Rp 2.500.000", date: "26 Jun 2026", hasWO: false, hasInvoice: false },
-];
+interface ServiceOrder {
+  id: string;
+  soNo: string;
+  customer: { name: string; id: string };
+  vehicle: { plateNo: string; brand: string; model: string };
+  sa: { name: string } | null;
+  store: { name: string };
+  status: string;
+  total: number;
+  createdAt: string;
+  _count?: { workOrders: number; invoices: number };
+}
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -21,14 +24,64 @@ const statusPill = (status: string) => {
     Delivered: "pill pill--delivered",
     Approved: "pill pill--approved",
     Cancelled: "pill pill--cancelled",
+    "In Progress": "pill pill--in-progress",
+    Completed: "pill pill--completed",
   };
   return map[status] || "pill pill--draft";
 };
 
+function fmt(n: number): string {
+  return `Rp ${(n || 0).toLocaleString("id-ID")}`;
+}
+
+function fmtDate(d: string): string {
+  if (!d) return "-";
+  return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
+
 export default function ServiceOrdersPage() {
   const router = useRouter();
+  const [orders, setOrders] = useState<ServiceOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+
+  const fetchOrders = () => {
+    setLoading(true);
+    const params = new URLSearchParams({ limit: "50" });
+    if (statusFilter) params.set("status", statusFilter);
+    if (search) params.set("search", search);
+
+    fetch(`/api/service-orders?${params}`)
+      .then((r) => r.json())
+      .then((json) => {
+        setOrders(json.data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Gagal memuat data service orders");
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const filtered = orders.filter((o) => {
+    const matchStatus = !statusFilter || o.status === statusFilter;
+    const matchSearch =
+      !search ||
+      o.soNo.toLowerCase().includes(search.toLowerCase()) ||
+      o.customer?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      o.vehicle?.plateNo?.toLowerCase().includes(search.toLowerCase());
+    return matchStatus && matchSearch;
+  });
+
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -55,22 +108,24 @@ export default function ServiceOrdersPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>Draft</option>
-              <option>Delivered</option>
-              <option>Approved</option>
-              <option>Cancelled</option>
+            <select
+              className="form-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="Draft">Draft</option>
+              <option value="Approved">Approved</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Store</label>
             <select className="form-select">
               <option>All Stores</option>
-              <option>PT Putra Wijaya Motor</option>
-              <option>PT Putro Joyo Motor</option>
-              <option>PT Nia Jaya Motor</option>
-              <option>Wijaya Motor</option>
             </select>
           </div>
           <div className="form-group">
@@ -93,19 +148,23 @@ export default function ServiceOrdersPage() {
             <label className="form-label">Service Advisor</label>
             <select className="form-select">
               <option>All SA</option>
-              <option>Rudi</option>
-              <option>Ani</option>
-              <option>Budi</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Tanggal</label>
-            <DateRangePicker from={dateFrom} to={dateTo} onChange={(f, t) => { setDateFrom(f); setDateTo(t); }} />
+            <DateRangePicker
+              from={dateFrom}
+              to={dateTo}
+              onChange={(f, t) => {
+                setDateFrom(f);
+                setDateTo(t);
+              }}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>
             <div className="flex gap-2">
-              <button className="btn btn--brand btn--sm flex-1 justify-center">
+              <button className="btn btn--brand btn--sm flex-1 justify-center" onClick={fetchOrders}>
                 <Search size={14} /> Cari
               </button>
               <button className="btn btn--sm">
@@ -118,53 +177,117 @@ export default function ServiceOrdersPage() {
 
       {/* Table */}
       <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>No. SRO</th>
-              <th>Customers</th>
-              <th>Vehicle No</th>
-              <th>Store</th>
-              <th>Service Advisor</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Tanggal</th>
-              <th>Linked Docs</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.no}>
-                <td
-                  className="font-medium cursor-pointer"
-                  style={{ color: "var(--color-brand)" }}
-                  onClick={() => router.push(`/service-orders/${order.no}`)}
-                >{order.no}</td>
-                <td>
-                  <div className="font-medium">{order.customerName}</div>
-                </td>
-                <td
-                  className="cursor-pointer"
-                  onClick={(e) => { e.stopPropagation(); router.push(`/master-data/vehicles/${encodeURIComponent(order.platNo)}`); }}
-                >
-                  <div className="font-medium" style={{ color: "var(--color-brand)" }}>{order.platNo}</div>
-                  <div className="text-xs text-[--color-text-secondary]">{order.merkMobil}</div>
-                </td>
-                <td className="text-[--color-text-secondary]">{order.store}</td>
-                <td>{order.sa}</td>
-                <td><span className={statusPill(order.status)}>{order.status}</span></td>
-                <td className="font-medium">{order.total}</td>
-                <td className="text-[--color-text-secondary]">{order.date}</td>
-                <td>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <span title={order.hasWO ? "Work Order sudah dibuat" : "Belum ada Work Order"} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 4, fontSize: 11, fontWeight: 700, background: order.hasWO ? "#2e844a" : "#d8d8d8", color: order.hasWO ? "#fff" : "#8e8f8e", cursor: "default" }}>WO</span>
-                    <span title={order.hasInvoice ? "Invoice sudah dibuat" : "Belum ada Invoice"} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 4, fontSize: 11, fontWeight: 700, background: order.hasInvoice ? "#0176d3" : "#d8d8d8", color: order.hasInvoice ? "#fff" : "#8e8f8e", cursor: "default" }}>INV</span>
-                  </div>
-                </td>
+        {loading ? (
+          <div className="p-8 text-center text-[--color-text-secondary]">Loading...</div>
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>No. SRO</th>
+                <th>Customers</th>
+                <th>Vehicle No</th>
+                <th>Store</th>
+                <th>Service Advisor</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Tanggal</th>
+                <th>Linked Docs</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((order) => (
+                <tr key={order.id}>
+                  <td
+                    className="font-medium cursor-pointer"
+                    style={{ color: "var(--color-brand)" }}
+                    onClick={() => router.push(`/service-orders/${order.soNo}`)}
+                  >
+                    {order.soNo}
+                  </td>
+                  <td>
+                    <div className="font-medium">{order.customer?.name || "-"}</div>
+                  </td>
+                  <td
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/master-data/vehicles/${encodeURIComponent(order.vehicle?.plateNo || "")}`);
+                    }}
+                  >
+                    <div className="font-medium" style={{ color: "var(--color-brand)" }}>
+                      {order.vehicle?.plateNo || "-"}
+                    </div>
+                    <div className="text-xs text-[--color-text-secondary]">
+                      {order.vehicle?.brand} {order.vehicle?.model}
+                    </div>
+                  </td>
+                  <td className="text-[--color-text-secondary]">{order.store?.name || "-"}</td>
+                  <td>{order.sa?.name || "-"}</td>
+                  <td>
+                    <span className={statusPill(order.status)}>{order.status}</span>
+                  </td>
+                  <td className="font-medium">{fmt(order.total)}</td>
+                  <td className="text-[--color-text-secondary]">{fmtDate(order.createdAt)}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <span
+                        title={
+                          (order._count?.workOrders ?? 0) > 0
+                            ? "Work Order sudah dibuat"
+                            : "Belum ada Work Order"
+                        }
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 22,
+                          height: 22,
+                          borderRadius: 4,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          background: (order._count?.workOrders ?? 0) > 0 ? "#2e844a" : "#d8d8d8",
+                          color: (order._count?.workOrders ?? 0) > 0 ? "#fff" : "#8e8f8e",
+                          cursor: "default",
+                        }}
+                      >
+                        WO
+                      </span>
+                      <span
+                        title={
+                          (order._count?.invoices ?? 0) > 0
+                            ? "Invoice sudah dibuat"
+                            : "Belum ada Invoice"
+                        }
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 22,
+                          height: 22,
+                          borderRadius: 4,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          background: (order._count?.invoices ?? 0) > 0 ? "#0176d3" : "#d8d8d8",
+                          color: (order._count?.invoices ?? 0) > 0 ? "#fff" : "#8e8f8e",
+                          cursor: "default",
+                        }}
+                      >
+                        INV
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="text-center text-[--color-text-secondary] py-8">
+                    Tidak ada service order
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
@@ -174,8 +297,14 @@ function ClipboardList({ className }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
     >
       <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />

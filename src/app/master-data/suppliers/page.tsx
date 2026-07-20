@@ -1,16 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
-const suppliers = [
-  { id: "S-001", name: "PT Auto Parts", phone: "021-555-1234", address: "Jl. Raya Bogor No. 123, Jakarta", terms: "Net 30" },
-  { id: "S-002", name: "CV Ban Sehat", phone: "022-888-5678", address: "Jl. Soekarno Hatta No. 45, Bandung", terms: "Net 14" },
-  { id: "S-003", name: "UD Oli Jaya", phone: "021-777-9012", address: "Jl. Gatot Subroto No. 67, Jakarta", terms: "COD" },
-];
+interface Supplier {
+  id: string;
+  companyName: string;
+  phone: string;
+  address: string;
+  storeId: string;
+  _count?: { spareparts: number; purchaseOrders: number };
+}
 
 export default function SuppliersPage() {
   const router = useRouter();
+  const [data, setData] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    fetch(`/api/suppliers${qs ? "?" + qs : ""}`)
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load suppliers"); setLoading(false); });
+  }, [search]);
+
   return (
     <div>
       <div className="view-header">
@@ -29,7 +49,7 @@ export default function SuppliersPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
             <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="Nama / No. Telp..." />
+            <input type="text" className="form-input" placeholder="Nama / No. Telp..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>
@@ -39,30 +59,39 @@ export default function SuppliersPage() {
           </div>
         </div>
       </div>
-      <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nama Supplier</th>
-              <th>Telepon</th>
-              <th>Alamat</th>
-              <th>Payment Terms</th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((s) => (
-              <tr key={s.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/suppliers/${s.id}`)}>
-                <td className="font-medium text-[--color-brand]">{s.id}</td>
-                <td className="font-medium">{s.name}</td>
-                <td>{s.phone}</td>
-                <td className="text-[--color-text-secondary]">{s.address}</td>
-                <td><span className="pill bg-gray-200 text-gray-700">{s.terms}</span></td>
+
+      {loading && <div className="p-8 text-center text-[--color-text-secondary]">Loading...</div>}
+      {error && <div className="p-8 text-center text-red-500">{error}</div>}
+
+      {!loading && !error && (
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nama Supplier</th>
+                <th>Telepon</th>
+                <th>Alamat</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-8 text-[--color-text-secondary]">No suppliers found</td>
+                </tr>
+              )}
+              {data.map((s) => (
+                <tr key={s.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/suppliers/${s.id}`)}>
+                  <td className="font-medium text-[--color-brand]">{s.id}</td>
+                  <td className="font-medium">{s.companyName}</td>
+                  <td>{s.phone}</td>
+                  <td className="text-[--color-text-secondary]">{s.address}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

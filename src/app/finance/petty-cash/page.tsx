@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Plus, Search, X, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
@@ -17,26 +17,42 @@ interface CashEntry {
 
 const COA_CATEGORIES = ["ATK & Perlengkapan", "Transportasi", "Konsumsi", "Maintenance", "Lain-lain"];
 
-const INITIAL_DATA: CashEntry[] = [
-  { id: "PC-2026/0007", date: "2026-07-04", description: "Isi saldo kas dari Bank BCA", category: "Lain-lain", nominal: 2000000, type: "masuk" },
-  { id: "PC-2026/0006", date: "2026-07-02", description: "Beli kertas A4, tinta printer, pulpen", category: "ATK & Perlengkapan", nominal: 350000, type: "keluar" },
-  { id: "PC-2026/0005", date: "2026-07-01", description: "Bensin operasional mobil service", category: "Transportasi", nominal: 500000, type: "keluar" },
-  { id: "PC-2026/0004", date: "2026-06-30", description: "Konsumsi meeting tim", category: "Konsumsi", nominal: 200000, type: "keluar" },
-  { id: "PC-2026/0003", date: "2026-06-28", description: "Service AC ruang tunggu", category: "Maintenance", nominal: 750000, type: "keluar" },
-  { id: "PC-2026/0002", date: "2026-06-25", description: "Setoran awal kas dari Bank Mandiri", category: "Lain-lain", nominal: 5000000, type: "masuk" },
-  { id: "PC-2026/0001", date: "2026-06-20", description: "Biaya parkir & tol", category: "Transportasi", nominal: 150000, type: "keluar" },
-];
-
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function PettyCashPage() {
-  const [data, setData] = useState<CashEntry[]>(INITIAL_DATA);
+  const [data, setData] = useState<CashEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [balance, setBalance] = useState(0);
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [filterCategory, setFilterCategory] = useState("Semua");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), desc: "", category: "ATK & Perlengkapan", nominal: "" });
+
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/petty-cash")
+      .then((r) => r.json())
+      .then((json) => {
+        const entries = (json.data || []).map((pc: any) => ({
+          id: pc.id?.toString() || `PC-${Date.now()}`,
+          date: pc.date ? new Date(pc.date).toISOString().slice(0, 10) : "",
+          description: pc.description || "",
+          category: pc.category || "Lain-lain",
+          nominal: pc.amount || pc.nominal || 0,
+          type: (pc.type === "masuk" || pc.type === "in") ? "masuk" : "keluar",
+        }));
+        setData(entries);
+        setBalance(json.balance || 0);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load petty cash"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   const filtered = useMemo(() => {
     return data.filter((d) => {

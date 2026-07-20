@@ -1,23 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Truck, Star, Search, X } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
-
-const purchaseRequests = [
-  { refCode: "PRQ/HO/26010014", date: "14 Jan 2026", dueAt: "21 Jan 2026", warehouse: "Workshop Utama", supplier: "PT Bearing Jaya", status: "PENDING APPROVAL", closed: false, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010015", date: "15 Jan 2026", dueAt: "22 Jan 2026", warehouse: "Workshop Utama", supplier: "PT Suku Cadang Abadi", status: "ORDERED", closed: false, purchaseOrder: "PO/2601/0001" },
-  { refCode: "PRQ/HO/26010016", date: "16 Jan 2026", dueAt: "23 Jan 2026", warehouse: "Gudang Utama", supplier: "PT Bearing Jaya", status: "APPROVED", closed: false, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010017", date: "17 Jan 2026", dueAt: "24 Jan 2026", warehouse: "Workshop Utama", supplier: "CV Teknik Mandiri", status: "PENDING APPROVAL", closed: false, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010018", date: "18 Jan 2026", dueAt: "25 Jan 2026", warehouse: "Gudang Utama", supplier: "PT Suku Cadang Abadi", status: "ORDERED", closed: false, purchaseOrder: "PO/2601/0003" },
-  { refCode: "PRQ/HO/26010019", date: "19 Jan 2026", dueAt: "26 Jan 2026", warehouse: "Workshop Utama", supplier: "PT Bearing Jaya", status: "APPROVED", closed: true, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010020", date: "20 Jan 2026", dueAt: "27 Jan 2026", warehouse: "Gudang Utama", supplier: "CV Teknik Mandiri", status: "PENDING APPROVAL", closed: false, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010021", date: "21 Jan 2026", dueAt: "28 Jan 2026", warehouse: "Workshop Utama", supplier: "PT Suku Cadang Abadi", status: "ORDERED", closed: false, purchaseOrder: "PO/2601/0005" },
-  { refCode: "PRQ/HO/26010022", date: "22 Jan 2026", dueAt: "29 Jan 2026", warehouse: "Gudang Utama", supplier: "PT Bearing Jaya", status: "APPROVED", closed: false, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010023", date: "23 Jan 2026", dueAt: "30 Jan 2026", warehouse: "Workshop Utama", supplier: "CV Teknik Mandiri", status: "PENDING APPROVAL", closed: true, purchaseOrder: "" },
-  { refCode: "PRQ/HO/26010024", date: "24 Jan 2026", dueAt: "31 Jan 2026", warehouse: "Gudang Utama", supplier: "PT Suku Cadang Abadi", status: "ORDERED", closed: false, purchaseOrder: "PO/2601/0007" },
-];
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -30,8 +16,22 @@ const statusPill = (status: string) => {
 
 export default function PurchaseRequestListPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+
+  useEffect(() => {
+    fetch("/api/purchase-requests")
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">
@@ -116,19 +116,19 @@ export default function PurchaseRequestListPage() {
             </tr>
           </thead>
           <tbody>
-            {purchaseRequests.map((pr) => (
-              <tr key={pr.refCode} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
+            {data.map((pr) => (
+              <tr key={pr.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors">
                 <td
                   className="font-medium cursor-pointer"
                   style={{ color: "var(--color-brand)" }}
-                  onClick={() => router.push(`/warehouse/purchase-request/${pr.refCode}`)}
+                  onClick={() => router.push(`/warehouse/purchase-request/${pr.prNo}`)}
                 >
-                  {pr.refCode}
+                  {pr.prNo}
                 </td>
-                <td className="text-[--color-text-secondary]">{pr.date}</td>
-                <td>{pr.dueAt}</td>
-                <td>{pr.warehouse}</td>
-                <td>{pr.supplier}</td>
+                <td className="text-[--color-text-secondary]">{pr.date ? new Date(pr.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
                 <td>
                   <span
                     style={{
@@ -147,7 +147,7 @@ export default function PurchaseRequestListPage() {
                 <td className="text-center">
                   {pr.closed && <X size={16} className="text-red-500 inline" />}
                 </td>
-                <td className="text-[--color-text-secondary]">{pr.purchaseOrder}</td>
+                <td className="text-[--color-text-secondary]">{pr.purchaseOrder || ""}</td>
               </tr>
             ))}
           </tbody>

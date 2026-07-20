@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart3, Star, Search, Download } from "lucide-react";
 
@@ -91,15 +92,6 @@ const paymentColumns = [
   "SUKU DINAS CIPTA KARYA TATA RUANG DAN PERTANAHAN JAKARTA TIMUR",
 ];
 
-/* ── 31 days of July 2026, all values 0 ── */
-const rows = Array.from({ length: 31 }, (_, i) => {
-  const day = String(i + 1).padStart(2, "0");
-  return {
-    date: `2026-07-${day}`,
-    values: paymentColumns.map(() => 0),
-  };
-});
-
 function fmt(n: number): string {
   return n.toLocaleString("id-ID").replace(/,/g, ".");
 }
@@ -132,6 +124,40 @@ const TD_RIGHT: React.CSSProperties = { ...TD, textAlign: "right" };
 
 export default function DailyServicePaymentsPage() {
   const router = useRouter();
+  const [rows, setRows] = useState<{ date: string; values: number[] }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=daily-payments&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        // Group payments by date, map amount into the payment-type column
+        const payments: any[] = j.data || [];
+        const byDate: Record<string, Record<string, number>> = {};
+        for (const p of payments) {
+          const d = (p.paymentDate || "").slice(0, 10);
+          if (!byDate[d]) byDate[d] = {};
+          const pt = p.paymentType || p.method || "Cash";
+          byDate[d][pt] = (byDate[d][pt] || 0) + (p.amount || 0);
+        }
+        const mapped = Object.entries(byDate)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .map(([date, vals]) => ({
+            date,
+            values: paymentColumns.map((col) => vals[col] || 0),
+          }));
+        setRows(mapped.length > 0 ? mapped : Array.from({ length: 31 }, (_, i) => ({
+          date: `2026-07-${String(i + 1).padStart(2, "0")}`,
+          values: paymentColumns.map(() => 0),
+        })));
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load daily payments"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>

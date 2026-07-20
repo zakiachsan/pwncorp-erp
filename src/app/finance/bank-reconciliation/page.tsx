@@ -1,23 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Search, CheckCircle, XCircle } from "lucide-react";
-
-const reconData = [
-  { date: "26 Jun 2026", bankRef: "TRF-001", description: "Transfer dari Budi Santoso", bankAmount: "Rp 2.500.000", journalRef: "PAY-001", journalAmount: "Rp 2.500.000", status: "Matched" },
-  { date: "25 Jun 2026", bankRef: "TRF-002", description: "Transfer dari Siti Rahmawati", bankAmount: "Rp 2.600.000", journalRef: "PAY-002", journalAmount: "Rp 2.600.000", status: "Matched" },
-  { date: "24 Jun 2026", bankRef: "TRF-003", description: "Transfer ke PT Suku Cadang", bankAmount: "Rp 4.250.000", journalRef: "PO-001", journalAmount: "Rp 4.250.000", status: "Matched" },
-  { date: "23 Jun 2026", bankRef: "CK-001", description: "Cek dari Ahmad Fauzi", bankAmount: "Rp 950.000", journalRef: "-", journalAmount: "-", status: "Unmatched" },
-  { date: "22 Jun 2026", bankRef: "TRF-004", description: "Fee bank bulanan", bankAmount: "Rp 50.000", journalRef: "-", journalAmount: "-", status: "Unmatched" },
-];
-
-const statusPill = (status: string) => {
-  const map: Record<string, string> = { Matched: "#2e844a", Unmatched: "#ea001e", Partial: "#f59e0b" };
-  return map[status] || "#6b7280";
-};
+import { Upload, Search, CheckCircle } from "lucide-react";
 
 export default function BankReconPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [summary, setSummary] = useState({ totalBalance: 0, count: 0 });
+
+  useEffect(() => {
+    fetch("/api/bank-accounts")
+      .then((r) => r.json())
+      .then((json) => {
+        setData(json.data || []);
+        setSummary(json.summary || { totalBalance: 0, count: 0 });
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load bank accounts"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+
+  const statusPill = (status: string) => {
+    const map: Record<string, string> = { Matched: "#2e844a", Unmatched: "#ea001e", Partial: "#f59e0b", Active: "#0176d3" };
+    return map[status] || "#6b7280";
+  };
+
   return (
     <div>
       <div className="view-header">
@@ -51,6 +65,18 @@ export default function BankReconPage() {
         </div>
       </div>
 
+      {/* Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div className="card-slds" style={{ textAlign: "center", padding: 16 }}>
+          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Balance</div>
+          <div className="text-2xl font-bold text-[--color-brand]">{fmt(summary.totalBalance)}</div>
+        </div>
+        <div className="card-slds" style={{ textAlign: "center", padding: 16 }}>
+          <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Total Accounts</div>
+          <div className="text-2xl font-bold">{summary.count}</div>
+        </div>
+      </div>
+
       {/* Table */}
       <div className="table-wrap">
         <table className="data-table">
@@ -67,24 +93,25 @@ export default function BankReconPage() {
             </tr>
           </thead>
           <tbody>
-            {reconData.map((r, i) => (
-              <tr key={i} className="hover:bg-[#f8f8f8] cursor-pointer">
-                <td className="text-[--color-text-secondary]">{r.date}</td>
-                <td className="font-medium">{r.bankRef}</td>
-                <td>{r.description}</td>
-                <td className="text-right font-medium">{r.bankAmount}</td>
-                <td className="text-[--color-text-secondary]">{r.journalRef}</td>
-                <td className="text-right">{r.journalAmount}</td>
+            {data.map((r, i) => (
+              <tr key={r.id || i} className="hover:bg-[#f8f8f8] cursor-pointer">
+                <td className="text-[--color-text-secondary]">—</td>
+                <td className="font-medium">{r.accountNo || "—"}</td>
+                <td>{r.bankName || "—"}</td>
+                <td className="text-right font-medium">{fmt(r.balance || 0)}</td>
+                <td className="text-[--color-text-secondary]">—</td>
+                <td className="text-right">—</td>
                 <td>
-                  <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(r.status), color: "#fff" }}>{r.status}</span>
+                  <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill("Active"), color: "#fff" }}>Active</span>
                 </td>
                 <td>
-                  {r.status === "Unmatched" && (
-                    <button className="btn btn--brand btn--xs"><CheckCircle size={12} /> Match</button>
-                  )}
+                  <button className="btn btn--brand btn--xs"><CheckCircle size={12} /> Match</button>
                 </td>
               </tr>
             ))}
+            {data.length === 0 && (
+              <tr><td colSpan={8} style={{ textAlign: "center", color: "#8e8f8e", padding: 32 }}>Tidak ada data</td></tr>
+            )}
           </tbody>
         </table>
       </div>

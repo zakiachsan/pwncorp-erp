@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+// TODO: Replace hardcoded data with API call when /api/anggaran endpoint is available
+import { useEffect, useState } from "react";
 import { Plus, X, BarChart3, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -46,7 +47,21 @@ export default function AnggaranPage() {
   const [items, setItems] = useState<AnggaranSWO[]>(initialData);
   const [selectedProject, setSelectedProject] = useState(projects[0].id);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
+
+  // Attempt to fetch from API; no dedicated endpoint exists yet
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-wo&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        // TODO: Replace with /api/anggaran when available
+        // For now, keep hardcoded data as-is
+        setLoading(false);
+      })
+      .catch(() => { setLoading(false); });
+  }, []);
 
   const pp = projects.find((p) => p.id === selectedProject);
 

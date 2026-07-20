@@ -1,24 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Save, ChevronDown, Plus, Search } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ArrowLeft, Save, ChevronDown, Plus, Search, Trash2, Loader2 } from "lucide-react";
 
-// ─── Vehicle Registry ───
-const vehicleRegistry: Record<string, { customer: string; vehicleType: string; vehicleMake: string; vehicleModel: string; year: string; color: string; odometer: string }> = {
-  "B 1234 CD": { customer: "Budi Santoso", vehicleType: "CAR", vehicleMake: "TOYOTA", vehicleModel: "AVANZA", year: "2022", color: "SILVER", odometer: "45.230" },
-  "B 5678 EF": { customer: "PT Maju Jaya", vehicleType: "CAR", vehicleMake: "HONDA", vehicleModel: "CIVIC", year: "2021", color: "HITAM", odometer: "78.450" },
-  "B 9012 GH": { customer: "Siti Rahmawati", vehicleType: "CAR", vehicleMake: "MITSUBISHI", vehicleModel: "PAJERO", year: "2020", color: "PUTIH", odometer: "62.100" },
-  "B 3456 IJ": { customer: "CV Berkah Abadi", vehicleType: "CAR", vehicleMake: "SUZUKI", vehicleModel: "ERTIGA", year: "2023", color: "MERAH", odometer: "15.200" },
-  "B 7890 KL": { customer: "Ahmad Fauzi", vehicleType: "CAR", vehicleMake: "DAIHATSU", vehicleModel: "XENIA", year: "2022", color: "ABU-ABU", odometer: "33.500" },
-  "B 1112 MN": { customer: "PT Transport Jaya", vehicleType: "TRUCK", vehicleMake: "ISUZU", vehicleModel: "ELF", year: "2019", color: "BIRU", odometer: "120.000" },
-  "B 1314 OP": { customer: "CV Berkah Abadi", vehicleType: "CAR", vehicleMake: "MITSUBISHI", vehicleModel: "L300", year: "2018", color: "PUTIH", odometer: "89.000" },
-};
+// ─── Types ───
+interface Customer { id: string; name: string; phone?: string; type?: string }
+interface Vehicle { id: string; plateNo: string; brand: string; model?: string; year?: number; customer: { id: string; name: string } }
+interface Service { id: string; sku: string; name: string; standardPrice?: number; price?: number }
+interface Sparepart { id: string; sku: string; name: string; stockQty: number; sellPrice: number }
+interface User { id: string; name: string; role?: { name: string } }
 
 // ─── Initial empty form ───
 const emptyForm = {
   store: "",
   customer: "",
+  customerId: "",
+  vehicleId: "",
   registrationNo: "",
   planServiceDate: "",
   planServiceTime: "",
@@ -32,6 +30,7 @@ const emptyForm = {
   odometer: "",
   year: "",
   color: "",
+  complaint: "",
 };
 
 export default function NewServiceOrderPage() {
@@ -41,6 +40,54 @@ export default function NewServiceOrderPage() {
   const [regOpen, setRegOpen] = useState(false);
   const regRef = useRef<HTMLDivElement>(null);
   const regInputRef = useRef<HTMLInputElement>(null);
+
+  // ─── API Data ───
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [spareparts, setSpareparts] = useState<Sparepart[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // ─── Line Items ───
+  const [serviceItems, setServiceItems] = useState<{ serviceId: string; qty: number; unitPrice: number }[]>([]);
+  const [sparepartItems, setSparepartItems] = useState<{ sparepartId: string; qty: number; unitPrice: number }[]>([]);
+
+  // ─── Fetch all data on mount ───
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        setLoading(true);
+        const [custRes, vehRes, svcRes, spRes, usrRes] = await Promise.all([
+          fetch("/api/customers?limit=100"),
+          fetch("/api/vehicles?limit=100"),
+          fetch("/api/services?limit=100"),
+          fetch("/api/spareparts?limit=100"),
+          fetch("/api/users?limit=100"),
+        ]);
+        const [custData, vehData, svcData, spData, usrData] = await Promise.all([
+          custRes.json(),
+          vehRes.json(),
+          svcRes.json(),
+          spRes.json(),
+          usrRes.json(),
+        ]);
+        setCustomers(custData.data || []);
+        setVehicles(vehData.data || []);
+        setServices(svcData.data || []);
+        setSpareparts(spData.data || []);
+        setUsers(usrData.data || []);
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+        setError("Gagal memuat data dari server");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
 
   // Close registration dropdown on outside click
   useEffect(() => {
@@ -55,31 +102,140 @@ export default function NewServiceOrderPage() {
 
   const update = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
 
-  const filteredRegs = Object.keys(vehicleRegistry).filter((r) =>
-    r.toLowerCase().includes(regSearch.toLowerCase())
+  const filteredVehicles = vehicles.filter((v) =>
+    v.plateNo.toLowerCase().includes(regSearch.toLowerCase())
   );
 
-  const handleSelectReg = (reg: string) => {
-    const v = vehicleRegistry[reg];
+  const handleSelectReg = (vehicle: Vehicle) => {
     setForm((prev) => ({
       ...prev,
-      registrationNo: reg,
-      customer: v.customer,
-      vehicleType: v.vehicleType,
-      vehicleMake: v.vehicleMake,
-      vehicleModel: v.vehicleModel,
-      year: v.year,
-      color: v.color,
-      odometer: v.odometer,
+      registrationNo: vehicle.plateNo,
+      customerId: vehicle.customer.id,
+      vehicleId: vehicle.id,
+      customer: vehicle.customer.name,
+      vehicleType: "",
+      vehicleMake: vehicle.brand || "",
+      vehicleModel: vehicle.model || "",
+      year: vehicle.year ? String(vehicle.year) : "",
+      color: "",
+      odometer: "",
     }));
     setRegOpen(false);
     setRegSearch("");
   };
 
-  const handleSave = () => {
-    alert("Service Order berhasil dibuat (Draft)!");
-    router.push("/service-orders");
+  const handleSave = async () => {
+    if (!form.customerId || !form.vehicleId) {
+      setError("Pilih customer dan kendaraan terlebih dahulu");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      const body = {
+        customerId: form.customerId,
+        vehicleId: form.vehicleId,
+        complaint: form.complaint || null,
+        spareparts: sparepartItems.filter((sp) => sp.sparepartId),
+        services: serviceItems.filter((sv) => sv.serviceId),
+      };
+
+      const res = await fetch("/api/service-orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Gagal menyimpan service order");
+      }
+
+      router.push("/service-orders");
+    } catch (err: any) {
+      setError(err.message || "Terjadi kesalahan saat menyimpan");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // ─── Service items helpers ───
+  const addServiceItem = () => {
+    setServiceItems([...serviceItems, { serviceId: "", qty: 1, unitPrice: 0 }]);
+  };
+  const updateServiceItem = (idx: number, field: string, value: any) => {
+    setServiceItems((prev) => prev.map((item, i) => {
+      if (i !== idx) return item;
+      const updated = { ...item, [field]: value };
+      if (field === "serviceId") {
+        const svc = services.find((s) => s.id === value);
+        if (svc) updated.unitPrice = svc.standardPrice || svc.price || 0;
+      }
+      return updated;
+    }));
+  };
+  const removeServiceItem = (idx: number) => {
+    setServiceItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // ─── Sparepart items helpers ───
+  const addSparepartItem = () => {
+    setSparepartItems([...sparepartItems, { sparepartId: "", qty: 1, unitPrice: 0 }]);
+  };
+  const updateSparepartItem = (idx: number, field: string, value: any) => {
+    setSparepartItems((prev) => prev.map((item, i) => {
+      if (i !== idx) return item;
+      const updated = { ...item, [field]: value };
+      if (field === "sparepartId") {
+        const sp = spareparts.find((s) => s.id === value);
+        if (sp) updated.unitPrice = sp.sellPrice || 0;
+      }
+      return updated;
+    }));
+  };
+  const removeSparepartItem = (idx: number) => {
+    setSparepartItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // ─── Derived values ───
+  const customerOptions = customers.map((c) => ({ value: c.id, label: c.name }));
+  const saOptions = users.map((u) => ({ value: u.name, label: u.name }));
+  const selectedVehicle = vehicles.find((v) => v.id === form.vehicleId);
+
+  const serviceTotal = serviceItems.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+  const sparepartTotal = sparepartItems.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+  const grandTotal = serviceTotal + sparepartTotal;
+
+  // When customer changes from the CUSTOMER dropdown (not from vehicle selection),
+  // clear the vehicle selection if it doesn't belong to the new customer
+  const handleCustomerChange = useCallback((customerId: string) => {
+    const cust = customers.find((c) => c.id === customerId);
+    setForm((prev) => ({
+      ...prev,
+      customerId,
+      customer: cust?.name || "",
+      // Clear vehicle if it doesn't belong to this customer
+      vehicleId: selectedVehicle && selectedVehicle.customer.id !== customerId ? "" : prev.vehicleId,
+      registrationNo: selectedVehicle && selectedVehicle.customer.id !== customerId ? "" : prev.registrationNo,
+      vehicleMake: selectedVehicle && selectedVehicle.customer.id !== customerId ? "" : prev.vehicleMake,
+      vehicleModel: selectedVehicle && selectedVehicle.customer.id !== customerId ? "" : prev.vehicleModel,
+      year: selectedVehicle && selectedVehicle.customer.id !== customerId ? "" : prev.year,
+    }));
+  }, [customers, selectedVehicle]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: "0 24px 24px", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
+        <div style={{ textAlign: "center" }}>
+          <Loader2 size={32} style={{ color: "#0176d3", animation: "spin 1s linear infinite" }} />
+          <div style={{ marginTop: 12, fontSize: 14, color: "#444746" }}>Memuat data...</div>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -91,6 +247,13 @@ export default function NewServiceOrderPage() {
         <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>New Service Order</h1>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div style={{ padding: "10px 14px", marginBottom: 16, background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, color: "#b91c1c", fontSize: 13 }}>
+          {error}
+        </div>
+      )}
+
       {/* Workflow Bar */}
       <div style={S.workflowBar}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -101,8 +264,9 @@ export default function NewServiceOrderPage() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={handleSave} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
-            <Save size={14} /> Save as Draft
+          <button onClick={handleSave} disabled={saving} style={{ ...S.actionBtn, background: saving ? "#a0c4e8" : "#0176d3", color: "#fff", border: "1px solid #0176d3", cursor: saving ? "not-allowed" : "pointer" }}>
+            {saving ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={14} />}
+            {saving ? "Menyimpan..." : "Save as Draft"}
           </button>
         </div>
       </div>
@@ -117,7 +281,20 @@ export default function NewServiceOrderPage() {
         {/* Left Column */}
         <div>
           <FCreatable label="STORE" value={form.store} onChange={(v) => update("store", v)} placeholder="Pilih store" presets={["Wijaya Motor - One Stop Service", "Wijaya Motor - Branch A", "Wijaya Motor - Branch B"]} />
-          <FCreatable label="CUSTOMER" value={form.customer} onChange={(v) => update("customer", v)} placeholder="Pilih / ketik customer" presets={["Budi Santoso", "PT Maju Jaya", "Siti Rahmawati", "CV Berkah Abadi", "Ahmad Fauzi", "PT Transport Jaya"]} />
+          <FCreatable
+            label="CUSTOMER"
+            value={form.customer}
+            onChange={(name) => {
+              const cust = customers.find((c) => c.name === name);
+              if (cust) {
+                handleCustomerChange(cust.id);
+              } else {
+                update("customer", name);
+              }
+            }}
+            placeholder="Pilih / ketik customer"
+            presets={customerOptions.map((c) => c.label)}
+          />
 
           {/* Registration No Search */}
           <div style={{ marginBottom: 14 }} ref={regRef}>
@@ -156,24 +333,23 @@ export default function NewServiceOrderPage() {
                     />
                   </div>
 
-                  {filteredRegs.length > 0 ? filteredRegs.map((reg) => {
-                    const v = vehicleRegistry[reg];
+                  {filteredVehicles.length > 0 ? filteredVehicles.map((v) => {
                     return (
                       <div
-                        key={reg}
-                        onClick={() => handleSelectReg(reg)}
+                        key={v.id}
+                        onClick={() => handleSelectReg(v)}
                         style={{
                           padding: "10px 12px", fontSize: 13, cursor: "pointer",
                           borderBottom: "1px solid #f0f0f0",
-                          color: reg === form.registrationNo ? "#0176d3" : "#001526",
-                          background: reg === form.registrationNo ? "#eef4ff" : "transparent",
+                          color: v.plateNo === form.registrationNo ? "#0176d3" : "#001526",
+                          background: v.plateNo === form.registrationNo ? "#eef4ff" : "transparent",
                         }}
-                        onMouseEnter={(e) => { if (reg !== form.registrationNo) e.currentTarget.style.background = "#f5f5f5"; }}
-                        onMouseLeave={(e) => { if (reg !== form.registrationNo) e.currentTarget.style.background = "transparent"; }}
+                        onMouseEnter={(e) => { if (v.plateNo !== form.registrationNo) e.currentTarget.style.background = "#f5f5f5"; }}
+                        onMouseLeave={(e) => { if (v.plateNo !== form.registrationNo) e.currentTarget.style.background = "transparent"; }}
                       >
-                        <div style={{ fontWeight: 600 }}>{reg}</div>
+                        <div style={{ fontWeight: 600 }}>{v.plateNo}</div>
                         <div style={{ fontSize: 11, color: "#444746", marginTop: 2 }}>
-                          {v.customer} — {v.vehicleMake} {v.vehicleModel} ({v.year})
+                          {v.customer.name} — {v.brand} {v.model || ""} {v.year ? `(${v.year})` : ""}
                         </div>
                       </div>
                     );
@@ -189,7 +365,7 @@ export default function NewServiceOrderPage() {
 
           <FInput label="PLAN SERVICE DATE" type="date" value={form.planServiceDate} onChange={(v) => update("planServiceDate", v)} placeholder="Pilih tanggal" />
           <FInput label="PLAN SERVICE TIME" type="time" value={form.planServiceTime} onChange={(v) => update("planServiceTime", v)} placeholder="Pilih waktu" />
-          <FCreatable label="SERVICE ADVISOR" value={form.serviceAdvisor} onChange={(v) => update("serviceAdvisor", v)} placeholder="Pilih SA" presets={["Rudi", "Ani", "Budi", "Nanda Salsa"]} />
+          <FCreatable label="SERVICE ADVISOR" value={form.serviceAdvisor} onChange={(v) => update("serviceAdvisor", v)} placeholder="Pilih SA" presets={saOptions.map((u) => u.label)} />
           <FCreatable label="SALESPERSON" value={form.salesperson} onChange={(v) => update("salesperson", v)} placeholder="Pilih / ketik nama" presets={["-", "Andi", "Budi", "Citra"]} />
           <FCreatable label="BOOKING SOURCE" value={form.bookingSource} onChange={(v) => update("bookingSource", v)} placeholder="Pilih / ketik sumber" presets={["WhatsApp", "Telepon", "Walk-in", "Website", "Instagram"]} />
           <FInput label="REFERENCE NUMBER" value={form.referenceNumber} onChange={(v) => update("referenceNumber", v)} placeholder="-" />
@@ -204,11 +380,162 @@ export default function NewServiceOrderPage() {
           <FCreatable label="COLOR" value={form.color} onChange={(v) => update("color", v)} placeholder="Pilih / ketik warna" presets={["HITAM", "PUTIH", "SILVER", "ABU-ABU", "MERAH", "BIRU", "HIJAU", "KUNING", "ORANYE", "COKLAT", "EMAS"]} />
         </div>
       </div>
+
+      {/* Complaint Section */}
+      <div style={{ marginTop: 24, borderTop: "1px solid #ecebea", paddingTop: 20 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>COMPLAINT / KELUHAN</div>
+        <textarea
+          value={form.complaint}
+          onChange={(e) => update("complaint", e.target.value)}
+          placeholder="Deskripsikan keluhan customer..."
+          rows={3}
+          style={{
+            width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526",
+            border: "1px solid #d8d8d8", borderRadius: 6, outline: "none", resize: "vertical",
+          }}
+        />
+      </div>
+
+      {/* Services Section */}
+      <div style={{ marginTop: 24, borderTop: "1px solid #ecebea", paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#001526" }}>Jasa / Services</div>
+          <button onClick={addServiceItem} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+            <Plus size={14} /> Tambah Jasa
+          </button>
+        </div>
+        {serviceItems.length > 0 && (
+          <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+              <span>Service</span>
+              <span style={{ textAlign: "center" }}>Qty</span>
+              <span style={{ textAlign: "right" }}>Harga Satuan</span>
+              <span style={{ textAlign: "right" }}>Total</span>
+              <span></span>
+            </div>
+            {serviceItems.map((item, idx) => (
+              <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
+                <select
+                  value={item.serviceId}
+                  onChange={(e) => updateServiceItem(idx, "serviceId", e.target.value)}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff" }}
+                >
+                  <option value="">Pilih jasa...</option>
+                  {services.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.sku})</option>)}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  value={item.qty}
+                  onChange={(e) => updateServiceItem(idx, "qty", parseInt(e.target.value) || 1)}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "center" }}
+                />
+                <input
+                  type="number"
+                  min={0}
+                  value={item.unitPrice}
+                  onChange={(e) => updateServiceItem(idx, "unitPrice", parseFloat(e.target.value) || 0)}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "right" }}
+                />
+                <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600 }}>
+                  {(item.qty * item.unitPrice).toLocaleString("id-ID")}
+                </div>
+                <button onClick={() => removeServiceItem(idx)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Trash2 size={14} style={{ color: "#dc2626" }} />
+                </button>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 12px", borderTop: "1px solid #ecebea", background: "#f9f9f9" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#444746", marginRight: 16 }}>Subtotal Jasa:</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#001526", minWidth: 100, textAlign: "right" }}>
+                Rp {serviceTotal.toLocaleString("id-ID")}
+              </span>
+            </div>
+          </div>
+        )}
+        {serviceItems.length === 0 && (
+          <div style={{ padding: "24px", textAlign: "center", color: "#8e8f8e", fontSize: 13, background: "#fafafa", borderRadius: 6, border: "1px dashed #d8d8d8" }}>
+            Belum ada jasa ditambahkan. Klik "Tambah Jasa" untuk menambahkan.
+          </div>
+        )}
+      </div>
+
+      {/* Spareparts Section */}
+      <div style={{ marginTop: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#001526" }}>Suku Cadang / Spareparts</div>
+          <button onClick={addSparepartItem} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+            <Plus size={14} /> Tambah Suku Cadang
+          </button>
+        </div>
+        {sparepartItems.length > 0 && (
+          <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+              <span>Suku Cadang</span>
+              <span style={{ textAlign: "center" }}>Qty</span>
+              <span style={{ textAlign: "right" }}>Harga Satuan</span>
+              <span style={{ textAlign: "right" }}>Total</span>
+              <span></span>
+            </div>
+            {sparepartItems.map((item, idx) => (
+              <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
+                <select
+                  value={item.sparepartId}
+                  onChange={(e) => updateSparepartItem(idx, "sparepartId", e.target.value)}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff" }}
+                >
+                  <option value="">Pilih suku cadang...</option>
+                  {spareparts.map((sp) => <option key={sp.id} value={sp.id}>{sp.name} ({sp.sku}) - Stok: {sp.stockQty}</option>)}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  value={item.qty}
+                  onChange={(e) => updateSparepartItem(idx, "qty", parseInt(e.target.value) || 1)}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "center" }}
+                />
+                <input
+                  type="number"
+                  min={0}
+                  value={item.unitPrice}
+                  onChange={(e) => updateSparepartItem(idx, "unitPrice", parseFloat(e.target.value) || 0)}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "right" }}
+                />
+                <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600 }}>
+                  {(item.qty * item.unitPrice).toLocaleString("id-ID")}
+                </div>
+                <button onClick={() => removeSparepartItem(idx)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Trash2 size={14} style={{ color: "#dc2626" }} />
+                </button>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 12px", borderTop: "1px solid #ecebea", background: "#f9f9f9" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#444746", marginRight: 16 }}>Subtotal Suku Cadang:</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#001526", minWidth: 100, textAlign: "right" }}>
+                Rp {sparepartTotal.toLocaleString("id-ID")}
+              </span>
+            </div>
+          </div>
+        )}
+        {sparepartItems.length === 0 && (
+          <div style={{ padding: "24px", textAlign: "center", color: "#8e8f8e", fontSize: 13, background: "#fafafa", borderRadius: 6, border: "1px dashed #d8d8d8" }}>
+            Belum ada suku cadang ditambahkan. Klik "Tambah Suku Cadang" untuk menambahkan.
+          </div>
+        )}
+      </div>
+
+      {/* Grand Total */}
+      {(serviceItems.length > 0 || sparepartItems.length > 0) && (
+        <div style={{ marginTop: 20, padding: "14px 16px", background: "#f0f7ff", border: "1px solid #b6d4fe", borderRadius: 8, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 16 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#444746" }}>Grand Total:</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: "#0176d3" }}>
+            Rp {grandTotal.toLocaleString("id-ID")}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
-
-/* ─── Searchable Registration No ─── */
 
 /* ─── Creatable Dropdown ─── */
 function FCreatable({ label, placeholder, presets, value, onChange }: { label: string; placeholder: string; presets: string[]; value: string; onChange: (v: string) => void }) {
@@ -220,6 +547,11 @@ function FCreatable({ label, placeholder, presets, value, onChange }: { label: s
   const inputRef = useRef<HTMLInputElement>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync presets when they change (e.g. from API)
+  useEffect(() => {
+    setOptions(presets);
+  }, [presets]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

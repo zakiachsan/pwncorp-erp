@@ -1,14 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
-
-const payments = [
-  { no: "PAY-001", invoice: "INV-001", customer: "Budi Santoso", amount: "Rp 2.500.000", method: "Cash", date: "26 Jun 2026", status: "Verified" },
-  { no: "PAY-002", invoice: "INV-003", customer: "Siti Rahmawati", amount: "Rp 2.600.000", method: "Transfer", date: "26 Jun 2026", status: "Verified" },
-  { no: "PAY-003", invoice: "INV-004", customer: "Ahmad Fauzi", amount: "Rp 950.000", method: "Cash", date: "25 Jun 2026", status: "Verified" },
-  { no: "PAY-004", invoice: "INV-003", customer: "Siti Rahmawati", amount: "Rp 1.000.000", method: "Transfer", date: "24 Jun 2026", status: "Pending" },
-];
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Verified: "#2e844a", Pending: "#f59e0b", Rejected: "#ea001e" };
@@ -17,6 +11,26 @@ const statusPill = (status: string) => {
 
 export default function PaymentsPage() {
   const router = useRouter();
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    if (search) params.set("search", search);
+    fetch(`/api/payments?${params.toString()}`)
+      .then((r) => r.json())
+      .then((json) => { setPayments(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load payments"); setLoading(false); });
+  }, [statusFilter, search]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">
@@ -35,16 +49,16 @@ export default function PaymentsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>Verified</option>
-              <option>Pending</option>
-              <option>Rejected</option>
+            <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">All Status</option>
+              <option value="Verified">Verified</option>
+              <option value="Pending">Pending</option>
+              <option value="Rejected">Rejected</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="No. Payment / Customer..." />
+            <input type="text" className="form-input" placeholder="No. Payment / Customer..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">Periode</label>
@@ -72,14 +86,14 @@ export default function PaymentsPage() {
             </tr>
           </thead>
           <tbody>
-            {payments.map((p) => (
-              <tr key={p.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${p.no}`)}>
-                <td className="font-medium text-[--color-brand]">{p.no}</td>
-                <td className="text-[--color-text-secondary]">{p.invoice}</td>
-                <td>{p.customer}</td>
-                <td className="text-right font-medium">{p.amount}</td>
+            {payments.map((p: any) => (
+              <tr key={p.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${p.paymentNo || p.id}`)}>
+                <td className="font-medium text-[--color-brand]">{p.paymentNo}</td>
+                <td className="text-[--color-text-secondary]">{p.invoice?.invNo || p.invoiceId || "-"}</td>
+                <td>{p.customer?.name || "-"}</td>
+                <td className="text-right font-medium">Rp {(p.amount || 0).toLocaleString("id-ID")}</td>
                 <td>{p.method}</td>
-                <td className="text-[--color-text-secondary]">{p.date}</td>
+                <td className="text-[--color-text-secondary]">{p.date ? new Date(p.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
                 <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(p.status), color: "#fff" }}>{p.status}</span></td>
               </tr>
             ))}

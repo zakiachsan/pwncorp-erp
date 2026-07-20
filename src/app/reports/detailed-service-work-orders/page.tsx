@@ -1,21 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Wrench, Star, Search, Download } from "lucide-react";
-
-/* ── data from Excel ── */
-const data = [
-  { no:1, serviceDate:"07-Jul-2026", store:"PT Putra Wijaya Motor", swo:"SWO/WM/26070010", status:"Waiting", customer:"SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN", vehicleType:"Car", registration:"B9118SSC", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"MARDOTO", startDate:"", startTime:"", completedDate:"", completedTime:"", assignee:"AGUNG PRATAMA", itemType:"Service", sku:"GENERAL", productName:"CEK KERUSAKAN SESUAI INPECTION LIST - CEK KERUSAKAN SESUAI INPECTION LIST", description:"CEK KERUSAKAN SESUAI INPECTION LIST", productBrand:"", productType:"JASA SERVICE MOBIL", qty:1, feedback:"", sro:"SRO/WM/26070010", serviceReservation:"", sri:"", insuranceProvider:"" },
-  { no:2, serviceDate:"07-Jul-2026", store:"PT Putra Wijaya Motor", swo:"SWO/WM/26070010", status:"Waiting", customer:"SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN", vehicleType:"Car", registration:"B9118SSC", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"MARDOTO", startDate:"", startTime:"", completedDate:"", completedTime:"", assignee:"Pak Hasan", itemType:"Service", sku:"JS.CAT.BMPR.FR", productName:"SOL,DEMPUL,CAT BUMPER DEPAN - SOL,DEMPUL,CAT BUMPER DEPAN", description:"SOL,DEMPUL,CAT BUMPER DEPAN", productBrand:"", productType:"JASA POLES BODY MOBIL", qty:1, feedback:"", sro:"SRO/WM/26070010", serviceReservation:"", sri:"", insuranceProvider:"" },
-  { no:3, serviceDate:"07-Jul-2026", store:"PT Putra Wijaya Motor", swo:"SWO/WM/26070010", status:"Waiting", customer:"SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN", vehicleType:"Car", registration:"B9118SSC", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"MARDOTO", startDate:"", startTime:"", completedDate:"", completedTime:"", assignee:"Pak Hasan", itemType:"Service", sku:"JS.BOD.BAK", productName:"LAS,KETHOK,DEMPUL CAT BAK BELAKANG LUAR - LAS,KETHOK,DEMPUL CAT BAK BELAKANG LUAR", description:"LAS,KETHOK,DEMPUL CAT BAK BELAKANG LUAR", productBrand:"", productType:"JASA SERVICE MOBIL", qty:1, feedback:"", sro:"SRO/WM/26070010", serviceReservation:"", sri:"", insuranceProvider:"" },
-  { no:4, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070030", status:"Completed", customer:"BPK. IKO", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"08:31", completedDate:"07/07/26", completedTime:"09:33", assignee:"NENDY, WOYO", itemType:"Service", sku:"A2", productName:"Spooring Mobil Kelas I-A - Spooring", description:"Spooring", productBrand:"", productType:"", qty:1, feedback:"", sro:"SRO/003/26070031", serviceReservation:"", sri:"SRI/003/26070028", insuranceProvider:"" },
-  { no:5, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070030", status:"Completed", customer:"BPK. IKO", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"08:31", completedDate:"07/07/26", completedTime:"09:33", assignee:"NENDY", itemType:"Service", sku:"B6", productName:'Balancing Ring 16"/17\'/18" Profit>50 - Balancing', description:"Balancing", productBrand:"", productType:"", qty:4, feedback:"", sro:"SRO/003/26070031", serviceReservation:"", sri:"SRI/003/26070028", insuranceProvider:"" },
-  { no:6, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070031", status:"Completed", customer:"BPK. RICKY", vehicleType:"Car", registration:"B9525PAM", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"10:02", completedDate:"07/07/26", completedTime:"10:57", assignee:"NENDY, WOYO", itemType:"Service", sku:"A6", productName:"Spooring Mobil Kelas III-A - Spooring", description:"Spooring", productBrand:"", productType:"", qty:1, feedback:"", sro:"SRO/003/26070032", serviceReservation:"", sri:"SRI/003/26070029", insuranceProvider:"" },
-  { no:7, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070031", status:"Completed", customer:"BPK. RICKY", vehicleType:"Car", registration:"B9525PAM", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"10:02", completedDate:"07/07/26", completedTime:"10:57", assignee:"NENDY, WOYO", itemType:"Service", sku:"B6", productName:'Balancing Ring 16"/17\'/18" Profit>50 - Balancing', description:"Balancing", productBrand:"", productType:"", qty:4, feedback:"", sro:"SRO/003/26070032", serviceReservation:"", sri:"SRI/003/26070029", insuranceProvider:"" },
-  { no:8, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070032", status:"Completed", customer:"BPK. ALDO", vehicleType:"Car", registration:"KH1863GI", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"11:26", completedDate:"07/07/26", completedTime:"12:06", assignee:"MIFTA ARIFIN", itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P HEADLAMP F R+L", description:"B/P HEADLAMP F R+L", productBrand:"", productType:"JASA NON TRACKING", qty:2, feedback:"", sro:"SRO/003/26070033", serviceReservation:"", sri:"SRI/003/26070031", insuranceProvider:"" },
-  { no:9, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070033", status:"Completed", customer:"AUTO PRIMA", vehicleType:"Car", registration:"B819BEN", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"13:43", completedDate:"07/07/26", completedTime:"14:00", assignee:"NENDY", itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P BAN", description:"B/P BAN", productBrand:"", productType:"JASA NON TRACKING", qty:1, feedback:"", sro:"SRO/003/26070034", serviceReservation:"", sri:"SRI/003/26070032", insuranceProvider:"" },
-  { no:10, serviceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", swo:"SWO/003/26070034", status:"In Progress", customer:"PROMOTOR", vehicleType:"Car", registration:"B1537BIR", hullNumber:"", vin:"", estimatedTime:"", serviceAdvisor:"NANDA SALSA", startDate:"07/07/26", startTime:"13:57", completedDate:"", completedTime:"", assignee:"NENDY, WOYO", itemType:"Service", sku:"A3", productName:"Spooring Mobil Kelas I - Spooring", description:"Spooring", productBrand:"", productType:"", qty:1, feedback:"", sro:"SRO/003/26070035", serviceReservation:"", sri:"", insuranceProvider:"" },
-];
 
 const L: React.CSSProperties = { color: "#0176d3", cursor: "pointer", fontWeight: 500 };
 
@@ -33,7 +20,6 @@ const TH: React.CSSProperties = {
   textTransform: "uppercase", letterSpacing: "0.03em", borderBottom: "2px solid #ecebea",
   borderRight: "1px solid #ecebea", background: "#f9f9f9", whiteSpace: "nowrap",
 };
-
 const TD: React.CSSProperties = {
   padding: "7px 10px", color: "#001526", borderBottom: "1px solid #f0f0f0",
   borderRight: "1px solid #f0f0f0", whiteSpace: "nowrap",
@@ -46,6 +32,57 @@ const statusPill = (status: string) => {
 
 export default function DetailedServiceWorkOrdersPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-wo&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const wos: any[] = j.data || [];
+        const mapped = wos.flatMap((wo: any, idx: number) => {
+          const items = wo.items || wo.workOrderItems || [wo];
+          return items.map((item: any, i: number) => ({
+            no: idx * 10 + i + 1,
+            serviceDate: (wo.serviceDate || wo.createdAt || "").slice(0, 10),
+            store: wo.so?.store?.name || wo.store?.name || "—",
+            swo: wo.woNo || "—",
+            status: wo.status || "Waiting",
+            customer: wo.so?.customer?.name || "—",
+            vehicleType: wo.so?.vehicle?.type || "Car",
+            registration: wo.so?.vehicle?.plateNo || "—",
+            hullNumber: "",
+            vin: "",
+            estimatedTime: item.estimatedTime || "",
+            serviceAdvisor: wo.so?.sa?.name || "—",
+            startDate: wo.startDate ? (wo.startDate || "").slice(0, 10) : "",
+            startTime: wo.startTime || "",
+            completedDate: wo.completedDate ? (wo.completedDate || "").slice(0, 10) : "",
+            completedTime: wo.completedTime || "",
+            assignee: wo.mekanik?.name || item.assignee || "—",
+            itemType: item.itemType || "Service",
+            sku: item.sku || item.product?.sku || "—",
+            productName: item.productName || item.product?.name || "—",
+            description: item.description || "—",
+            productBrand: item.product?.brand || "",
+            productType: item.product?.type || "",
+            qty: item.qty || 0,
+            feedback: item.feedback || "",
+            sro: wo.so?.soNo || "—",
+            serviceReservation: "",
+            sri: wo.invoice?.invNo || "",
+            insuranceProvider: "",
+          }));
+        });
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load detailed work orders"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -69,7 +106,7 @@ export default function DetailedServiceWorkOrdersPage() {
           <Field label="Store"><select className="form-select" style={{ minWidth: 170 }}><option>All Stores</option><option>PT Putra Wijaya Motor</option><option>Wijaya Motor - One Stop Service</option></select></Field>
           <Field label="Service Work Order"><input type="text" className="form-input" placeholder="Service Work Order" style={{ minWidth: 160 }} /></Field>
           <Field label="Status"><select className="form-select" style={{ minWidth: 120 }}><option>All Status</option><option>Waiting</option><option>In Progress</option><option>Completed</option></select></Field>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 180 }}><option>All Customers</option><option>SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>BPK. ALDO</option><option>AUTO PRIMA</option><option>PROMOTOR</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 180 }}><option>All Customers</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
           <Field label="Registration"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
@@ -77,9 +114,9 @@ export default function DetailedServiceWorkOrdersPage() {
           <Field label="VIN"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="Item Type"><select className="form-select" style={{ minWidth: 120 }}><option>All Types</option><option>Service</option><option>Sparepart</option></select></Field>
           <Field label="Product Brand"><select className="form-select" style={{ minWidth: 140 }}><option>All Brands</option></select></Field>
-          <Field label="Product Type"><select className="form-select" style={{ minWidth: 140 }}><option>All Types</option><option>JASA SERVICE MOBIL</option><option>JASA POLES BODY MOBIL</option><option>JASA NON TRACKING</option></select></Field>
-          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option><option>MARDOTO</option><option>NANDA SALSA</option></select></Field>
-          <Field label="Assignee"><select className="form-select" style={{ minWidth: 140 }}><option>All Assignee</option><option>AGUNG PRATAMA</option><option>Pak Hasan</option><option>NENDY</option><option>WOYO</option><option>MIFTA ARIFIN</option></select></Field>
+          <Field label="Product Type"><select className="form-select" style={{ minWidth: 140 }}><option>All Types</option></select></Field>
+          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option></select></Field>
+          <Field label="Assignee"><select className="form-select" style={{ minWidth: 140 }}><option>All Assignee</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
           <Field label="Group Assignee"><select className="form-select" style={{ minWidth: 120 }}><option>Yes</option><option>No</option></select></Field>

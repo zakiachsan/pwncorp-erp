@@ -1,83 +1,16 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, ChevronRight, FileText, Download } from "lucide-react";
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 const fmtRp = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
-/* ─── Shared kendaraan data ─── */
-const fleet10 = [
-  { id: "KD-001", merk: "Honda Civic", noPol: "B 5678 EF", pagu: 8000000, service1: { swoId: "SWO/002/26060151", estimasi: 5000000, realisasi: 4800000 }, service2: null },
-  { id: "KD-002", merk: "Toyota Avanza", noPol: "B 1234 CD", pagu: 6000000, service1: { swoId: "SWO/001/26060149", estimasi: 2500000, realisasi: 2500000 }, service2: null },
-  { id: "KD-003", merk: "Daihatsu Xenia", noPol: "B 7890 KL", pagu: 5000000, service1: null, service2: null },
-  { id: "KD-004", merk: "Suzuki Ertiga", noPol: "B 3456 IJ", pagu: 5500000, service1: { swoId: "SWO/004/26060153", estimasi: 3500000, realisasi: 3500000 }, service2: { swoId: "SWO/008/26060200", estimasi: 2000000, realisasi: 1500000 } },
-  { id: "KD-005", merk: "Mitsubishi L300", noPol: "B 1314 OP", pagu: 9000000, service1: { swoId: "SWO/007/26060143", estimasi: 3500000, realisasi: 3500000 }, service2: null },
-  { id: "KD-006", merk: "Isuzu Elf", noPol: "B 1112 MN", pagu: 12000000, service1: { swoId: "SWO/006/26060155", estimasi: 8000000, realisasi: 7200000 }, service2: null },
-  { id: "KD-007", merk: "Honda Jazz", noPol: "B 2001 AB", pagu: 5500000, service1: null, service2: null },
-  { id: "KD-008", merk: "Toyota Fortuner", noPol: "B 3002 CD", pagu: 10000000, service1: { swoId: "SWO/009/26060201", estimasi: 4500000, realisasi: 4000000 }, service2: { swoId: "SWO/010/26060202", estimasi: 3500000, realisasi: 0 } },
-  { id: "KD-009", merk: "Mitsubishi Pajero", noPol: "B 9012 GH", pagu: 15000000, service1: { swoId: "SWO/003/26060152", estimasi: 4500000, realisasi: 4500000 }, service2: { swoId: "SWO/011/26060203", estimasi: 5200000, realisasi: 5200000 } },
-  { id: "KD-010", merk: "Nissan Livina", noPol: "B 4003 EF", pagu: 7500000, service1: null, service2: null },
-];
-
-/* ─── Data ─── */
-const projectData: Record<string, any> = {
-  "PRJ/001/26040410": {
-    id: "PRJ/001/26040410", noPesanan: "PO-2026-0012", name: "Service Berkala Fleet PT Maju Jaya",
-    customer: "PT Maju Jaya", periode: "10 April — 10 Juni 2026", nilai: 45000000, totalPengeluaran: 18000000, status: "Aktif",
-    sroList: ["SRO/002/26060150", "SRO/006/26060155", "SRO/001/26060149"],
-    swoList: ["SWO/002/26060151", "SWO/001/26060149", "SWO/004/26060153", "SWO/007/26060143", "SWO/006/26060155", "SWO/009/26060201", "SWO/010/26060202", "SWO/003/26060152", "SWO/011/26060203"],
-    kendaraan: fleet10,
-    pemasukanList: [
-      { date: "15 Apr 2026", desc: "DP 30% Kontrak", jumlah: 13500000, status: "Diterima" },
-      { date: "05 Mei 2026", desc: "Termin 2 (BAST)", jumlah: 18000000, status: "Menunggu" },
-    ],
-    pengeluaranList: [
-      { date: "29 Apr 2026", desc: "Pembayaran Sparepart", vendor: "PT Parts Indo", jumlah: 4200000 },
-      { date: "30 Apr 2026", desc: "Biaya Transportasi", vendor: "CV Transport", jumlah: 3000000 },
-    ],
-    hutangPiutang: [
-      { jenis: "Piutang", pihak: "PT Maju Jaya", jumlah: 18000000, jatuhTempo: "10 Mei 2026", status: "Belum Dibayar" },
-      { jenis: "Hutang", pihak: "PT Parts Indo", jumlah: 2000000, jatuhTempo: "15 Mei 2026", status: "Belum Dibayar" },
-    ],
-    dokumen: [
-      { name: "Kontrak_01_PWN_IV_2026.pdf", type: "Kontrak", date: "10 Apr 2026", icon: "pdf" },
-    ],
-  },
-  "PRJ/002/26050501": {
-    id: "PRJ/002/26050501", noPesanan: "PO-2026-0018", name: "Overhaul Mesin Isuzu Elf",
-    customer: "PT Transport Jaya", periode: "01 Mei — 30 Juni 2026", nilai: 25000000, totalPengeluaran: 12500000, status: "Aktif",
-    sroList: ["SRO/003/26060152"], swoList: ["SWO/003/26060152"],
-    kendaraan: [
-      { id: "KD-101", merk: "Mitsubishi Pajero", noPol: "B 9012 GH", pagu: 25000000, service1: { swoId: "SWO/003/26060152", estimasi: 8000000, realisasi: 7500000 }, service2: null },
-    ],
-    pemasukanList: [{ date: "02 Mei 2026", desc: "DP 50% Kontrak", jumlah: 12500000, status: "Diterima" }],
-    pengeluaranList: [{ date: "10 Mei 2026", desc: "Pembelian Piston Kit", vendor: "PT Diesel Parts", jumlah: 7000000 }],
-    hutangPiutang: [{ jenis: "Piutang", pihak: "PT Transport Jaya", jumlah: 12500000, jatuhTempo: "30 Jun 2026", status: "Belum Dibayar" }],
-    dokumen: [{ name: "Kontrak_02_PWN_V_2026.pdf", type: "Kontrak", date: "01 Mei 2026", icon: "pdf" }],
-  },
-  "PRJ/003/26060601": {
-    id: "PRJ/003/26060601", noPesanan: "", name: "Perawatan Berkala Q3 2026",
-    customer: "CV Berkah Abadi", periode: "01 Juni — 30 September 2026", nilai: 18000000, totalPengeluaran: 0, status: "Aktif",
-    sroList: ["SRO/004/26060153"], swoList: [],
-    kendaraan: [
-      { id: "KD-201", merk: "Suzuki Ertiga", noPol: "B 3456 IJ", pagu: 18000000, service1: null, service2: null },
-    ],
-    pemasukanList: [], pengeluaranList: [], hutangPiutang: [],
-    dokumen: [{ name: "Kontrak_03_PWN_VI_2026.pdf", type: "Kontrak", date: "01 Jun 2026", icon: "pdf" }],
-  },
-  "PRJ/004/26060620": {
-    id: "PRJ/004/26060620", noPesanan: "PO-2026-0025", name: "Ganti Oli & Tune Up Fleet",
-    customer: "Budi Santoso", periode: "20 Juni — 27 Juni 2026", nilai: 2500000, totalPengeluaran: 2500000, status: "Selesai",
-    sroList: ["SRO/001/26060149"], swoList: ["SWO/001/26060149"],
-    kendaraan: [
-      { id: "KD-301", merk: "Toyota Avanza", noPol: "B 1234 CD", pagu: 2500000, service1: { swoId: "SWO/001/26060149", estimasi: 1500000, realisasi: 1500000 }, service2: { swoId: null, estimasi: 1000000, realisasi: 1000000 } },
-    ],
-    pemasukanList: [{ date: "20 Jun 2026", desc: "Pembayaran Penuh", jumlah: 2500000, status: "Diterima" }],
-    pengeluaranList: [{ date: "21 Jun 2026", desc: "Pembelian Oli", vendor: "PT Parts Indo", jumlah: 1500000 }],
-    hutangPiutang: [], dokumen: [],
-  },
+const fmtDate = (d: string | null) => {
+  if (!d) return "-";
+  const dt = new Date(d);
+  return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 };
 
 const tabList = [
@@ -95,7 +28,52 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const prjId = Array.isArray(params.id) ? params.id.join("/") : (params.id as string);
   const [activeTab, setActiveTab] = useState<TabKey>("sro-swo");
-  const p = projectData[prjId];
+  const [p, setP] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch(`/api/projects?search=${encodeURIComponent(prjId)}&limit=1`)
+      .then((r) => r.json())
+      .then((j) => {
+        const list = j.data || [];
+        if (list.length > 0) {
+          const proj = list[0];
+          // Map API fields to expected UI shape
+          setP({
+            id: proj.id,
+            name: proj.name,
+            customer: proj.customer?.name || "-",
+            periode: proj.startDate ? `${fmtDate(proj.startDate)} — ${fmtDate(proj.endDate)}` : "-",
+            nilai: proj.contractValue || 0,
+            totalPengeluaran: proj.expenses?.reduce((s: number, e: any) => s + (e.amount || 0), 0) || 0,
+            status: (proj.status === "active" ? "Aktif" : proj.status === "completed" ? "Selesai" : proj.status === "cancelled" ? "Batal" : proj.status),
+            sroList: [],
+            swoList: [],
+            kendaraan: [],
+            pemasukanList: [],
+            pengeluaranList: proj.expenses?.map((e: any) => ({ date: fmtDate(e.date), desc: e.description, vendor: "-", jumlah: e.amount })) || [],
+            hutangPiutang: [],
+            dokumen: [],
+          });
+        }
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load project"); setLoading(false); });
+  }, [prjId]);
+
+  if (loading) return (
+    <div style={{ padding: 24 }}>
+      <button onClick={() => router.push("/project")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button>
+      <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Loading...</p></div>
+    </div>
+  );
+  if (error) return (
+    <div style={{ padding: 24 }}>
+      <button onClick={() => router.push("/project")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button>
+      <div style={S.card}><p style={{ color: "red", fontSize: 14 }}>{error}</p></div>
+    </div>
+  );
 
   if (!p) return (
     <div style={{ padding: 24 }}>

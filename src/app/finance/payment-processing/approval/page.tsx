@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, X, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, X } from "lucide-react";
 
 interface PaymentReq {
   id: string;
@@ -12,16 +12,33 @@ interface PaymentReq {
   status: string;
 }
 
-const dataAwal: PaymentReq[] = [
-  { id: "RFP/001/260701", tanggal: "01 Jul 2026", diajukanOleh: "Budi", keperluan: "Gaji Karyawan Juli 2026", jumlah: 45000000, status: "pending" },
-  { id: "RFP/004/260704", tanggal: "04 Jul 2026", diajukanOleh: "Budi", keperluan: "Pembelian Oli & Filter", jumlah: 12000000, status: "pending" },
-  { id: "RFP/006/260706", tanggal: "06 Jul 2026", diajukanOleh: "Rudi", keperluan: "Biaya Listrik Bengkel", jumlah: 2800000, status: "pending" },
-];
-
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function ApprovalDeskPage() {
-  const [data, setData] = useState<PaymentReq[]>(dataAwal);
+  const [data, setData] = useState<PaymentReq[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/payment-requests?status=pending")
+      .then((r) => r.json())
+      .then((json) => {
+        const mapped = (json.data || []).map((pr: any) => ({
+          id: pr.prNo || pr.id?.toString() || "",
+          tanggal: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
+          diajukanOleh: pr.requestedBy || "User",
+          keperluan: pr.purpose || "",
+          jumlah: pr.amount || 0,
+          status: pr.status || "pending",
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment requests"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   const handleAction = (id: string, action: "approve" | "reject") => {
     setData((prev) => prev.filter((r) => r.id !== id));

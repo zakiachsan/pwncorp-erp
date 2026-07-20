@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Copy, Trash2, Edit3, Check, X, ChevronDown } from "lucide-react";
 
 type NormalBalance = "Debit" | "Kredit";
@@ -100,7 +100,9 @@ export default function MasterDataPage() {
   const [activeMaster, setActiveMaster] = useState<MasterDataKey>("coa");
 
   /* ─── COA state ─── */
-  const [coaData, setCoaData] = useState<COAEntry[]>(initialCOA);
+  const [coaData, setCoaData] = useState<COAEntry[]>([]);
+  const [coaLoading, setCoaLoading] = useState(true);
+  const [coaError, setCoaError] = useState("");
   const [searchCode, setSearchCode] = useState("");
   const [searchName, setSearchName] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState<KategoriAkun | "All">("All");
@@ -119,6 +121,32 @@ export default function MasterDataPage() {
   const [katForm, setKatForm] = useState({ name: "", coaCode: "", divisiAccess: [] as string[], diKasir: false });
 
   /* ═══════════ COA logic ═══════════ */
+
+  useEffect(() => {
+    fetch("/api/coa")
+      .then((r) => r.json())
+      .then((json) => {
+        const apiData = (json.data || []).map((a: any) => ({
+          id: a.id?.toString() || `coa-${a.code}`,
+          code: a.code || "",
+          name: a.name || "",
+          normal: (a.normalBalance === "Debit" ? "Debit" : "Kredit") as NormalBalance,
+          kategori: (a.kategori || "Asset") as KategoriAkun,
+          divisi: a.divisi || "ALL - Semua Divisi",
+          note: a.note || "",
+          noRek: a.noRek || "",
+          pemilik: a.pemilik || "",
+        }));
+        if (apiData.length > 0) {
+          setCoaData(apiData);
+        }
+        setCoaLoading(false);
+      })
+      .catch(() => { setCoaError("Failed to load Chart of Accounts"); setCoaLoading(false); });
+  }, []);
+
+  if (coaLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (coaError) return <div className="p-8 text-center text-red-500">{coaError}</div>;
 
   const updateCOAField = (id: string, field: keyof COAEntry, value: string) => {
     setCoaData((prev) => prev.map((row) => row.id === id ? { ...row, [field]: value } : row));

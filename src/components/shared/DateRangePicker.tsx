@@ -13,6 +13,7 @@ const PRESETS = [
 ];
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+const MONTHS_LONG = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 const DAYS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 const fmtDate = (d: Date) => {
@@ -128,14 +129,21 @@ export default function DateRangePicker({ from, to, onChange, onApply, label }: 
         }}
       >
         <Calendar size={14} />
-        {fmtDate(from)} - {fmtDate(to)}
+        {(() => {
+          const preset = PRESETS.find(p => p.key === activePreset);
+          const isThisMonth = from.getMonth() === new Date().getMonth() && from.getFullYear() === new Date().getFullYear();
+          if (activePreset && preset) return preset.label;
+          if (activePreset === "kustom") return `${fmtDate(from)} - ${fmtDate(to)}`;
+          if (isThisMonth) return `Bulan Ini`;
+          return `${MONTHS_LONG[from.getMonth()]} ${from.getFullYear()}`;
+        })()}
         {label && <span style={{ color: "#8e8f8e", fontWeight: 400, marginLeft: 4 }}>{label}</span>}
       </button>
       {open && (
         <>
           <div style={{ position: "fixed", inset: 0, zIndex: 48 }} onClick={handleCancel} />
           <div style={{
-            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 49,
+            position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 49,
             background: "#fff", borderRadius: 10, boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
             border: "1px solid #ecebea", display: "flex", overflow: "hidden",
           }}>

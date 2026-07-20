@@ -1,32 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart3, Star, Search, Download } from "lucide-react";
-
-/* ── data from Excel (item-level rows) ── */
-const data = [
-  { no:1, sro:"SRO/WM/26050083", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"25-May-2026", approvedDate:"07-Jul-2026", planServiceDate:"25-May-2026", planServiceTime:"16:00", customer:"UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA", company:"", vehicleType:"Car", registration:"B1005PQP", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"PRESTONE-PS-MERAH", productName:"PRESTONE P/STEERING FLUID RED", brand:"PRESTONE", itemType2:"MINYAK POWER STEERING", estimatedTime:"", qty:2, priceExTax:115000, discount:0, subtotal:230000, tax:25300, otherTax:0, total:255300, swo:"SWO/WM/26070014" },
-  { no:2, sro:"SRO/WM/26050083", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"25-May-2026", approvedDate:"07-Jul-2026", planServiceDate:"25-May-2026", planServiceTime:"16:00", customer:"UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA", company:"", vehicleType:"Car", registration:"B1005PQP", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"JS.GT.HOSE.PS", productName:"GANTI SELANG POWER STEERING - GANTI SELANG POWER STEERING", brand:"", itemType2:"JASA SERVICE MOBIL", estimatedTime:"", qty:1, priceExTax:265000, discount:0, subtotal:265000, tax:29150, otherTax:0, total:294150, swo:"SWO/WM/26070014" },
-  { no:3, sro:"SRO/WM/26050083", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"25-May-2026", approvedDate:"07-Jul-2026", planServiceDate:"25-May-2026", planServiceTime:"16:00", customer:"UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA", company:"", vehicleType:"Car", registration:"B1005PQP", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"JS.GOL1.106", productName:"SPOORING - SPOORING", brand:"", itemType2:"JASA SERVICE MOBIL", estimatedTime:"01:00:00", qty:1, priceExTax:250000, discount:0, subtotal:250000, tax:27500, otherTax:0, total:277500, swo:"SWO/WM/26070014" },
-  { no:4, sro:"SRO/WM/26050083", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"25-May-2026", approvedDate:"07-Jul-2026", planServiceDate:"25-May-2026", planServiceTime:"16:00", customer:"UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA", company:"", vehicleType:"Car", registration:"B1005PQP", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"44040-BZ050", productName:"POWER STEERING HOSE ASSY", brand:"TOYOTA", itemType2:"SELANG", estimatedTime:"", qty:1, priceExTax:1129310, discount:0, subtotal:1129310, tax:124224, otherTax:0, total:1253534, swo:"SWO/WM/26070014" },
-  { no:5, sro:"SRO/003/26070031", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"08:55", customer:"BPK. IKO", company:"", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"A2", productName:"Spooring Mobil Kelas I-A - Spooring", brand:"", itemType2:"", estimatedTime:"", qty:0, priceExTax:499500, discount:0, subtotal:0, tax:0, otherTax:0, total:0, swo:"SWO/003/26070030" },
-  { no:6, sro:"SRO/003/26070031", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"08:55", customer:"BPK. IKO", company:"", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"A2", productName:"Spooring Mobil Kelas I-A - Spooring", brand:"", itemType2:"", estimatedTime:"", qty:1, priceExTax:450000, discount:22500, subtotal:427500, tax:0, otherTax:0, total:427500, swo:"SWO/003/26070030" },
-  { no:7, sro:"SRO/003/26070031", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"08:55", customer:"BPK. IKO", company:"", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"B6", productName:'Balancing Ring 16"/17\'/18" Profit>50 - Balancing', brand:"", itemType2:"", estimatedTime:"", qty:4, priceExTax:50000, discount:10000, subtotal:190000, tax:0, otherTax:0, total:190000, swo:"SWO/003/26070030" },
-  { no:8, sro:"SRO/003/26070032", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"10:55", customer:"BPK. RICKY", company:"", vehicleType:"Car", registration:"B9525PAM", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"B6", productName:'Balancing Ring 16"/17\'/18" Profit>50 - Balancing', brand:"", itemType2:"", estimatedTime:"", qty:4, priceExTax:40000, discount:8000, subtotal:152000, tax:0, otherTax:0, total:152000, swo:"SWO/003/26070031" },
-  { no:9, sro:"SRO/003/26070032", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"10:55", customer:"BPK. RICKY", company:"", vehicleType:"Car", registration:"B9525PAM", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"A6", productName:"Spooring Mobil Kelas III-A - Spooring", brand:"", itemType2:"", estimatedTime:"", qty:1, priceExTax:275000, discount:13750, subtotal:261250, tax:0, otherTax:0, total:261250, swo:"SWO/003/26070031" },
-  { no:10, sro:"SRO/003/26070033", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"11:35", customer:"BPK. ALDO", company:"", vehicleType:"Car", registration:"KH1863GI", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P HEADLAMP F R+L", brand:"", itemType2:"JASA NON TRACKING", estimatedTime:"", qty:2, priceExTax:200000, discount:0, subtotal:400000, tax:0, otherTax:0, total:400000, swo:"SWO/003/26070032" },
-  { no:11, sro:"SRO/003/26070034", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"13:55", customer:"AUTO PRIMA", company:"", vehicleType:"Car", registration:"B819BEN", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P BAN", brand:"", itemType2:"JASA NON TRACKING", estimatedTime:"", qty:1, priceExTax:50000, discount:5000, subtotal:45000, tax:0, otherTax:0, total:45000, swo:"SWO/003/26070033" },
-  { no:12, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"NON-TRACKING", productName:"UNIVERSAL - WHASER", brand:"OLI", itemType2:"NON TRACKING", estimatedTime:"", qty:4, priceExTax:65000, discount:26000, subtotal:234000, tax:0, otherTax:0, total:234000, swo:"" },
-  { no:13, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - KURAS TANGKI", brand:"", itemType2:"JASA NON TRACKING", estimatedTime:"", qty:1, priceExTax:300000, discount:30000, subtotal:270000, tax:0, otherTax:0, total:270000, swo:"" },
-  { no:14, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - JASA SERVICE B/P", brand:"", itemType2:"JASA NON TRACKING", estimatedTime:"", qty:1, priceExTax:750000, discount:75000, subtotal:675000, tax:0, otherTax:0, total:675000, swo:"" },
-  { no:15, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"NON-TRACKING", productName:"UNIVERSAL - NOZZLE", brand:"OLI", itemType2:"NON TRACKING", estimatedTime:"", qty:4, priceExTax:1250000, discount:500000, subtotal:4500000, tax:0, otherTax:0, total:4500000, swo:"" },
-  { no:16, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"23390-0L041", productName:"FUEL FILTER", brand:"TOYOTA", itemType2:"FILTER SOLAR", estimatedTime:"", qty:1, priceExTax:360750, discount:36075, subtotal:324675, tax:0, otherTax:0, total:324675, swo:"" },
-  { no:17, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"NON-TRACKING", productName:"UNIVERSAL - VALVE", brand:"OLI", itemType2:"NON TRACKING", estimatedTime:"", qty:2, priceExTax:950000, discount:190000, subtotal:1710000, tax:0, otherTax:0, total:1710000, swo:"" },
-  { no:18, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"NON-TRACKING", productName:"UNIVERSAL - KALIBRASI INJECTOR", brand:"OLI", itemType2:"NON TRACKING", estimatedTime:"", qty:4, priceExTax:350000, discount:140000, subtotal:1260000, tax:0, otherTax:0, total:1260000, swo:"" },
-  { no:19, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"NON-TRACKING", productName:"UNIVERSAL - RING RETURN", brand:"OLI", itemType2:"NON TRACKING", estimatedTime:"", qty:5, priceExTax:325000, discount:162500, subtotal:1462500, tax:0, otherTax:0, total:1462500, swo:"" },
-  { no:20, sro:"SRO/WM/26070024", store:"PT Putra Wijaya Motor", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"15:45", customer:"BAPAK DANI", company:"", vehicleType:"Car", registration:"B1360PYC", hullNumber:"", vin:"", serviceAdvisor:"MARDOTO", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Sparepart", sku:"NON-TRACKING", productName:"UNIVERSAL - ORING NOZZLE", brand:"OLI", itemType2:"NON TRACKING", estimatedTime:"", qty:4, priceExTax:35000, discount:14000, subtotal:126000, tax:0, otherTax:0, total:126000, swo:"" },
-  { no:21, sro:"SRO/003/26070035", store:"Wijaya Motor - One Stop Service", type:"Service Sale", status:"Approved", createdDate:"07-Jul-2026", approvedDate:"07-Jul-2026", planServiceDate:"07-Jul-2026", planServiceTime:"14:05", customer:"PROMOTOR", company:"", vehicleType:"Car", registration:"B1537BIR", hullNumber:"", vin:"", serviceAdvisor:"NANDA SALSA", salesperson:"", bookingSource:"", insuranceProvider:"", serviceReservation:"", itemType:"Service", sku:"A3", productName:"Spooring Mobil Kelas I - Spooring", brand:"", itemType2:"", estimatedTime:"", qty:1, priceExTax:375000, discount:37500, subtotal:337500, tax:0, otherTax:0, total:337500, swo:"SWO/003/26070034" },
-];
 
 function fmt(n: number): string {
   return n.toLocaleString("id-ID").replace(/,/g, ".");
@@ -61,6 +37,63 @@ const statusPill = (status: string) => {
 
 export default function DetailedServiceOrdersPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-so&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const orders: any[] = j.data || [];
+        // Map SO data to detailed line-item format
+        const mapped = orders.flatMap((so: any, idx: number) => {
+          const items = so.items || so.serviceOrderItems || [so];
+          return items.map((item: any, i: number) => ({
+            no: idx * 10 + i + 1,
+            sro: so.soNo || "—",
+            store: so.store?.name || "—",
+            type: so.type || "Service Sale",
+            status: so.status || "Approved",
+            createdDate: (so.createdAt || so.date || "").slice(0, 10),
+            approvedDate: (so.approvedAt || so.date || "").slice(0, 10),
+            planServiceDate: (so.planServiceDate || so.date || "").slice(0, 10),
+            planServiceTime: so.planServiceTime || "",
+            customer: so.customer?.name || "—",
+            company: "",
+            vehicleType: so.vehicle?.type || "Car",
+            registration: so.vehicle?.plateNo || "—",
+            hullNumber: "",
+            vin: "",
+            serviceAdvisor: so.sa?.name || "—",
+            salesperson: "",
+            bookingSource: "",
+            insuranceProvider: "",
+            serviceReservation: "",
+            itemType: item.itemType || "Service",
+            sku: item.sku || item.product?.sku || "—",
+            productName: item.productName || item.product?.name || "—",
+            brand: item.product?.brand || "",
+            itemType2: item.product?.type || "",
+            estimatedTime: item.estimatedTime || "",
+            qty: item.qty || 0,
+            priceExTax: item.price || item.priceExTax || 0,
+            discount: item.discount || 0,
+            subtotal: item.subtotal || 0,
+            tax: item.tax || 0,
+            otherTax: item.otherTax || 0,
+            total: item.total || so.total || 0,
+            swo: so.workOrders?.[0]?.woNo || "",
+          }));
+        });
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load detailed service orders"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -87,17 +120,17 @@ export default function DetailedServiceOrdersPage() {
           <Field label="Status"><select className="form-select" style={{ minWidth: 120 }}><option>All Status</option><option>Approved</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 180 }}><option>All Customers</option><option>UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>BPK. ALDO</option><option>AUTO PRIMA</option><option>BAPAK DANI</option><option>PROMOTOR</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 180 }}><option>All Customers</option></select></Field>
           <Field label="Registration"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="Hull Number"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="VIN"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
           <Field label="Item Type"><select className="form-select" style={{ minWidth: 120 }}><option>All Types</option><option>Service</option><option>Sparepart</option></select></Field>
-          <Field label="Product Brand"><select className="form-select" style={{ minWidth: 140 }}><option>All Brands</option><option>PRESTONE</option><option>TOYOTA</option><option>OLI</option></select></Field>
-          <Field label="Product Type"><select className="form-select" style={{ minWidth: 140 }}><option>All Types</option><option>MINYAK POWER STEERING</option><option>JASA SERVICE MOBIL</option><option>SELANG</option><option>JASA NON TRACKING</option><option>NON TRACKING</option><option>FILTER SOLAR</option></select></Field>
+          <Field label="Product Brand"><select className="form-select" style={{ minWidth: 140 }}><option>All Brands</option></select></Field>
+          <Field label="Product Type"><select className="form-select" style={{ minWidth: 140 }}><option>All Types</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
           <Field label="Service Product Type"><select className="form-select" style={{ minWidth: 150 }}><option>All Types</option></select></Field>
-          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option><option>MARDOTO</option><option>NANDA SALSA</option></select></Field>
+          <Field label="Service Advisor"><select className="form-select" style={{ minWidth: 150 }}><option>All Service Advisor</option></select></Field>
           <Field label="Salesperson"><select className="form-select" style={{ minWidth: 140 }}><option>All Salespersons</option></select></Field>
           <Field label="Booking Source"><select className="form-select" style={{ minWidth: 140 }}><option>All Booking Source</option></select></Field>
           <Field label="">&nbsp;</Field>

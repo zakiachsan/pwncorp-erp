@@ -1,32 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, CreditCard } from "lucide-react";
 
-interface PaymentExec {
-  id: string;
-  tanggal: string;
-  keperluan: string;
-  penerima: string;
-  jumlah: number;
-  metode: string;
-  status: string;
-}
-
-const dataAwal: PaymentExec[] = [
-  { id: "RFP/002/260702", tanggal: "02 Jul 2026", keperluan: "Pembelian Sparepart AC", penerima: "PT CoolTech", jumlah: 8500000, metode: "Transfer Bank BCA", status: "pending" },
-  { id: "RFP/005/260705", tanggal: "05 Jul 2026", keperluan: "Service Kendaraan Operasional", penerima: "Bengkel Resmi", jumlah: 2500000, metode: "Transfer Bank Mandiri", status: "pending" },
-  { id: "RFP/007/260707", tanggal: "07 Jul 2026", keperluan: "Sewa Alat Berat", penerima: "PT Rental Indo", jumlah: 15000000, metode: "Transfer Bank BCA", status: "pending" },
-];
-
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
-
 export default function PaymentExecutionPage() {
-  const [data, setData] = useState<PaymentExec[]>(dataAwal);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/payment-requests?status=pending")
+      .then((r) => r.json())
+      .then((json) => {
+        const mapped = (json.data || []).map((pr: any) => ({
+          id: pr.prNo || pr.id?.toString() || "",
+          tanggal: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "",
+          keperluan: pr.purpose || "",
+          penerima: pr.penerima || "-",
+          jumlah: pr.amount || 0,
+          metode: pr.metode || "-",
+          status: pr.status || "pending",
+        }));
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment requests"); setLoading(false); });
+  }, []);
 
   const executePayment = (id: string) => {
     setData((prev) => prev.map((r) => r.id === id ? { ...r, status: "completed" } : r));
   };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
   return (
     <div>

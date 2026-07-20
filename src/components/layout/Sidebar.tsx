@@ -286,10 +286,8 @@ const S = {
   sidebar: {
     width: 260,
     minWidth: 260,
-    height: "100vh",
     background: "#032d47",
     color: "#fff",
-    display: "flex",
     flexDirection: "column" as const,
     overflow: "hidden",
     flexShrink: 0,
@@ -636,7 +634,7 @@ export default function Sidebar() {
           ...S.sidebar,
           ...(collapsed ? { width: 64, minWidth: 64 } : {}),
         }}
-        className="hidden lg:flex"
+        className="hidden lg:flex h-full flex-col"
       >
         {sidebarContent}
       </aside>
@@ -657,7 +655,7 @@ export default function Sidebar() {
 
       {/* ═══ Mobile Sidebar ═══ */}
       <aside
-        className="lg:hidden"
+        className="lg:hidden flex flex-col"
         style={{
           ...S.sidebar,
           position: "fixed",

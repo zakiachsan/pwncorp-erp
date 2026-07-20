@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronRight, Star } from 'lucide-react';
 
 interface AccountNode {
@@ -8,200 +8,6 @@ interface AccountNode {
   name: string;
   children?: AccountNode[];
 }
-
-const accountData: AccountNode[] = [
-  {
-    code: '1',
-    name: 'ASSETS',
-    children: [
-      {
-        code: '11',
-        name: 'KAS',
-        children: [
-          { code: '1101', name: 'KAS PENJUALAN' },
-          { code: '1102', name: 'KAS KECIL' },
-        ],
-      },
-      {
-        code: '12',
-        name: 'BANK',
-        children: [
-          { code: '1201', name: 'BANK BCA' },
-          { code: '1202', name: 'BANK MANDIRI' },
-        ],
-      },
-      {
-        code: '13',
-        name: 'PIUTANG',
-        children: [
-          { code: '1301', name: 'PIUTANG DAGANG' },
-          { code: '1302', name: 'PIUTANG PELANGGAN SERVICE' },
-        ],
-      },
-      {
-        code: '14',
-        name: 'PERSEDIAAN',
-        children: [
-          { code: '1401', name: 'PERSEDIAAN SPAREPART' },
-          { code: '1402', name: 'PERSEDIAAN OLI' },
-        ],
-      },
-      {
-        code: '15',
-        name: 'AKTIVA TETAP',
-        children: [
-          { code: '1501', name: 'PERALATAN BENGKEL' },
-          { code: '1502', name: 'KENDARAAN' },
-          { code: '1503', name: 'INVENTARIS KANTOR' },
-        ],
-      },
-      {
-        code: '16',
-        name: 'AKUMULASI PENYUSUTAN',
-        children: [
-          { code: '1601', name: 'AKUM PENYUSUTAN PERALATAN' },
-          { code: '1602', name: 'AKUM PENYUSUTAN KENDARAAN' },
-        ],
-      },
-    ],
-  },
-  {
-    code: '2',
-    name: 'LIABILITIES',
-    children: [
-      {
-        code: '21',
-        name: 'HUTANG DAGANG',
-        children: [{ code: '2101', name: 'HUTANG SUPPLIER' }],
-      },
-      {
-        code: '22',
-        name: 'HUTANG PAJAK',
-        children: [
-          { code: '2201', name: 'PPN KELUARAN' },
-          { code: '2202', name: 'PPH 21' },
-        ],
-      },
-      {
-        code: '23',
-        name: 'KEWAJIBAN LAIN-LAIN',
-        children: [{ code: '2301', name: 'HUTANG GAJI' }],
-      },
-    ],
-  },
-  {
-    code: '3',
-    name: 'EQUITY',
-    children: [
-      {
-        code: '31',
-        name: 'MODAL USAHA',
-        children: [{ code: '3101', name: 'MODAL DISETOR' }],
-      },
-      {
-        code: '32',
-        name: 'LABA DITAHAN',
-        children: [{ code: '3201', name: 'LABA TAHUN BERJALAN' }],
-      },
-    ],
-  },
-  {
-    code: '4',
-    name: 'REVENUE',
-    children: [
-      {
-        code: '41',
-        name: 'PENDAPATAN SERVICE',
-        children: [
-          { code: '4101', name: 'PENDAPATAN JASA SERVIS' },
-          { code: '4102', name: 'PENDAPATAN JASA SPOORING' },
-          { code: '4103', name: 'PENDAPATAN JASA BALANCING' },
-        ],
-      },
-      {
-        code: '42',
-        name: 'PENDAPATAN SPAREPART',
-        children: [
-          { code: '4201', name: 'PENJUALAN SPAREPART' },
-          { code: '4202', name: 'RETUR PENJUALAN' },
-        ],
-      },
-      {
-        code: '43',
-        name: 'PENDAPATAN LAIN-LAIN',
-        children: [{ code: '4301', name: 'PENDAPATAN BUNGA BANK' }],
-      },
-    ],
-  },
-  {
-    code: '5',
-    name: 'HPP',
-    children: [
-      {
-        code: '51',
-        name: 'HPP SPAREPART',
-        children: [{ code: '5101', name: 'HPP SPAREPART' }],
-      },
-      {
-        code: '52',
-        name: 'HPP SERVICE',
-        children: [{ code: '5201', name: 'HPP JASA SERVICE' }],
-      },
-    ],
-  },
-  {
-    code: '6',
-    name: 'EXPENSES',
-    children: [
-      {
-        code: '61',
-        name: 'BEBAN GAJI',
-        children: [
-          { code: '6101', name: 'GAJI KARYAWAN' },
-          { code: '6102', name: 'TUNJANGAN' },
-        ],
-      },
-      {
-        code: '62',
-        name: 'BEBAN UMUM',
-        children: [
-          { code: '6201', name: 'BEBAN LISTRIK & AIR' },
-          { code: '6202', name: 'BEBAN SEWA' },
-          { code: '6203', name: 'BEBAN ATK' },
-        ],
-      },
-      {
-        code: '63',
-        name: 'BEBAN PENJUALAN',
-        children: [{ code: '6301', name: 'BEBAN IKLAN' }],
-      },
-      {
-        code: '64',
-        name: 'BEBAN PERBAIKAN',
-        children: [
-          { code: '6401', name: 'BEBAN PEMELIHARAAN PERALATAN' },
-          { code: '6402', name: 'BEBAN PEMELIHARAAN KENDARAAN' },
-        ],
-      },
-      {
-        code: '65',
-        name: 'BEBAN PENYUSUTAN',
-        children: [
-          { code: '6501', name: 'BEBAN PENYUSUTAN PERALATAN' },
-          { code: '6502', name: 'BEBAN PENYUSUTAN KENDARAAN' },
-        ],
-      },
-      {
-        code: '66',
-        name: 'BEBAN PAJAK',
-        children: [
-          { code: '6601', name: 'BEBAN PPh 21' },
-          { code: '6602', name: 'BEBAN PPh 23' },
-        ],
-      },
-    ],
-  },
-];
 
 // Helper to collect all parent node codes
 function collectAllParentCodes(nodes: AccountNode[]): string[] {
@@ -220,6 +26,34 @@ function getLevel1ParentCodes(nodes: AccountNode[]): string[] {
   return nodes
     .filter((node) => node.children && node.children.length > 0)
     .map((node) => node.code);
+}
+
+// Convert flat COA data to tree
+function buildTree(accounts: any[]): AccountNode[] {
+  const map = new Map<string, AccountNode>();
+  const roots: AccountNode[] = [];
+
+  accounts.forEach((a) => {
+    map.set(a.code, { code: a.code, name: a.name, children: a.children ? [] : undefined });
+  });
+
+  accounts.forEach((a) => {
+    const node = map.get(a.code)!;
+    if (a.parentId) {
+      const parentCode = accounts.find((p) => p.id === a.parentId)?.code;
+      if (parentCode && map.has(parentCode)) {
+        const parent = map.get(parentCode)!;
+        if (!parent.children) parent.children = [];
+        parent.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
 }
 
 interface TreeNodeProps {
@@ -332,11 +166,29 @@ function TreeNode({ node, level, expandedNodes, toggleNode }: TreeNodeProps) {
 }
 
 export default function AccountTreePage() {
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
-    // Default: level-1 parent nodes expanded
-    const level1Codes = getLevel1ParentCodes(accountData);
-    return new Set(level1Codes);
-  });
+  const [accountData, setAccountData] = useState<AccountNode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetch('/api/coa?flat=true')
+      .then((r) => r.json())
+      .then((json) => {
+        const accounts = json.data || [];
+        // If API already returns tree structure, use it directly
+        if (accounts.length > 0 && accounts[0].children !== undefined) {
+          setAccountData(accounts);
+        } else {
+          setAccountData(accounts);
+        }
+        // Default: expand level-1 parent nodes
+        const level1Codes = getLevel1ParentCodes(accounts.length > 0 && accounts[0].children !== undefined ? accounts : []);
+        setExpandedNodes(new Set(level1Codes));
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load account tree"); setLoading(false); });
+  }, []);
 
   const toggleNode = (code: string) => {
     setExpandedNodes((prev) => {
@@ -358,6 +210,9 @@ export default function AccountTreePage() {
   const collapseAll = () => {
     setExpandedNodes(new Set());
   };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div
@@ -502,45 +357,15 @@ export default function AccountTreePage() {
               Account Name
             </span>
           </div>
-
-          {/* Tree Body */}
-          <div>
-            {accountData.map((node) => (
-              <TreeNode
-                key={node.code}
-                node={node}
-                level={0}
-                expandedNodes={expandedNodes}
-                toggleNode={toggleNode}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div
-          style={{
-            marginTop: '16px',
-            padding: '12px 16px',
-            backgroundColor: '#fff',
-            border: '1px solid #ecebea',
-            borderRadius: '6px',
-            fontSize: '12px',
-            color: '#444746',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <span style={{ fontWeight: '600' }}>
-            {expandedNodes.size}
-          </span>
-          <span>nodes expanded</span>
-          <span style={{ margin: '0 4px', color: '#d0d0d0' }}>|</span>
-          <span style={{ fontWeight: '600' }}>
-            {collectAllParentCodes(accountData).length}
-          </span>
-          <span>total nodes</span>
+          {accountData.map((node) => (
+            <TreeNode
+              key={node.code}
+              node={node}
+              level={0}
+              expandedNodes={expandedNodes}
+              toggleNode={toggleNode}
+            />
+          ))}
         </div>
       </div>
     </div>

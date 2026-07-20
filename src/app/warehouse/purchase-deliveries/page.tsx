@@ -1,33 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Star, Truck, ArrowUpDown } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const deliveries = [
-  { refCode: "PD/WJY/26060041", refNo: "B1795PQQ", po: "PO/WJY/26060101", pi: "PI/WJY/26060021", date: "25 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Astra Otoparts", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060042", refNo: "B1685PQG", po: "PO/WJY/26060102", pi: "PI/WJY/26060022", date: "25 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Toyota Astra Motor", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060043", refNo: "B1795PQQ", po: "PO/WJY/26060103", pi: "PI/WJY/26060023", date: "26 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "CV Surya Gemilang", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060044", refNo: "B9072PSC", po: "PO/WJY/26060104", pi: "PI/WJY/26060024", date: "26 Jun 2026", warehouse: "Wijaya Motor - WH Parts", supplier: "PT Maju Jaya Sparepart", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060045", refNo: "B9135PSD", po: "PO/WJY/26060105", pi: "PI/WJY/26060025", date: "26 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Bengkel Abadi", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060046", refNo: "B1212LQ", po: "PO/WJY/26060106", pi: "PI/WJY/26060026", date: "27 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Astra Otoparts", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060047", refNo: "B9150KQ", po: "PO/WJY/26060107", pi: "PI/WJY/26060027", date: "27 Jun 2026", warehouse: "Wijaya Motor - WH Parts", supplier: "CV Berkah Sparepart", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060048", refNo: "B9329PSE", po: "PO/WJY/26060108", pi: "PI/WJY/26060028", date: "27 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Toyota Astra Motor", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060049", refNo: "B1795PQQ", po: "PO/WJY/26060109", pi: "PI/WJY/26060029", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Maju Jaya Sparepart", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060050", refNo: "B1795PQQ", po: "PO/WJY/26060110", pi: "PI/WJY/26060030", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Parts", supplier: "PT Bengkel Abadi", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060051", refNo: "B1795PQQ", po: "PO/WJY/26060111", pi: "PI/WJY/26060031", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "CV Surya Gemilang", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060052", refNo: "B9791PTB", po: "PO/WJY/26060112", pi: "PI/WJY/26060032", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Astra Otoparts", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060053", refNo: "B9155PQV", po: "PO/WJY/26060113", pi: "PI/WJY/26060033", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Parts", supplier: "PT Toyota Astra Motor", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060054", refNo: "B1795PQQ", po: "PO/WJY/26060114", pi: "PI/WJY/26060034", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "CV Berkah Sparepart", status: "RECEIVED" },
-  { refCode: "PD/WJY/26060055", refNo: "B2295UQ", po: "PO/WJY/26060115", pi: "PI/WJY/26060035", date: "28 Jun 2026", warehouse: "Wijaya Motor - WH Main", supplier: "PT Maju Jaya Sparepart", status: "RECEIVED" },
-];
-
 export default function PurchaseDeliveriesPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"standard" | "fixedAssets">("standard");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+
+  useEffect(() => {
+    fetch("/api/purchase-deliveries")
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
     <div>
@@ -124,33 +119,31 @@ export default function PurchaseDeliveriesPage() {
             </tr>
           </thead>
           <tbody>
-            {deliveries.map((d) => (
-              <tr key={d.refCode}>
+            {data.map((d) => (
+              <tr key={d.id}>
                 <td
                   className="font-medium cursor-pointer"
                   style={{ color: "var(--color-brand)" }}
-                  onClick={() => router.push(`/warehouse/purchase-deliveries/${d.refCode}`)}
+                  onClick={() => router.push(`/warehouse/purchase-deliveries/${d.deliveryNo}`)}
                 >
-                  {d.refCode}
+                  {d.deliveryNo}
                 </td>
-                <td>
-                  {d.refNo}
+                <td>{d.deliveryNo}</td>
+                <td
+                  className="cursor-pointer font-medium"
+                  style={{ color: "var(--color-brand)" }}
+                >
+                  {d.po?.poNo || "-"}
                 </td>
                 <td
                   className="cursor-pointer font-medium"
                   style={{ color: "var(--color-brand)" }}
                 >
-                  {d.po}
+                  -
                 </td>
-                <td
-                  className="cursor-pointer font-medium"
-                  style={{ color: "var(--color-brand)" }}
-                >
-                  {d.pi}
-                </td>
-                <td className="text-[--color-text-secondary]">{d.date}</td>
-                <td>{d.warehouse}</td>
-                <td>{d.supplier}</td>
+                <td className="text-[--color-text-secondary]">{d.date ? new Date(d.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td>-</td>
+                <td>{d.po?.supplier?.companyName || "-"}</td>
                 <td>
                   <span
                     style={{

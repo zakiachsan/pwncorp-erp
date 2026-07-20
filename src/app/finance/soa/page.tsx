@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const soaList = [
+// TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-receivable.
+const hardcodedSoaList = [
   { refCode: "SOA/HO/26060001", customer: "PT Maju Jaya", createdAt: "26 Jun 2026", sentAt: "26 Jun 2026", status: "SENT", totalAmount: 1800000 },
   { refCode: "SOA/HO/26060002", customer: "Budi Santoso", createdAt: "25 Jun 2026", sentAt: "", status: "DRAFT", totalAmount: 2500000 },
   { refCode: "SOA/HO/26060003", customer: "Siti Rahmawati", createdAt: "24 Jun 2026", sentAt: "24 Jun 2026", status: "SENT", totalAmount: 5200000 },
@@ -21,6 +22,37 @@ export default function SOAPage() {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [soaList, setSoaList] = useState(hardcodedSoaList);
+  const [loading, setLoading] = useState(true);
+
+  // Attempt to fetch from API; fallback to hardcoded data
+  useEffect(() => {
+    fetch("/api/accounts-receivable?limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const ars: any[] = j.data || [];
+        if (ars.length > 0) {
+          // Build SOA-like list from AR data grouped by customer
+          const byCustomer: Record<string, any[]> = {};
+          for (const ar of ars) {
+            const custName = ar.customer?.name || "Unknown";
+            if (!byCustomer[custName]) byCustomer[custName] = [];
+            byCustomer[custName].push(ar);
+          }
+          const mapped = Object.entries(byCustomer).map(([customer, items], idx) => ({
+            refCode: `SOA/API/${String(idx + 1).padStart(4, "0")}`,
+            customer,
+            createdAt: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+            sentAt: "",
+            status: items.some((i: any) => i.status === "PAID") ? "SENT" : "DRAFT",
+            totalAmount: items.reduce((s: number, i: any) => s + (i.amount || 0), 0),
+          }));
+          setSoaList(mapped);
+        }
+        setLoading(false);
+      })
+      .catch(() => { setLoading(false); });
+  }, []);
 
   const filtered = soaList.filter((s) => {
     if (statusFilter && s.status !== statusFilter) return false;

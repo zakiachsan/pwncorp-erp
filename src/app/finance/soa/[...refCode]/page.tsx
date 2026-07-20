@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Printer, X } from "lucide-react";
 
-const soaData: Record<string, any> = {
+// TODO: No dedicated API for SOA detail yet. Attempting to build from /api/accounts-receivable.
+const hardcodedSoaData: Record<string, any> = {
   "SOA/HO/26060001": {
     refCode: "SOA/HO/26060001",
     customer: "PT Maju Jaya",
@@ -130,8 +131,59 @@ export default function SOADetailPage() {
   const params = useParams();
   const refCodeArray = params.refCode as string[];
   const refCode = refCodeArray ? refCodeArray.join("/") : "";
-  const soa = soaData[refCode];
+  const [soaData, setSoaData] = useState<Record<string, any>>(hardcodedSoaData);
+  const [loading, setLoading] = useState(true);
   const [printMode, setPrintMode] = useState(false);
+
+  // Attempt to fetch AR data from API; fallback to hardcoded
+  useEffect(() => {
+    fetch("/api/accounts-receivable?limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const ars: any[] = j.data || [];
+        if (ars.length > 0) {
+          // Build SOA detail from AR data for this refCode
+          const byCustomer: Record<string, any[]> = {};
+          for (const ar of ars) {
+            const custName = ar.customer?.name || "Unknown";
+            if (!byCustomer[custName]) byCustomer[custName] = [];
+            byCustomer[custName].push(ar);
+          }
+          const apiSoaData: Record<string, any> = {};
+          Object.entries(byCustomer).forEach(([customer, items], idx) => {
+            const key = `SOA/API/${String(idx + 1).padStart(4, "0")}`;
+            const totalAmount = items.reduce((s: number, i: any) => s + (i.amount || 0), 0);
+            apiSoaData[key] = {
+              refCode: key,
+              customer,
+              address: items[0]?.customer?.address || "—",
+              createdAt: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }),
+              sentAt: "",
+              status: items.some((i: any) => i.status === "PAID") ? "SENT" : "DRAFT",
+              notes: "—",
+              createdBy: "System",
+              updatedBy: "System",
+              updatedAt: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }),
+              totalAmount,
+              invoices: items.map((i: any) => ({
+                no: i.invoice?.invNo || "—",
+                sro: i.invoice?.serviceOrder?.soNo || "—",
+                swo: "—",
+                date: i.dueDate ? new Date(i.dueDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+                dueDate: i.dueDate ? new Date(i.dueDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—",
+                amount: i.amount || 0,
+                status: i.status || "UNPAID",
+              })),
+            };
+          });
+          setSoaData({ ...hardcodedSoaData, ...apiSoaData });
+        }
+        setLoading(false);
+      })
+      .catch(() => { setLoading(false); });
+  }, []);
+
+  const soa = soaData[refCode];
 
   if (!soa) {
     return (

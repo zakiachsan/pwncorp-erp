@@ -1,20 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-const payables = [
-  { docNo: "PI/HO/26050143", refNo: "B2664EQ", supplier: "BUANA AC MOBIL", invoiceDate: "12-May-2026", dueDate: "11-Jun-2026", status: "APPROVED", total: 1280000, amountPaid: 0, amountDue: 1280000 },
-  { docNo: "PI/HO/26050142", refNo: "B9015BTA", supplier: "BUANA AC MOBIL", invoiceDate: "12-May-2026", dueDate: "11-Jun-2026", status: "APPROVED", total: 1430000, amountPaid: 0, amountDue: 1430000 },
-  { docNo: "PI/HO/26060037", refNo: "B1795PQQ", supplier: "ERA JAYA DAIHATSU", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", status: "PAID", total: 58333, amountPaid: 58333, amountDue: 0 },
-  { docNo: "PI/HO/26060036", refNo: "B2295UQ", supplier: "JABA MOTOR TOYOTA", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", status: "PAID", total: 295774, amountPaid: 295774, amountDue: 0 },
-  { docNo: "PI/HO/26060035", refNo: "B2295UQ", supplier: "AUTO RUBBER", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", status: "PAID", total: 81647, amountPaid: 81647, amountDue: 0 },
-  { docNo: "PI/HO/26060034", refNo: "B9155PQV", supplier: "HOLY BAN INDONESIA", invoiceDate: "13-Jun-2026", dueDate: "13-Jun-2026", status: "PAID", total: 8969588, amountPaid: 8969588, amountDue: 0 },
-  { docNo: "PI/HO/26060033", refNo: "B1087PQF", supplier: "FIKHI VARIASI", invoiceDate: "10-Jun-2026", dueDate: "10-Jun-2026", status: "PAID", total: 7000000, amountPaid: 7000000, amountDue: 0 },
-  { docNo: "PI/HO/26060032", refNo: "B1935PSD", supplier: "INDONESIA JAYA EST 1980", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", status: "PAID", total: 604200, amountPaid: 604200, amountDue: 0 },
-  { docNo: "PI/HO/26060031", refNo: "B2295UQ", supplier: "STAMX AUTOMOBILES", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", status: "PAID", total: 3233020, amountPaid: 3233020, amountDue: 0 },
-  { docNo: "PI/HO/26060030", refNo: "STOCK ITEM", supplier: "MANDIRI JAYA ASIA", invoiceDate: "11-Jun-2026", dueDate: "11-Jun-2026", status: "PAID", total: 329500, amountPaid: 329500, amountDue: 0 },
-];
+import { useEffect, useState } from "react";
 
 const fmt = (n: number) => n.toLocaleString("id-ID");
 
@@ -30,15 +17,27 @@ const statusColor = (s: string) => {
 
 export default function InvoicePayablesPage() {
   const router = useRouter();
+  const [payables, setPayables] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  const filtered = payables.filter((inv) => {
-    if (statusFilter && inv.status !== statusFilter) return false;
-    return true;
-  });
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    fetch(`/api/purchase-invoices?${params.toString()}`)
+      .then((r) => r.json())
+      .then((json) => { setPayables(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load payables"); setLoading(false); });
+  }, [statusFilter]);
 
-  const totalDue = filtered.reduce((s, x) => s + x.amountDue, 0);
-  const totalPaid = filtered.reduce((s, x) => s + x.amountPaid, 0);
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const filtered = payables;
+  const totalDue = filtered.reduce((s: number, x: any) => s + ((x.total || 0) - (x.paidAmount || 0)), 0);
+  const totalPaid = filtered.reduce((s: number, x: any) => s + (x.paidAmount || 0), 0);
 
   return (
     <div>
@@ -123,29 +122,32 @@ export default function InvoicePayablesPage() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((inv) => (
+            {filtered.map((inv: any) => {
+              const amountDue = (inv.total || 0) - (inv.paidAmount || 0);
+              return (
               <tr
-                key={inv.docNo}
+                key={inv.id}
                 style={{ ...S.tr, cursor: "pointer" }}
-                onClick={() => router.push(`/finance/invoices/${inv.docNo}`)}
+                onClick={() => router.push(`/finance/invoices/${inv.docNo || inv.id}`)}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >
-                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo}</td>
-                <td style={S.td}>{inv.refNo}</td>
-                <td style={{ ...S.td, color: "#0176d3" }}>{inv.supplier}</td>
-                <td style={S.td}>{inv.invoiceDate}</td>
-                <td style={S.td}>{inv.dueDate}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo || inv.id}</td>
+                <td style={S.td}>{inv.po?.poNo || "-"}</td>
+                <td style={{ ...S.td, color: "#0176d3" }}>{inv.supplier?.companyName || "-"}</td>
+                <td style={S.td}>{inv.date ? new Date(inv.date).toLocaleDateString("en-GB") : "-"}</td>
+                <td style={S.td}>{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("en-GB") : "-"}</td>
                 <td style={S.td}>
                   <span style={{ ...S.pill, background: statusColor(inv.status) }}>{inv.status}</span>
                 </td>
-                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.total)}</td>
-                <td style={{ ...S.td, textAlign: "right", color: "#2e844a" }}>{fmt(inv.amountPaid)}</td>
-                <td style={{ ...S.td, textAlign: "right", color: inv.amountDue > 0 ? "#ea001e" : "#444746", fontWeight: inv.amountDue > 0 ? 600 : 400 }}>
-                  {fmt(inv.amountDue)}
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.total || 0)}</td>
+                <td style={{ ...S.td, textAlign: "right", color: "#2e844a" }}>{fmt(inv.paidAmount || 0)}</td>
+                <td style={{ ...S.td, textAlign: "right", color: amountDue > 0 ? "#ea001e" : "#444746", fontWeight: amountDue > 0 ? 600 : 400 }}>
+                  {fmt(amountDue)}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

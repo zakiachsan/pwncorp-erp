@@ -1,15 +1,67 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 
-const agingData = [
-  { supplier: "PT Suku Cadang Jaya", total: "Rp 4.250.000", current: "Rp 4.250.000", "1-30": "-", "31-60": "-", "61-90": "-", "90+": "-" },
-  { supplier: "CV Autoparts", total: "Rp 1.500.000", current: "Rp 1.500.000", "1-30": "-", "31-60": "-", "61-90": "-", "90+": "-" },
-];
+const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+
+interface AgingRow {
+  supplier: string;
+  total: number;
+  current: number;
+  d30: number;
+  d60: number;
+  d90: number;
+  d90plus: number;
+}
 
 export default function AgingAPPage() {
   const router = useRouter();
+  const [rows, setRows] = useState<AgingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/finance?report=ap-aging")
+      .then((r) => r.json())
+      .then((j) => {
+        const items = j.data?.items || [];
+        const now = new Date();
+        const grouped: Record<string, AgingRow> = {};
+        for (const ap of items) {
+          const name = ap.purchaseInvoice?.supplier?.companyName || "-";
+          if (!grouped[name]) grouped[name] = { supplier: name, total: 0, current: 0, d30: 0, d60: 0, d90: 0, d90plus: 0 };
+          const days = Math.floor((now.getTime() - new Date(ap.dueDate).getTime()) / (1000 * 60 * 60 * 24));
+          const bal = ap.balance || 0;
+          grouped[name].total += bal;
+          if (days <= 0) grouped[name].current += bal;
+          else if (days <= 30) grouped[name].d30 += bal;
+          else if (days <= 60) grouped[name].d60 += bal;
+          else if (days <= 90) grouped[name].d90 += bal;
+          else grouped[name].d90plus += bal;
+        }
+        setRows(Object.values(grouped));
+        setLoading(false);
+      })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const totals = rows.reduce(
+    (acc, r) => ({
+      total: acc.total + r.total,
+      current: acc.current + r.current,
+      d30: acc.d30 + r.d30,
+      d60: acc.d60 + r.d60,
+      d90: acc.d90 + r.d90,
+      d90plus: acc.d90plus + r.d90plus,
+    }),
+    { total: 0, current: 0, d30: 0, d60: 0, d90: 0, d90plus: 0 }
+  );
+
   return (
     <div>
       <div className="view-header">
@@ -20,7 +72,6 @@ export default function AgingAPPage() {
         <button className="btn btn--sm"><Download size={14} /> Export</button>
       </div>
 
-      {/* Filter */}
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="form-group">
@@ -34,7 +85,6 @@ export default function AgingAPPage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="table-wrap">
         <table className="data-table">
           <thead>
@@ -49,29 +99,34 @@ export default function AgingAPPage() {
             </tr>
           </thead>
           <tbody>
-            {agingData.map((a) => (
+            {rows.map((a) => (
               <tr key={a.supplier} className="hover:bg-[#f8f8f8] cursor-pointer">
                 <td className="font-medium">{a.supplier}</td>
-                <td className="text-right font-medium">{a.total}</td>
-                <td className="text-right">{a.current}</td>
-                <td className="text-right">{a["1-30"]}</td>
-                <td className="text-right">{a["31-60"]}</td>
-                <td className="text-right">{a["61-90"]}</td>
-                <td className="text-right">{a["90+"]}</td>
+                <td className="text-right font-medium">{fmt(a.total)}</td>
+                <td className="text-right">{a.current ? fmt(a.current) : "-"}</td>
+                <td className="text-right">{a.d30 ? fmt(a.d30) : "-"}</td>
+                <td className="text-right">{a.d60 ? fmt(a.d60) : "-"}</td>
+                <td className="text-right">{a.d90 ? fmt(a.d90) : "-"}</td>
+                <td className="text-right">{a.d90plus ? fmt(a.d90plus) : "-"}</td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={7} className="text-center py-8 text-[--color-text-secondary]">Tidak ada data</td></tr>
+            )}
           </tbody>
-          <tfoot>
-            <tr className="font-bold border-t-2 border-[--color-text-primary]">
-              <td>Total</td>
-              <td className="text-right">Rp 5.750.000</td>
-              <td className="text-right">Rp 5.750.000</td>
-              <td className="text-right">-</td>
-              <td className="text-right">-</td>
-              <td className="text-right">-</td>
-              <td className="text-right">-</td>
-            </tr>
-          </tfoot>
+          {rows.length > 0 && (
+            <tfoot>
+              <tr className="font-bold border-t-2 border-[--color-text-primary]">
+                <td>Total</td>
+                <td className="text-right">{fmt(totals.total)}</td>
+                <td className="text-right">{totals.current ? fmt(totals.current) : "-"}</td>
+                <td className="text-right">{totals.d30 ? fmt(totals.d30) : "-"}</td>
+                <td className="text-right">{totals.d60 ? fmt(totals.d60) : "-"}</td>
+                <td className="text-right">{totals.d90 ? fmt(totals.d90) : "-"}</td>
+                <td className="text-right">{totals.d90plus ? fmt(totals.d90plus) : "-"}</td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

@@ -1,7 +1,8 @@
 "use client";
 
+// TODO: Replace hardcoded data with API call when /api/pembanding endpoint is available
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Star, GitCompare } from "lucide-react";
 
 const comparisons = [
@@ -25,6 +26,20 @@ const statusPill = (status: string) => {
 export default function PembandingListPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Attempt to fetch from API; no dedicated endpoint exists yet
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-invoices&limit=10")
+      .then((r) => r.json())
+      .then(() => {
+        // TODO: Replace with /api/pembanding when available
+        // For now, keep hardcoded data as-is
+        setLoading(false);
+      })
+      .catch(() => { setLoading(false); });
+  }, []);
 
   const filtered = comparisons.filter((c) =>
     c.id.toLowerCase().includes(search.toLowerCase()) ||

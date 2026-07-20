@@ -1,20 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X, Wallet, Banknote, Landmark, TrendingUp, AlertTriangle } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
 /* ─── Types & Helpers ─── */
 interface Rekening { id: string; nama: string; noRekening: string; saldo: number; }
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
-
-/* ═══════════ Data ─── */
-const initialRekening: Rekening[] = [
-  { id: "1", nama: "Kas Tunai", noRekening: "-", saldo: 25000000 },
-  { id: "2", nama: "Bank BCA", noRekening: "123-456-7890", saldo: 150000000 },
-  { id: "3", nama: "Bank Mandiri", noRekening: "098-765-4321", saldo: 85000000 },
-  { id: "4", nama: "Bank BRI", noRekening: "567-890-1234", saldo: 45000000 },
-];
 
 const bankColor = (nama: string): string => {
   const m: Record<string, string> = {
@@ -23,33 +15,47 @@ const bankColor = (nama: string): string => {
   return m[nama] || "#0176d3";
 };
 
-const recentTransactions = [
-  { date: "04 Jul 2026", desc: "Pembayaran Invoice SRI/004", type: "masuk", amount: 2500000, customer: "Budi Santoso" },
-  { date: "03 Jul 2026", desc: "Pembayaran Gaji Karyawan", type: "keluar", amount: 45000000, customer: "-" },
-  { date: "02 Jul 2026", desc: "Penerimaan DP Project Fleet", type: "masuk", amount: 13500000, customer: "PT Maju Jaya" },
-  { date: "01 Jul 2026", desc: "Pembelian Sparepart", type: "keluar", amount: 8500000, customer: "PT Parts Indo" },
-  { date: "30 Jun 2026", desc: "Pembayaran Invoice SRI/003", type: "masuk", amount: 1800000, customer: "PT Maju Jaya" },
-];
-
-const piutangJatuhTempo = [
-  { customer: "PT Maju Jaya", jumlah: 18000000, jatuhTempo: "10 Jul 2026", hari: 5 },
-  { customer: "PT Transport Jaya", jumlah: 12500000, jatuhTempo: "15 Jul 2026", hari: 10 },
-  { customer: "Siti Rahmawati", jumlah: 4500000, jatuhTempo: "03 Jul 2026", hari: -2 },
-];
-
-const hutangMendesak = [
-  { vendor: "PT Parts Indo", jumlah: 2000000, jatuhTempo: "08 Jul 2026", hari: 2, desc: "Pembayaran Sparepart" },
-  { vendor: "PT Diesel Parts", jumlah: 3500000, jatuhTempo: "07 Jul 2026", hari: 1, desc: "Pembelian Piston Kit" },
-  { vendor: "PLN", jumlah: 3200000, jatuhTempo: "05 Jul 2026", hari: -1, desc: "Listrik Bengkel" },
-];
-
 /* ═══════════ Page ─── */
 export default function FinanceDashboardPage() {
-  const [rekeningList, setRekeningList] = useState<Rekening[]>(initialRekening);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [rekeningList, setRekeningList] = useState<Rekening[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [piutangJatuhTempo, setPiutangJatuhTempo] = useState<any[]>([]);
+  const [hutangMendesak, setHutangMendesak] = useState<any[]>([]);
+  const [summary, setSummary] = useState({ omzet: 0, labaBersih: 0 });
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ nama: "", noRekening: "", saldoAwal: "" });
   const [dateFrom, setDateFrom] = useState<Date>(() => new Date(2026, 6, 1));
   const [dateTo, setDateTo] = useState<Date>(() => new Date(2026, 6, 31));
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/finance/dashboard").then((r) => r.ok ? r.json() : null).catch(() => null),
+      fetch("/api/finance/accounts").then((r) => r.ok ? r.json() : null).catch(() => null),
+    ])
+      .then(([dashboardData, accountsData]) => {
+        if (accountsData?.data) {
+          setRekeningList(accountsData.data.map((a: any) => ({
+            id: a.id,
+            nama: a.nama || a.name,
+            noRekening: a.noRekening || "-",
+            saldo: a.saldo || 0,
+          })));
+        } else {
+          setRekeningList([]);
+        }
+        if (dashboardData?.recentTransactions) setRecentTransactions(dashboardData.recentTransactions);
+        if (dashboardData?.piutangJatuhTempo) setPiutangJatuhTempo(dashboardData.piutangJatuhTempo);
+        if (dashboardData?.hutangMendesak) setHutangMendesak(dashboardData.hutangMendesak);
+        if (dashboardData?.omzet) setSummary({ omzet: dashboardData.omzet, labaBersih: dashboardData.labaBersih || 0 });
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Gagal memuat data dashboard");
+        setLoading(false);
+      });
+  }, []);
 
   const totalKasBank = rekeningList.reduce((sum, r) => sum + r.saldo, 0);
   const totalPiutang = piutangJatuhTempo.reduce((s, p) => s + p.jumlah, 0);
@@ -57,9 +63,6 @@ export default function FinanceDashboardPage() {
 
   const totalPemasukan = recentTransactions.filter((t) => t.type === "masuk").reduce((s, t) => s + t.amount, 0);
   const totalPengeluaran = recentTransactions.filter((t) => t.type === "keluar").reduce((s, t) => s + t.amount, 0);
-
-  const omzet2026 = 875000000;
-  const labaBersih2026 = 218750000;
 
   const handleSave = () => {
     if (!form.nama.trim() || !form.saldoAwal) return;
@@ -72,6 +75,8 @@ export default function FinanceDashboardPage() {
     setRekeningList((prev) => [...prev, newRek]);
     setModalOpen(false);
   };
+
+  if (loading) return <div className="p-8 text-center">Loading dashboard...</div>;
 
   return (
     <div>
@@ -103,7 +108,7 @@ export default function FinanceDashboardPage() {
           </div>
           <div>
             <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Omzet (Revenue)</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#0176d3" }}>{fmt(omzet2026)}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#0176d3" }}>{fmt(summary.omzet)}</div>
           </div>
         </div>
 
@@ -113,7 +118,7 @@ export default function FinanceDashboardPage() {
           </div>
           <div>
             <div className="text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide mb-1">Laba Bersih</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#2e844a" }}>{fmt(labaBersih2026)}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "#2e844a" }}>{fmt(summary.labaBersih)}</div>
           </div>
         </div>
 

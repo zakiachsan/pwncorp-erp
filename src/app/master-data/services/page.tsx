@@ -1,18 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
-const services = [
-  { code: "J-001", name: "Ganti Oli Mesin", category: "Perawatan", price: "Rp 250.000", duration: "30 menit" },
-  { code: "J-002", name: "Spooring Mobil Kelas I", category: "Perbaikan", price: "Rp 375.000", duration: "60 menit" },
-  { code: "J-003", name: "Balancing Ring", category: "Perawatan", price: "Rp 60.000", duration: "30 menit" },
-  { code: "J-004", name: "Ganti Kampas Rem", category: "Perbaikan", price: "Rp 150.000", duration: "45 menit" },
-  { code: "J-005", name: "Tune Up", category: "Perawatan", price: "Rp 200.000", duration: "60 menit" },
-];
+interface Service {
+  id: string;
+  sku: string;
+  name: string;
+  price: number;
+  category: string;
+}
 
 export default function ServicesPage() {
   const router = useRouter();
+  const [data, setData] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (categoryFilter !== "All") params.set("category", categoryFilter);
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    fetch(`/api/services${qs ? "?" + qs : ""}`)
+      .then((r) => r.json())
+      .then((json) => { setData(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load services"); setLoading(false); });
+  }, [categoryFilter, search]);
+
+  const formatPrice = (price: number) => {
+    return "Rp " + price.toLocaleString("id-ID");
+  };
+
   return (
     <div>
       <div className="view-header">
@@ -31,15 +54,15 @@ export default function ServicesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
             <label className="form-label">Kategori</label>
-            <select className="form-select">
-              <option>All Categories</option>
+            <select className="form-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+              <option value="All">All Categories</option>
               <option>Perawatan</option>
               <option>Perbaikan</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="Nama / Kode Jasa..." />
+            <input type="text" className="form-input" placeholder="Nama / Kode Jasa..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>
@@ -49,30 +72,39 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
-      <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Kode</th>
-              <th>Nama Jasa</th>
-              <th>Kategori</th>
-              <th>Harga</th>
-              <th>Estimasi Waktu</th>
-            </tr>
-          </thead>
-          <tbody>
-            {services.map((s) => (
-              <tr key={s.code} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/services/${s.code}`)}>
-                <td className="font-medium text-[--color-brand]">{s.code}</td>
-                <td className="font-medium">{s.name}</td>
-                <td><span className="pill bg-gray-200 text-gray-700">{s.category}</span></td>
-                <td className="font-medium">{s.price}</td>
-                <td className="text-[--color-text-secondary]">{s.duration}</td>
+
+      {loading && <div className="p-8 text-center text-[--color-text-secondary]">Loading...</div>}
+      {error && <div className="p-8 text-center text-red-500">{error}</div>}
+
+      {!loading && !error && (
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Nama Jasa</th>
+                <th>Kategori</th>
+                <th>Harga</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-8 text-[--color-text-secondary]">No services found</td>
+                </tr>
+              )}
+              {data.map((s) => (
+                <tr key={s.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/services/${s.sku || s.id}`)}>
+                  <td className="font-medium text-[--color-brand]">{s.sku}</td>
+                  <td className="font-medium">{s.name}</td>
+                  <td><span className="pill bg-gray-200 text-gray-700">{s.category}</span></td>
+                  <td className="font-medium">{formatPrice(s.price)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

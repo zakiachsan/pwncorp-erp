@@ -1,19 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ReceiptText, Star, Search, Download } from "lucide-react";
-
-const data = [
-  { no:1, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070028", type:"Service Sale", status:"Completed", customer:"BPK. IKO", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", vehicleMake:"TOYOTA", vehicleModel:"ALL NEW CAMRY 2.5", vehicleYear:2022, itemType:"Service", sku:"A2", productName:"Spooring Mobil Kelas I-A - Spooring", description:"Spooring", productBrand:"", productType:"", qty:1, priceExTax:450000, totalPriceExTax:450000, discount:22500, subtotal:427500, tax:0, otherTax:0, total:427500, cost:"", grossProfit:"", swo:"SWO/003/26070030", sro:"SRO/003/26070031", serviceReservation:"", tags:"", paymentTypes:"BRI QRIS" },
-  { no:2, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070028", type:"Service Sale", status:"Completed", customer:"BPK. IKO", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B1992B", hullNumber:"", vin:"", vehicleMake:"TOYOTA", vehicleModel:"ALL NEW CAMRY 2.5", vehicleYear:2022, itemType:"Service", sku:"B6", productName:'Balancing Ring 16"/17\'/18" Profit>50 - Balancing', description:"Balancing", productBrand:"", productType:"", qty:4, priceExTax:50000, totalPriceExTax:200000, discount:10000, subtotal:190000, tax:0, otherTax:0, total:190000, cost:"", grossProfit:"", swo:"SWO/003/26070030", sro:"SRO/003/26070031", serviceReservation:"", tags:"", paymentTypes:"" },
-  { no:3, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070029", type:"Service Sale", status:"Completed", customer:"BPK. RICKY", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B9525PAM", hullNumber:"", vin:"", vehicleMake:"SUZUKI", vehicleModel:"NEW CARRY PICK UP", vehicleYear:2022, itemType:"Service", sku:"A6", productName:"Spooring Mobil Kelas III-A - Spooring", description:"Spooring", productBrand:"", productType:"", qty:1, priceExTax:275000, totalPriceExTax:275000, discount:13750, subtotal:261250, tax:0, otherTax:0, total:261250, cost:"", grossProfit:"", swo:"SWO/003/26070031", sro:"SRO/003/26070032", serviceReservation:"", tags:"", paymentTypes:"BRI QRIS" },
-  { no:4, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070029", type:"Service Sale", status:"Completed", customer:"BPK. RICKY", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B9525PAM", hullNumber:"", vin:"", vehicleMake:"SUZUKI", vehicleModel:"NEW CARRY PICK UP", vehicleYear:2022, itemType:"Service", sku:"B6", productName:'Balancing Ring 16"/17\'/18" Profit>50 - Balancing', description:"Balancing", productBrand:"", productType:"", qty:4, priceExTax:40000, totalPriceExTax:160000, discount:8000, subtotal:152000, tax:0, otherTax:0, total:152000, cost:"", grossProfit:"", swo:"SWO/003/26070031", sro:"SRO/003/26070032", serviceReservation:"", tags:"", paymentTypes:"" },
-  { no:5, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070030", type:"Service Sale", status:"Completed", customer:"LUPIN MOTOR", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B1800TP", hullNumber:"", vin:"", vehicleMake:"RANGE ROVER", vehicleModel:"EVOQUE", vehicleYear:2020, itemType:"Service", sku:"B2", productName:'Balancing Ban Jeep R 15"/16"/17"/18"/(Besar) - Balancing', description:"Balancing", productBrand:"", productType:"", qty:8, priceExTax:70000, totalPriceExTax:560000, discount:56000, subtotal:504000, tax:0, otherTax:0, total:504000, cost:"", grossProfit:"", swo:"SWO/003/26070029", sro:"SRO/003/26070029", serviceReservation:"", tags:"", paymentTypes:"BRI QRIS" },
-  { no:6, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070030", type:"Service Sale", status:"Completed", customer:"LUPIN MOTOR", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B1800TP", hullNumber:"", vin:"", vehicleMake:"RANGE ROVER", vehicleModel:"EVOQUE", vehicleYear:2020, itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P BAN", description:"B/P BAN", productBrand:"", productType:"JASA NON TRACKING", qty:8, priceExTax:80000, totalPriceExTax:640000, discount:64000, subtotal:576000, tax:0, otherTax:0, total:576000, cost:"", grossProfit:"", swo:"SWO/003/26070029", sro:"SRO/003/26070029", serviceReservation:"", tags:"", paymentTypes:"" },
-  { no:7, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070030", type:"Service Sale", status:"Completed", customer:"LUPIN MOTOR", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B1800TP", hullNumber:"", vin:"", vehicleMake:"RANGE ROVER", vehicleModel:"EVOQUE", vehicleYear:2020, itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - BONGKAR BAN", description:"BONGKAR BAN", productBrand:"", productType:"JASA NON TRACKING", qty:4, priceExTax:40000, totalPriceExTax:160000, discount:16000, subtotal:144000, tax:0, otherTax:0, total:144000, cost:"", grossProfit:"", swo:"SWO/003/26070029", sro:"SRO/003/26070029", serviceReservation:"", tags:"", paymentTypes:"" },
-  { no:8, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070031", type:"Service Sale", status:"Completed", customer:"BPK. ALDO", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"KH1863GI", hullNumber:"", vin:"", vehicleMake:"TOYOTA", vehicleModel:"LAND CRUISER", vehicleYear:2020, itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P HEADLAMP F R+L", description:"B/P HEADLAMP F R+L", productBrand:"", productType:"JASA NON TRACKING", qty:2, priceExTax:200000, totalPriceExTax:400000, discount:0, subtotal:400000, tax:0, otherTax:0, total:400000, cost:"", grossProfit:"", swo:"SWO/003/26070032", sro:"SRO/003/26070033", serviceReservation:"", tags:"", paymentTypes:"BRI QRIS" },
-  { no:9, invoiceDate:"07-Jul-2026", store:"Wijaya Motor - One Stop Service", sri:"SRI/003/26070032", type:"Service Sale", status:"Completed", customer:"AUTO PRIMA", company:"", customerGroup:"", membership:"", salesperson:"", bookingSource:"", serviceProvider:"", serviceAdvisor:"NANDA SALSA", vehicleType:"Car", registration:"B819BEN", hullNumber:"", vin:"", vehicleMake:"BYD", vehicleModel:"SEAL", vehicleYear:2023, itemType:"Service", sku:"JAS.NT.001", productName:"JASA NON TRACKING - B/P BAN", description:"B/P BAN", productBrand:"", productType:"JASA NON TRACKING", qty:1, priceExTax:50000, totalPriceExTax:50000, discount:5000, subtotal:45000, tax:0, otherTax:0, total:45000, cost:"", grossProfit:"", swo:"SWO/003/26070033", sro:"SRO/003/26070034", serviceReservation:"", tags:"", paymentTypes:"BRI QRIS" },
-];
 
 function fmt(n: number): string { return n.toLocaleString("id-ID").replace(/,/g, "."); }
 const L: React.CSSProperties = { color: "#0176d3", cursor: "pointer", fontWeight: 500 };
@@ -27,6 +16,72 @@ const TD: React.CSSProperties = { padding: "7px 10px", color: "#001526", borderB
 
 export default function DetailedServiceInvoicesPage() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/service?report=summary-invoices&limit=100")
+      .then((r) => r.json())
+      .then((j) => {
+        const invoices: any[] = j.data || [];
+        // Map invoice data to the detailed line-item format
+        const mapped = invoices.flatMap((inv: any, idx: number) => {
+          const items = inv.items || inv.serviceInvoiceItems || [inv];
+          return items.map((item: any, i: number) => ({
+            no: idx * 10 + i + 1,
+            invoiceDate: (inv.invoiceDate || "").slice(0, 10),
+            store: inv.store?.name || inv.storeName || "—",
+            sri: inv.invNo || "—",
+            type: inv.type || "Service Sale",
+            status: inv.status || "Completed",
+            customer: inv.customer?.name || "—",
+            company: inv.customer?.company || "",
+            customerGroup: "",
+            membership: "",
+            salesperson: "",
+            bookingSource: "",
+            serviceProvider: "",
+            serviceAdvisor: inv.sa?.name || inv.serviceAdvisor || "—",
+            vehicleType: inv.vehicle?.type || "Car",
+            registration: inv.vehicle?.plateNo || "—",
+            hullNumber: "",
+            vin: "",
+            vehicleMake: inv.vehicle?.make || "—",
+            vehicleModel: inv.vehicle?.model || "—",
+            vehicleYear: inv.vehicle?.year || "—",
+            itemType: item.itemType || "Service",
+            sku: item.sku || item.product?.sku || "—",
+            productName: item.productName || item.product?.name || "—",
+            description: item.description || "—",
+            productBrand: item.product?.brand || "",
+            productType: item.product?.type || "",
+            qty: item.qty || 0,
+            priceExTax: item.price || item.priceExTax || 0,
+            totalPriceExTax: (item.qty || 0) * (item.price || item.priceExTax || 0),
+            discount: item.discount || 0,
+            subtotal: item.subtotal || 0,
+            tax: item.tax || 0,
+            otherTax: item.otherTax || 0,
+            total: item.total || inv.total || 0,
+            cost: "",
+            grossProfit: "",
+            swo: inv.workOrder?.woNo || "—",
+            sro: inv.serviceOrder?.soNo || "—",
+            serviceReservation: "",
+            tags: "",
+            paymentTypes: inv.payments?.map((p: any) => p.method).join(", ") || "",
+          }));
+        });
+        setData(mapped);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load detailed invoices"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div style={{ padding: "6px 16px", background: "#f3f3f3", borderBottom: "1px solid #ecebea", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -48,7 +103,7 @@ export default function DetailedServiceInvoicesPage() {
           <Field label="Status"><select className="form-select" style={{ minWidth: 120 }}><option>All Status</option><option>Completed</option></select></Field>
         </div>
         <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option><option>BPK. IKO</option><option>BPK. RICKY</option><option>LUPIN MOTOR</option><option>BPK. ALDO</option><option>AUTO PRIMA</option></select></Field>
+          <Field label="Customer"><select className="form-select" style={{ minWidth: 160 }}><option>All Customers</option></select></Field>
           <Field label="Customer Group"><select className="form-select" style={{ minWidth: 140 }}><option>All Customer Groups</option></select></Field>
           <Field label="Membership"><select className="form-select" style={{ minWidth: 120 }}><option>Any</option><option>Yes</option><option>No</option></select></Field>
           <Field label="Registration"><input type="text" className="form-input" defaultValue="All" style={{ minWidth: 110 }} /></Field>
@@ -58,12 +113,12 @@ export default function DetailedServiceInvoicesPage() {
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
           <Field label="Product Brand"><select className="form-select" style={{ minWidth: 140 }}><option>All Brands</option></select></Field>
-          <Field label="Product Type"><select className="form-select" style={{ minWidth: 140 }}><option>All Types</option><option>JASA NON TRACKING</option></select></Field>
+          <Field label="Product Type"><select className="form-select" style={{ minWidth: 140 }}><option>All Types</option></select></Field>
           <Field label="Product Tags"><select className="form-select" style={{ minWidth: 140 }}><option>All Tags</option></select></Field>
           <Field label="Service Product Type"><select className="form-select" style={{ minWidth: 150 }}><option>All Types</option></select></Field>
           <Field label="Salesperson"><select className="form-select" style={{ minWidth: 140 }}><option>All Salespersons</option></select></Field>
           <Field label="Booking Source"><select className="form-select" style={{ minWidth: 140 }}><option>All Booking Source</option></select></Field>
-          <Field label="Vehicle Make"><select className="form-select" style={{ minWidth: 140 }}><option>All Vehicle Makes</option><option>TOYOTA</option><option>SUZUKI</option><option>RANGE ROVER</option><option>BYD</option></select></Field>
+          <Field label="Vehicle Make"><select className="form-select" style={{ minWidth: 140 }}><option>All Vehicle Makes</option></select></Field>
           <Field label="">&nbsp;</Field>
           <button className="btn btn--sm" style={{ minWidth: 90, justifyContent: "center", gap: 6 }}><Search size={14} /> Show</button>
           <button className="btn btn--brand btn--sm" style={{ minWidth: 110, justifyContent: "center", gap: 6, background: "#014486" }}><Download size={14} /> Download</button>
@@ -80,7 +135,7 @@ export default function DetailedServiceInvoicesPage() {
           <tbody>
             {data.map((row, i) => (
               <tr key={row.no} style={{ background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
-                <td style={TD}>{row.no}</td><td style={TD}>{row.invoiceDate}</td><td style={{ ...TD, ...L }}>{row.store}</td><td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/service/${row.sri}`)}>{row.sri}</td><td style={TD}>{row.type}</td><td style={TD}><span className="pill pill--completed">{row.status}</span></td><td style={{ ...TD, ...L }}>{row.customer}</td><td style={TD}>{row.company || "—"}</td><td style={TD}>{row.customerGroup || "—"}</td><td style={TD}>{row.membership || "—"}</td><td style={TD}>{row.salesperson || "—"}</td><td style={TD}>{row.bookingSource || "—"}</td><td style={TD}>{row.serviceProvider || "—"}</td><td style={TD}>{row.serviceAdvisor}</td><td style={TD}>{row.vehicleType}</td><td style={{ ...TD, ...L }}>{row.registration}</td><td style={TD}>{row.hullNumber || "—"}</td><td style={TD}>{row.vin || "—"}</td><td style={TD}>{row.vehicleMake}</td><td style={TD}>{row.vehicleModel}</td><td style={TD}>{row.vehicleYear}</td><td style={TD}><span className="pill pill--draft">{row.itemType}</span></td><td style={{ ...TD, maxWidth: 300 }}>{row.productName}</td><td style={TD}>{row.description}</td><td style={TD}>{row.productBrand || "—"}</td><td style={TD}>{row.productType || "—"}</td><td style={{ ...TD, textAlign: "right" }}>{row.qty}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.priceExTax)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.totalPriceExTax)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.discount)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.subtotal)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.tax)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.otherTax)}</td><td style={{ ...TD, textAlign: "right", fontWeight: 600 }}>{fmt(row.total)}</td><td style={{ ...TD, textAlign: "right" }}>{row.cost || "—"}</td><td style={{ ...TD, textAlign: "right" }}>{row.grossProfit || "—"}</td><td style={{ ...TD, ...L }} onClick={() => router.push(`/work-orders/${row.swo}`)}>{row.swo}</td><td style={{ ...TD, ...L }} onClick={() => router.push(`/service-orders/${row.sro}`)}>{row.sro}</td><td style={TD}>{row.serviceReservation || "—"}</td><td style={TD}>{row.tags || "—"}</td><td style={TD}>{row.paymentTypes || "—"}</td>
+                <td style={TD}>{row.no}</td><td style={TD}>{row.invoiceDate}</td><td style={{ ...TD, ...L }}>{row.store}</td><td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/service/${row.sri}`)}>{row.sri}</td><td style={TD}>{row.type}</td><td style={TD}><span className="pill pill--completed">{row.status}</span></td><td style={{ ...TD, ...L }}>{row.customer}</td><td style={TD}>{row.company || "—"}</td><td style={TD}>{row.customerGroup || "—"}</td><td style={TD}>{row.membership || "—"}</td><td style={TD}>{row.salesperson || "—"}</td><td style={TD}>{row.bookingSource || "—"}</td><td style={TD}>{row.serviceProvider || "—"}</td><td style={TD}>{row.serviceAdvisor}</td><td style={TD}>{row.vehicleType}</td><td style={{ ...TD, ...L }}>{row.registration}</td><td style={TD}>{row.hullNumber || "—"}</td><td style={TD}>{row.vin || "—"}</td><td style={TD}>{row.vehicleMake}</td><td style={TD}>{row.vehicleModel}</td><td style={TD}>{row.vehicleYear}</td><td style={TD}><span className="pill pill--draft">{row.itemType}</span></td><td style={{ ...TD, maxWidth: 300 }}>{row.productName}</td><td style={TD}>{row.description}</td><td style={TD}>{row.productBrand || "—"}</td><td style={TD}>{row.productType || "—"}</td><td style={{ ...TD, textAlign: "right" }}>{row.qty}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.priceExTax)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.totalPriceExTax)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.discount)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.subtotal)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.tax)}</td><td style={{ ...TD, textAlign: "right" }}>{fmt(row.otherTax)}</td><td style={{ ...TD, textAlign: "right", fontWeight: 600 }}>{fmt(row.total)}</td><td style={{ ...TD, textAlign: "right" }}>{row.cost || "—"}</td><td style={{ ...TD, textAlign: "right" }}>{row.grossProfit || "—"}</td><td style={{ ...TD, ...L }} onClick={() => row.swo !== "—" && router.push(`/work-orders/${row.swo}`)}>{row.swo}</td><td style={{ ...TD, ...L }} onClick={() => row.sro !== "—" && router.push(`/service-orders/${row.sro}`)}>{row.sro}</td><td style={TD}>{row.serviceReservation || "—"}</td><td style={TD}>{row.tags || "—"}</td><td style={TD}>{row.paymentTypes || "—"}</td>
               </tr>
             ))}
           </tbody>

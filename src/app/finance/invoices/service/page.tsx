@@ -1,8 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Printer, X } from "lucide-react";
+
+interface ApiInvoice {
+  id: string;
+  invNo: string;
+  customer: { name: string } | null;
+  so: { soNo: string } | null;
+  total: number;
+  status: string;
+  dueDate: string;
+  paidAmount: number;
+}
 
 interface Invoice {
   docNo: string;
@@ -18,53 +29,6 @@ interface Invoice {
   services: { item: string; description: string; qty: number; total: number }[];
 }
 
-const serviceInvoices: Invoice[] = [
-  {
-    docNo: "SRI/001/26060155", swoNo: "SWO/006/26060155", soNo: "SRO/006/26060155",
-    customer: "PT Transport Jaya", invoiceDate: "27-Jun-2026", dueDate: "04-Jul-2026",
-    status: "UNPAID", total: 4800000, amountPaid: 0, amountDue: 4800000,
-    services: [
-      { item: "F1 - Overhaul", description: "Overhaul Mesin", qty: 1, total: 2375000 },
-      { item: "JAS.NT.001", description: "NITRO FILL (BARU)", qty: 4, total: 80000 },
-    ],
-  },
-  {
-    docNo: "SRI/002/26060152", swoNo: "SWO/003/26060152", soNo: "SRO/003/26060152",
-    customer: "Siti Rahmawati", invoiceDate: "27-Jun-2026", dueDate: "04-Jul-2026",
-    status: "PAID", total: 5200000, amountPaid: 5200000, amountDue: 0,
-    services: [
-      { item: "C1 - Service Berkala 10K", description: "Service Umum", qty: 1, total: 450000 },
-      { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", qty: 1, total: 250000 },
-    ],
-  },
-  {
-    docNo: "SRI/003/26060150", swoNo: "SWO/002/26060151", soNo: "SRO/002/26060150",
-    customer: "PT Maju Jaya", invoiceDate: "26-Jun-2026", dueDate: "03-Jul-2026",
-    status: "PARTIAL", total: 1800000, amountPaid: 900000, amountDue: 900000,
-    services: [
-      { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", qty: 1, total: 250000 },
-    ],
-  },
-  {
-    docNo: "SRI/004/26060149", swoNo: "SWO/001/26060149", soNo: "SRO/001/26060149",
-    customer: "Budi Santoso", invoiceDate: "24-Jun-2026", dueDate: "01-Jul-2026",
-    status: "PAID", total: 2500000, amountPaid: 2500000, amountDue: 0,
-    services: [
-      { item: "A3 - Spooring Mobil Kelas I", description: "Spooring", qty: 1, total: 337500 },
-      { item: "B4 - Balancing Ring", description: "Balancing", qty: 4, total: 216000 },
-      { item: "JAS.NT.001", description: "NITRO FILL (BARU)", qty: 4, total: 80000 },
-    ],
-  },
-  {
-    docNo: "SRI/005/26060154", swoNo: "SWO/005/26060154", soNo: "SRO/005/26060154",
-    customer: "Ahmad Fauzi", invoiceDate: "26-Jun-2026", dueDate: "03-Jul-2026",
-    status: "PAID", total: 950000, amountPaid: 950000, amountDue: 0,
-    services: [
-      { item: "E1 - Rem Mobil", description: "Ganti Kampas Rem", qty: 1, total: 280000 },
-    ],
-  },
-];
-
 const fmt = (n: number) => n.toLocaleString("id-ID");
 const fmtRp = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
@@ -77,13 +41,43 @@ const statusColor = (s: string) => {
 
 export default function ServiceInvoicesPage() {
   const router = useRouter();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [printMode, setPrintMode] = useState(false);
   const [search, setSearch] = useState("");
 
-  const filtered = serviceInvoices.filter((inv) => {
+  useEffect(() => {
+    fetch("/api/invoices?limit=1000")
+      .then((r) => r.json())
+      .then((j) => {
+        const data: ApiInvoice[] = j.data || [];
+        const mapped: Invoice[] = data.map((inv) => ({
+          docNo: inv.invNo,
+          swoNo: "-",
+          soNo: inv.so?.soNo || "-",
+          customer: inv.customer?.name || "-",
+          invoiceDate: "-",
+          dueDate: inv.dueDate || "-",
+          status: inv.status,
+          total: inv.total || 0,
+          amountPaid: inv.paidAmount || 0,
+          amountDue: (inv.total || 0) - (inv.paidAmount || 0),
+          services: [],
+        }));
+        setInvoices(mapped);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load service invoices");
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = invoices.filter((inv) => {
     if (statusFilter && inv.status !== statusFilter) return false;
     if (search && !inv.docNo.toLowerCase().includes(search.toLowerCase()) && !inv.customer.toLowerCase().includes(search.toLowerCase()) && !inv.swoNo.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
@@ -115,13 +109,16 @@ export default function ServiceInvoicesPage() {
     setSelected(new Set());
   };
 
-  const selectedInvoices = serviceInvoices.filter((inv) => selected.has(inv.docNo));
+  const selectedInvoices = invoices.filter((inv) => selected.has(inv.docNo));
   const printTotal = selectedInvoices.reduce((s, inv) => s + inv.total, 0);
 
   const handlePrint = () => {
     if (selected.size === 0) return;
     setPrintMode(true);
   };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   if (printMode) {
     return <PrintView invoices={selectedInvoices} total={printTotal} onClose={() => setPrintMode(false)} />;
@@ -295,11 +292,15 @@ function PrintView({ invoices, total, onClose }: { invoices: Invoice[]; total: n
                 </tr>
               </thead>
               <tbody>
-                {inv.services.map((s, i) => (
-                  <tr key={i}>
-                    <td style={PT.td}>{i + 1}</td><td style={{ ...PT.td, fontWeight: 500 }}>{s.item}</td><td style={PT.td}>{s.description}</td><td style={{ ...PT.td, textAlign: "right" }}>{s.qty}</td><td style={{ ...PT.td, textAlign: "right", fontWeight: 600 }}>{fmtRp(s.total)}</td>
-                  </tr>
-                ))}
+                {inv.services.length > 0 ? (
+                  inv.services.map((s, i) => (
+                    <tr key={i}>
+                      <td style={PT.td}>{i + 1}</td><td style={{ ...PT.td, fontWeight: 500 }}>{s.item}</td><td style={PT.td}>{s.description}</td><td style={{ ...PT.td, textAlign: "right" }}>{s.qty}</td><td style={{ ...PT.td, textAlign: "right", fontWeight: 600 }}>{fmtRp(s.total)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={5} style={{ ...PT.td, textAlign: "center", color: "#8e8f8e" }}>No service items available</td></tr>
+                )}
               </tbody>
               <tfoot>
                 <tr><td colSpan={4} style={PT.totalL}>TOTAL</td><td style={PT.totalR}>{fmtRp(inv.total)}</td></tr>

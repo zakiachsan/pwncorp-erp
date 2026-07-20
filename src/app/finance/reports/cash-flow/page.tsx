@@ -1,19 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Download, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 
-const cashFlowData = [
-  { date: "26 Jun 2026", description: "Pembayaran Invoice INV-001 - Budi Santoso", category: "Piutang", inflow: "Rp 2.500.000", outflow: "-", balance: "Rp 2.500.000" },
-  { date: "26 Jun 2026", description: "Pembayaran Invoice INV-003 - Siti Rahmawati", category: "Piutang", inflow: "Rp 2.600.000", outflow: "-", balance: "Rp 5.100.000" },
-  { date: "25 Jun 2026", description: "Pembayaran PO-001 - PT Suku Cadang Jaya", category: "Hutang", inflow: "-", outflow: "Rp 4.250.000", balance: "Rp 850.000" },
-  { date: "24 Jun 2026", description: "Pembayaran Invoice INV-004 - Ahmad Fauzi", category: "Piutang", inflow: "Rp 950.000", outflow: "-", balance: "Rp 1.800.000" },
-  { date: "24 Jun 2026", description: "Bayar Listrik Bulanan", category: "Operasional", inflow: "-", outflow: "Rp 250.000", balance: "Rp 1.550.000" },
-  { date: "23 Jun 2026", description: "Bayar Gaji Mekanik", category: "Gaji", inflow: "-", outflow: "Rp 3.000.000", balance: "Rp 1.550.000" },
-];
+const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmtDate = (d: string) => new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
 export default function CashFlowPage() {
   const router = useRouter();
+  const [items, setItems] = useState<any[]>([]);
+  const [summary, setSummary] = useState({ totalInflow: 0, totalOutflow: 0, net: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/finance?report=cash-flow")
+      .then((r) => r.json())
+      .then((j) => {
+        setItems(j.data?.items || []);
+        setSummary(j.data?.summary || { totalInflow: 0, totalOutflow: 0, net: 0 });
+        setLoading(false);
+      })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">
@@ -28,19 +42,21 @@ export default function CashFlowPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Total Inflow</div>
-          <div className="text-xl font-bold text-[--color-success]">Rp 6.050.000</div>
+          <div className="text-xl font-bold text-[--color-success]">{fmt(summary.totalInflow)}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Total Outflow</div>
-          <div className="text-xl font-bold text-[--color-error]">Rp 7.500.000</div>
+          <div className="text-xl font-bold text-[--color-error]">{fmt(summary.totalOutflow)}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Net Cash Flow</div>
-          <div className="text-xl font-bold text-[--color-error]">- Rp 1.450.000</div>
+          <div className={`text-xl font-bold ${summary.net >= 0 ? "text-[--color-success]" : "text-[--color-error]"}`}>
+            {summary.net >= 0 ? "" : "- "}{fmt(Math.abs(summary.net))}
+          </div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Saldo Kas</div>
-          <div className="text-xl font-bold text-[--color-brand]">Rp 1.550.000</div>
+          <div className="text-xl font-bold text-[--color-brand]">{fmt(summary.net)}</div>
         </div>
       </div>
 
@@ -58,12 +74,13 @@ export default function CashFlowPage() {
               <option>Piutang</option>
               <option>Hutang</option>
               <option>Operasional</option>
-              <option>Gaji</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>
-            <button className="btn btn--brand btn--sm flex-1 justify-center"><Search size={14} /> Cari</button>
+            <button className="btn btn--brand btn--sm flex-1 justify-center">
+              <Search size={14} /> Tampilkan
+            </button>
           </div>
         </div>
       </div>
@@ -73,25 +90,36 @@ export default function CashFlowPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Category</th>
+              <th>Tanggal</th>
+              <th>Deskripsi</th>
+              <th>Kategori</th>
               <th className="text-right">Inflow</th>
               <th className="text-right">Outflow</th>
-              <th className="text-right">Balance</th>
             </tr>
           </thead>
           <tbody>
-            {cashFlowData.map((cf, i) => (
-              <tr key={i} className="hover:bg-[#f8f8f8] cursor-pointer">
-                <td className="text-[--color-text-secondary]">{cf.date}</td>
-                <td>{cf.description}</td>
-                <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: cf.category === "Piutang" ? "#2e844a" : cf.category === "Hutang" ? "#ea001e" : "#6b7280", color: "#fff" }}>{cf.category}</span></td>
-                <td className="text-right font-medium text-[--color-success]">{cf.inflow}</td>
-                <td className="text-right font-medium text-[--color-error]">{cf.outflow}</td>
-                <td className="text-right font-medium">{cf.balance}</td>
+            {items.map((item, i) => (
+              <tr key={i} className="hover:bg-[#f8f8f8]">
+                <td className="text-[--color-text-secondary]">{fmtDate(item.date)}</td>
+                <td className="font-medium">{item.description}</td>
+                <td>
+                  <span className="pill pill--draft">{item.category}</span>
+                </td>
+                <td className="text-right">
+                  {item.inflow > 0 ? (
+                    <span className="text-[--color-success] font-medium">{fmt(item.inflow)}</span>
+                  ) : "-"}
+                </td>
+                <td className="text-right">
+                  {item.outflow > 0 ? (
+                    <span className="text-[--color-error] font-medium">{fmt(item.outflow)}</span>
+                  ) : "-"}
+                </td>
               </tr>
             ))}
+            {items.length === 0 && (
+              <tr><td colSpan={5} className="text-center py-8 text-[--color-text-secondary]">Tidak ada data</td></tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -102,8 +130,9 @@ export default function CashFlowPage() {
 function CashIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M6 12h.01M18 12h.01" />
     </svg>
   );
 }

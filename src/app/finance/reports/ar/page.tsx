@@ -1,12 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Download, BarChart3 } from "lucide-react";
 
 /* ── helpers ──────────────────────────────────────────────────────── */
 function fmtRp(n: number): string {
   return "Rp " + n.toLocaleString("id-ID").replace(/,/g, ".");
 }
+
+const num = (v: any): number => {
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  return typeof n === "number" && !isNaN(n) ? n : 0;
+};
+const fmtNum = (v: any): string => num(v).toLocaleString("id-ID");
+const fmtDate = (v: any): string => (v ? new Date(v).toLocaleDateString("id-ID") : "-");
+const pick = (o: any, ...keys: string[]): any => {
+  if (!o) return undefined;
+  for (const k of keys) if (o[k] !== undefined && o[k] !== null) return o[k];
+  return undefined;
+};
+const pickName = (o: any, ...paths: string[]): string => {
+  if (!o) return "-";
+  for (const p of paths) {
+    const v = p.split(".").reduce((a: any, k: string) => (a ? a[k] : undefined), o);
+    if (v) return String(v);
+  }
+  return "-";
+};
 
 const statusPillColor = (s: string): string => {
   const map: Record<string, string> = {
@@ -91,13 +111,7 @@ const TABS: TabConfig[] = [
       { header: "Paid", key: "paid", align: "right" },
       { header: "Due", key: "due", align: "right" },
     ],
-    data: [
-      { invoiceDate: "20 Jun 2026", dueDate: "20 Jul 2026", customer: "PT Transport Jaya", docNo: "IR/SO/2026/0005", refNo: "REF-IR005", status: "Paid", subtotal: "12.000.000", tax: "1.320.000", total: "13.320.000", paid: "13.320.000", due: "0" },
-      { invoiceDate: "15 Jun 2026", dueDate: "15 Jul 2026", customer: "Ahmad Fauzi", docNo: "IR/SO/2026/0004", refNo: "REF-IR004", status: "Unpaid", subtotal: "1.450.000", tax: "159.500", total: "1.609.500", paid: "0", due: "1.609.500" },
-      { invoiceDate: "10 Jun 2026", dueDate: "10 Jul 2026", customer: "CV Berkah Abadi", docNo: "IR/SO/2026/0003", refNo: "REF-IR003", status: "Partial", subtotal: "5.800.000", tax: "638.000", total: "6.438.000", paid: "3.000.000", due: "3.438.000" },
-      { invoiceDate: "05 Jun 2026", dueDate: "05 Jul 2026", customer: "Budi Santoso", docNo: "IR/SO/2026/0002", refNo: "REF-IR002", status: "Unpaid", subtotal: "3.200.000", tax: "352.000", total: "3.552.000", paid: "0", due: "3.552.000" },
-      { invoiceDate: "01 Jun 2026", dueDate: "01 Jul 2026", customer: "PT Maju Jaya", docNo: "IR/SO/2026/0001", refNo: "REF-IR001", status: "Paid", subtotal: "7.500.000", tax: "825.000", total: "8.325.000", paid: "8.325.000", due: "0" },
-    ],
+    data: [],
   },
 
   /* ── B  Invoice Receivables ──────────────────────────── */
@@ -124,12 +138,7 @@ const TABS: TabConfig[] = [
       { header: "Tax", key: "tax", align: "right" },
       { header: "Total", key: "total", align: "right" },
     ],
-    data: [
-      { invoiceDate: "08 Jun 2026", entity: "PT Pencorp Motor", customer: "CV Berkah Abadi", docNo: "INV-004", refNo: "REF-IR004", itemDesc: "Mesin Alternator Rebuilt", qty: 1, unitPrice: "3.500.000", subTotal: "3.500.000", tax: "385.000", total: "3.885.000" },
-      { invoiceDate: "05 Jun 2026", entity: "PT Pencorp Spare", customer: "Siti Rahmawati", docNo: "INV-003", refNo: "REF-IR003", itemDesc: "Kampas Rem Depan - Toyota Avanza", qty: 2, unitPrice: "450.000", subTotal: "900.000", tax: "99.000", total: "999.000" },
-      { invoiceDate: "03 Jun 2026", entity: "PT Pencorp Motor", customer: "Budi Santoso", docNo: "INV-002", refNo: "REF-IR002", itemDesc: "Ban Michelin Pilot Sport 4", qty: 4, unitPrice: "2.800.000", subTotal: "11.200.000", tax: "1.232.000", total: "12.432.000" },
-      { invoiceDate: "01 Jun 2026", entity: "PT Pencorp Motor", customer: "PT Maju Jaya", docNo: "INV-001", refNo: "REF-IR001", itemDesc: "Service Ringan + Ganti Oli", qty: 3, unitPrice: "850.000", subTotal: "2.550.000", tax: "280.500", total: "2.830.500" },
-    ],
+    data: [],
   },
 
   /* ── C  AR Aging ─────────────────────────────────────── */
@@ -157,13 +166,7 @@ const TABS: TabConfig[] = [
       { header: "Over 90", key: "over90", align: "right" },
       { header: "Balance", key: "balance", align: "right" },
     ],
-    data: [
-      { entity: "PT Pencorp Motor", customer: "Budi Santoso", docNo: "IR/SO/2026/0002", refNo: "REF-IR002", invoiceDate: "05 Jun 2026", dueDate: "05 Jul 2026", current: "3.552.000", d1_30: "0", d31_60: "0", d61_90: "0", over90: "0", balance: "3.552.000" },
-      { entity: "PT Pencorp Motor", customer: "PT Maju Jaya", docNo: "IR/SO/2026/0001", refNo: "REF-IR001", invoiceDate: "01 Jun 2026", dueDate: "01 Jul 2026", current: "8.325.000", d1_30: "0", d31_60: "0", d61_90: "0", over90: "0", balance: "8.325.000" },
-      { entity: "PT Pencorp Spare", customer: "CV Berkah Abadi", docNo: "IR/SO/2026/0003", refNo: "REF-IR003", invoiceDate: "10 Apr 2026", dueDate: "10 May 2026", current: "0", d1_30: "0", d31_60: "0", d61_90: "3.438.000", over90: "0", balance: "3.438.000" },
-      { entity: "PT Pencorp Motor", customer: "PT Transport Jaya", docNo: "IR/SO/2026/0005", refNo: "REF-IR005", invoiceDate: "15 Mar 2026", dueDate: "14 Apr 2026", current: "0", d1_30: "0", d31_60: "0", d61_90: "6.438.000", over90: "0", balance: "6.438.000" },
-      { entity: "PT Pencorp Motor", customer: "Ahmad Fauzi", docNo: "IR/SO/2026/0004", refNo: "REF-IR004", invoiceDate: "01 Feb 2026", dueDate: "03 Mar 2026", current: "0", d1_30: "0", d31_60: "0", d61_90: "0", over90: "1.609.500", balance: "1.609.500" },
-    ],
+    data: [],
   },
 
   /* ── D  AR Payments ──────────────────────────────────── */
@@ -194,12 +197,7 @@ const TABS: TabConfig[] = [
       { header: "Payment", key: "payment", align: "right" },
       { header: "Account", key: "account" },
     ],
-    data: [
-      { paymentDate: "15 Jul 2026", docNo: "RCT-2026/004", payRef: "TRF-BRI-004", invoiceRef: "IR/SO/2026/0004", customer: "Ahmad Fauzi", status: "Cleared", payment: "1.609.500", account: "BRI - 1122334455" },
-      { paymentDate: "10 Jul 2026", docNo: "RCT-2026/003", payRef: "TRF-BCA-003", invoiceRef: "IR/SO/2026/0005", customer: "PT Transport Jaya", status: "Pending", payment: "5.000.000", account: "BCA - 1234567890" },
-      { paymentDate: "05 Jul 2026", docNo: "RCT-2026/002", payRef: "TRF-MDR-002", invoiceRef: "IR/SO/2026/0003", customer: "CV Berkah Abadi", status: "Cleared", payment: "3.000.000", account: "Mandiri - 0987654321" },
-      { paymentDate: "01 Jul 2026", docNo: "RCT-2026/001", payRef: "TRF-BCA-001", invoiceRef: "IR/SO/2026/0001", customer: "PT Maju Jaya", status: "Cleared", payment: "8.325.000", account: "BCA - 1234567890" },
-    ],
+    data: [],
   },
 
   /* ── E  AR Credit ────────────────────────────────────── */
@@ -231,10 +229,7 @@ const TABS: TabConfig[] = [
       { header: "Withholding Tax", key: "wht", align: "right" },
       { header: "Total", key: "total", align: "right" },
     ],
-    data: [
-      { invoiceDate: "10 Jun 2026", entity: "PT Pencorp Spare", customer: "Budi Santoso", docNo: "CN-AR/2026/002", status: "Draft", subtotal: "800.000", tax: "88.000", wht: "40.000", total: "848.000" },
-      { invoiceDate: "01 Jun 2026", entity: "PT Pencorp Motor", customer: "PT Maju Jaya", docNo: "CN-AR/2026/001", status: "Approved", subtotal: "1.500.000", tax: "165.000", wht: "75.000", total: "1.590.000" },
-    ],
+    data: [],
   },
 
   /* ── F  AR Overdue ───────────────────────────────────── */
@@ -258,13 +253,7 @@ const TABS: TabConfig[] = [
       { header: "Due Date", key: "dueDate" },
       { header: "Balance (Rp)", key: "balance", align: "right" },
     ],
-    data: [
-      { customer: "Ahmad Fauzi", docNo: "IR/SO/2026/0010", entity: "PT Pencorp Motor", refNo: "REF-IR010", creditTerm: 30, overdueDays: 15, date: "01 Jun 2026", dueDate: "01 Jul 2026", balance: "3.200.000" },
-      { customer: "CV Berkah Abadi", docNo: "IR/SO/2026/0009", entity: "PT Pencorp Motor", refNo: "REF-IR009", creditTerm: 30, overdueDays: 45, date: "10 May 2026", dueDate: "09 Jun 2026", balance: "6.100.000" },
-      { customer: "Siti Rahmawati", docNo: "IR/SO/2026/0008", entity: "PT Pencorp Spare", refNo: "REF-IR008", creditTerm: 45, overdueDays: 75, date: "01 Apr 2026", dueDate: "16 May 2026", balance: "2.850.000" },
-      { customer: "Budi Santoso", docNo: "IR/SO/2026/0007", entity: "PT Pencorp Motor", refNo: "REF-IR007", creditTerm: 30, overdueDays: 95, date: "15 Mar 2026", dueDate: "14 Apr 2026", balance: "4.200.000" },
-      { customer: "PT Maju Jaya", docNo: "IR/SO/2026/0006", entity: "PT Pencorp Motor", refNo: "REF-IR006", creditTerm: 30, overdueDays: 120, date: "01 Feb 2026", dueDate: "03 Mar 2026", balance: "7.500.000" },
-    ],
+    data: [],
   },
 
   /* ── G  AR Overlimit ─────────────────────────────────── */
@@ -282,11 +271,7 @@ const TABS: TabConfig[] = [
       { header: "Invoice Receivables (Rp)", key: "invoiceReceivables", align: "right" },
       { header: "Balance (Rp)", key: "balance", align: "right" },
     ],
-    data: [
-      { customer: "PT Maju Jaya", creditLimit: "10.000.000", salesInvoices: "15.500.000", invoiceReceivables: "8.325.000", balance: "7.175.000" },
-      { customer: "CV Berkah Abadi", creditLimit: "5.000.000", salesInvoices: "9.800.000", invoiceReceivables: "6.438.000", balance: "3.362.000" },
-      { customer: "PT Transport Jaya", creditLimit: "8.000.000", salesInvoices: "13.320.000", invoiceReceivables: "13.320.000", balance: "0" },
-    ],
+    data: [],
   },
 
   /* ── H  AR Subledger ─────────────────────────────────── */
@@ -309,12 +294,7 @@ const TABS: TabConfig[] = [
       { header: "Due Amount", key: "dueAmount", align: "right" },
       { header: "Paid Date", key: "paidDate" },
     ],
-    data: [
-      { entity: "PT Pencorp Motor", customer: "Ahmad Fauzi", invoiceNo: "IR/SO/2026/0004", invoiceDate: "15 Jun 2026", netSubtotal: "1.609.500", paid: "1.609.500", dueAmount: "0", paidDate: "15 Jul 2026" },
-      { entity: "PT Pencorp Spare", customer: "CV Berkah Abadi", invoiceNo: "IR/SO/2026/0003", invoiceDate: "10 Jun 2026", netSubtotal: "6.438.000", paid: "3.000.000", dueAmount: "3.438.000", paidDate: "-" },
-      { entity: "PT Pencorp Motor", customer: "Budi Santoso", invoiceNo: "IR/SO/2026/0002", invoiceDate: "05 Jun 2026", netSubtotal: "3.552.000", paid: "0", dueAmount: "3.552.000", paidDate: "-" },
-      { entity: "PT Pencorp Motor", customer: "PT Maju Jaya", invoiceNo: "IR/SO/2026/0001", invoiceDate: "01 Jun 2026", netSubtotal: "8.325.000", paid: "8.325.000", dueAmount: "0", paidDate: "01 Jul 2026" },
-    ],
+    data: [],
   },
 
   /* ── I  AR Cheque/BG ─────────────────────────────────── */
@@ -346,11 +326,7 @@ const TABS: TabConfig[] = [
       { header: "Cheque/BG No.", key: "chequeNo" },
       { header: "Amount", key: "amount", align: "right" },
     ],
-    data: [
-      { customer: "CV Berkah Abadi", docNo: "RCT-2026/007", entity: "PT Pencorp Spare", paymentDate: "10 Jul 2026", status: "Bounced", issuedDate: "05 Jul 2026", chequeNo: "CK-009012", amount: "1.800.000" },
-      { customer: "Budi Santoso", docNo: "RCT-2026/006", entity: "PT Pencorp Motor", paymentDate: "05 Jul 2026", status: "Pending", issuedDate: "01 Jul 2026", chequeNo: "BG-005678", amount: "2.500.000" },
-      { customer: "PT Maju Jaya", docNo: "RCT-2026/005", entity: "PT Pencorp Motor", paymentDate: "01 Jul 2026", status: "Cleared", issuedDate: "28 Jun 2026", chequeNo: "CK-001234", amount: "5.000.000" },
-    ],
+    data: [],
   },
 ];
 
@@ -358,10 +334,131 @@ const TABS: TabConfig[] = [
 export default function ARReportsPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
+  const [tabData, setTabData] = useState<Record<string, any>[]>([]);
+  const [loading, setLoading] = useState(false);
   const cfg = TABS[activeTab];
+
+  useEffect(() => {
+    setLoading(true);
+    setTabData([]);
+    const tabId = TABS[activeTab].id;
+    let url = "";
+    if (tabId === "account-receivables") url = "/api/accounts-receivable?limit=100";
+    else if (tabId === "ar-aging") url = "/api/reports/finance?report=ar-aging";
+    else if (tabId === "ar-payments") url = "/api/payments?limit=100";
+    else if (tabId === "invoice-receivables") url = "/api/reports/finance?report=invoice-receivables";
+    else if (tabId === "ar-credit") url = "/api/reports/finance?report=ar-credit";
+    else if (tabId === "ar-overdue") url = "/api/reports/finance?report=ar-overdue";
+    else if (tabId === "ar-overlimit") url = "/api/reports/finance?report=ar-overlimit";
+    else if (tabId === "ar-subledger") url = "/api/reports/finance?report=ar-subledger";
+    else if (tabId === "ar-cheque") url = "/api/reports/finance?report=ar-cheque";
+
+    if (!url) { setLoading(false); return; }
+
+    fetch(url)
+      .then((r) => r.json())
+      .then((j) => {
+        const raw = j.data?.items || j.data || [];
+        if (tabId === "account-receivables") {
+          setTabData(raw.map((ar: any) => ({
+            invoiceDate: "-",
+            dueDate: ar.dueDate ? new Date(ar.dueDate).toLocaleDateString("id-ID") : "-",
+            customer: ar.customer?.name || "-",
+            docNo: ar.invoice?.invNo || "-",
+            refNo: "-",
+            status: ar.status || "-",
+            total: (ar.amount || 0).toLocaleString("id-ID"),
+            paid: ((ar.amount || 0) - (ar.balance || 0)).toLocaleString("id-ID"),
+            due: (ar.balance || 0).toLocaleString("id-ID"),
+          })));
+        } else if (tabId === "ar-aging") {
+          setTabData(raw.map((ar: any) => ({
+            customer: ar.customer?.name || "-",
+            docNo: ar.invoice?.invNo || "-",
+            dueDate: ar.dueDate ? new Date(ar.dueDate).toLocaleDateString("id-ID") : "-",
+            status: ar.status || "-",
+            total: (ar.balance || 0).toLocaleString("id-ID"),
+          })));
+        } else if (tabId === "invoice-receivables") {
+          setTabData(raw.map((r: any) => ({
+            invoiceDate: fmtDate(pick(r, "invoiceDate", "date")),
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            customer: pickName(r, "customer", "customer.name", "customerName", "invoice.customer.name"),
+            docNo: pick(r, "docNo", "documentNo", "invNo", "invoiceNo") || "-",
+            refNo: pick(r, "refNo", "referenceNo") || "-",
+            itemDesc: pick(r, "itemDesc", "item", "description") || "-",
+            qty: fmtNum(pick(r, "qty", "quantity")),
+            unitPrice: fmtNum(pick(r, "unitPrice", "unit_price")),
+            subTotal: fmtNum(pick(r, "subTotal", "subtotal", "total")),
+            tax: fmtNum(pick(r, "tax", "taxAmount")),
+            total: fmtNum(pick(r, "total", "grandTotal")),
+          })));
+        } else if (tabId === "ar-credit") {
+          setTabData(raw.map((r: any) => ({
+            invoiceDate: fmtDate(pick(r, "invoiceDate", "date")),
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            customer: pickName(r, "customer", "customer.name", "customerName", "invoice.customer.name"),
+            docNo: pick(r, "docNo", "documentNo", "invNo", "invoiceNo") || "-",
+            status: pick(r, "status") || "-",
+            subtotal: fmtNum(pick(r, "subtotal", "subTotal")),
+            tax: fmtNum(pick(r, "tax", "taxAmount")),
+            wht: fmtNum(pick(r, "wht", "withholdingTax", "withholding")),
+            total: fmtNum(pick(r, "total", "grandTotal")),
+          })));
+        } else if (tabId === "ar-overdue") {
+          setTabData(raw.map((r: any) => ({
+            customer: pickName(r, "customer", "customer.name", "customerName", "invoice.customer.name"),
+            docNo: pick(r, "docNo", "documentNo", "invNo", "invoiceNo", "invoice.invNo") || "-",
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            refNo: pick(r, "refNo", "referenceNo") || "-",
+            creditTerm: fmtNum(pick(r, "creditTerm", "creditTermDays", "termDays")),
+            overdueDays: fmtNum(pick(r, "overdueDays", "daysOverdue")),
+            date: fmtDate(pick(r, "date", "invoiceDate")),
+            dueDate: fmtDate(pick(r, "dueDate")),
+            balance: fmtNum(pick(r, "balance", "amountDue", "outstanding")),
+          })));
+        } else if (tabId === "ar-overlimit") {
+          setTabData(raw.map((r: any) => ({
+            customer: pickName(r, "customer", "customer.name", "customerName"),
+            creditLimit: fmtNum(pick(r, "creditLimit")),
+            salesInvoices: fmtNum(pick(r, "salesInvoices", "salesInvoiceTotal")),
+            invoiceReceivables: fmtNum(pick(r, "invoiceReceivables", "invoiceReceivableTotal")),
+            balance: fmtNum(pick(r, "balance", "outstanding")),
+          })));
+        } else if (tabId === "ar-subledger") {
+          setTabData(raw.map((r: any) => ({
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            customer: pickName(r, "customer", "customer.name", "customerName", "invoice.customer.name"),
+            invoiceNo: pick(r, "invoiceNo", "invNo", "docNo", "documentNo", "invoice.invNo") || "-",
+            invoiceDate: fmtDate(pick(r, "invoiceDate", "date")),
+            netSubtotal: fmtNum(pick(r, "netSubtotal", "netSubTotal", "subtotal")),
+            paid: fmtNum(pick(r, "paid", "amountPaid", "paidAmount")),
+            dueAmount: fmtNum(pick(r, "dueAmount", "balance", "amountDue")),
+            paidDate: fmtDate(pick(r, "paidDate", "lastPaidDate")),
+          })));
+        } else if (tabId === "ar-cheque") {
+          setTabData(raw.map((r: any) => ({
+            customer: pickName(r, "customer", "customer.name", "customerName"),
+            docNo: pick(r, "docNo", "documentNo", "paymentNo", "invNo") || "-",
+            entity: pickName(r, "entity", "store.name", "businessEntity"),
+            paymentDate: fmtDate(pick(r, "paymentDate")),
+            status: pick(r, "status") || "-",
+            issuedDate: fmtDate(pick(r, "issuedDate")),
+            chequeNo: pick(r, "chequeNo", "chequeNumber", "bgNo") || "-",
+            amount: fmtNum(pick(r, "amount", "amountPaid")),
+          })));
+        } else {
+          setTabData(raw);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [activeTab]);
+
+  const displayData = tabData;
   const PER_PAGE = 20;
-  const totalPages = Math.ceil(cfg.data.length / PER_PAGE);
-  const pagedData = cfg.data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const totalPages = Math.ceil(displayData.length / PER_PAGE);
+  const pagedData = displayData.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -484,7 +581,7 @@ export default function ARReportsPage() {
 
       {/* ── data table ── */}
       <div style={{ margin: "0 24px 24px", overflowX: "auto" }}>
-        {cfg.data.length === 0 ? (
+        {displayData.length === 0 ? (
           <div style={{ padding: "40px 0", textAlign: "center", fontSize: 14, color: "#444746", background: "#f9f9f9", borderRadius: 8, border: "1px solid #ecebea" }}>
             No data available
           </div>

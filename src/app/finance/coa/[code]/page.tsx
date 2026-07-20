@@ -1,25 +1,50 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Edit, Download } from "lucide-react";
 
-const mockTransactions = [
-  { date: "26 Jun 2026", ref: "INV-001", description: "Pembayaran Invoice INV-001", debit: 2500000, credit: 0 },
-  { date: "25 Jun 2026", ref: "INV-003", description: "Pembayaran Invoice INV-003", debit: 2600000, credit: 0 },
-  { date: "24 Jun 2026", ref: "WO-004", description: "Pembayaran sparepart WO-004", debit: 0, credit: 1500000 },
-  { date: "23 Jun 2026", ref: "INV-004", description: "Pembayaran Invoice INV-004", debit: 950000, credit: 0 },
-];
+const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
 export default function COADetailPage() {
   const router = useRouter();
   const params = useParams();
+  const code = params.code as string;
+  const [account, setAccount] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/coa?search=${encodeURIComponent(code)}`)
+      .then((r) => r.json())
+      .then((json) => {
+        const accounts = json.data || [];
+        const found = accounts.find((a: any) => a.code === code);
+        setAccount(found || { code, name: `Akun ${code}` });
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load account"); setLoading(false); });
+  }, [code]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  // TODO: No dedicated API for account transaction history yet. Using hardcoded data.
+  const mockTransactions = [
+    { date: "26 Jun 2026", ref: "INV-001", description: "Pembayaran Invoice INV-001", debit: 2500000, credit: 0 },
+    { date: "25 Jun 2026", ref: "INV-003", description: "Pembayaran Invoice INV-003", debit: 2600000, credit: 0 },
+    { date: "24 Jun 2026", ref: "WO-004", description: "Pembayaran sparepart WO-004", debit: 0, credit: 1500000 },
+    { date: "23 Jun 2026", ref: "INV-004", description: "Pembayaran Invoice INV-004", debit: 950000, credit: 0 },
+  ];
 
   return (
     <div>
       <div className="view-header">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="btn btn--sm"><ArrowLeft size={16} /></button>
-          <div className="view-title">Akun {params.code}</div>
+          <div className="view-title">Akun {account.code}</div>
         </div>
         <div className="flex gap-2">
           <button className="btn btn--sm"><Download size={14} /> Export</button>
@@ -30,11 +55,11 @@ export default function COADetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Kode Akun</div>
-          <div className="text-lg font-bold">{params.code}</div>
+          <div className="text-lg font-bold">{account.code}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Nama Akun</div>
-          <div className="text-lg font-bold">Kas & Bank</div>
+          <div className="text-lg font-bold">{account.name}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Saldo Saat Ini</div>

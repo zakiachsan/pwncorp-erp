@@ -1,15 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
-
-const invoices = [
-  { no: "INV-001", so: "SO-001", customer: "Budi Santoso", status: "Paid", total: "Rp 2.500.000", due: "30 Jun 2026", paid: "Rp 2.500.000" },
-  { no: "INV-002", so: "SO-002", customer: "PT Maju Jaya", status: "Unpaid", total: "Rp 1.800.000", due: "28 Jun 2026", paid: "-" },
-  { no: "INV-003", so: "SO-003", customer: "Siti Rahmawati", status: "Partial", total: "Rp 5.200.000", due: "02 Jul 2026", paid: "Rp 2.600.000" },
-  { no: "INV-004", so: "SO-005", customer: "Ahmad Fauzi", status: "Paid", total: "Rp 950.000", due: "28 Jun 2026", paid: "Rp 950.000" },
-  { no: "INV-005", so: "SO-006", customer: "PT Transport Jaya", status: "Draft", total: "Rp 4.800.000", due: "-", paid: "-" },
-];
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Draft: "#6b7280", Paid: "#2e844a", Unpaid: "#ea001e", Partial: "#f59e0b", Overdue: "#ea001e" };
@@ -18,6 +11,25 @@ const statusPill = (status: string) => {
 
 export default function InvoicesPage() {
   const router = useRouter();
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (statusFilter) params.set("status", statusFilter);
+    fetch(`/api/invoices?${params.toString()}`)
+      .then((r) => r.json())
+      .then((json) => { setInvoices(json.data || []); setLoading(false); })
+      .catch(() => { setError("Failed to load invoices"); setLoading(false); });
+  }, [search, statusFilter]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
       <div className="view-header">
@@ -35,19 +47,19 @@ export default function InvoicesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Total Invoice</div>
-          <div className="text-xl font-bold text-[--color-text-primary]">Rp 15.250.000</div>
+          <div className="text-xl font-bold text-[--color-text-primary]">Rp {invoices.reduce((s: number, i: any) => s + (i.total || 0), 0).toLocaleString("id-ID")}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Paid</div>
-          <div className="text-xl font-bold text-[--color-success]">Rp 3.450.000</div>
+          <div className="text-xl font-bold text-[--color-success]">Rp {invoices.filter((i: any) => i.status === "Paid").reduce((s: number, i: any) => s + (i.paidAmount || 0), 0).toLocaleString("id-ID")}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Unpaid</div>
-          <div className="text-xl font-bold text-[--color-error]">Rp 1.800.000</div>
+          <div className="text-xl font-bold text-[--color-error]">Rp {invoices.filter((i: any) => i.status === "Unpaid").reduce((s: number, i: any) => s + (i.total || 0), 0).toLocaleString("id-ID")}</div>
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Partial</div>
-          <div className="text-xl font-bold text-[--color-warning]">Rp 2.600.000</div>
+          <div className="text-xl font-bold text-[--color-warning]">Rp {invoices.filter((i: any) => i.status === "Partial").reduce((s: number, i: any) => s + (i.paidAmount || 0), 0).toLocaleString("id-ID")}</div>
         </div>
       </div>
 
@@ -56,17 +68,17 @@ export default function InvoicesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>Draft</option>
-              <option>Paid</option>
-              <option>Unpaid</option>
-              <option>Partial</option>
+            <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">All Status</option>
+              <option value="Draft">Draft</option>
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Unpaid</option>
+              <option value="Partial">Partial</option>
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="No. Invoice / Customer..." />
+            <input type="text" className="form-input" placeholder="No. Invoice / Customer..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">Periode</label>
@@ -94,15 +106,15 @@ export default function InvoicesPage() {
             </tr>
           </thead>
           <tbody>
-            {invoices.map((inv) => (
-              <tr key={inv.no} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/${inv.no}`)}>
-                <td className="font-medium text-[--color-brand]">{inv.no}</td>
-                <td className="text-[--color-text-secondary]">{inv.so}</td>
-                <td>{inv.customer}</td>
+            {invoices.map((inv: any) => (
+              <tr key={inv.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/${inv.invNo || inv.id}`)}>
+                <td className="font-medium text-[--color-brand]">{inv.invNo}</td>
+                <td className="text-[--color-text-secondary]">{inv.so?.soNo || "-"}</td>
+                <td>{inv.customer?.name || "-"}</td>
                 <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(inv.status), color: "#fff" }}>{inv.status}</span></td>
-                <td className="text-right font-medium">{inv.total}</td>
-                <td className="text-[--color-text-secondary]">{inv.due}</td>
-                <td className="text-right">{inv.paid}</td>
+                <td className="text-right font-medium">Rp {(inv.total || 0).toLocaleString("id-ID")}</td>
+                <td className="text-[--color-text-secondary]">{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td className="text-right">Rp {(inv.paidAmount || 0).toLocaleString("id-ID")}</td>
               </tr>
             ))}
           </tbody>
