@@ -59,6 +59,9 @@ export default function ProductsPage() {
         <button className="btn btn--sm">
           <Download size={14} /> Export
         </button>
+        <button onClick={() => router.push("/products/new")} className="btn btn--brand btn--sm">
+          + Add Product
+        </button>
       </div>
 
       <div className="flex border-b border-[--color-border-light] mb-4 gap-0 overflow-x-auto">
