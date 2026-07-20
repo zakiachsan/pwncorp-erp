@@ -131,7 +131,7 @@ export default function SOADetailPage() {
   const params = useParams();
   const refCodeArray = params.refCode as string[];
   const refCode = refCodeArray ? refCodeArray.join("/") : "";
-  const [soaData, setSoaData] = useState<Record<string, any>>(hardcodedSoaData);
+  const [soaData, setSoaData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [printMode, setPrintMode] = useState(false);
 
@@ -176,7 +176,7 @@ export default function SOADetailPage() {
               })),
             };
           });
-          setSoaData({ ...hardcodedSoaData, ...apiSoaData });
+          setSoaData(apiSoaData);
         }
         setLoading(false);
       })

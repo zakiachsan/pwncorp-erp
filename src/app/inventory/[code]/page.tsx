@@ -1,86 +1,70 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, Edit, AlertTriangle } from "lucide-react";
 
-const inventoryData: Record<string, any> = {
-  "SP-001": {
-    code: "SP-001",
-    name: "Oli Mesin 10W-40",
-    brand: "Shell",
-    category: "Oli",
-    unit: "Ltr",
-    buyPrice: 75000,
-    sellPrice: 85000,
-    minStock: 10,
-    location: "Rak A-01",
-    description: "Oli mesin untuk kendaraan bensin dan diesel",
-    stock: 45,
-    lastPurchase: "25 Jun 2026",
-    lastUsed: "26 Jun 2026",
-    createdAt: "15 Jan 2026",
-    updatedAt: "26 Jun 2026",
-    updatedBy: "Admin",
-  },
-  "SP-002": {
-    code: "SP-002",
-    name: "Filter Oli",
-    brand: "Toyota Genuine",
-    category: "Filter",
-    unit: "Pcs",
-    buyPrice: 50000,
-    sellPrice: 65000,
-    minStock: 5,
-    location: "Rak A-02",
-    description: "Filter oli original Toyota",
-    stock: 22,
-    lastPurchase: "24 Jun 2026",
-    lastUsed: "25 Jun 2026",
-    createdAt: "15 Jan 2026",
-    updatedAt: "25 Jun 2026",
-    updatedBy: "Admin",
-  },
-  "SP-003": {
-    code: "SP-003",
-    name: "Kampas Rem Depan",
-    brand: "Bendix",
-    category: "Rem",
-    unit: "Set",
-    buyPrice: 180000,
-    sellPrice: 250000,
-    minStock: 10,
-    location: "Rak B-01",
-    description: "Kampas rem depan untuk mobil",
-    stock: 8,
-    lastPurchase: "22 Jun 2026",
-    lastUsed: "24 Jun 2026",
-    createdAt: "15 Jan 2026",
-    updatedAt: "24 Jun 2026",
-    updatedBy: "Admin",
-  },
+const fmt = (n: number) => n.toLocaleString("id-ID");
+
+const fmtDate = (d: string | Date | null | undefined) => {
+  if (!d) return "-";
+  return new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const changeTypeLabel: Record<string, string> = { in: "Purchase", out: "Used", adjust: "Stock Opname" };
+const changeTypeColor: Record<string, string> = { in: "#2e844a", out: "#ea001e", adjust: "#f59e0b" };
 
 export default function InventoryDetailPage() {
   const params = useParams();
   const router = useRouter();
   const code = params.code as string;
   const [activeTab, setActiveTab] = useState<"product" | "stock" | "price">("product");
+  const [item, setItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const item = inventoryData[code];
+  useEffect(() => {
+    if (!code) return;
+    setLoading(true);
+    fetch(`/api/spareparts?search=${encodeURIComponent(code)}&limit=1`)
+      .then((r) => r.json())
+      .then((j) => {
+        const found = j.data?.[0];
+        if (!found) { setError(`Data tidak ditemukan: ${code}`); setLoading(false); return; }
+        // Fetch full detail with stock histories
+        return fetch(`/api/spareparts/${found.id}`)
+          .then((r) => r.json())
+          .then((dj) => {
+            setItem(dj.data || found);
+            setLoading(false);
+          });
+      })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, [code]);
 
-  if (!item) {
+  if (loading) {
     return (
       <div style={{ padding: 24 }}>
         <button onClick={() => router.push("/inventory")} style={S.backBtn}>
           <ArrowLeft size={16} /> Kembali
         </button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {code}</p></div>
+        <div style={{ ...S.card, marginTop: 16, textAlign: "center", color: "#444746", padding: 40 }}>Memuat data...</div>
       </div>
     );
   }
+
+  if (error || !item) {
+    return (
+      <div style={{ padding: 24 }}>
+        <button onClick={() => router.push("/inventory")} style={S.backBtn}>
+          <ArrowLeft size={16} /> Kembali
+        </button>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>{error || `Data tidak ditemukan: ${code}`}</p></div>
+      </div>
+    );
+  }
+
+  const stockHistories: any[] = item.stockHistories || [];
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -93,7 +77,7 @@ export default function InventoryDetailPage() {
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Product Details</h1>
             <div style={{ fontSize: 13, color: "#0176d3", marginTop: 2 }}>
-              {item.code} - {item.name}
+              {item.code || item.sku} - {item.name}
             </div>
           </div>
         </div>
@@ -128,36 +112,37 @@ export default function InventoryDetailPage() {
           {/* Left Column */}
           <div>
             <SectionTitle>Details</SectionTitle>
-            <F label="SKU" value={item.code} />
+            <F label="SKU" value={item.sku || item.code || "-"} />
             <F label="NAME" value={item.name} />
-            <F label="DESCRIPTION" value={item.description || "-"} />
-            <F label="BRAND" value={item.brand} />
-            <F label="CATEGORY" value={item.category} />
-            <F label="UNIT" value={item.unit} />
+            <F label="DESCRIPTION" value={item.type || "-"} />
+            <F label="BRAND" value={item.brand || "-"} />
+            <F label="CATEGORY" value={item.category || "-"} />
+            <F label="UNIT" value={item.unit || "pcs"} />
 
             <SectionTitle>Pricing</SectionTitle>
-            <F label="BUY PRICE (Rp)" value={fmt(item.buyPrice)} />
-            <F label="SELL PRICE (Rp)" value={fmt(item.sellPrice)} />
-            <F label="MARGIN" value={`${Math.round(((item.sellPrice - item.buyPrice) / item.buyPrice) * 100)}%`} />
+            <F label="BUY PRICE (Rp)" value={fmt(item.buyPrice || 0)} />
+            <F label="SELL PRICE (Rp)" value={fmt(item.sellPrice || 0)} />
+            <F label="MARGIN" value={item.buyPrice > 0 ? `${Math.round(((item.sellPrice - item.buyPrice) / item.buyPrice) * 100)}%` : "-"} />
           </div>
 
           {/* Right Column */}
           <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
             <SectionTitle>Stock Information</SectionTitle>
-            <F label="CURRENT STOCK" value={`${item.stock} ${item.unit}`} highlight={item.stock <= item.minStock} />
-            <F label="MIN STOCK" value={`${item.minStock} ${item.unit}`} />
-            <F label="LOCATION" value={item.location} />
+            <F label="CURRENT STOCK" value={`${item.stockQty ?? 0} ${item.unit || "pcs"}`} highlight={(item.stockQty ?? 0) <= (item.minStock ?? 0)} />
+            <F label="MIN STOCK" value={`${item.minStock ?? 0} ${item.unit || "pcs"}`} />
+            <F label="LOCATION" value={item.location || "-"} />
+            <F label="SUPPLIER" value={item.supplier?.companyName || "-"} />
 
-            {item.stock <= item.minStock && (
+            {(item.stockQty ?? 0) <= (item.minStock ?? 0) && (
               <div style={{ ...S.alertBox, background: "#fef3cd", border: "1px solid #ffc107", color: "#856404" }}>
                 <AlertTriangle size={14} /> Stok di bawah minimum!
               </div>
             )}
 
             <SectionTitle>Changes</SectionTitle>
-            <F label="CREATED AT" value={item.createdAt} />
-            <F label="UPDATED AT" value={item.updatedAt} />
-            <F label="UPDATED BY" value={item.updatedBy} />
+            <F label="CREATED AT" value={fmtDate(item.createdAt)} />
+            <F label="UPDATED AT" value={fmtDate(item.createdAt)} />
+            <F label="UPDATED BY" value="-" />
           </div>
         </div>
       )}
@@ -179,30 +164,18 @@ export default function InventoryDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr style={S.tr}>
-                  <td style={S.td}>26 Jun 2026</td>
-                  <td style={S.td}><span style={{ ...S.pill, background: "#ea001e" }}>Used</span></td>
-                  <td style={{ ...S.td, color: "#0176d3" }}>WO-001</td>
-                  <td style={{ ...S.td, textAlign: "right", color: "#ea001e" }}>-4</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>45</td>
-                  <td style={S.td}>Hendra</td>
-                </tr>
-                <tr style={S.tr}>
-                  <td style={S.td}>25 Jun 2026</td>
-                  <td style={S.td}><span style={{ ...S.pill, background: "#2e844a" }}>Purchase</span></td>
-                  <td style={{ ...S.td, color: "#0176d3" }}>PO-001</td>
-                  <td style={{ ...S.td, textAlign: "right", color: "#2e844a" }}>+20</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>49</td>
-                  <td style={S.td}>Admin</td>
-                </tr>
-                <tr style={S.tr}>
-                  <td style={S.td}>24 Jun 2026</td>
-                  <td style={S.td}><span style={{ ...S.pill, background: "#ea001e" }}>Used</span></td>
-                  <td style={{ ...S.td, color: "#0176d3" }}>WO-003</td>
-                  <td style={{ ...S.td, textAlign: "right", color: "#ea001e" }}>-2</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>29</td>
-                  <td style={S.td}>Agus</td>
-                </tr>
+                {stockHistories.length > 0 ? stockHistories.map((h: any) => (
+                  <tr key={h.id} style={S.tr}>
+                    <td style={S.td}>{fmtDate(h.date)}</td>
+                    <td style={S.td}><span style={{ ...S.pill, background: changeTypeColor[h.changeType] || "#6b7280" }}>{changeTypeLabel[h.changeType] || h.changeType}</span></td>
+                    <td style={{ ...S.td, color: "#0176d3" }}>{h.refDoc || "-"}</td>
+                    <td style={{ ...S.td, textAlign: "right", color: h.qtyChange > 0 ? "#2e844a" : "#ea001e" }}>{h.qtyChange > 0 ? "+" : ""}{h.qtyChange}</td>
+                    <td style={{ ...S.td, textAlign: "right" }}>{h.qtyAfter}</td>
+                    <td style={S.td}>{h.user?.name || "-"}</td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={6} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada history stock</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -225,16 +198,10 @@ export default function InventoryDetailPage() {
               </thead>
               <tbody>
                 <tr style={S.tr}>
-                  <td style={S.td}>26 Jun 2026</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>Rp 75.000</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>Rp 85.000</td>
-                  <td style={S.td}>Admin</td>
-                </tr>
-                <tr style={S.tr}>
-                  <td style={S.td}>15 Jan 2026</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>Rp 70.000</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>Rp 80.000</td>
-                  <td style={S.td}>Admin</td>
+                  <td style={S.td}>{fmtDate(item.createdAt)}</td>
+                  <td style={{ ...S.td, textAlign: "right" }}>Rp {fmt(item.buyPrice || 0)}</td>
+                  <td style={{ ...S.td, textAlign: "right" }}>Rp {fmt(item.sellPrice || 0)}</td>
+                  <td style={S.td}>-</td>
                 </tr>
               </tbody>
             </table>

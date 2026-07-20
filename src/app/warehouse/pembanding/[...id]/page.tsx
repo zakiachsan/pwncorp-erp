@@ -1,58 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Check } from "lucide-react";
-
-const comparisonData: Record<string, any> = {
-  "CMP/WM/26060001": {
-    id: "CMP/WM/26060001",
-    date: "24 Jun 2026",
-    refNo: "PRQ/HO/26010014",
-    status: "Sudah Dipilih",
-    items: [
-      { nama: "Oli Mesin 5W-30", qty: 4, satuan: "Liter" },
-      { nama: "Filter Udara", qty: 1, satuan: "Pcs" },
-      { nama: "Filter Oli", qty: 1, satuan: "Pcs" },
-      { nama: "Busi NGK LKR6C", qty: 4, satuan: "Pcs" },
-    ],
-    vendors: [
-      {
-        id: "V1",
-        supplier: "PT Auto Parts Sejahtera",
-        pilihan: "Dipilih",
-        items: [
-          { hargaSatuan: 85000 },
-          { hargaSatuan: 45000 },
-          { hargaSatuan: 42000 },
-          { hargaSatuan: 36036 },
-        ],
-      },
-      {
-        id: "V2",
-        supplier: "CV Suku Cadang Jaya",
-        pilihan: "Alternatif",
-        items: [
-          { hargaSatuan: 82000 },
-          { hargaSatuan: 42000 },
-          { hargaSatuan: 40000 },
-          { hargaSatuan: 34000 },
-        ],
-      },
-      {
-        id: "V3",
-        supplier: "UD Sparepart Berkah",
-        pilihan: "Alternatif",
-        items: [
-          { hargaSatuan: 80000 },
-          { hargaSatuan: 43500 },
-          { hargaSatuan: 41000 },
-          { hargaSatuan: 35500 },
-        ],
-      },
-    ],
-  },
-};
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
@@ -61,23 +11,76 @@ export default function PembandingDetailPage() {
   const router = useRouter();
   const idArray = params.id as string[];
   const id = idArray ? idArray.join("/") : "";
-  const data = comparisonData[id];
 
-  const [vendors, setVendors] = useState(data?.vendors || []);
-  const [items, setItems] = useState(data?.items || []);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [addVendorOpen, setAddVendorOpen] = useState(false);
   const [newVendorName, setNewVendorName] = useState("");
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [newItem, setNewItem] = useState({ nama: "", qty: 1, satuan: "Pcs" });
 
-  if (!data) {
+  // Fetch sparepart data by search id
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    fetch(`/api/spareparts?search=${encodeURIComponent(id)}&limit=1`)
+      .then((r) => r.json())
+      .then((j) => {
+        const found = j.data?.[0];
+        if (!found) {
+          setError(`Data tidak ditemukan: ${id}`);
+          setLoading(false);
+          return;
+        }
+        // Build comparison data from sparepart
+        const comparisonData = {
+          id: id,
+          date: new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }),
+          refNo: found.sku || found.code || "-",
+          status: "Draft",
+          items: [
+            { nama: found.name, qty: 1, satuan: found.unit || "Pcs" },
+          ],
+          vendors: found.supplier ? [
+            {
+              id: "V1",
+              supplier: found.supplier.companyName,
+              pilihan: "Dipilih",
+              items: [{ hargaSatuan: found.buyPrice || 0 }],
+            },
+          ] : [],
+        };
+        setData(comparisonData);
+        setVendors(comparisonData.vendors);
+        setItems(comparisonData.items);
+        setLoading(false);
+      })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div style={{ padding: 24 }}>
+        <button onClick={() => router.push("/warehouse/pembanding")} className="btn btn--sm mb-4">
+          <ArrowLeft size={16} /> Kembali
+        </button>
+        <div className="card-slds" style={{ padding: 40, textAlign: "center", color: "#444746" }}>Memuat data...</div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
     return (
       <div style={{ padding: 24 }}>
         <button onClick={() => router.push("/warehouse/pembanding")} className="btn btn--sm mb-4">
           <ArrowLeft size={16} /> Kembali
         </button>
         <div className="card-slds">
-          <p className="text-sm text-[--color-text-secondary]">Data tidak ditemukan: {id}</p>
+          <p className="text-sm text-[--color-text-secondary]">{error || `Data tidak ditemukan: ${id}`}</p>
         </div>
       </div>
     );

@@ -5,18 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, Star, GitCompare } from "lucide-react";
 
-const comparisons = [
-  { id: "CMP/WM/26060001", date: "24 Jun 2026", refNo: "PRQ/HO/26010014", vendorCount: 3, selectedVendor: "PT Auto Parts Sejahtera", status: "Sudah Dipilih" },
-  { id: "CMP/WM/26060002", date: "24 Jun 2026", refNo: "PRQ/HO/26010013", vendorCount: 2, selectedVendor: null, status: "Belum Dipilih" },
-  { id: "CMP/WM/26060003", date: "25 Jun 2026", refNo: "PRQ/HO/26010012", vendorCount: 4, selectedVendor: "CV Suku Cadang Jaya", status: "Sudah Dipilih" },
-  { id: "CMP/WM/26060004", date: "25 Jun 2026", refNo: "PRQ/HO/26010011", vendorCount: 3, selectedVendor: null, status: "Belum Dipilih" },
-  { id: "CMP/WM/26060005", date: "26 Jun 2026", refNo: "PRQ/HO/26010010", vendorCount: 2, selectedVendor: "UD Sparepart Berkah", status: "Sudah Dipilih" },
-  { id: "CMP/WM/26060006", date: "26 Jun 2026", refNo: "PRQ/HO/26010009", vendorCount: 5, selectedVendor: null, status: "Belum Dipilih" },
-  { id: "CMP/WM/26060007", date: "27 Jun 2026", refNo: "PRQ/HO/26010008", vendorCount: 3, selectedVendor: "PT Maju Motor Indonesia", status: "Sudah Dipilih" },
-  { id: "CMP/WM/26060008", date: "27 Jun 2026", refNo: "PRQ/HO/26010007", vendorCount: 2, selectedVendor: null, status: "Belum Dipilih" },
-  { id: "CMP/WM/26060009", date: "28 Jun 2026", refNo: "PRQ/HO/26010006", vendorCount: 3, selectedVendor: "PT Auto Parts Sejahtera", status: "Sudah Dipilih" },
-  { id: "CMP/WM/26060010", date: "28 Jun 2026", refNo: "PRQ/HO/26010005", vendorCount: 2, selectedVendor: null, status: "Belum Dipilih" },
-];
+interface Comparison { id: string; date: string; refNo: string; vendorCount: number; selectedVendor: string | null; status: string; }
 
 const statusPill = (status: string) => {
   if (status === "Sudah Dipilih") return { background: "var(--color-success)", color: "#fff" };
@@ -29,16 +18,24 @@ export default function PembandingListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Attempt to fetch from API; no dedicated endpoint exists yet
+  const [comparisons, setComparisons] = useState<Comparison[]>([]);
+
   useEffect(() => {
-    fetch("/api/reports/service?report=summary-invoices&limit=10")
+    fetch("/api/purchase-requests?limit=50")
       .then((r) => r.json())
-      .then(() => {
-        // TODO: Replace with /api/pembanding when available
-        // For now, keep hardcoded data as-is
+      .then((j) => {
+        const items = (j.data || []).map((pr: any, i: number) => ({
+          id: `CMP/WM/${String(i + 1).padStart(8, "0")}`,
+          date: pr.date ? new Date(pr.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-",
+          refNo: pr.prNo || "-",
+          vendorCount: pr._count?.items || 0,
+          selectedVendor: pr.status === "Approved" ? "Dipilih" : null,
+          status: pr.status === "Approved" ? "Sudah Dipilih" : "Belum Dipilih",
+        }));
+        setComparisons(items);
         setLoading(false);
       })
-      .catch(() => { setLoading(false); });
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
   }, []);
 
   const filtered = comparisons.filter((c) =>

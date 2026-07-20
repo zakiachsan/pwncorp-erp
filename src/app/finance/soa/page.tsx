@@ -4,15 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-receivable.
-const hardcodedSoaList = [
-  { refCode: "SOA/HO/26060001", customer: "PT Maju Jaya", createdAt: "26 Jun 2026", sentAt: "26 Jun 2026", status: "SENT", totalAmount: 1800000 },
-  { refCode: "SOA/HO/26060002", customer: "Budi Santoso", createdAt: "25 Jun 2026", sentAt: "", status: "DRAFT", totalAmount: 2500000 },
-  { refCode: "SOA/HO/26060003", customer: "Siti Rahmawati", createdAt: "24 Jun 2026", sentAt: "24 Jun 2026", status: "SENT", totalAmount: 5200000 },
-  { refCode: "SOA/HO/26060004", customer: "CV Berkah Abadi", createdAt: "23 Jun 2026", sentAt: "", status: "CANCELLED", totalAmount: 3100000 },
-  { refCode: "SOA/HO/26060005", customer: "Ahmad Fauzi", createdAt: "22 Jun 2026", sentAt: "22 Jun 2026", status: "SENT", totalAmount: 950000 },
-  { refCode: "SOA/HO/26060006", customer: "PT Transport Jaya", createdAt: "21 Jun 2026", sentAt: "", status: "DRAFT", totalAmount: 4800000 },
-];
-
 const statusColor = (s: string) => {
   const map: Record<string, string> = { DRAFT: "#6b7280", SENT: "#2e844a", CANCELLED: "#ea001e" };
   return map[s] || "#6b7280";
@@ -22,7 +13,7 @@ export default function SOAPage() {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
-  const [soaList, setSoaList] = useState(hardcodedSoaList);
+  const [soaList, setSoaList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Attempt to fetch from API; fallback to hardcoded data

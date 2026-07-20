@@ -4,50 +4,16 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Save, ChevronDown, Plus } from "lucide-react";
 
-const inventoryData: Record<string, any> = {
-  "SP-001": {
-    code: "SP-001",
-    name: "Oli Mesin 10W-40",
-    brand: "Shell",
-    category: "Oli",
-    unit: "Ltr",
-    buyPrice: 75000,
-    sellPrice: 85000,
-    minStock: 10,
-    location: "Rak A-01",
-    description: "Oli mesin untuk kendaraan bensin dan diesel",
-  },
-  "SP-002": {
-    code: "SP-002",
-    name: "Filter Oli",
-    brand: "Toyota Genuine",
-    category: "Filter",
-    unit: "Pcs",
-    buyPrice: 50000,
-    sellPrice: 65000,
-    minStock: 5,
-    location: "Rak A-02",
-    description: "Filter oli original Toyota",
-  },
-  "SP-003": {
-    code: "SP-003",
-    name: "Kampas Rem Depan",
-    brand: "Bendix",
-    category: "Rem",
-    unit: "Set",
-    buyPrice: 180000,
-    sellPrice: 250000,
-    minStock: 10,
-    location: "Rak B-01",
-    description: "Kampas rem depan untuk mobil",
-  },
-};
-
 export default function EditSparepartPage() {
   const params = useParams();
   const router = useRouter();
   const code = params.code as string;
-  const item = inventoryData[code];
+
+  const [item, setItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -59,36 +25,96 @@ export default function EditSparepartPage() {
     minStock: "",
     location: "",
     description: "",
+    supplierId: "",
   });
 
+  // Fetch sparepart by code
   useEffect(() => {
-    if (item) {
-      setFormData({
-        name: item.name || "",
-        brand: item.brand || "",
-        category: item.category || "",
-        unit: item.unit || "",
-        buyPrice: item.buyPrice?.toString() || "",
-        sellPrice: item.sellPrice?.toString() || "",
-        minStock: item.minStock?.toString() || "",
-        location: item.location || "",
-        description: item.description || "",
-      });
-    }
-  }, [item]);
+    if (!code) return;
+    setLoading(true);
+    fetch(`/api/spareparts?search=${encodeURIComponent(code)}&limit=1`)
+      .then((r) => r.json())
+      .then((j) => {
+        const found = j.data?.[0];
+        if (!found) { setError(`Data tidak ditemukan: ${code}`); setLoading(false); return; }
+        setItem(found);
+        setFormData({
+          name: found.name || "",
+          brand: found.brand || "",
+          category: found.category || "",
+          unit: found.unit || "",
+          buyPrice: found.buyPrice?.toString() || "",
+          sellPrice: found.sellPrice?.toString() || "",
+          minStock: found.minStock?.toString() || "",
+          location: found.location || "",
+          description: found.type || "",
+          supplierId: found.supplierId || "",
+        });
+        setLoading(false);
+      })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, [code]);
 
-  const handleSave = () => {
-    alert("Sparepart berhasil diupdate!");
-    router.push(`/inventory/${code}`);
+  // Fetch suppliers for dropdown
+  useEffect(() => {
+    fetch("/api/suppliers?limit=100")
+      .then((r) => r.json())
+      .then((j) => setSuppliers(j.data || []))
+      .catch(() => {});
+  }, []);
+
+  const handleSave = async () => {
+    if (!item) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/spareparts/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          brand: formData.brand,
+          category: formData.category,
+          unit: formData.unit,
+          buyPrice: parseFloat(formData.buyPrice) || 0,
+          sellPrice: parseFloat(formData.sellPrice) || 0,
+          minStock: parseInt(formData.minStock) || 0,
+          location: formData.location,
+          type: formData.description,
+          supplierId: formData.supplierId || null,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Gagal menyimpan data");
+        setSaving(false);
+        return;
+      }
+      alert("Sparepart berhasil diupdate!");
+      router.push(`/inventory/${code}`);
+    } catch {
+      alert("Gagal menyimpan data");
+      setSaving(false);
+    }
   };
 
-  if (!item) {
+  if (loading) {
     return (
       <div style={{ padding: 24 }}>
         <button onClick={() => router.push("/inventory")} style={S.backBtn}>
           <ArrowLeft size={16} /> Kembali
         </button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {code}</p></div>
+        <div style={{ ...S.card, marginTop: 16, textAlign: "center", color: "#444746", padding: 40 }}>Memuat data...</div>
+      </div>
+    );
+  }
+
+  if (error || !item) {
+    return (
+      <div style={{ padding: 24 }}>
+        <button onClick={() => router.push("/inventory")} style={S.backBtn}>
+          <ArrowLeft size={16} /> Kembali
+        </button>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>{error || `Data tidak ditemukan: ${code}`}</p></div>
       </div>
     );
   }
@@ -103,7 +129,7 @@ export default function EditSparepartPage() {
         <div>
           <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Edit Sparepart</h1>
           <div style={{ fontSize: 13, color: "#0176d3", marginTop: 2 }}>
-            {item.code} - {item.name}
+            {item.code || item.sku} - {item.name}
           </div>
         </div>
       </div>
@@ -117,7 +143,7 @@ export default function EditSparepartPage() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
         {/* Left Column */}
         <div>
-          <FInput label="CODE" value={item.code} disabled />
+          <FInput label="CODE" value={item.code || item.sku} disabled />
           <FCreatable label="NAME" value={formData.name} onChange={(v) => setFormData({ ...formData, name: v })} presets={["Oli Mesin", "Filter Oli", "Kampas Rem", "Busi", "Aki", "V-Belt", "Bearing", "Seal"]} />
           <FCreatable label="BRAND" value={formData.brand} onChange={(v) => setFormData({ ...formData, brand: v })} presets={["Shell", "Toyota Genuine", "Bendix", "NGK", "GS Battery", "Mitsuboshi", "SKF", "NTN"]} />
           <FCreatable label="CATEGORY" value={formData.category} onChange={(v) => setFormData({ ...formData, category: v })} presets={["Oli", "Filter", "Rem", "Pengapian", "Kelistrikan", "Mesin", "Body", "Suspensi"]} />
@@ -129,9 +155,26 @@ export default function EditSparepartPage() {
           <FInput label="SELL PRICE" value={formData.sellPrice} onChange={(v) => setFormData({ ...formData, sellPrice: v })} type="number" />
           <FInput label="MIN STOCK" value={formData.minStock} onChange={(v) => setFormData({ ...formData, minStock: v })} type="number" />
           <FInput label="LOCATION" value={formData.location} onChange={(v) => setFormData({ ...formData, location: v })} placeholder="Contoh: Rak A-01" />
+          {/* Supplier dropdown */}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>SUPPLIER</div>
+            <select
+              value={formData.supplierId}
+              onChange={(e) => setFormData({ ...formData, supplierId: e.target.value })}
+              style={{
+                width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526",
+                border: "1px solid #d8d8d8", borderRadius: 6, outline: "none", background: "#fff",
+              }}
+            >
+              <option value="">-- Pilih Supplier --</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>{s.companyName}</option>
+              ))}
+            </select>
+          </div>
           <div style={{ marginTop: 20 }}>
-            <button onClick={handleSave} style={{ ...S.saveBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
-              <Save size={14} /> Simpan
+            <button onClick={handleSave} disabled={saving} style={{ ...S.saveBtn, background: saving ? "#93c5fd" : "#0176d3", color: "#fff", border: "1px solid #0176d3", opacity: saving ? 0.7 : 1 }}>
+              <Save size={14} /> {saving ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
         </div>

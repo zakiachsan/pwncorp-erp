@@ -2,24 +2,42 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface InvoiceItem {
   id: number;
-  type: "Jasa" | "Sparepart";
-  name: string;
+  description: string;
   qty: number;
-  price: number;
+  unitPrice: number;
+}
+
+interface Customer {
+  id: string;
+  name: string;
+  code?: string;
 }
 
 export default function InvoiceCreatePage() {
   const router = useRouter();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(true);
+  const [customerId, setCustomerId] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: 1, type: "Jasa", name: "Service Oil Change", qty: 1, price: 350000 },
+    { id: 1, description: "", qty: 1, unitPrice: 0 },
   ]);
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/customers?limit=100")
+      .then(r => r.json())
+      .then(j => { setCustomers(j.data || []); setCustomersLoading(false); })
+      .catch(() => setCustomersLoading(false));
+  }, []);
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), type: "Sparepart", name: "", qty: 1, price: 0 }]);
+    setItems([...items, { id: Date.now(), description: "", qty: 1, unitPrice: 0 }]);
   };
 
   const removeItem = (id: number) => {
@@ -30,9 +48,39 @@ export default function InvoiceCreatePage() {
     setItems(items.map((i) => (i.id === id ? { ...i, [field]: value } : i)));
   };
 
-  const subtotal = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.qty * i.unitPrice, 0);
   const ppn = Math.round(subtotal * 0.11);
   const total = subtotal + ppn;
+
+  const canSubmit = customerId && dueDate && items.length > 0 && items.every(i => i.description.trim()) && !saving;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    setSaving(true);
+    setSubmitError("");
+
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId,
+          dueDate,
+          items: items.map(i => ({
+            description: i.description.trim(),
+            qty: i.qty,
+            unitPrice: i.unitPrice,
+          })),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to create invoice");
+      router.push("/finance/invoices");
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to create invoice");
+      setSaving(false);
+    }
+  };
 
   return (
     <div>
@@ -41,8 +89,14 @@ export default function InvoiceCreatePage() {
           <button onClick={() => router.back()} className="btn btn--sm"><ArrowLeft size={16} /></button>
           <div className="view-title">Buat Invoice Baru</div>
         </div>
-        <button className="btn btn--brand btn--sm"><Save size={14} /> Simpan</button>
+        <button className="btn btn--brand btn--sm" disabled={!canSubmit} onClick={handleSubmit}>
+          <Save size={14} /> {saving ? "Menyimpan..." : "Simpan"}
+        </button>
       </div>
+
+      {submitError && (
+        <div className="mb-4 p-3 rounded bg-red-50 text-red-600 text-sm border border-red-200">{submitError}</div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Form */}
@@ -51,25 +105,17 @@ export default function InvoiceCreatePage() {
             <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-4">Informasi Invoice</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="form-label">No. Service Order *</label>
-                <select className="form-select">
-                  <option value="">Pilih SO</option>
-                  <option>SO-001 - Budi Santoso</option>
-                  <option>SO-002 - PT Maju Jaya</option>
-                  <option>SO-003 - Siti Rahmawati</option>
+                <label className="form-label">Customer *</label>
+                <select className="form-select" value={customerId} onChange={(e) => setCustomerId(e.target.value)} disabled={customersLoading}>
+                  <option value="">{customersLoading ? "Loading..." : "Pilih Customer"}</option>
+                  {customers.map(c => (
+                    <option key={c.id} value={c.id}>{c.code ? `${c.code} - ` : ""}{c.name}</option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Customer *</label>
-                <input type="text" className="form-input" placeholder="Otomatis dari SO" readOnly />
-              </div>
-              <div className="form-group">
                 <label className="form-label">Jatuh Tempo *</label>
-                <input type="date" className="form-input" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Diskon (%)</label>
-                <input type="number" className="form-input" placeholder="0" defaultValue={0} />
+                <input type="date" className="form-input" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
               </div>
             </div>
           </div>
@@ -84,8 +130,7 @@ export default function InvoiceCreatePage() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Tipe</th>
-                    <th>Nama Item</th>
+                    <th>Deskripsi</th>
                     <th className="text-right">Qty</th>
                     <th className="text-right">Harga</th>
                     <th className="text-right">Subtotal</th>
@@ -95,16 +140,10 @@ export default function InvoiceCreatePage() {
                 <tbody>
                   {items.map((item) => (
                     <tr key={item.id}>
-                      <td>
-                        <select className="form-select" value={item.type} onChange={(e) => updateItem(item.id, "type", e.target.value)} style={{ minWidth: 100 }}>
-                          <option>Jasa</option>
-                          <option>Sparepart</option>
-                        </select>
-                      </td>
-                      <td><input type="text" className="form-input" value={item.name} onChange={(e) => updateItem(item.id, "name", e.target.value)} /></td>
+                      <td><input type="text" className="form-input" value={item.description} onChange={(e) => updateItem(item.id, "description", e.target.value)} placeholder="Nama item / jasa" /></td>
                       <td className="text-right"><input type="number" className="form-input text-right" value={item.qty} onChange={(e) => updateItem(item.id, "qty", Number(e.target.value))} style={{ width: 60 }} /></td>
-                      <td className="text-right"><input type="number" className="form-input text-right" value={item.price} onChange={(e) => updateItem(item.id, "price", Number(e.target.value))} style={{ width: 120 }} /></td>
-                      <td className="text-right font-medium">Rp {(item.qty * item.price).toLocaleString("id-ID")}</td>
+                      <td className="text-right"><input type="number" className="form-input text-right" value={item.unitPrice} onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))} style={{ width: 120 }} /></td>
+                      <td className="text-right font-medium">Rp {(item.qty * item.unitPrice).toLocaleString("id-ID")}</td>
                       <td><button onClick={() => removeItem(item.id)} className="text-[--color-error] hover:text-red-700 p-1"><Trash2 size={14} /></button></td>
                     </tr>
                   ))}

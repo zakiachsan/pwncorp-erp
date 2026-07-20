@@ -16,25 +16,9 @@ interface AnggaranSWO {
   realisasi: number;
 }
 
-const projects = [
-  { id: "PRJ/001/26040410", name: "Service Berkala Fleet PT Maju Jaya" },
-  { id: "PRJ/002/26050501", name: "Overhaul Mesin Isuzu Elf" },
-  { id: "PRJ/003/26060601", name: "Perawatan Berkala Q3 2026" },
-  { id: "PRJ/004/26060620", name: "Ganti Oli & Tune Up Fleet" },
-];
+const projects: { id: string; name: string }[] = [];
 
-const initialData: AnggaranSWO[] = [
-  { id: "A-001", swoId: "SWO/002/26060151", sroId: "SRO/002/26060150", customer: "PT Maju Jaya", kendaraan: "Honda Civic", noPol: "B 5678 EF", anggaran: 5000000, realisasi: 4800000 },
-  { id: "A-002", swoId: "SWO/001/26060149", sroId: "SRO/001/26060149", customer: "PT Maju Jaya", kendaraan: "Toyota Avanza", noPol: "B 1234 CD", anggaran: 2500000, realisasi: 2500000 },
-  { id: "A-003", swoId: "SWO/004/26060153", sroId: "SRO/004/26060153", customer: "PT Maju Jaya", kendaraan: "Suzuki Ertiga", noPol: "B 3456 IJ", anggaran: 3500000, realisasi: 3500000 },
-  { id: "A-004", swoId: "SWO/007/26060143", sroId: "SRO/007/26060143", customer: "PT Maju Jaya", kendaraan: "Mitsubishi L300", noPol: "B 1314 OP", anggaran: 3500000, realisasi: 3500000 },
-  { id: "A-005", swoId: "SWO/006/26060155", sroId: "SRO/006/26060155", customer: "PT Maju Jaya", kendaraan: "Isuzu Elf", noPol: "B 1112 MN", anggaran: 8000000, realisasi: 7200000 },
-  { id: "A-006", swoId: "SWO/009/26060201", sroId: "SRO/002/26060150", customer: "PT Maju Jaya", kendaraan: "Toyota Fortuner", noPol: "B 3002 CD", anggaran: 4500000, realisasi: 4000000 },
-  { id: "A-007", swoId: "SWO/010/26060202", sroId: "SRO/006/26060155", customer: "PT Maju Jaya", kendaraan: "Toyota Fortuner", noPol: "B 3002 CD", anggaran: 3500000, realisasi: 0 },
-  { id: "A-008", swoId: "SWO/003/26060152", sroId: "SRO/003/26060152", customer: "PT Maju Jaya", kendaraan: "Mitsubishi Pajero", noPol: "B 9012 GH", anggaran: 4500000, realisasi: 4500000 },
-  { id: "A-009", swoId: "SWO/011/26060203", sroId: "SRO/006/26060155", customer: "PT Maju Jaya", kendaraan: "Mitsubishi Pajero", noPol: "B 9012 GH", anggaran: 5200000, realisasi: 5200000 },
-  { id: "A-010", swoId: "SWO/008/26060200", sroId: "SRO/004/26060153", customer: "PT Maju Jaya", kendaraan: "Suzuki Ertiga", noPol: "B 3456 IJ", anggaran: 2000000, realisasi: 1500000 },
-];
+const initialData: AnggaranSWO[] = [];
 
 const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
 const fmtShort = (n: number) => {
@@ -45,22 +29,31 @@ const fmtShort = (n: number) => {
 export default function AnggaranPage() {
   const router = useRouter();
   const [items, setItems] = useState<AnggaranSWO[]>(initialData);
-  const [selectedProject, setSelectedProject] = useState(projects[0].id);
+  const [selectedProject, setSelectedProject] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
 
-  // Attempt to fetch from API; no dedicated endpoint exists yet
   useEffect(() => {
-    fetch("/api/reports/service?report=summary-wo&limit=100")
+    fetch("/api/work-orders?limit=100")
       .then((r) => r.json())
       .then((j) => {
-        // TODO: Replace with /api/anggaran when available
-        // For now, keep hardcoded data as-is
+        const wos = j.data || [];
+        const mapped: AnggaranSWO[] = wos.map((wo: any, i: number) => ({
+          id: `A-${String(i + 1).padStart(3, "0")}`,
+          swoId: wo.woNo || "-",
+          sroId: wo.so?.soNo || "-",
+          customer: wo.so?.customer?.name || "-",
+          kendaraan: wo.so?.vehicle ? `${wo.so.vehicle.brand} ${wo.so.vehicle.model || ""}` : "-",
+          noPol: wo.so?.vehicle?.plateNo || "-",
+          anggaran: wo.items?.reduce((s: number, it: any) => s + (it.total || 0), 0) || 0,
+          realisasi: wo.status === "Completed" ? (wo.items?.reduce((s: number, it: any) => s + (it.total || 0), 0) || 0) : 0,
+        }));
+        setItems(mapped);
         setLoading(false);
       })
-      .catch(() => { setLoading(false); });
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
   }, []);
 
   const pp = projects.find((p) => p.id === selectedProject);

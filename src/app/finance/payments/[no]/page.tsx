@@ -2,18 +2,17 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Printer, Download } from "lucide-react";
+import { useEffect, useState } from "react";
 
-const paymentsData: Record<string, any> = {
-  "PAY-001": { no: "PAY-001", invoice: "INV-001", customer: "Budi Santoso", phone: "0812-3456-7890", amount: 2500000, method: "Cash", date: "26 Jun 2026", status: "Verified", notes: "Pembayaran tunai service spooring" },
-  "PAY-002": { no: "PAY-002", invoice: "INV-003", customer: "Siti Rahmawati", phone: "0813-5678-9012", amount: 2600000, method: "Transfer", date: "26 Jun 2026", status: "Verified", notes: "Transfer BCA - partial payment INV-003" },
-  "PAY-003": { no: "PAY-003", invoice: "INV-004", customer: "Ahmad Fauzi", phone: "0812-999-0000", amount: 950000, method: "Cash", date: "25 Jun 2026", status: "Verified", notes: "Pembayaran tunai kampas rem" },
-  "PAY-004": { no: "PAY-004", invoice: "INV-003", customer: "Siti Rahmawati", phone: "0813-5678-9012", amount: 1000000, method: "Transfer", date: "24 Jun 2026", status: "Pending", notes: "Menunggu verifikasi bank" },
+const fmt = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
+
+const fmtDate = (d: string | null | undefined) => {
+  if (!d) return "-";
+  return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-const fmt = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
-
 const statusColor = (s: string) => {
-  const map: Record<string, string> = { Verified: "#2e844a", Pending: "#f59e0b", Rejected: "#ea001e" };
+  const map: Record<string, string> = { Verified: "#2e844a", Pending: "#f59e0b", Rejected: "#ea001e", PAID: "#2e844a", PARTIAL: "#f59e0b", UNPAID: "#ea001e" };
   return map[s] || "#6b7280";
 };
 
@@ -21,16 +20,44 @@ export default function PaymentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const no = params.no as string;
-  const payment = paymentsData[no];
 
-  if (!payment) {
+  const [payment, setPayment] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!no) { setLoading(false); setError("No payment number"); return; }
+
+    fetch(`/api/payments?search=${encodeURIComponent(no)}&limit=1`)
+      .then(r => r.json())
+      .then(j => {
+        const found = j.data?.[0];
+        if (!found) { setError("Payment not found"); setLoading(false); return; }
+        setPayment(found);
+        setLoading(false);
+      })
+      .catch(() => { setError("Failed to load payment"); setLoading(false); });
+  }, [no]);
+
+  if (loading) return <div style={{ padding: 32, textAlign: "center", color: "#444746" }}>Loading...</div>;
+  if (error || !payment) {
     return (
       <div style={{ padding: 24 }}>
         <button onClick={() => router.back()} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {no}</p></div>
+        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>{error || "Data tidak ditemukan"}: {no}</p></div>
       </div>
     );
   }
+
+  // Map API fields
+  const paymentNo = payment.paymentNo || payment.id?.slice(-8) || no;
+  const invoiceNo = payment.invoice?.invNo || "-";
+  const customer = payment.invoice?.customer?.name || "-";
+  const amount = payment.amount || 0;
+  const method = payment.paymentMethod || payment.method || "-";
+  const date = fmtDate(payment.paymentDate || payment.date);
+  const status = payment.status || "Verified";
+  const notes = payment.notes || "-";
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
@@ -39,8 +66,8 @@ export default function PaymentDetailPage() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <PaymentIcon />
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Pembayaran {payment.no}</h1>
-          <span style={{ ...S.pill, background: statusColor(payment.status) }}>{payment.status}</span>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Pembayaran {paymentNo}</h1>
+          <span style={{ ...S.pill, background: statusColor(status) }}>{status}</span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button style={S.actionBtn}><Printer size={14} /> Print</button>
@@ -51,22 +78,21 @@ export default function PaymentDetailPage() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         <div style={S.card}>
           <div style={S.sectionTitle}>Informasi Pembayaran</div>
-          <F label="No. Pembayaran" value={payment.no} />
-          <F label="No. Invoice" value={payment.invoice} link onClick={() => router.push(`/finance/invoices/${payment.invoice}`)} />
-          <F label="Customer" value={payment.customer} />
-          <F label="Telepon" value={payment.phone} />
-          <F label="Metode" value={payment.method} />
-          <F label="Tanggal" value={payment.date} />
-          <F label="Status" value={payment.status} pill statusColor={statusColor(payment.status)} />
+          <F label="No. Pembayaran" value={paymentNo} />
+          <F label="No. Invoice" value={invoiceNo} link onClick={() => invoiceNo !== "-" && router.push(`/finance/invoices/${invoiceNo}`)} />
+          <F label="Customer" value={customer} />
+          <F label="Metode" value={method} />
+          <F label="Tanggal" value={date} />
+          <F label="Status" value={status} pill statusColor={statusColor(status)} />
         </div>
         <div style={S.card}>
           <div style={S.sectionTitle}>Detail Amount</div>
           <div style={{ padding: "20px 0", textAlign: "center" }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 8 }}>Total Dibayar</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: "#001526" }}>{fmt(payment.amount)}</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: "#001526" }}>{fmt(amount)}</div>
           </div>
           <div style={{ borderTop: "1px solid #ecebea", paddingTop: 16, marginTop: 8 }}>
-            <F label="Catatan" value={payment.notes || "-"} />
+            <F label="Catatan" value={notes} />
           </div>
         </div>
       </div>
