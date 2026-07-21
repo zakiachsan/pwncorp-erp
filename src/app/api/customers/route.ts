@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { withAuth } from "@/lib/auth-helpers";
+import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 
 export const GET = withAuth(async (req: NextRequest) => {
-  const user = (req as any).user || (await import("@/lib/auth-helpers").then(m => m.getCurrentUser()));
+  const user = (req as any).user || (await getCurrentUser());
   const storeId = (user as any).storeId;
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1");
@@ -30,15 +30,39 @@ export const GET = withAuth(async (req: NextRequest) => {
 });
 
 export const POST = withAuth(async (req: NextRequest) => {
-  const user = (await import("@/lib/auth-helpers").then(m => m.getCurrentUser())) as any;
+  const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { name, type, phone, whatsapp, email, address } = body;
+  const { name, type, phone, whatsapp, email, address, vehicleId, vehicle } = body;
 
   if (!name) return NextResponse.json({ error: "Name is required" }, { status: 400 });
 
   const customer = await prisma.customer.create({
     data: { storeId: user.storeId, name, type: type || "retail", phone, whatsapp, email, address },
   });
+
+  // --- handle vehicle ---
+  if (vehicleId) {
+    // reassign existing vehicle to this new customer
+    await prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: { customerId: customer.id },
+    });
+  } else if (vehicle) {
+    // create new vehicle linked to this customer
+    const { plateNo, brand, model, year } = vehicle;
+    if (plateNo && brand) {
+      await prisma.vehicle.create({
+        data: {
+          storeId: user.storeId,
+          customerId: customer.id,
+          plateNo,
+          brand,
+          model: model || null,
+          year: year || null,
+        },
+      });
+    }
+  }
 
   return NextResponse.json({ data: customer }, { status: 201 });
 });
