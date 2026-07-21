@@ -51,9 +51,6 @@ export default function PettyCashPage() {
       .catch(() => { setError("Failed to load petty cash"); setLoading(false); });
   }, []);
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
-
   const filtered = useMemo(() => {
     return data.filter((d) => {
       const entryDate = new Date(d.date);
@@ -64,6 +61,9 @@ export default function PettyCashPage() {
       return true;
     });
   }, [data, dateFrom, dateTo, filterCategory, search]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   const totalMasuk = data.filter((d) => d.type === "masuk").reduce((s, d) => s + d.nominal, 0);
   const totalKeluar = data.filter((d) => d.type === "keluar").reduce((s, d) => s + d.nominal, 0);
