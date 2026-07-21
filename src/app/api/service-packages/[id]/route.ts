@@ -3,7 +3,9 @@ import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const pkg = await prisma.servicePackage.findUnique({ where: { id: params.id } });
+  const pkg = await prisma.servicePackage.findFirst({
+    where: { OR: [{ id: params.id }, { sku: params.id }] },
+  });
   if (!pkg) return NextResponse.json({ error: "Service package not found" }, { status: 404 });
   return NextResponse.json({ data: pkg });
 });

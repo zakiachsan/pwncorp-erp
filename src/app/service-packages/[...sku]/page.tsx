@@ -67,12 +67,14 @@ export default function PackageServiceDetailPage() {
   useEffect(() => {
     if (!sku) return;
     setLoading(true);
-    fetch(`/api/service-packages?search=${encodeURIComponent(sku)}&limit=1`)
-      .then((r) => r.json())
+    fetch(`/api/service-packages/${encodeURIComponent(sku)}`)
+      .then((r) => {
+        if (!r.ok) { setError(`Package not found: ${sku}`); setLoading(false); return null; }
+        return r.json();
+      })
       .then((j) => {
-        const found = j.data?.[0];
-        if (!found) { setError(`Package not found: ${sku}`); setLoading(false); return; }
-        setPkg(found);
+        if (!j) return;
+        setPkg(j.data);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load data"); setLoading(false); });

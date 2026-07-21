@@ -15,6 +15,13 @@ export const GET = withAuth(async (req: NextRequest) => {
   const where: any = {
     invoice: { storeId: user.storeId },
   };
+  const search = searchParams.get("search") || "";
+  if (search) {
+    where.OR = [
+      { refNo: { contains: search, mode: "insensitive" } },
+      { id: search },
+    ];
+  }
   if (invoiceId) where.invoiceId = invoiceId;
   if (paymentMethod) where.paymentMethod = paymentMethod;
   if (dateFrom || dateTo) {

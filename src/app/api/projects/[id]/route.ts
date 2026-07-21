@@ -3,8 +3,8 @@ import prisma from "@/lib/prisma";
 import { withAuth } from "@/lib/auth-helpers";
 
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const project = await prisma.project.findUnique({
-    where: { id: params.id },
+  const project = await prisma.project.findFirst({
+    where: { OR: [{ id: params.id }, { name: params.id }] },
     include: {
       customer: { select: { id: true, name: true, phone: true, email: true } },
       expenses: { orderBy: { date: "desc" } },

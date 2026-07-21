@@ -10,7 +10,12 @@ export const GET = withAuth(async (req: NextRequest) => {
   const search = searchParams.get("search") || "";
 
   const where: any = { storeId: user.storeId, isActive: true };
-  if (search) where.name = { contains: search, mode: "insensitive" };
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { sku: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
   const [data, total] = await Promise.all([
     prisma.servicePackage.findMany({

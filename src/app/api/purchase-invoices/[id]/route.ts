@@ -3,8 +3,8 @@ import prisma from "@/lib/prisma";
 import { withAuth } from "@/lib/auth-helpers";
 
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const invoice = await prisma.purchaseInvoice.findUnique({
-    where: { id: params.id },
+  const invoice = await prisma.purchaseInvoice.findFirst({
+    where: { OR: [{ id: params.id }, { docNo: params.id }] },
     include: {
       supplier: true,
       po: { select: { poNo: true, total: true } },

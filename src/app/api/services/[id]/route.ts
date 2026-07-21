@@ -3,7 +3,9 @@ import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const service = await prisma.service.findUnique({ where: { id: params.id } });
+  const service = await prisma.service.findFirst({
+    where: { OR: [{ id: params.id }, { sku: params.id }] },
+  });
   if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
   return NextResponse.json({ data: service });
 });
