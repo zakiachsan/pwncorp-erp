@@ -33,7 +33,7 @@ async function main() {
   // ─── Users ───
   const hash = await bcrypt.hash("password123", 10);
   await prisma.user.create({ data: { name: "Yusro Iqbal", email: "owner@bengkel.com", passwordHash: hash, roleId: roleOwner.id, storeId: storeWM.id } });
-  await prisma.user.create({ data: { name: "Angga Novianto", email: "admin@bengkel.com", passwordHash: hash, roleId: roleAdmin.id, storeId: storeWM.id } });
+  await prisma.user.create({ data: { name: "Angga Novianto", email: "admin@pwncorp.co.id", passwordHash: hash, roleId: roleAdmin.id, storeId: storeWM.id } });
   await prisma.user.create({ data: { name: "Rudi", email: "rudi@bengkel.com", passwordHash: hash, roleId: roleSA.id, storeId: storePW.id } });
   await prisma.user.create({ data: { name: "Budi", email: "budi@bengkel.com", passwordHash: hash, roleId: roleSA.id, storeId: storePJ.id } });
   await prisma.user.create({ data: { name: "Ani", email: "ani@bengkel.com", passwordHash: hash, roleId: roleSA.id, storeId: storeNJ.id } });
