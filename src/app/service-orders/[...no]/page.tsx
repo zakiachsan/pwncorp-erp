@@ -2,193 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Printer, FileText, Phone, CheckCircle, Wrench, ExternalLink, Briefcase } from "lucide-react";
-
-const initialOrdersData: Record<string, any> = {
-  "SRO/001/26060149": {
-    documentNumber: "SRO/001/26060149", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "Budi Santoso", phone: "0812-3456-7890" }, registrationNo: "B 1234 CD",
-    planServiceDate: "Rabu, 26 Juni 2026", planServiceTime: "09:00", serviceAdvisor: "Rudi", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "TOYOTA", vehicleModel: "AVANZA", odometer: "45.230", year: "2022", color: "SILVER", status: "DRAFT",
-    project: { id: "PRJ/004/26060620", name: "Ganti Oli & Tune Up Fleet" },
-    services: [
-      { item: "A3 - Spooring Mobil Kelas I", description: "Spooring", estimatedTime: "", quantity: 1, priceExTax: 375000, discount: "10%", subtotal: 337500, tax: 0, otherTax: 0, total: 337500 },
-      { item: "B4 - Balancing Ring >19\"", description: "Balancing", estimatedTime: "", quantity: 4, priceExTax: 60000, discount: "10%", subtotal: 216000, tax: 0, otherTax: 0, total: 216000 },
-      { item: "JAS.NT.001 - JASA NON TRACKING", description: "NITRO FILL (BARU)", estimatedTime: "", quantity: 4, priceExTax: 20000, discount: "-", subtotal: 80000, tax: 0, otherTax: 0, total: 80000 },
-    ],
-    spareparts: [
-      { code: "OLM-001", name: "Oli Mesin 5W-30", qty: 3, price: 85000, total: 255000 },
-    ],
-    workOrders: [],
-  },
-  "SRO/002/26060150": {
-    documentNumber: "SRO/002/26060150", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "PT Maju Jaya", phone: "021-555-1234" }, registrationNo: "B 5678 EF",
-    planServiceDate: "Rabu, 26 Juni 2026", planServiceTime: "10:30", serviceAdvisor: "Ani", salesperson: "-", bookingSource: "WhatsApp", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "HONDA", vehicleModel: "CIVIC", odometer: "78.450", year: "2021", color: "HITAM", status: "APPROVED",
-    project: { id: "PRJ/001/26040410", name: "Service Berkala Fleet PT Maju Jaya" },
-    services: [{ item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 }],
-    workOrders: [{ documentNumber: "SWO/002/26060151", createdDate: "26-Jun-2026 10:45 AM", status: "IN PROGRESS" }],
-  },
-  "SRO/003/26060152": {
-    documentNumber: "SRO/003/26060152", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "Siti Rahmawati", phone: "0813-5678-9012" }, registrationNo: "B 9012 GH",
-    planServiceDate: "Kamis, 27 Juni 2026", planServiceTime: "08:00", serviceAdvisor: "Rudi", salesperson: "-", bookingSource: "Walk-in", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "MITSUBISHI", vehicleModel: "PAJERO", odometer: "62.100", year: "2020", color: "PUTIH", status: "APPROVED",
-    project: { id: "PRJ/002/26050501", name: "Overhaul Mesin Isuzu Elf" },
-    services: [
-      { item: "C1 - Service Berkala 10K", description: "Service Umum", estimatedTime: "90 menit", quantity: 1, priceExTax: 450000, discount: "-", subtotal: 450000, tax: 0, otherTax: 0, total: 450000 },
-      { item: "A1 - Ganti Oli Mesin", description: "Ganti Oli", estimatedTime: "30 menit", quantity: 1, priceExTax: 250000, discount: "-", subtotal: 250000, tax: 0, otherTax: 0, total: 250000 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26060152", createdDate: "26-Jun-2026 09:00 AM", status: "COMPLETED" }],
-  },
-  "SRO/007/26060143": {
-    documentNumber: "SRO/007/26060143", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "CV Berkah Abadi", phone: "021-777-8888" }, registrationNo: "B 1314 OP",
-    planServiceDate: "Jumat, 23 Juni 2026", planServiceTime: "14:00", serviceAdvisor: "Rudi", salesperson: "-", bookingSource: "Walk-in", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "MITSUBISHI", vehicleModel: "L300", odometer: "89.000", year: "2018", color: "PUTIH", status: "CANCELLED",
-    project: null,
-    services: [{ item: "G1 - Service AC", description: "Service AC Mobil", estimatedTime: "60 menit", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, tax: 0, otherTax: 0, total: 350000 }],
-    workOrders: [],
-  },
-  "SRO/004/26060153": {
-    documentNumber: "SRO/004/26060153", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "CV Berkah Abadi", phone: "021-777-8888" }, registrationNo: "B 3456 IJ",
-    planServiceDate: "Sabtu, 24 Juni 2026", planServiceTime: "08:00", serviceAdvisor: "Budi", salesperson: "-", bookingSource: "Walk-in", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "SUZUKI", vehicleModel: "ERTIGA", odometer: "15.200", year: "2023", color: "MERAH", status: "DRAFT",
-    project: { id: "PRJ/003/26060601", name: "Perawatan Berkala Q3 2026" },
-    services: [{ item: "D1 - Tune Up", description: "Tune Up Mesin", estimatedTime: "120 menit", quantity: 1, priceExTax: 350000, discount: "-", subtotal: 350000, tax: 0, otherTax: 0, total: 350000 }],
-    workOrders: [],
-  },
-  "SRO/005/26060154": {
-    documentNumber: "SRO/005/26060154", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "Ahmad Fauzi", phone: "0812-999-0000" }, registrationNo: "B 7890 KL",
-    planServiceDate: "Senin, 26 Juni 2026", planServiceTime: "09:30", serviceAdvisor: "Ani", salesperson: "-", bookingSource: "WhatsApp", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "DAIHATSU", vehicleModel: "XENIA", odometer: "33.500", year: "2022", color: "ABU-ABU", status: "CANCELLED",
-    project: null,
-    services: [{ item: "E1 - Rem Mobil", description: "Ganti Kampas Rem", estimatedTime: "45 menit", quantity: 1, priceExTax: 280000, discount: "-", subtotal: 280000, tax: 0, otherTax: 0, total: 280000 }],
-    workOrders: [],
-  },
-  "SRO/006/26060155": {
-    documentNumber: "SRO/006/26060155", type: "General", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "PT Transport Jaya", phone: "021-333-4444" }, registrationNo: "B 1112 MN",
-    planServiceDate: "Minggu, 25 Juni 2026", planServiceTime: "07:30", serviceAdvisor: "Budi", salesperson: "-", bookingSource: "Phone", referenceNumber: "-",
-    vehicleType: "TRUCK", vehicleMake: "ISUZU", vehicleModel: "ELF", odometer: "120.000", year: "2019", color: "BIRU", status: "DELIVERED",
-    project: { id: "PRJ/001/26040410", name: "Service Berkala Fleet PT Maju Jaya" },
-    services: [{ item: "F1 - Overhaul", description: "Overhaul Mesin", estimatedTime: "480 menit", quantity: 1, priceExTax: 2500000, discount: "5%", subtotal: 2375000, tax: 0, otherTax: 0, total: 2375000 }],
-    workOrders: [],
-  },
-  "SRO/WM/26050083": {
-    documentNumber: "SRO/WM/26050083", type: "Service Sale", store: "PT Putra Wijaya Motor",
-    customer: { name: "UNIT PENGELOLA ANJUNGAN DAN GRAHA WISATA", phone: "" }, registrationNo: "B1005PQP",
-    planServiceDate: "Minggu, 25 Mei 2026", planServiceTime: "16:00", serviceAdvisor: "MARDOTO", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "JSB-DEMPUL - DEMPUL BODY TOTAL", description: "Demul body total", estimatedTime: "", quantity: 5, priceExTax: 374862, discount: "-", subtotal: 1874310, tax: 206174, otherTax: 0, total: 2080484 },
-    ],
-    workOrders: [{ documentNumber: "SWO/WM/26070014", createdDate: "07-Jul-2026", status: "WAITING" }],
-  },
-  "SRO/003/26070029": {
-    documentNumber: "SRO/003/26070029", type: "Service Sale", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "LUPIN MOTOR", phone: "081314778809" }, registrationNo: "B1800TP",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "-", serviceAdvisor: "NANDA SALSA", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "RANGE ROVER", vehicleModel: "EVOQUE", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", estimatedTime: "", quantity: 20, priceExTax: 61200, discount: "6.800", subtotal: 1224000, tax: 0, otherTax: 0, total: 1224000 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26070029", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-    invoices: [{ documentNumber: "SRI/003/26070030", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-  },
-  "SRO/003/26070031": {
-    documentNumber: "SRO/003/26070031", type: "Service Sale", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "BPK. IKO", phone: "" }, registrationNo: "B1992B",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "08:55", serviceAdvisor: "NANDA SALSA", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", estimatedTime: "", quantity: 5, priceExTax: 123500, discount: "-", subtotal: 617500, tax: 0, otherTax: 0, total: 617500 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26070030", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-    invoices: [{ documentNumber: "SRI/003/26070028", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-  },
-  "SRO/003/26070032": {
-    documentNumber: "SRO/003/26070032", type: "Service Sale", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "BPK. RICKY", phone: "" }, registrationNo: "B9525PAM",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "10:55", serviceAdvisor: "NANDA SALSA", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", estimatedTime: "", quantity: 5, priceExTax: 82650, discount: "-", subtotal: 413250, tax: 0, otherTax: 0, total: 413250 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26070031", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-    invoices: [{ documentNumber: "SRI/003/26070029", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-  },
-  "SRO/003/26070033": {
-    documentNumber: "SRO/003/26070033", type: "Service Sale", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "BPK. ALDO", phone: "" }, registrationNo: "KH1863GI",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "11:35", serviceAdvisor: "NANDA SALSA", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", estimatedTime: "", quantity: 2, priceExTax: 200000, discount: "-", subtotal: 400000, tax: 0, otherTax: 0, total: 400000 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26070032", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-    invoices: [{ documentNumber: "SRI/003/26070031", createdDate: "07-Jul-2026", status: "COMPLETED" }],
-  },
-  "SRO/003/26070034": {
-    documentNumber: "SRO/003/26070034", type: "Service Sale", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "AUTO PRIMA", phone: "" }, registrationNo: "B819BEN",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "13:55", serviceAdvisor: "NANDA SALSA", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "PACKAGE SERVICE", description: "Package Service", estimatedTime: "", quantity: 1, priceExTax: 45000, discount: "-", subtotal: 45000, tax: 0, otherTax: 0, total: 45000 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26070033", createdDate: "07-Jul-2026", status: "IN PROGRESS" }],
-  },
-  "SRO/WM/26070024": {
-    documentNumber: "SRO/WM/26070024", type: "Service Sale", store: "PT Putra Wijaya Motor",
-    customer: { name: "BAPAK DANI", phone: "" }, registrationNo: "B1360PYC",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "15:45", serviceAdvisor: "MARDOTO", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "-", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "JASA NON TRACKING - KURAS TANGKI", description: "Kuras Tangki", estimatedTime: "", quantity: 1, priceExTax: 300000, discount: "10%", subtotal: 270000, tax: 0, otherTax: 0, total: 270000 },
-      { item: "JASA NON TRACKING - SERVICE B/P", description: "Service B/P", estimatedTime: "", quantity: 1, priceExTax: 750000, discount: "10%", subtotal: 675000, tax: 0, otherTax: 0, total: 675000 },
-    ],
-    spareparts: [
-      { code: "NON-TRACKING", name: "UNIVERSAL - WHASER", qty: 4, price: 65000, total: 234000 },
-      { code: "NON-TRACKING", name: "UNIVERSAL - NOZZLE", qty: 4, price: 1250000, total: 4500000 },
-      { code: "23390-0L041", name: "FUEL FILTER", qty: 1, price: 360750, total: 324675 },
-      { code: "NON-TRACKING", name: "UNIVERSAL - VALVE", qty: 2, price: 950000, total: 1710000 },
-      { code: "NON-TRACKING", name: "UNIVERSAL - KALIBRASI INJECTOR", qty: 4, price: 350000, total: 1260000 },
-      { code: "NON-TRACKING", name: "UNIVERSAL - RING RETURN", qty: 5, price: 325000, total: 1462500 },
-      { code: "NON-TRACKING", name: "UNIVERSAL - ORING NOZZLE", qty: 4, price: 35000, total: 126000 },
-    ],
-  },
-  "SRO/003/26070035": {
-    documentNumber: "SRO/003/26070035", type: "Service Sale", store: "Wijaya Motor - One Stop Service",
-    customer: { name: "PROMOTOR", phone: "" }, registrationNo: "B1537BIR",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "14:05", serviceAdvisor: "NANDA SALSA", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "114.166", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [
-      { item: "A3 - Spooring Mobil Kelas I", description: "Spooring", estimatedTime: "", quantity: 1, priceExTax: 375000, discount: "10%", subtotal: 337500, tax: 0, otherTax: 0, total: 337500 },
-    ],
-    workOrders: [{ documentNumber: "SWO/003/26070034", createdDate: "07-Jul-2026", status: "IN PROGRESS" }],
-  },
-  "SRO/WM/26070010": {
-    documentNumber: "SRO/WM/26070010", type: "Service Sale", store: "PT Putra Wijaya Motor",
-    customer: { name: "SUKU DINAS SUMBER DAYA AIR JAKARTA SELATAN", phone: "" }, registrationNo: "B9118SSC",
-    planServiceDate: "Selasa, 07 Juli 2026", planServiceTime: "12:28", serviceAdvisor: "MARDOTO", salesperson: "-", bookingSource: "-", referenceNumber: "-",
-    vehicleType: "CAR", vehicleMake: "-", vehicleModel: "-", odometer: "0", year: "-", color: "-", status: "APPROVED",
-    project: null,
-    services: [],
-    workOrders: [{ documentNumber: "SWO/WM/26070010", createdDate: "06-Jul-2026", status: "WAITING" }],
-  },
-};
+import { ArrowLeft, Printer, FileText, CheckCircle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2 } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -205,6 +19,26 @@ export default function ServiceOrderDetailPage() {
   const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
 
+  // Edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
+  const [spareparts, setSpareparts] = useState<any[]>([]);
+  const [editFields, setEditFields] = useState({ complaint: "", customerId: "", vehicleId: "" });
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Add item modals
+  const [showAddService, setShowAddService] = useState(false);
+  const [showAddSparepart, setShowAddSparepart] = useState(false);
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
+  const [availableSpareparts, setAvailableSpareparts] = useState<any[]>([]);
+  const [allCustomers, setAllCustomers] = useState<any[]>([]);
+  const [allVehicles, setAllVehicles] = useState<any[]>([]);
+
+  // New item forms
+  const [newService, setNewService] = useState({ serviceId: "", qty: 1, unitPrice: 0 });
+  const [newSparepart, setNewSparepart] = useState({ sparepartId: "", qty: 1, unitPrice: 0 });
+
   useEffect(() => {
     setLoading(true);
     fetch(`/api/service-orders?search=${encodeURIComponent(orderNo)}&limit=1`)
@@ -212,11 +46,14 @@ export default function ServiceOrderDetailPage() {
       .then((j) => {
         const found = j.data?.[0];
         if (found && found.id) {
-          // Fetch full detail with services, spareparts, workOrders
           return fetch(`/api/service-orders/${found.id}`)
             .then((r2) => r2.json())
             .then((j2) => {
-              setOrder(j2.data || found);
+              const d = j2.data || found;
+              setOrder(d);
+              setServices((d.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } })));
+              setSpareparts((d.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } })));
+              setEditFields({ complaint: d.complaint || "", customerId: d.customerId || "", vehicleId: d.vehicleId || "" });
               setLoading(false);
             });
         }
@@ -227,7 +64,21 @@ export default function ServiceOrderDetailPage() {
       .catch(() => { setError("Gagal memuat data"); setLoading(false); });
   }, [orderNo]);
 
-    if (loading) return <div className="p-8 text-center">Loading...</div>;
+  // Load lookup data for add modals
+  useEffect(() => {
+    fetch("/api/services?limit=200").then(r => r.json()).then(d => setAvailableServices(d.data || [])).catch(() => {});
+    fetch("/api/spareparts?limit=200").then(r => r.json()).then(d => setAvailableSpareparts(d.data || [])).catch(() => {});
+    fetch("/api/customers?limit=200").then(r => r.json()).then(d => setAllCustomers(d.data || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (editFields.customerId) {
+      fetch(`/api/vehicles?customerId=${editFields.customerId}&limit=200`)
+        .then(r => r.json()).then(d => setAllVehicles(d.data || [])).catch(() => {});
+    }
+  }, [editFields.customerId]);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#ea001e", fontSize: 14 }}>{error}</p></div></div>;
   if (!order) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {orderNo}</p></div></div>;
 
@@ -247,7 +98,6 @@ export default function ServiceOrderDetailPage() {
       body: JSON.stringify({ status: "Delivered" }),
     });
     setOrder((prev: any) => ({ ...prev, status: "Delivered" }));
-    // Auto-create work order
     try {
       const res = await fetch("/api/work-orders", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -272,10 +122,107 @@ export default function ServiceOrderDetailPage() {
     }
   };
 
-  const totalQty = (order.services || []).reduce((s: number, x: any) => s + (x.quantity || x.qty || 0), 0);
-  const grandTotal = (order.services || []).reduce((s: number, x: any) => s + (x.total || 0), 0);
+  // --- Edit handlers ---
+  const addServiceRow = () => {
+    if (!newService.serviceId) return;
+    const svc = availableServices.find(s => s.id === newService.serviceId);
+    setServices(prev => [...prev, {
+      serviceId: newService.serviceId,
+      service: svc || { sku: "", name: "" },
+      qty: newService.qty,
+      unitPrice: newService.unitPrice,
+      total: newService.qty * newService.unitPrice,
+    }]);
+    setNewService({ serviceId: "", qty: 1, unitPrice: 0 });
+    setShowAddService(false);
+  };
 
-  // Map API format to display format
+  const updateServiceRow = (idx: number, field: string, value: any) => {
+    setServices(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      if (field === "qty" || field === "unitPrice") {
+        updated[idx].total = updated[idx].qty * updated[idx].unitPrice;
+      }
+      return updated;
+    });
+  };
+
+  const removeServiceRow = (idx: number) => {
+    setServices(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const addSparepartRow = () => {
+    if (!newSparepart.sparepartId) return;
+    const sp = availableSpareparts.find(s => s.id === newSparepart.sparepartId);
+    setSpareparts(prev => [...prev, {
+      sparepartId: newSparepart.sparepartId,
+      sparepart: sp || { sku: "", name: "" },
+      qty: newSparepart.qty,
+      unitPrice: newSparepart.unitPrice,
+      total: newSparepart.qty * newSparepart.unitPrice,
+    }]);
+    setNewSparepart({ sparepartId: "", qty: 1, unitPrice: 0 });
+    setShowAddSparepart(false);
+  };
+
+  const updateSparepartRow = (idx: number, field: string, value: any) => {
+    setSpareparts(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      if (field === "qty" || field === "unitPrice") {
+        updated[idx].total = updated[idx].qty * updated[idx].unitPrice;
+      }
+      return updated;
+    });
+  };
+
+  const removeSparepartRow = (idx: number) => {
+    setSpareparts(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveEdits = async () => {
+    setEditSaving(true);
+    try {
+      const total = [...services, ...spareparts].reduce((s, x) => s + (x.total || 0), 0);
+      const payload: any = {
+        services: services.map(s => ({ serviceId: s.serviceId, qty: s.qty, unitPrice: s.unitPrice })),
+        spareparts: spareparts.map(s => ({ sparepartId: s.sparepartId, qty: s.qty, unitPrice: s.unitPrice })),
+      };
+      const res = await fetch(`/api/service-orders/${order.id}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Gagal menyimpan");
+      const j = await res.json();
+      setOrder((prev: any) => ({ ...prev, total: j.data.total }));
+      setEditMode(false);
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleSaveFields = async () => {
+    try {
+      await fetch(`/api/service-orders/${order.id}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFields),
+      });
+      setShowEditModal(false);
+      // refresh
+      const r = await fetch(`/api/service-orders/${order.id}`);
+      const j = await r.json();
+      setOrder(j.data);
+    } catch {
+      alert("Gagal menyimpan perubahan");
+    }
+  };
+
+  const totalQty = services.reduce((s: number, x: any) => s + (x.qty || 0), 0);
+  const grandTotal = services.reduce((s: number, x: any) => s + (x.total || 0), 0);
+
   const d = {
     documentNumber: order.soNo || order.documentNumber || "-",
     store: order.store?.name || order.store || "-",
@@ -329,10 +276,11 @@ export default function ServiceOrderDetailPage() {
           <div className="flex flex-wrap gap-2 mb-4">
             {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Deliver</button>}
             {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{!hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}</>}
-            {isApproved && !hasWO && (order.services || []).length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
-            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/WO-${orderNo.replace("SO-", "")}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
+            {isApproved && !hasWO && services.length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
+            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
             <button style={S.actionBtn}><Printer size={14} /> Print</button>
             <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
+            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
           </div>
 
           {/* 3-Column Info Grid */}
@@ -366,7 +314,7 @@ export default function ServiceOrderDetailPage() {
           </div>
 
           {/* Line Tabs: Services | Spareparts */}
-          <div style={{ marginBottom: 0, display: "flex", gap: 0 }}>
+          <div style={{ marginBottom: 0, display: "flex", gap: 0, alignItems: "center" }}>
             <button onClick={() => setSvcLineTab("services")} style={{
               padding: "7px 16px", fontSize: 12, fontWeight: svcLineTab === "services" ? 600 : 400,
               color: svcLineTab === "services" ? "#0176d3" : "#444746",
@@ -379,13 +327,98 @@ export default function ServiceOrderDetailPage() {
               border: "none", borderBottom: svcLineTab === "spareparts" ? "2px solid #0176d3" : "2px solid transparent",
               background: "transparent", cursor: "pointer",
             }}>Spareparts</button>
+            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+              {!editMode ? (
+                <button onClick={() => setEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit Items</button>
+              ) : (
+                <>
+                  <button onClick={() => svcLineTab === "services" ? setShowAddService(true) : setShowAddSparepart(true)} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
+                  <button onClick={() => { setEditMode(false); setServices((order.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } }))); setSpareparts((order.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } }))); }} style={S.actionBtn}>Batal</button>
+                  <button onClick={handleSaveEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
+                    <Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {svcLineTab === "services" && (
-            <ServicesTable services={order.services || []} totalQty={totalQty} grandTotal={grandTotal} router={router} />
+            <div>
+              {editMode && showAddService && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ background: "#f0f7ff", border: "1px solid #0176d3", borderRadius: 8, padding: 12 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
+                      <div style={{ flex: "1 1 200px" }}>
+                        <label style={S.formLabel}>Service</label>
+                        <select value={newService.serviceId} onChange={e => setNewService(prev => ({ ...prev, serviceId: e.target.value }))} style={S.formInput}>
+                          <option value="">-- Pilih Service --</option>
+                          {availableServices.map(s => (
+                            <option key={s.id} value={s.id}>{s.sku} - {s.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div style={{ width: 70 }}>
+                        <label style={S.formLabel}>Qty</label>
+                        <input type="number" min={1} value={newService.qty} onChange={e => setNewService(prev => ({ ...prev, qty: parseInt(e.target.value) || 1 }))} style={S.formInput} />
+                      </div>
+                      <div style={{ width: 130 }}>
+                        <label style={S.formLabel}>Unit Price</label>
+                        <input type="number" min={0} value={newService.unitPrice} onChange={e => setNewService(prev => ({ ...prev, unitPrice: parseInt(e.target.value) || 0 }))} style={S.formInput} />
+                      </div>
+                      <button onClick={addServiceRow} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Tambah</button>
+                      <button onClick={() => setShowAddService(false)} style={S.actionBtn}><X size={14} /></button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <ServicesTableEdit
+                services={services}
+                totalQty={totalQty}
+                grandTotal={grandTotal}
+                editMode={editMode}
+                onUpdate={updateServiceRow}
+                onRemove={removeServiceRow}
+                router={router}
+              />
+            </div>
           )}
+
           {svcLineTab === "spareparts" && (
-            <SparepartTable spareparts={order.spareparts || []} />
+            <div>
+              {editMode && showAddSparepart && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ background: "#f0f7ff", border: "1px solid #0176d3", borderRadius: 8, padding: 12 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
+                      <div style={{ flex: "1 1 200px" }}>
+                        <label style={S.formLabel}>Sparepart</label>
+                        <select value={newSparepart.sparepartId} onChange={e => setNewSparepart(prev => ({ ...prev, sparepartId: e.target.value }))} style={S.formInput}>
+                          <option value="">-- Pilih Sparepart --</option>
+                          {availableSpareparts.map(s => (
+                            <option key={s.id} value={s.id}>{s.sku} - {s.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div style={{ width: 70 }}>
+                        <label style={S.formLabel}>Qty</label>
+                        <input type="number" min={1} value={newSparepart.qty} onChange={e => setNewSparepart(prev => ({ ...prev, qty: parseInt(e.target.value) || 1 }))} style={S.formInput} />
+                      </div>
+                      <div style={{ width: 130 }}>
+                        <label style={S.formLabel}>Unit Price</label>
+                        <input type="number" min={0} value={newSparepart.unitPrice} onChange={e => setNewSparepart(prev => ({ ...prev, unitPrice: parseInt(e.target.value) || 0 }))} style={S.formInput} />
+                      </div>
+                      <button onClick={addSparepartRow} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Tambah</button>
+                      <button onClick={() => setShowAddSparepart(false)} style={S.actionBtn}><X size={14} /></button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <SparepartTableEdit
+                spareparts={spareparts}
+                editMode={editMode}
+                onUpdate={updateSparepartRow}
+                onRemove={removeSparepartRow}
+              />
+            </div>
           )}
         </>
       )}
@@ -393,7 +426,6 @@ export default function ServiceOrderDetailPage() {
       {/* ─── Document Reference Tab ─── */}
       {activeTab === "docref" && (
         <>
-          {/* Work Orders (if any) */}
           {hasWO && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Work Orders</div>
@@ -404,10 +436,8 @@ export default function ServiceOrderDetailPage() {
               </div>
             </div>
           )}
-
-          {/* Services Table */}
           <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Services</div>
-          <ServicesTable services={order.services || []} totalQty={totalQty} grandTotal={grandTotal} router={router} />
+          <ServicesTableEdit services={services} totalQty={totalQty} grandTotal={grandTotal} editMode={false} onUpdate={() => {}} onRemove={() => {}} router={router} />
         </>
       )}
 
@@ -421,7 +451,38 @@ export default function ServiceOrderDetailPage() {
       {/* Modals */}
       {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DELIVERED ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
       {showDeliverConfirm && <Modal title="Deliver Service Order?" message="Status akan berubah dari DRAFT ke DELIVERED." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Deliver" />}
-      {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${(order.services || []).length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
+      {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${services.length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
+
+      {/* Edit Fields Modal */}
+      {showEditModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 500, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)", maxHeight: "80vh", overflow: "auto" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 16 }}>Edit Service Order</h3>
+            <div style={{ marginBottom: 12 }}>
+              <label style={S.formLabel}>Customer</label>
+              <select value={editFields.customerId} onChange={e => setEditFields(prev => ({ ...prev, customerId: e.target.value }))} style={S.formInput}>
+                <option value="">-- Pilih Customer --</option>
+                {allCustomers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={S.formLabel}>Kendaraan</label>
+              <select value={editFields.vehicleId} onChange={e => setEditFields(prev => ({ ...prev, vehicleId: e.target.value }))} style={S.formInput}>
+                <option value="">-- Pilih Kendaraan --</option>
+                {allVehicles.map(v => <option key={v.id} value={v.id}>{v.plateNo} — {v.brand} {v.model}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={S.formLabel}>Keluhan (Complaint)</label>
+              <textarea value={editFields.complaint} onChange={e => setEditFields(prev => ({ ...prev, complaint: e.target.value }))} style={{ ...S.formInput, minHeight: 80 }} rows={3} />
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowEditModal(false)} style={S.actionBtn}>Batal</button>
+              <button onClick={handleSaveFields} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Simpan</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -436,71 +497,127 @@ function F2({ label, value }: { label: string; value: string }) {
   );
 }
 
-/* ─── Services Table ─── */
-function ServicesTable({ services, totalQty, grandTotal, router }: { services: any[]; totalQty: number; grandTotal: number; router: any }) {
-  const isApiFormat = services.length > 0 && services[0].service;
+/* ─── Editable Services Table ─── */
+function ServicesTableEdit({ services, totalQty, grandTotal, editMode, onUpdate, onRemove, router }: {
+  services: any[]; totalQty: number; grandTotal: number; editMode: boolean;
+  onUpdate: (idx: number, field: string, value: any) => void;
+  onRemove: (idx: number) => void;
+  router: any;
+}) {
   return (
     <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
-        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Item</th><th className="hidden sm:table-cell" style={S.th}>Description</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
+        <thead><tr>
+          <th style={{ ...S.th, width: 36 }}>No.</th>
+          <th style={S.th}>Item</th>
+          <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+          <th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th>
+          <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+          {editMode && <th style={{ ...S.th, width: 40 }}></th>}
+        </tr></thead>
         <tbody>
+          {services.length === 0 && (
+            <tr><td colSpan={editMode ? 6 : 5} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
+          )}
           {services.map((svc: any, i: number) => {
-            if (isApiFormat) {
-              const s = svc.service || {};
-              return (
-                <tr key={i} style={S.tr}>
-                  <td style={S.td}>{i + 1}</td>
-                  <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/master-data/services/${s.sku || ""}`)}>{s.sku} - {s.name}</td>
-                  <td className="hidden sm:table-cell" style={S.td}>-</td>
-                  <td style={{ ...S.td, textAlign: "right" }}>{svc.qty}</td>
-                  <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(svc.unitPrice)}</td>
-                  <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
-                </tr>
-              );
-            }
-            const code = (svc.item || "").split(" - ")[0]?.trim?.();
+            const s = svc.service || {};
             return (
               <tr key={i} style={S.tr}>
                 <td style={S.td}>{i + 1}</td>
-                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/master-data/services/${code}`)}>{svc.item}</td>
-                <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
-                <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(svc.priceExTax)}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{fmt(svc.subtotal)}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => !editMode && router.push(`/master-data/services/${s.sku || ""}`)}>{s.sku} - {s.name}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>
+                  {editMode ? (
+                    <input type="number" min={1} value={svc.qty} onChange={e => onUpdate(i, "qty", parseInt(e.target.value) || 1)}
+                      style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  ) : svc.qty}
+                </td>
+                <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
+                  {editMode ? (
+                    <input type="number" min={0} value={svc.unitPrice} onChange={e => onUpdate(i, "unitPrice", parseInt(e.target.value) || 0)}
+                      style={{ width: 100, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  ) : fmt(svc.unitPrice)}
+                </td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+                {editMode && (
+                  <td style={S.td}>
+                    <button onClick={() => onRemove(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 2 }}><Trash2 size={14} /></button>
+                  </td>
+                )}
               </tr>
             );
           })}
         </tbody>
-        <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}><td colSpan={3} style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalQty}</td><td style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700, fontSize: 13 }}>{fmt(grandTotal)}</td></tr></tfoot>
+        <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
+          <td colSpan={editMode ? 2 : 2} style={S.td}></td>
+          <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalQty}</td>
+          <td className="hidden sm:table-cell" style={S.td}></td>
+          <td style={{ ...S.td, textAlign: "right", fontWeight: 700, fontSize: 13 }}>{fmt(grandTotal)}</td>
+          {editMode && <td style={S.td}></td>}
+        </tr></tfoot>
       </table>
     </div>
   );
 }
 
-/* ─── Sparepart Table ─── */
-function SparepartTable({ spareparts }: { spareparts: any[] }) {
-  if (spareparts.length === 0) return <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white p-6 text-center text-[#8e8f8e] text-[13px]">Belum ada sparepart</div>;
-  const isApiFormat = spareparts[0].sparepart;
+/* ─── Editable Sparepart Table ─── */
+function SparepartTableEdit({ spareparts, editMode, onUpdate, onRemove }: {
+  spareparts: any[]; editMode: boolean;
+  onUpdate: (idx: number, field: string, value: any) => void;
+  onRemove: (idx: number) => void;
+}) {
   const total = spareparts.reduce((s: number, sp: any) => s + (sp.total || 0), 0);
   return (
     <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
-        <thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>Code</th><th style={S.th}>Name</th><th style={{ ...S.th, textAlign: "right" }}>Qty</th><th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
+        <thead><tr>
+          <th style={{ ...S.th, width: 36 }}>No.</th>
+          <th style={S.th}>Code</th>
+          <th style={S.th}>Name</th>
+          <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+          <th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th>
+          <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+          {editMode && <th style={{ ...S.th, width: 40 }}></th>}
+        </tr></thead>
         <tbody>
+          {spareparts.length === 0 && (
+            <tr><td colSpan={editMode ? 7 : 6} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada sparepart</td></tr>
+          )}
           {spareparts.map((sp, i) => {
-            const data = isApiFormat ? {
-              code: sp.sparepart?.sku || "-",
-              name: sp.sparepart?.name || "-",
-              qty: sp.qty,
-              price: sp.unitPrice,
-              total: sp.total,
-            } : sp;
+            const s = sp.sparepart || {};
             return (
-              <tr key={i} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{data.code}</td><td style={S.td}>{data.name}</td><td style={{ ...S.td, textAlign: "right" }}>{data.qty}</td><td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(data.price)}</td><td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(data.total)}</td></tr>
+              <tr key={i} style={S.tr}>
+                <td style={S.td}>{i + 1}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{s.sku || "-"}</td>
+                <td style={S.td}>{s.name || "-"}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>
+                  {editMode ? (
+                    <input type="number" min={1} value={sp.qty} onChange={e => onUpdate(i, "qty", parseInt(e.target.value) || 1)}
+                      style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  ) : sp.qty}
+                </td>
+                <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
+                  {editMode ? (
+                    <input type="number" min={0} value={sp.unitPrice} onChange={e => onUpdate(i, "unitPrice", parseInt(e.target.value) || 0)}
+                      style={{ width: 100, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  ) : fmt(sp.unitPrice)}
+                </td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td>
+                {editMode && (
+                  <td style={S.td}>
+                    <button onClick={() => onRemove(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 2 }}><Trash2 size={14} /></button>
+                  </td>
+                )}
+              </tr>
             );
           })}
         </tbody>
-        <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}><td colSpan={5} style={S.td}></td><td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(total)}</td></tr></tfoot>
+        {spareparts.length > 0 && (
+          <tfoot><tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
+            <td colSpan={editMode ? 5 : 4} style={S.td}></td>
+            <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(total)}</td>
+            {editMode && <td style={S.td}></td>}
+          </tr></tfoot>
+        )}
       </table>
     </div>
   );
@@ -526,8 +643,6 @@ function Modal({ title, message, onCancel, onConfirm, confirmText }: { title: st
 const S: Record<string, React.CSSProperties> = {
   backBtn: { display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13, fontWeight: 500, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" },
   card: { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 16 },
-  workflowBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px", background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8, marginBottom: 16 },
-  tabBar: { display: "flex", gap: 0, marginBottom: 16, borderBottom: "2px solid #ecebea" },
   tab: { padding: "8px 16px", fontSize: 13, fontWeight: 500, color: "#444746", background: "transparent", border: "none", borderBottom: "2px solid transparent", marginBottom: -2, cursor: "pointer" },
   tabActive: { padding: "8px 16px", fontSize: 13, fontWeight: 600, color: "#0176d3", background: "transparent", border: "none", borderBottom: "2px solid #0176d3", marginBottom: -2, cursor: "pointer" },
   badge: { display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 4, fontSize: 10, fontWeight: 700, letterSpacing: "0.03em" },
@@ -536,10 +651,11 @@ const S: Record<string, React.CSSProperties> = {
   actionBtn: { display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 12, fontWeight: 500, color: "#001526", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" },
   infoCol: { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 12 },
   infoColTitle: { fontSize: 11, fontWeight: 700, color: "#0176d3", textTransform: "uppercase" as const, marginBottom: 8, letterSpacing: "0.04em" },
-  tableWrap: { border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden", background: "#fff" },
   table: { width: "100%", borderCollapse: "collapse" as const, fontSize: 13 },
   th: { padding: "8px 10px", textAlign: "left" as const, fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", background: "#fff", borderBottom: "1px solid #ecebea" },
   td: { padding: "8px 10px", borderBottom: "1px solid #f0f0f0", color: "#001526", background: "#fff" },
   tr: { transition: "background 100ms" },
   pill: { display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, color: "#fff" },
+  formLabel: { display: "block", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, marginBottom: 4 },
+  formInput: { width: "100%", padding: "6px 10px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none", boxSizing: "border-box" as const },
 };

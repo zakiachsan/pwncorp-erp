@@ -50,7 +50,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { status, mekanikId, startDate, targetDate } = body;
+  const { status, mekanikId, startDate, targetDate, items } = body;
 
   const existing = await prisma.workOrder.findUnique({
     where: { id: params.id },
@@ -125,6 +125,24 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   if (mekanikId !== undefined) updateData.mekanikId = mekanikId;
   if (startDate !== undefined) updateData.startDate = startDate ? new Date(startDate) : null;
   if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
+
+  // Handle items replacement
+  if (items !== undefined) {
+    await prisma.wOItem.deleteMany({ where: { woId: params.id } });
+    for (const item of items) {
+      await prisma.wOItem.create({
+        data: {
+          woId: params.id,
+          itemType: item.itemType,
+          itemId: item.itemId || "",
+          itemName: item.itemName || "",
+          qty: item.qty || 1,
+          unitPrice: item.unitPrice || 0,
+          total: (item.qty || 1) * (item.unitPrice || 0),
+        },
+      });
+    }
+  }
 
   const wo = await prisma.workOrder.update({
     where: { id: params.id },

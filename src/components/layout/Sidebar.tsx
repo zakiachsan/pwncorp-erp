@@ -45,7 +45,10 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
       {
         label: "Project",
         icon: <Briefcase size={18} />,
-        href: "/project",
+        children: [
+          { label: "Projects", href: "/project" },
+          { label: "Anggaran", href: "/warehouse/anggaran" },
+        ],
       },
       {
         label: "Service Orders",
@@ -70,7 +73,6 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         label: "Warehouse",
         icon: <Package size={18} />,
         children: [
-          { label: "Anggaran", href: "/warehouse/anggaran" },
           { label: "Purchase Request", href: "/warehouse/purchase-request" },
           { label: "Pembanding", href: "/warehouse/pembanding" },
           { label: "Purchase Orders", href: "/warehouse/purchase-orders" },

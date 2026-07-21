@@ -27,16 +27,23 @@ export default function NewPurchaseOrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // warehouse state
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [showAddWarehouse, setShowAddWarehouse] = useState(false);
+  const [newWarehouseName, setNewWarehouseName] = useState("");
+
   useEffect(() => {
     Promise.all([
       fetch("/api/suppliers?limit=200").then((r) => r.json()),
       fetch("/api/spareparts?limit=200").then((r) => r.json()),
       fetch("/api/purchase-requests?limit=50").then((r) => r.json()),
+      fetch("/api/warehouses?limit=100").then((r) => r.json()),
     ])
-      .then(([sup, sp, pr]) => {
+      .then(([sup, sp, pr, wh]) => {
         setSuppliers(sup.data || []);
         setSpareparts(sp.data || []);
         setPurchaseRequests(pr.data || []);
+        setWarehouses(wh.data || []);
         setLoadingMaster(false);
       })
       .catch(() => { setError("Failed to load master data"); setLoadingMaster(false); });
@@ -44,6 +51,24 @@ export default function NewPurchaseOrderPage() {
 
   const addItem = () => setItems([...items, { sparepartId: "", qty: 1, unitPrice: 0 }]);
   const removeItem = (i: number) => setItems(items.filter((_, idx) => idx !== i));
+
+  const addWarehouse = async () => {
+    if (!newWarehouseName.trim()) return;
+    try {
+      const res = await fetch("/api/warehouses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newWarehouseName.trim() }),
+      });
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setWarehouses(prev => [...prev, json.data]);
+        setWarehouse(json.data.name);
+        setNewWarehouseName("");
+        setShowAddWarehouse(false);
+      }
+    } catch {}
+  };
   const setItem = (i: number, key: keyof ItemRow, val: any) => {
     const next = [...items];
     next[i] = { ...next[i], [key]: val };
@@ -118,13 +143,28 @@ export default function NewPurchaseOrderPage() {
           </div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Gudang Utama..."
-              value={warehouse}
-              onChange={(e) => setWarehouse(e.target.value)}
-            />
+            {!showAddWarehouse ? (
+              <select className="form-select" value={warehouse} onChange={(e) => { if (e.target.value === "__new__") { setShowAddWarehouse(true); } else { setWarehouse(e.target.value); } }}>
+                <option value="">-- Select Warehouse --</option>
+                {warehouses.map((w) => (
+                  <option key={w.id} value={w.name}>{w.name}{w.code ? ` (${w.code})` : ""}</option>
+                ))}
+                <option value="__new__" style={{ color: "#0176d3", fontWeight: 600 }}>+ Tambah Warehouse Baru</option>
+              </select>
+            ) : (
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="text"
+                  className="form-input flex-1"
+                  placeholder="Nama warehouse..."
+                  value={newWarehouseName}
+                  onChange={(e) => setNewWarehouseName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addWarehouse()}
+                />
+                <button type="button" className="btn btn--brand btn--sm" onClick={addWarehouse}>Tambah</button>
+                <button type="button" className="btn btn--sm" onClick={() => setShowAddWarehouse(false)}>Batal</button>
+              </div>
+            )}
           </div>
           <div className="form-group">
             <label className="form-label">Due Date</label>

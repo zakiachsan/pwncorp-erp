@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Edit } from "lucide-react";
+import { ArrowLeft, Edit, Car } from "lucide-react";
+
+interface VehicleData {
+  id: string;
+  plateNo: string;
+  brand: string;
+  model: string | null;
+  year: number | null;
+}
 
 interface CustomerDetail {
   id: string;
@@ -13,13 +21,8 @@ interface CustomerDetail {
   whatsapp?: string;
   email?: string;
   address?: string;
-  vehicles?: number;
+  vehicles?: VehicleData[];
 }
-
-const statusPill = (status: string) => {
-  const map: Record<string, string> = { Draft: "#6b7280", Approved: "#0176d3", "In Progress": "#f59e0b", Completed: "#2e844a", Cancelled: "#ea001e" };
-  return map[status] || "#6b7280";
-};
 
 export default function CustomerDetailPage() {
   const params = useParams();
@@ -59,6 +62,8 @@ export default function CustomerDetailPage() {
     );
   }
 
+  const vehicles = item.vehicles || [];
+
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       <div className="flex items-center gap-3 mb-4">
@@ -78,9 +83,9 @@ export default function CustomerDetailPage() {
         <button key="details" onClick={() => setActiveTab("details")} style={{ padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", color: activeTab === "details" ? "#fff" : "#444746", background: activeTab === "details" ? "#0176d3" : "transparent", fontWeight: activeTab === "details" ? 600 : 400, whiteSpace: "nowrap" }}>Details</button>
         <button key="history" onClick={() => setActiveTab("history")} style={{ padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", color: activeTab === "history" ? "#fff" : "#444746", background: activeTab === "history" ? "#0176d3" : "transparent", fontWeight: activeTab === "history" ? 600 : 400, whiteSpace: "nowrap" }}>Service Orders</button>
         <button key="workorders" onClick={() => setActiveTab("workorders")} style={{ padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", color: activeTab === "workorders" ? "#fff" : "#444746", background: activeTab === "workorders" ? "#0176d3" : "transparent", fontWeight: activeTab === "workorders" ? 600 : 400, whiteSpace: "nowrap" }}>Work Orders</button>
-        {item.type === "Wholesale" && (
-          <button key="vehicles" onClick={() => setActiveTab("vehicles")} style={{ padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", color: activeTab === "vehicles" ? "#fff" : "#444746", background: activeTab === "vehicles" ? "#0176d3" : "transparent", fontWeight: activeTab === "vehicles" ? 600 : 400, whiteSpace: "nowrap" }}>Vehicles</button>
-        )}
+        <button key="vehicles" onClick={() => setActiveTab("vehicles")} style={{ padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", color: activeTab === "vehicles" ? "#fff" : "#444746", background: activeTab === "vehicles" ? "#0176d3" : "transparent", fontWeight: activeTab === "vehicles" ? 600 : 400, whiteSpace: "nowrap" }}>
+          Vehicles {vehicles.length > 0 && `(${vehicles.length})`}
+        </button>
       </div>
 
       {activeTab === "details" && (
@@ -92,6 +97,19 @@ export default function CustomerDetailPage() {
           <F label="EMAIL" value={item.email || "—"} />
           <F label="TIPE" value={item.type} />
           <F label="ALAMAT" value={item.address || "—"} />
+
+          {vehicles.length > 0 && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #ecebea" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 8 }}>Kendaraan</div>
+              {vehicles.map((v) => (
+                <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #f5f5f5", fontSize: 13 }}>
+                  <Car size={14} style={{ color: "#0176d3", flexShrink: 0 }} />
+                  <span style={{ fontWeight: 500, color: "#001526" }}>{v.plateNo}</span>
+                  <span style={{ color: "#444746" }}>— {v.brand} {v.model || ""} {v.year || ""}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -108,8 +126,31 @@ export default function CustomerDetailPage() {
       )}
 
       {activeTab === "vehicles" && (
-        <div style={{ border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden", background: "#fff" }}>
-          <div style={{ padding: 24, textAlign: "center", color: "#8e8f8e" }}>Belum ada data kendaraan</div>
+        <div style={{ background: "#fff", border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden" }}>
+          {vehicles.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "#8e8f8e" }}>Belum ada data kendaraan</div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ ...TH, width: 180 }}>Plat Nomor</th>
+                  <th style={TH}>Merk</th>
+                  <th style={TH}>Model</th>
+                  <th style={{ ...TH, width: 80 }}>Tahun</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vehicles.map((v) => (
+                  <tr key={v.id} style={{ cursor: "pointer" }} onClick={() => router.push(`/master-data/vehicles/${encodeURIComponent(v.plateNo)}`)} className="hover:bg-[#f0f7ff]">
+                    <td style={{ ...TD, color: "#0176d3", fontWeight: 500 }}>{v.plateNo}</td>
+                    <td style={TD}>{v.brand}</td>
+                    <td style={TD}>{v.model || "—"}</td>
+                    <td style={TD}>{v.year || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Printer, ChevronRight } from "lucide-react";
+import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -45,6 +45,15 @@ export default function WorkOrderDetailPage() {
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
   const [photoDesc, setPhotoDesc] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  // Edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editServices, setEditServices] = useState<any[]>([]);
+  const [editSpareparts, setEditSpareparts] = useState<any[]>([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFields, setEditFields] = useState({ mekanikId: "", startDate: "", targetDate: "" });
+  const [allMekanik, setAllMekanik] = useState<any[]>([]);
 
   useEffect(() => {
     fetch(`/api/work-orders?search=${encodeURIComponent(woNo)}&limit=1`)
@@ -108,6 +117,7 @@ export default function WorkOrderDetailPage() {
           store: w.store?.name || w.store || "-",
           serviceAdvisor: so.sa?.name || found.so?.serviceAdvisor || "-",
           mekanik: w.mekanik?.name || found.assignedTo || "-",
+          mekanikId: w.mekanikId || "",
           status: (w.status || "DRAFT").toUpperCase(),
           planStartDate: w.startDate || found.planStartDate || "-",
           planEndDate: w.targetDate || found.planEndDate || "-",
@@ -174,6 +184,122 @@ export default function WorkOrderDetailPage() {
     }
   };
 
+  // Init edit data when wo changes
+  useEffect(() => {
+    if (!wo) return;
+    setEditServices(wo.services || []);
+    setEditSpareparts(wo.spareparts || []);
+    setEditFields({
+      mekanikId: wo.mekanikId || "",
+      startDate: wo.planStartDate !== "-" ? wo.planStartDate : "",
+      targetDate: wo.planEndDate !== "-" ? wo.planEndDate : "",
+    });
+    // Fetch mekanik list
+    fetch("/api/users?limit=100").then(r => r.json()).then(d => {
+      setAllMekanik((d.data || d.users || []).filter((u: any) => u.role?.name === "Mekanik" || u.role === "Mekanik"));
+    }).catch(() => {});
+  }, [wo]);
+
+  // --- Edit handlers ---
+  const updateEditService = (idx: number, field: string, value: any) => {
+    setEditServices(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      if (field === "quantity" || field === "priceExTax") {
+        updated[idx].total = updated[idx].quantity * updated[idx].priceExTax;
+      }
+      return updated;
+    });
+  };
+
+  const removeEditService = (idx: number) => {
+    setEditServices(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateEditSparepart = (idx: number, field: string, value: any) => {
+    setEditSpareparts(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      if (field === "qty" || field === "price") {
+        updated[idx].total = updated[idx].qty * updated[idx].price;
+      }
+      return updated;
+    });
+  };
+
+  const removeEditSparepart = (idx: number) => {
+    setEditSpareparts(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSaveWOEdits = async () => {
+    setEditSaving(true);
+    try {
+      // Build items array from services and spareparts
+      const items = [
+        ...editServices.map(s => ({
+          itemType: "service",
+          itemId: s.itemId || "",
+          itemName: s.item || s.description || "",
+          qty: s.quantity || 1,
+          unitPrice: s.priceExTax || 0,
+        })),
+        ...editSpareparts.map(s => ({
+          itemType: "sparepart",
+          itemId: s.itemId || "",
+          itemName: s.name || "",
+          qty: s.qty || 1,
+          unitPrice: s.price || 0,
+        })),
+      ];
+      await fetch(`/api/work-orders/${wo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      // Refresh
+      const r = await fetch(`/api/work-orders/${wo.id}`);
+      const j = await r.json();
+      if (j.data) {
+        const d = j.data;
+        const so = d.so || {};
+        const svcs = (d.items || []).filter((it: any) => it.itemType === "service").map((it: any) => ({
+          item: it.itemName || it.name || "-", description: it.description || "-", quantity: it.qty || 1, priceExTax: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId,
+        }));
+        const sps = (d.items || []).filter((it: any) => it.itemType === "sparepart").map((it: any) => ({
+          code: it.sku || it.itemId || "-", name: it.itemName || "-", qty: it.qty || 0, price: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId,
+        }));
+        setWo((prev: any) => ({ ...prev, services: svcs, spareparts: sps, mekanik: d.mekanik?.name || prev.mekanik, mekanikId: d.mekanikId || prev.mekanikId, planStartDate: d.startDate || prev.planStartDate, planEndDate: d.targetDate || prev.planEndDate }));
+      }
+      setEditMode(false);
+    } catch (e: any) {
+      alert("Gagal menyimpan: " + e.message);
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleSaveWOFields = async () => {
+    try {
+      await fetch(`/api/work-orders/${wo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mekanikId: editFields.mekanikId || undefined,
+          startDate: editFields.startDate || undefined,
+          targetDate: editFields.targetDate || undefined,
+        }),
+      });
+      setShowEditModal(false);
+      const r = await fetch(`/api/work-orders/${wo.id}`);
+      const j = await r.json();
+      if (j.data) {
+        setWo((prev: any) => ({ ...prev, mekanik: j.data.mekanik?.name || prev.mekanik, mekanikId: j.data.mekanikId, planStartDate: j.data.startDate || prev.planStartDate, planEndDate: j.data.targetDate || prev.planEndDate }));
+      }
+    } catch {
+      alert("Gagal menyimpan");
+    }
+  };
+
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       {/* Workflow Bar */}
@@ -205,6 +331,7 @@ export default function WorkOrderDetailPage() {
         </div>
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
+          <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: wo.planStartDate !== "-" ? wo.planStartDate : "", targetDate: wo.planEndDate !== "-" ? wo.planEndDate : "" }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
         </div>
       </div>
 
@@ -276,7 +403,7 @@ export default function WorkOrderDetailPage() {
           </div>
 
           {/* Line Tabs: Services | Spareparts */}
-          <div style={{ marginBottom: 0, display: "flex", gap: 0 }}>
+          <div style={{ marginBottom: 0, display: "flex", gap: 0, alignItems: "center" }}>
             <button onClick={() => setSvcLineTab("services")} style={{
               padding: "7px 16px", fontSize: 12, fontWeight: svcLineTab === "services" ? 600 : 400,
               color: svcLineTab === "services" ? "#0176d3" : "#444746",
@@ -289,93 +416,28 @@ export default function WorkOrderDetailPage() {
               border: "none", borderBottom: svcLineTab === "spareparts" ? "2px solid #0176d3" : "2px solid transparent",
               background: "transparent", cursor: "pointer",
             }}>Spareparts</button>
+            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+              {!editMode ? (
+                <button onClick={() => setEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit Items</button>
+              ) : (
+                <>
+                  <button onClick={() => { setEditMode(false); setEditServices(wo.services || []); setEditSpareparts(wo.spareparts || []); }} style={S.actionBtn}>Batal</button>
+                  <button onClick={handleSaveWOEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}><Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}</button>
+                </>
+              )}
+            </div>
           </div>
 
           {svcLineTab === "services" && (
-          /* Services Table */
-          <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
-            <table style={S.table}>
-              <thead>
-                <tr>
-                  <th style={{ ...S.th, width: 36 }}>No.</th>
-                  <th style={S.th}>Item</th>
-                  <th className="hidden sm:table-cell" style={S.th}>Description</th>
-                  <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-                  <th className="hidden md:table-cell" style={S.th}>Assigned To</th>
-                  <th className="hidden md:table-cell" style={S.th}>Est. Time</th>
-                  <th className="hidden sm:table-cell" style={S.th}>Status</th>
-                  <th style={{ ...S.th, textAlign: "right" }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wo.services.length === 0 && (
-                  <tr><td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
-                )}
-                {wo.services.map((svc: any, i: number) => (
-                  <tr key={i} style={S.tr}>
-                    <td style={S.td}>{i + 1}</td>
-                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
-                    <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
-                    <td style={{ ...S.td, textAlign: "right" }}>{svc.quantity}</td>
-                    <td className="hidden md:table-cell" style={S.td}>{svc.assignedTo}</td>
-                    <td className="hidden md:table-cell" style={S.td}>{svc.estimatedTime}</td>
-                    <td className="hidden sm:table-cell" style={S.td}>
-                      <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
-                    </td>
-                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-                  <td colSpan={7} style={S.td}></td>
-                  <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalServiceCost)}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+            <div>
+              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} />
+            </div>
           )}
 
           {svcLineTab === "spareparts" && (
-            <>
-          {/* Spareparts Table */}
-          {wo.spareparts.length > 0 ? (
-            <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white" style={{ marginTop: 16 }}>
-              <table style={S.table}>
-                <thead>
-                  <tr>
-                    <th style={{ ...S.th, width: 36 }}>No.</th>
-                    <th style={S.th}>Code</th>
-                    <th style={S.th}>Name</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-                    <th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th>
-                    <th style={{ ...S.th, textAlign: "right" }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {wo.spareparts.map((sp: any, i: number) => (
-                    <tr key={i} style={S.tr}>
-                      <td style={S.td}>{i + 1}</td>
-                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{sp.code}</td>
-                      <td style={S.td}>{sp.name}</td>
-                      <td style={{ ...S.td, textAlign: "right" }}>{sp.qty}</td>
-                      <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>{fmt(sp.price)}</td>
-                      <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-                    <td colSpan={5} style={S.td}></td>
-                    <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalSparepartCost)}</td>
-                  </tr>
-                </tfoot>
-              </table>
+            <div>
+              <WOSparepartTable spareparts={editMode ? editSpareparts : wo.spareparts} editMode={editMode} onUpdate={updateEditSparepart} onRemove={removeEditSparepart} totalCost={editMode ? editSpareparts.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalSparepartCost} />
             </div>
-          ) : (
-            <div style={{ marginTop: 16, ...S.card }}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada sparepart yang digunakan.</p></div>
-          )}
-            </>
           )}
 
           {/* Stock Outgoings */}
@@ -588,6 +650,34 @@ export default function WorkOrderDetailPage() {
                 </a>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Fields Modal */}
+      {showEditModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 440, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 16 }}>Edit Work Order</h3>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase", marginBottom: 4 }}>Mekanik</label>
+              <select value={editFields.mekanikId} onChange={e => setEditFields(prev => ({ ...prev, mekanikId: e.target.value }))} style={{ width: "100%", padding: "6px 10px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }}>
+                <option value="">-- Pilih Mekanik --</option>
+                {allMekanik.map((m: any) => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase", marginBottom: 4 }}>Tanggal Mulai</label>
+              <input type="date" value={editFields.startDate} onChange={e => setEditFields(prev => ({ ...prev, startDate: e.target.value }))} style={{ width: "100%", padding: "6px 10px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase", marginBottom: 4 }}>Tanggal Target</label>
+              <input type="date" value={editFields.targetDate} onChange={e => setEditFields(prev => ({ ...prev, targetDate: e.target.value }))} style={{ width: "100%", padding: "6px 10px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowEditModal(false)} style={S.actionBtn}>Batal</button>
+              <button onClick={handleSaveWOFields} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Simpan</button>
+            </div>
           </div>
         </div>
       )}
@@ -808,5 +898,135 @@ function StatusBtn({ label, color, onClick }: { label: string; color: string; on
     >
       Mark {label}
     </button>
+  );
+}
+
+/* ─── Editable WO Services Table ─── */
+function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost }: {
+  services: any[]; editMode: boolean; totalCost: number;
+  onUpdate: (idx: number, field: string, value: any) => void;
+  onRemove: (idx: number) => void;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
+      <table style={S.table}>
+        <thead>
+          <tr>
+            <th style={{ ...S.th, width: 36 }}>No.</th>
+            <th style={S.th}>Item</th>
+            <th className="hidden sm:table-cell" style={S.th}>Description</th>
+            <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+            {!editMode && <th className="hidden md:table-cell" style={S.th}>Assigned To</th>}
+            {!editMode && <th className="hidden md:table-cell" style={S.th}>Est. Time</th>}
+            {!editMode && <th className="hidden sm:table-cell" style={S.th}>Status</th>}
+            <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+            {editMode && <th style={{ ...S.th, width: 40 }}></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {services.length === 0 && (
+            <tr><td colSpan={editMode ? 5 : 8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
+          )}
+          {services.map((svc: any, i: number) => (
+            <tr key={i} style={S.tr}>
+              <td style={S.td}>{i + 1}</td>
+              <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
+              <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
+              <td style={{ ...S.td, textAlign: "right" }}>
+                {editMode ? (
+                  <input type="number" min={1} value={svc.quantity} onChange={e => onUpdate(i, "quantity", parseInt(e.target.value) || 1)}
+                    style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                ) : svc.quantity}
+              </td>
+              {!editMode && <td className="hidden md:table-cell" style={S.td}>{svc.assignedTo}</td>}
+              {!editMode && <td className="hidden md:table-cell" style={S.td}>{svc.estimatedTime}</td>}
+              {!editMode && <td className="hidden sm:table-cell" style={S.td}>
+                <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
+              </td>}
+              <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+              {editMode && (
+                <td style={S.td}>
+                  <button onClick={() => onRemove(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 2 }}><Trash2 size={14} /></button>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
+            <td colSpan={editMode ? 3 : 7} style={S.td}></td>
+            <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalCost)}</td>
+            {editMode && <td style={S.td}></td>}
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
+}
+
+/* ─── Editable WO Sparepart Table ─── */
+function WOSparepartTable({ spareparts, editMode, onUpdate, onRemove, totalCost }: {
+  spareparts: any[]; editMode: boolean; totalCost: number;
+  onUpdate: (idx: number, field: string, value: any) => void;
+  onRemove: (idx: number) => void;
+}) {
+  if (!editMode && spareparts.length === 0) {
+    return <div style={{ marginTop: 16, ...S.card }}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada sparepart yang digunakan.</p></div>;
+  }
+  return (
+    <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white" style={{ marginTop: editMode ? 0 : 16 }}>
+      <table style={S.table}>
+        <thead>
+          <tr>
+            <th style={{ ...S.th, width: 36 }}>No.</th>
+            <th style={S.th}>Code</th>
+            <th style={S.th}>Name</th>
+            <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+            <th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th>
+            <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+            {editMode && <th style={{ ...S.th, width: 40 }}></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {spareparts.length === 0 && editMode && (
+            <tr><td colSpan={7} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada sparepart</td></tr>
+          )}
+          {spareparts.map((sp: any, i: number) => (
+            <tr key={i} style={S.tr}>
+              <td style={S.td}>{i + 1}</td>
+              <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{sp.code}</td>
+              <td style={S.td}>{sp.name}</td>
+              <td style={{ ...S.td, textAlign: "right" }}>
+                {editMode ? (
+                  <input type="number" min={1} value={sp.qty} onChange={e => onUpdate(i, "qty", parseInt(e.target.value) || 1)}
+                    style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                ) : sp.qty}
+              </td>
+              <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
+                {editMode ? (
+                  <input type="number" min={0} value={sp.price} onChange={e => onUpdate(i, "price", parseInt(e.target.value) || 0)}
+                    style={{ width: 100, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                ) : fmt(sp.price)}
+              </td>
+              <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(sp.total)}</td>
+              {editMode && (
+                <td style={S.td}>
+                  <button onClick={() => onRemove(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 2 }}><Trash2 size={14} /></button>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+        {(spareparts.length > 0 || editMode) && (
+          <tfoot>
+            <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
+              <td colSpan={editMode ? 5 : 5} style={S.td}></td>
+              <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalCost)}</td>
+              {editMode && <td style={S.td}></td>}
+            </tr>
+          </tfoot>
+        )}
+      </table>
+    </div>
   );
 }

@@ -65,6 +65,7 @@ model Store {
   pettyCashes     PettyCash[]
   projects        Project[]
   journalEntries  JournalEntry[]
+  warehouses      Warehouse[]
   stockHistories  StockHistory[]
   receipts        Receipt[]
   paymentRequests PaymentRequest[]
@@ -429,6 +430,19 @@ model PurchaseOrder {
   returns    PurchaseReturn[]
 
   @@map("purchase_orders")
+}
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  storeId   String   @map("store_id")
+  store     Store    @relation(fields: [storeId], references: [id])
+  name      String
+  code      String?
+  address   String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("warehouses")
 }
 
 model POItem {

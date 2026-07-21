@@ -60,8 +60,15 @@ export default function PurchaseOrderDetailPage() {
   }
 
   const currentStepIndex = getStepIndex(po.status || "DRAFT");
-  const items = po.items || [];
-  const totalQty = items.reduce((s: number, x: any) => s + (x.orderQty || x.quantity || 0), 0);
+  const items = (po.items || []).map((item: any) => ({
+    ...item,
+    sku: item.sparepart?.sku || item.sku || "-",
+    product: item.sparepart?.name || item.product || "-",
+    orderQty: item.qty || item.orderQty || 0,
+    price: item.unitPrice || item.price || 0,
+    amount: item.total || item.amount || 0,
+  }));
+  const totalQty = items.reduce((s: number, x: any) => s + (x.orderQty || 0), 0);
   const subTotal = items.reduce((s: number, x: any) => s + (x.amount || 0), 0);
 
   return (

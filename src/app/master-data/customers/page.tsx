@@ -79,7 +79,6 @@ export default function CustomersPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: 80 }}>ID</th>
                 <th>Nama Customer</th>
                 <th>Telepon</th>
                 <th>Tipe</th>
@@ -89,13 +88,12 @@ export default function CustomersPage() {
             <tbody>
               {data.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-[--color-text-secondary]">No customers found</td>
+                  <td colSpan={4} className="text-center py-8 text-[--color-text-secondary]">No customers found</td>
                 </tr>
               )}
               {data.map((c) => (
-                <tr key={c.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/customers/${c.id}`)}>
-                  <td className="font-medium" style={{ color: "#0176d3", whiteSpace: "nowrap" }}>{c.code || c.id.slice(-6)}</td>
-                  <td className="font-medium" style={{ color: "#0176d3", cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); router.push(`/master-data/customers/${c.id}`); }}>{c.name}</td>
+              <tr key={c.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/customers/${c.id}`)}>
+              <td className="font-medium" style={{ color: "#0176d3", cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); router.push(`/master-data/customers/${c.id}`); }}>{c.name}</td>
                   <td>{c.phone}</td>
                   <td>
                     <span className={`pill ${c.type === "Wholesale" ? "bg-[--color-brand] text-white" : "bg-gray-200 text-gray-700"}`}>

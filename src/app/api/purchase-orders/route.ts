@@ -22,6 +22,7 @@ export const GET = withAuth(async (req: NextRequest) => {
       where,
       include: {
         supplier: { select: { id: true, companyName: true } },
+        items: { include: { sparepart: { select: { sku: true, name: true } } } },
         _count: { select: { items: true, deliveries: true } },
       },
       orderBy: { date: "desc" },
