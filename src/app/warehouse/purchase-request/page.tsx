@@ -40,6 +40,9 @@ export default function PurchaseRequestListPage() {
           Purchase Request
           <Star className="w-4 h-4 text-yellow-400 ml-2" />
         </div>
+        <button onClick={() => router.push("/warehouse/purchase-request/new")} className="btn btn--brand btn--sm">
+          + Add
+        </button>
       </div>
 
       {/* Filter */}

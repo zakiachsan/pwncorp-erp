@@ -33,6 +33,9 @@ export default function PurchaseDeliveriesPage() {
           Purchase Delivery
           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 ml-1" />
         </div>
+        <button onClick={() => router.push("/warehouse/purchase-deliveries/new")} className="btn btn--brand btn--sm">
+          + Add
+        </button>
       </div>
 
       {/* Filter Section */}

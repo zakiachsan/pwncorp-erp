@@ -31,6 +31,7 @@ export default function StockOpnamePage() {
           Warehouse Stock Opname
           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 ml-1" />
         </div>
+        <button onClick={() => router.push('/warehouse/stock-opname/new')} className="btn btn--brand btn--sm">+ Add</button>
       </div>
 
       <div className="filter-section">
