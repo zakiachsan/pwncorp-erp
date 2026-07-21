@@ -8,7 +8,7 @@ interface Service {
   id: string;
   sku: string;
   name: string;
-  price: number;
+  standardPrice: number;
   category: string;
 }
 
@@ -98,7 +98,7 @@ export default function ServicesPage() {
                   <td className="font-medium text-[--color-brand]">{s.sku}</td>
                   <td className="font-medium">{s.name}</td>
                   <td><span className="pill bg-gray-200 text-gray-700">{s.category}</span></td>
-                  <td className="font-medium">{formatPrice(s.price)}</td>
+                  <td className="font-medium">{formatPrice(s.standardPrice)}</td>
                 </tr>
               ))}
             </tbody>
