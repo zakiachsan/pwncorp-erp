@@ -23,7 +23,7 @@ interface PurchaseOrder {
   items: number;
 }
 
-const formatIDR = (val: number) => "Rp " + val.toLocaleString("id-ID");
+const formatIDR = (val: number) => "Rp " + (val || 0).toLocaleString("id-ID");
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {

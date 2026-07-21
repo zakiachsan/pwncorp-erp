@@ -5,7 +5,7 @@ import { Search, Download, BarChart3 } from "lucide-react";
 
 /* ── helpers ──────────────────────────────────────────────────────── */
 function fmtRp(n: number): string {
-  return "Rp " + n.toLocaleString("id-ID").replace(/,/g, ".");
+  return "Rp " + (n || 0).toLocaleString("id-ID").replace(/,/g, ".");
 }
 
 const num = (v: any): number => {

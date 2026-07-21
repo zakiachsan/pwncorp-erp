@@ -6,7 +6,7 @@ import { ArrowLeft, Printer, Search } from "lucide-react";
 
 const statusWorkflow = ["DRAFT", "STORE CONFIRMED", "WAREHOUSE SENT", "STORE RECEIVED"];
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 export default function StockOrderDetailPage() {
   const params = useParams();

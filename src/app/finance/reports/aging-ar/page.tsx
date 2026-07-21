@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function AgingARPage() {
   const router = useRouter();

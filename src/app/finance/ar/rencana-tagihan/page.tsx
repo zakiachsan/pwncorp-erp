@@ -18,7 +18,7 @@ const bulanLabels = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Ju
 
 const data: CustomerBilling[] = [];
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function RencanaTagihanPage() {
   const [search, setSearch] = useState("");

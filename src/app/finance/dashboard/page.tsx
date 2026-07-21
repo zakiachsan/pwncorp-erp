@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Wallet, TrendingUp, TrendingDown, Scale, ArrowUpRight, ArrowDownRight, BookOpen } from "lucide-react";
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function FinanceDashboardPage() {
   const [loading, setLoading] = useState(true);

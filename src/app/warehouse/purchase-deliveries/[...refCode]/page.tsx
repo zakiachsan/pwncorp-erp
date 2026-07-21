@@ -4,7 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, Barcode } from "lucide-react";
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 const workflowSteps = ["DRAFT", "RECEIVED"];
 

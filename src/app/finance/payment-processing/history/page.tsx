@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function PaymentHistoryPage() {
   const [historyData, setHistoryData] = useState<any[]>([]);

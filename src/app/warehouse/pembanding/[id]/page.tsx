@@ -75,7 +75,7 @@ export default function PembandingDetailPage() {
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (!pr) return <div className="p-8 text-center text-red-500">PR tidak ditemukan</div>;
 
-  const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+  const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">

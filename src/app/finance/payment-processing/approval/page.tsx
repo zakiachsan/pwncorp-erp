@@ -12,7 +12,7 @@ interface PaymentReq {
   status: string;
 }
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function ApprovalDeskPage() {
   const [data, setData] = useState<PaymentReq[]>([]);

@@ -9,7 +9,7 @@ const fmtDate = (d: string) => {
   return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 };
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 const workflowSteps = ["DRAFT", "APPROVED", "SENT"];
 

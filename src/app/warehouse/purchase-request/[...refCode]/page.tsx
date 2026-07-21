@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 const workflowSteps = ["DRAFT", "CONFIRMED", "PENDING APPROVAL", "APPROVED", "ORDERED"];
 
-const fmt = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
+const fmt = (n: number) => `Rp ${(n || 0).toLocaleString("id-ID")}`;
 
 export default function PurchaseRequestDetailPage() {
   const router = useRouter();

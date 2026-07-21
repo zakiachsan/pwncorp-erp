@@ -4,7 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Edit, Download } from "lucide-react";
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function COADetailPage() {
   const router = useRouter();
@@ -92,8 +92,8 @@ export default function COADetailPage() {
                     <td className="text-[--color-text-secondary]">{t.date}</td>
                     <td className="font-medium text-[--color-brand]">{t.ref}</td>
                     <td>{t.description}</td>
-                    <td className="text-right font-medium">{t.debit > 0 ? `Rp ${t.debit.toLocaleString("id-ID")}` : "-"}</td>
-                    <td className="text-right font-medium">{t.credit > 0 ? `Rp ${t.credit.toLocaleString("id-ID")}` : "-"}</td>
+                    <td className="text-right font-medium">{t.debit > 0 ? `Rp ${(t.debit || 0).toLocaleString("id-ID")}` : "-"}</td>
+                    <td className="text-right font-medium">{t.credit > 0 ? `Rp ${(t.credit || 0).toLocaleString("id-ID")}` : "-"}</td>
                     <td className="text-right font-medium">Rp {runningBalance.toLocaleString("id-ID")}</td>
                   </tr>
                 );

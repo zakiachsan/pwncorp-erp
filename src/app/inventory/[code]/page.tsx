@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, Edit, AlertTriangle } from "lucide-react";
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 const fmtDate = (d: string | Date | null | undefined) => {
   if (!d) return "-";

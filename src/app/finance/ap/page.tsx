@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, Download } from "lucide-react";
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Unpaid: "#ea001e", Partial: "#f59e0b", Paid: "#2e844a" };
   return map[status] || "#6b7280";

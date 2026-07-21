@@ -17,7 +17,7 @@ interface CashEntry {
 
 const COA_CATEGORIES = ["ATK & Perlengkapan", "Transportasi", "Konsumsi", "Maintenance", "Lain-lain"];
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function PettyCashPage() {
   const [data, setData] = useState<CashEntry[]>([]);

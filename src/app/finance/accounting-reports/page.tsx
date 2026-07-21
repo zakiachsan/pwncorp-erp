@@ -409,7 +409,7 @@ export default function AccountingReportsPage() {
 
 /* ─── Per-tab summary cards ─── */
 function PerTabSummary({ tabId, data, apiData }: { tabId: string; data: Record<string, any>[]; apiData?: any }) {
-  const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+  const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
   const parseNum = (v: any) => parseInt((v || "0").toString().replace(/[^0-9-]/g, "")) || 0;
 
   if (tabId === "profit-loss") {

@@ -25,7 +25,7 @@ export default function BankReconPage() {
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
-  const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+  const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
   const statusPill = (status: string) => {
     const map: Record<string, string> = { Matched: "#2e844a", Unmatched: "#ea001e", Partial: "#f59e0b", Active: "#0176d3" };

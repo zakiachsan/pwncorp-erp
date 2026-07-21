@@ -20,7 +20,7 @@ const projects: { id: string; name: string }[] = [];
 
 const initialData: AnggaranSWO[] = [];
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const fmtShort = (n: number) => {
   if (n >= 1000000) return `Rp ${(n / 1000000).toFixed(0)}jt`;
   return "Rp " + n.toLocaleString("id-ID");

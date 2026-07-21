@@ -14,7 +14,7 @@ interface Transfer {
   status: string;
 }
 
-const formatIDR = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
+const formatIDR = (val: number) => `Rp ${(val || 0).toLocaleString("id-ID")}`;
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Selesai: "#2e844a", Pending: "#f59e0b", Gagal: "#ea001e" };

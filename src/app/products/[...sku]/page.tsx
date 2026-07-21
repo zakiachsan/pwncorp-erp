@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Search, Edit } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 const tabList = ["product", "storeStocks", "warehouseStocks", "warehouseHistory", "productHistory", "purchaseHistory"] as const;
 type TabKey = typeof tabList[number];

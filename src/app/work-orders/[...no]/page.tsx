@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Printer, ChevronRight } from "lucide-react";
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 const statusColor = (s: string) => {
   const map: Record<string, string> = {

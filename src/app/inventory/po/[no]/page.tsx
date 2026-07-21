@@ -32,8 +32,8 @@ interface POData {
   vendors: { id: string; name: string; status: string; prices: number[] }[];
 }
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
-const formatIDR = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
+const formatIDR = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function PODetailPage() {
   const params = useParams();

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
 
-const formatIDR = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
+const formatIDR = (val: number) => `Rp ${(val || 0).toLocaleString("id-ID")}`;
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Lunas: "#2e844a", Pending: "#f59e0b", Dibatalkan: "#ea001e" };

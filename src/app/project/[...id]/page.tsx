@@ -4,8 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, ChevronRight, FileText, Download } from "lucide-react";
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
-const fmtRp = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
+const fmtRp = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 const fmtDate = (d: string | null) => {
   if (!d) return "-";

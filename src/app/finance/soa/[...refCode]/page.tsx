@@ -112,8 +112,8 @@ const hardcodedSoaData: Record<string, any> = {
   },
 };
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
-const fmtRp = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
+const fmtRp = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 const statusColor = (s: string) => {
   const map: Record<string, string> = { DRAFT: "#6b7280", SENT: "#2e844a", CANCELLED: "#ea001e" };

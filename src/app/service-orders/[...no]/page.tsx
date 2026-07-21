@@ -190,7 +190,7 @@ const initialOrdersData: Record<string, any> = {
   },
 };
 
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 export default function ServiceOrderDetailPage() {
   const params = useParams();

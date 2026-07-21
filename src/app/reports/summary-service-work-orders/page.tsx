@@ -165,7 +165,7 @@ export default function SummaryServiceWorkOrdersPage() {
                 <td style={TD}>{row.estimatedTime || "—"}</td>
                 <td style={TD}>{row.serviceAdvisor}</td>
                 <td style={TD}>{row.assignee}</td>
-                <td style={{ ...TD, textAlign: "right" }}>{row.odometer > 0 ? row.odometer.toLocaleString("id-ID") : "—"}</td>
+                <td style={{ ...TD, textAlign: "right" }}>{row.odometer > 0 ? (row.odometer || 0).toLocaleString("id-ID") : "—"}</td>
                 <td style={{ ...TD, ...L }} onClick={() => router.push(`/service-orders/${row.serviceOrder}`)}>{row.serviceOrder}</td>
                 <td style={TD}>{row.serviceReservation || "—"}</td>
                 <td style={TD}>{row.insuranceProvider || "—"}</td>

@@ -7,7 +7,7 @@ import { ArrowLeft, Edit } from "lucide-react";
 const typeColor: Record<string, string> = { in: "#2e844a", out: "#ea001e", adjust: "#f59e0b", Purchase: "#2e844a", Used: "#ea001e", "Stock Opname": "#f59e0b" };
 const typeLabel: Record<string, string> = { in: "Purchase", out: "Used", adjust: "Stock Opname" };
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const fmtDate = (d: string | Date | null | undefined) => {
   if (!d) return "-";
   return new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });

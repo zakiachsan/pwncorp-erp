@@ -16,7 +16,7 @@ function fmtDate(d: string | null) {
   return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const fmtShort = (n: number) => {
   if (n >= 1000000) return `Rp ${(n / 1000000).toFixed(1)}jt`;
   return "Rp " + n.toLocaleString("id-ID");

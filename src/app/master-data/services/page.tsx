@@ -33,7 +33,7 @@ export default function ServicesPage() {
   }, [categoryFilter, search]);
 
   const formatPrice = (price: number) => {
-    return "Rp " + price.toLocaleString("id-ID");
+    return "Rp " + (price || 0).toLocaleString("id-ID");
   };
 
   return (

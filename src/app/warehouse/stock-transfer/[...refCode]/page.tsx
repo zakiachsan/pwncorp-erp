@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, ChevronRight } from "lucide-react";
 
 const workflowSteps = ["DRAFT", "CONFIRMED", "APPROVED", "SENT FROM WAREHOUSE", "RECEIVED IN DESTINATION"];
-const fmt = (n: number) => n.toLocaleString("id-ID");
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
 export default function StockTransferDetailPage() {
   const router = useRouter();

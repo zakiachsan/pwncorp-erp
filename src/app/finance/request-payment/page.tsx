@@ -31,7 +31,7 @@ interface FormData {
   ketPenerima: string;
 }
 
-const fmt = (n: number) => "Rp " + n.toLocaleString("id-ID");
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 const statusStyle = (s: string) => {
   const m: Record<string, { bg: string; color: string }> = {
