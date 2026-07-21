@@ -8,11 +8,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
     include: { vehicles: true, _count: { select: { serviceOrders: true, invoices: true } } },
   });
   if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
-  // Attach display code
-  const cc = await prisma.$queryRawUnsafe<{ code: string }[]>(
-    `SELECT code FROM customer_codes WHERE customer_id = $1`, customer.id
-  );
-  return NextResponse.json({ data: { ...customer, code: cc[0]?.code || customer.id.slice(-6) } });
+  return NextResponse.json({ data: { ...customer, code: customer.id.slice(-6) } });
 });
 
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
