@@ -1,51 +1,66 @@
 "use client";
 
-// TODO: Replace hardcoded data with API call when /api/pembanding endpoint is available
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, Star, GitCompare } from "lucide-react";
 
-interface Comparison { id: string; date: string; refNo: string; vendorCount: number; selectedVendor: string | null; status: string; }
-
-const statusPill = (status: string) => {
-  if (status === "Sudah Dipilih") return { background: "var(--color-success)", color: "#fff" };
-  return { background: "var(--color-warning)", color: "#fff" };
-};
+interface PRRow {
+  id: string;
+  prNo: string;
+  date: string;
+  itemCount: number;
+  quoteCount: number;
+  selectedVendor: string | null;
+  status: string;
+}
 
 export default function PembandingListPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [comparisons, setComparisons] = useState<Comparison[]>([]);
+  const [rows, setRows] = useState<PRRow[]>([]);
 
   useEffect(() => {
-    fetch("/api/purchase-requests?limit=50")
-      .then((r) => r.json())
-      .then((j) => {
-        const items = (j.data || []).map((pr: any, i: number) => ({
-          id: `CMP/WM/${String(i + 1).padStart(8, "0")}`,
-          date: pr.date ? new Date(pr.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-",
-          refNo: pr.prNo || "-",
-          vendorCount: pr._count?.items || 0,
-          selectedVendor: pr.status === "Approved" ? "Dipilih" : null,
-          status: pr.status === "Approved" ? "Sudah Dipilih" : "Belum Dipilih",
-        }));
-        setComparisons(items);
+    Promise.all([
+      fetch("/api/purchase-requests?limit=100").then((r) => r.json()),
+      fetch("/api/vendor-quotes").then((r) => r.json()),
+    ])
+      .then(([prJson, quoteJson]) => {
+        const prs = prJson.data || [];
+        const quotes = quoteJson.data || [];
+        const mapped: PRRow[] = prs.map((pr: any) => {
+          const prQuotes = quotes.filter((q: any) => q.prId === pr.id);
+          const selected = prQuotes.find((q: any) => q.isSelected);
+          return {
+            id: pr.id,
+            prNo: pr.prNo,
+            date: pr.date ? new Date(pr.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-",
+            itemCount: pr._count?.items || 0,
+            quoteCount: prQuotes.length,
+            selectedVendor: selected?.supplier?.companyName || null,
+            status: selected ? "Sudah Dipilih" : prQuotes.length > 0 ? "Menunggu Pilihan" : "Belum Ada Quote",
+          };
+        });
+        setRows(mapped);
         setLoading(false);
       })
       .catch(() => { setError("Gagal memuat data"); setLoading(false); });
   }, []);
 
-  const filtered = comparisons.filter((c) =>
-    c.id.toLowerCase().includes(search.toLowerCase()) ||
-    c.refNo.toLowerCase().includes(search.toLowerCase())
+  const filtered = rows.filter((r) =>
+    r.prNo.toLowerCase().includes(search.toLowerCase()) ||
+    (r.selectedVendor || "").toLowerCase().includes(search.toLowerCase())
   );
+
+  const statusStyle = (s: string) => {
+    if (s === "Sudah Dipilih") return "pill pill--completed";
+    if (s === "Menunggu Pilihan") return "pill pill--pending";
+    return "pill pill--draft";
+  };
 
   return (
     <div>
-      {/* Header */}
       <div className="view-header">
         <div className="view-title">
           <GitCompare className="w-6 h-6 text-[--color-brand-secondary]" />
@@ -54,80 +69,59 @@ export default function PembandingListPage() {
         </div>
       </div>
 
-      {/* Filter */}
       <div className="filter-section">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="form-group">
-            <label className="form-label">Ref Code</label>
-            <input type="text" className="form-input" placeholder="CMP/WM/..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Reference No</label>
-            <input type="text" className="form-input" placeholder="PRQ/HO/..." />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>Sudah Dipilih</option>
-              <option>Belum Dipilih</option>
-            </select>
+            <label className="form-label">Cari</label>
+            <input type="text" className="form-input" placeholder="PR No / Vendor..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <div className="form-group">
             <label className="form-label">&nbsp;</label>
-            <div className="flex gap-2">
-              <button className="btn btn--brand btn--sm flex-1 justify-center">
-                <Search size={14} /> Cari
-              </button>
-            </div>
+            <button className="btn btn--brand btn--sm flex-1 justify-center"><Search size={14} /> Cari</button>
           </div>
         </div>
       </div>
 
-      {/* Table */}
       <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th className="text-left text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Ref Code</th>
-              <th className="text-left text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Date</th>
-              <th className="text-left text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Reference No</th>
-              <th className="text-center text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Vendor</th>
-              <th className="text-left text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Vendor Dipilih</th>
-              <th className="text-center text-xs font-semibold text-[--color-text-secondary] uppercase tracking-wide">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((c) => (
-              <tr key={c.id}>
-                <td>
-                  <span
-                    className="font-medium cursor-pointer"
-                    style={{ color: "var(--color-brand)" }}
-                    onClick={() => router.push(`/warehouse/pembanding/${c.id}`)}
-                  >
-                    {c.id}
-                  </span>
-                </td>
-                <td className="text-[--color-text-secondary]">{c.date}</td>
-                <td>
-                  <span
-                    className="font-medium cursor-pointer"
-                    style={{ color: "var(--color-brand)" }}
-                    onClick={() => router.push(`/warehouse/purchase-request/${c.refNo}`)}
-                  >
-                    {c.refNo}
-                  </span>
-                </td>
-                <td className="text-center">{c.vendorCount}</td>
-                <td>{c.selectedVendor || "-"}</td>
-                <td className="text-center">
-                  <span className="pill" style={statusPill(c.status)}>{c.status}</span>
-                </td>
+        {loading ? (
+          <div className="p-8 text-center text-[--color-text-secondary]">Loading...</div>
+        ) : error ? (
+          <div className="p-8 text-center text-red-500">{error}</div>
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>PR No</th>
+                <th>Date</th>
+                <th className="text-center">Items</th>
+                <th className="text-center">Vendor Quotes</th>
+                <th>Vendor Dipilih</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((r) => (
+                <tr key={r.id}>
+                  <td className="font-medium">{r.prNo}</td>
+                  <td>{r.date}</td>
+                  <td className="text-center">{r.itemCount}</td>
+                  <td className="text-center">{r.quoteCount}</td>
+                  <td>{r.selectedVendor || "-"}</td>
+                  <td className="text-center"><span className={statusStyle(r.status)}>{r.status}</span></td>
+                  <td className="text-center">
+                    <button onClick={() => router.push(`/warehouse/pembanding/${r.id}`)} className="btn btn--brand btn--sm">
+                      <GitCompare size={12} /> Compare
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan={7} className="text-center py-8 text-[--color-text-secondary]">Tidak ada data</td></tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

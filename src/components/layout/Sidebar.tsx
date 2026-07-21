@@ -48,11 +48,6 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         href: "/project",
       },
       {
-        label: "Anggaran",
-        icon: <BarChart3 size={18} />,
-        href: "/warehouse/anggaran",
-      },
-      {
         label: "Service Orders",
         icon: <ClipboardList size={18} />,
         href: "/service-orders",
@@ -75,6 +70,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         label: "Warehouse",
         icon: <Package size={18} />,
         children: [
+          { label: "Anggaran", href: "/warehouse/anggaran" },
           { label: "Purchase Request", href: "/warehouse/purchase-request" },
           { label: "Pembanding", href: "/warehouse/pembanding" },
           { label: "Purchase Orders", href: "/warehouse/purchase-orders" },
@@ -93,7 +89,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
     title: "Data Master",
     items: [
       {
-        label: "Product",
+        label: "Spareparts",
         icon: <Package size={18} />,
         href: "/products",
       },
@@ -163,6 +159,24 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
           { label: "Service Payment Received", href: "/reports/service-payment-received" },
           { label: "Service Payment Type Info", href: "/reports/service-payment-type-info" },
           { label: "Daily Service Payments", href: "/reports/daily-service-payments" },
+        ],
+      },
+      {
+        label: "Purchase",
+        icon: <Package size={18} />,
+        children: [
+          { label: "Summary Purchase Orders", href: "/reports/summary-purchase-orders" },
+          { label: "Summary Purchase Deliveries", href: "/reports/summary-purchase-deliveries" },
+          { label: "Summary Purchase Returns", href: "/reports/summary-purchase-returns" },
+        ],
+      },
+      {
+        label: "Stock",
+        icon: <Database size={18} />,
+        children: [
+          { label: "Stock Position", href: "/reports/stock-position" },
+          { label: "Stock Movement", href: "/reports/stock-movement" },
+          { label: "Low Stock Alert", href: "/reports/low-stock" },
         ],
       },
     ],
