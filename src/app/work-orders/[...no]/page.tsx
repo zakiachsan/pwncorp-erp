@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X } from "lucide-react";
+import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X, FileText } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -350,6 +350,7 @@ export default function WorkOrderDetailPage() {
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
           <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
+          <button style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }} onClick={() => router.push(`/finance/invoices/create?woNo=${encodeURIComponent(wo.woNo)}&customerId=${wo.customerId || ""}&vehicleId=${wo.vehicleId || ""}`)}><FileText size={14} /> Create Invoice</button>
         </div>
       </div>
 

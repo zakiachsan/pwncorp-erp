@@ -34,6 +34,39 @@ export default function InvoiceCreatePage() {
       .then(r => r.json())
       .then(j => { setCustomers(j.data || []); setCustomersLoading(false); })
       .catch(() => setCustomersLoading(false));
+
+    // Auto-populate from WO if woNo query param exists
+    const params = new URLSearchParams(window.location.search);
+    const woNo = params.get("woNo");
+    const custId = params.get("customerId");
+    if (custId) setCustomerId(custId);
+    if (woNo) {
+      // Fetch WO list to get ID, then fetch detail
+      fetch(`/api/work-orders?search=${encodeURIComponent(woNo)}&limit=1`)
+        .then(r => r.json())
+        .then(j => {
+          const wo = (j.data || [])[0];
+          if (!wo) return;
+          return fetch(`/api/work-orders/${wo.id}`)
+            .then(r2 => r2.json())
+            .then(j2 => {
+              const full = j2.data;
+              if (full.so?.customerId) setCustomerId(full.so.customerId);
+              // Pre-fill items from WO items (services + spareparts)
+              const woItems: InvoiceItem[] = [];
+              (full.items || []).forEach((s: any, i: number) => {
+                woItems.push({
+                  id: Date.now() + i,
+                  description: s.sparepartName || s.itemName || "-",
+                  qty: s.qty || 1,
+                  unitPrice: s.unitPrice || s.priceExTax || s.price || 0,
+                });
+              });
+              if (woItems.length > 0) setItems(woItems);
+            });
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const addItem = () => {
