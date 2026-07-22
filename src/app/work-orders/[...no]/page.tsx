@@ -58,6 +58,7 @@ export default function WorkOrderDetailPage() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "docRef" | "stockOrders" | "changes" | "photos">("details");
   const [showPrint, setShowPrint] = useState(false);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
   const [photoDesc, setPhotoDesc] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -318,6 +319,45 @@ export default function WorkOrderDetailPage() {
     }
   };
 
+  const handleCreateInvoice = async () => {
+    if (!wo?.id) return;
+    setCreatingInvoice(true);
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ woId: wo.id }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        alert(json.error || "Gagal membuat invoice");
+        setCreatingInvoice(false);
+        return;
+      }
+      // Refresh WO data to show new invoice
+      const refreshRes = await fetch(`/api/work-orders/${wo.id}`);
+      const refreshJson = await refreshRes.json();
+      if (refreshJson.data) {
+        const d = refreshJson.data;
+        const invoices = (d.invoices || []).map((inv: any) => ({
+          docNo: inv.invNo || inv.id,
+          invoiceDate: inv.date || inv.invoiceDate || "-",
+          dueDate: inv.dueDate || "-",
+          status: inv.status || "UNPAID",
+          total: inv.total || 0,
+          paidAmount: inv.paidAmount || inv.amountPaid || 0,
+        }));
+        setWo((prev: any) => ({ ...prev, invoices }));
+      }
+      setActiveTab("docRef");
+      alert("Invoice berhasil dibuat: " + (json.data?.invNo || ""));
+    } catch {
+      alert("Gagal membuat invoice");
+    } finally {
+      setCreatingInvoice(false);
+    }
+  };
+
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       {/* Workflow Bar */}
@@ -350,7 +390,7 @@ export default function WorkOrderDetailPage() {
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
           <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
-          <button style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }} onClick={() => router.push(`/finance/invoices/create?woNo=${encodeURIComponent(wo.woNo)}&customerId=${wo.customerId || ""}&vehicleId=${wo.vehicleId || ""}`)}><FileText size={14} /> Create Invoice</button>
+          <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}` }} onClick={handleCreateInvoice} disabled={creatingInvoice || wo.invoices?.length > 0}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Invoice Created" : "Create Invoice"}</button>
         </div>
       </div>
 

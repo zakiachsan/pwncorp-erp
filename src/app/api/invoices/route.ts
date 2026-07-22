@@ -59,9 +59,6 @@ export const POST = withAuth(async (req: NextRequest) => {
     },
   });
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });
-  if (wo.status !== "Completed") {
-    return NextResponse.json({ error: "Work order must be Completed before generating invoice" }, { status: 400 });
-  }
 
   // Check for existing invoice
   if (wo.invoices.length > 0) {

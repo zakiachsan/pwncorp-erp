@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Printer, CheckCircle, XCircle, Edit, Send, Ban, Plus, Trash2, Save, X } from "lucide-react";
+import { ArrowLeft, Printer, CheckCircle, XCircle, Edit, Send, Ban, Plus, Trash2, Save, X, Truck } from "lucide-react";
 
 const formatIDR = (n: number) => {
   if (n === 0) return "Rp 0";
@@ -205,6 +205,11 @@ export default function PurchaseOrderDetailPage() {
                 <Ban size={14} /> Cancel
               </button>
             </>
+          )}
+          {po.status === "SENT" && (
+            <button onClick={() => router.push(`/warehouse/purchase-deliveries/new?poId=${po.id}`)} className="btn btn--sm" style={{ background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
+              <Truck size={14} /> Create Delivery
+            </button>
           )}
           {editMode && (
             <>

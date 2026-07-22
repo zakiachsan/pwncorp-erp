@@ -27,7 +27,16 @@ export default function NewPurchaseDeliveryPage() {
   useEffect(() => {
     fetch("/api/purchase-orders?limit=50&status=SENT")
       .then((r) => r.json())
-      .then((json) => { setPurchaseOrders(json.data || []); setLoadingMaster(false); })
+      .then((json) => {
+        setPurchaseOrders(json.data || []);
+        setLoadingMaster(false);
+        // Auto-select PO from query param
+        const params = new URLSearchParams(window.location.search);
+        const poIdParam = params.get("poId");
+        if (poIdParam) {
+          handlePoSelect(poIdParam);
+        }
+      })
       .catch(() => { setError("Failed to load purchase orders"); setLoadingMaster(false); });
   }, []);
 
