@@ -24,7 +24,7 @@ export default function ServiceOrderDetailPage() {
   const [editSaving, setEditSaving] = useState(false);
   const [services, setServices] = useState<any[]>([]);
   const [spareparts, setSpareparts] = useState<any[]>([]);
-  const [editFields, setEditFields] = useState({ complaint: "", customerId: "", vehicleId: "" });
+  const [editFields, setEditFields] = useState({ complaint: "", customerId: "", vehicleId: "", planServiceDate: "", planServiceTime: "", saId: "", salesperson: "", bookingSource: "", referenceNumber: "", odometer: "", color: "" });
   const [showEditModal, setShowEditModal] = useState(false);
 
   // Add item modals
@@ -34,10 +34,17 @@ export default function ServiceOrderDetailPage() {
   const [availableSpareparts, setAvailableSpareparts] = useState<any[]>([]);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
   const [allVehicles, setAllVehicles] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
 
   // New item forms
   const [newService, setNewService] = useState({ serviceId: "", qty: 1, unitPrice: 0 });
   const [newSparepart, setNewSparepart] = useState({ sparepartId: "", qty: 1, unitPrice: 0 });
+
+  // Search state for combobox
+  const [svcSearch, setSvcSearch] = useState("");
+  const [spSearch, setSpSearch] = useState("");
+  const [svcDropdownOpen, setSvcDropdownOpen] = useState(false);
+  const [spDropdownOpen, setSpDropdownOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -53,7 +60,19 @@ export default function ServiceOrderDetailPage() {
               setOrder(d);
               setServices((d.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } })));
               setSpareparts((d.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } })));
-              setEditFields({ complaint: d.complaint || "", customerId: d.customerId || "", vehicleId: d.vehicleId || "" });
+              setEditFields({
+                complaint: d.complaint || "",
+                customerId: d.customerId || "",
+                vehicleId: d.vehicleId || "",
+                planServiceDate: d.date ? new Date(d.date).toISOString().split("T")[0] : "",
+                planServiceTime: d.planServiceTime || "",
+                saId: d.saId || "",
+                salesperson: d.salesperson || "",
+                bookingSource: d.bookingSource || "",
+                referenceNumber: d.referenceNumber || "",
+                odometer: d.odometer || "",
+                color: d.color || "",
+              });
               setLoading(false);
             });
         }
@@ -69,6 +88,7 @@ export default function ServiceOrderDetailPage() {
     fetch("/api/services?limit=200").then(r => r.json()).then(d => setAvailableServices(d.data || [])).catch(() => {});
     fetch("/api/spareparts?limit=200").then(r => r.json()).then(d => setAvailableSpareparts(d.data || [])).catch(() => {});
     fetch("/api/customers?limit=200").then(r => r.json()).then(d => setAllCustomers(d.data || [])).catch(() => {});
+    fetch("/api/users?limit=200").then(r => r.json()).then(d => setAllUsers(d.data || d.users || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -134,6 +154,7 @@ export default function ServiceOrderDetailPage() {
       total: newService.qty * newService.unitPrice,
     }]);
     setNewService({ serviceId: "", qty: 1, unitPrice: 0 });
+    setSvcSearch("");
     setShowAddService(false);
   };
 
@@ -163,6 +184,7 @@ export default function ServiceOrderDetailPage() {
       total: newSparepart.qty * newSparepart.unitPrice,
     }]);
     setNewSparepart({ sparepartId: "", qty: 1, unitPrice: 0 });
+    setSpSearch("");
     setShowAddSparepart(false);
   };
 
@@ -206,9 +228,14 @@ export default function ServiceOrderDetailPage() {
 
   const handleSaveFields = async () => {
     try {
+      const body: any = { ...editFields };
+      // Map planServiceDate → date for the API
+      if (editFields.planServiceDate) body.date = editFields.planServiceDate;
+      delete body.planServiceDate;
+
       await fetch(`/api/service-orders/${order.id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editFields),
+        body: JSON.stringify(body),
       });
       setShowEditModal(false);
       // refresh
@@ -238,9 +265,9 @@ export default function ServiceOrderDetailPage() {
     vehicleType: order.vehicle?.brand ? "CAR" : (order.vehicleType || "-"),
     vehicleMake: order.vehicle?.brand || order.vehicleMake || "-",
     vehicleModel: order.vehicle?.model || order.vehicleModel || "-",
-    odometer: order.vehicle?.odometer || order.odometer || "-",
+    odometer: order.odometer || order.vehicle?.odometer || "-",
     year: order.vehicle?.year || order.year || "-",
-    color: order.vehicle?.color || order.color || "-",
+    color: order.color || order.vehicle?.color || "-",
   };
   const isDraft = order.status === "Draft";
   const isDelivered = order.status === "Delivered";
@@ -280,7 +307,7 @@ export default function ServiceOrderDetailPage() {
             {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
             <button style={S.actionBtn}><Printer size={14} /> Print</button>
             <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
-            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
+            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer || "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
           </div>
 
           {/* 3-Column Info Grid */}
@@ -332,7 +359,7 @@ export default function ServiceOrderDetailPage() {
                 <button onClick={() => setEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit Items</button>
               ) : (
                 <>
-                  <button onClick={() => svcLineTab === "services" ? setShowAddService(true) : setShowAddSparepart(true)} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
+                  <button onClick={() => { svcLineTab === "services" ? (setShowAddService(true), setSvcSearch("")) : (setShowAddSparepart(true), setSpSearch("")); }} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
                   <button onClick={() => { setEditMode(false); setServices((order.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } }))); setSpareparts((order.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } }))); }} style={S.actionBtn}>Batal</button>
                   <button onClick={handleSaveEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
                     <Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}
@@ -348,14 +375,32 @@ export default function ServiceOrderDetailPage() {
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ background: "#f0f7ff", border: "1px solid #0176d3", borderRadius: 8, padding: 12 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-                      <div style={{ flex: "1 1 200px" }}>
+                      <div style={{ flex: "1 1 200px", position: "relative" }}>
                         <label style={S.formLabel}>Service</label>
-                        <select value={newService.serviceId} onChange={e => setNewService(prev => ({ ...prev, serviceId: e.target.value }))} style={S.formInput}>
-                          <option value="">-- Pilih Service --</option>
-                          {availableServices.map(s => (
-                            <option key={s.id} value={s.id}>{s.sku} - {s.name}</option>
-                          ))}
-                        </select>
+                        <input
+                          type="text"
+                          placeholder="Cari service..."
+                          value={svcSearch}
+                          onChange={e => { setSvcSearch(e.target.value); setSvcDropdownOpen(true); }}
+                          onFocus={() => setSvcDropdownOpen(true)}
+                          onBlur={() => setTimeout(() => setSvcDropdownOpen(false), 200)}
+                          style={S.formInput}
+                        />
+                        {svcDropdownOpen && (
+                          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                            {availableServices
+                              .filter(s => !svcSearch || s.name.toLowerCase().includes(svcSearch.toLowerCase()) || (s.sku || "").toLowerCase().includes(svcSearch.toLowerCase()))
+                              .map(s => (
+                                <div
+                                  key={s.id}
+                                  onClick={() => { setNewService(prev => ({ ...prev, serviceId: s.id })); setSvcSearch(`${s.sku} - ${s.name}`); setSvcDropdownOpen(false); }}
+                                  style={{ padding: "6px 10px", fontSize: 12, cursor: "pointer", background: newService.serviceId === s.id ? "#f0f7ff" : "transparent" }}
+                                  onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
+                                  onMouseLeave={e => e.currentTarget.style.background = newService.serviceId === s.id ? "#f0f7ff" : "transparent"}
+                                >{s.sku} - {s.name}</div>
+                              ))}
+                          </div>
+                        )}
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={S.formLabel}>Qty</label>
@@ -366,7 +411,7 @@ export default function ServiceOrderDetailPage() {
                         <input type="number" min={0} value={newService.unitPrice} onChange={e => setNewService(prev => ({ ...prev, unitPrice: parseInt(e.target.value) || 0 }))} style={S.formInput} />
                       </div>
                       <button onClick={addServiceRow} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Tambah</button>
-                      <button onClick={() => setShowAddService(false)} style={S.actionBtn}><X size={14} /></button>
+                      <button onClick={() => { setShowAddService(false); setSvcSearch(""); }} style={S.actionBtn}><X size={14} /></button>
                     </div>
                   </div>
                 </div>
@@ -389,14 +434,32 @@ export default function ServiceOrderDetailPage() {
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ background: "#f0f7ff", border: "1px solid #0176d3", borderRadius: 8, padding: 12 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-                      <div style={{ flex: "1 1 200px" }}>
+                      <div style={{ flex: "1 1 200px", position: "relative" }}>
                         <label style={S.formLabel}>Sparepart</label>
-                        <select value={newSparepart.sparepartId} onChange={e => setNewSparepart(prev => ({ ...prev, sparepartId: e.target.value }))} style={S.formInput}>
-                          <option value="">-- Pilih Sparepart --</option>
-                          {availableSpareparts.map(s => (
-                            <option key={s.id} value={s.id}>{s.sku} - {s.name}</option>
-                          ))}
-                        </select>
+                        <input
+                          type="text"
+                          placeholder="Cari sparepart..."
+                          value={spSearch}
+                          onChange={e => { setSpSearch(e.target.value); setSpDropdownOpen(true); }}
+                          onFocus={() => setSpDropdownOpen(true)}
+                          onBlur={() => setTimeout(() => setSpDropdownOpen(false), 200)}
+                          style={S.formInput}
+                        />
+                        {spDropdownOpen && (
+                          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                            {availableSpareparts
+                              .filter(s => !spSearch || s.name.toLowerCase().includes(spSearch.toLowerCase()) || (s.sku || "").toLowerCase().includes(spSearch.toLowerCase()))
+                              .map(s => (
+                                <div
+                                  key={s.id}
+                                  onClick={() => { setNewSparepart(prev => ({ ...prev, sparepartId: s.id })); setSpSearch(`${s.sku} - ${s.name}`); setSpDropdownOpen(false); }}
+                                  style={{ padding: "6px 10px", fontSize: 12, cursor: "pointer", background: newSparepart.sparepartId === s.id ? "#f0f7ff" : "transparent" }}
+                                  onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
+                                  onMouseLeave={e => e.currentTarget.style.background = newSparepart.sparepartId === s.id ? "#f0f7ff" : "transparent"}
+                                >{s.sku} - {s.name}</div>
+                              ))}
+                          </div>
+                        )}
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={S.formLabel}>Qty</label>
@@ -407,7 +470,7 @@ export default function ServiceOrderDetailPage() {
                         <input type="number" min={0} value={newSparepart.unitPrice} onChange={e => setNewSparepart(prev => ({ ...prev, unitPrice: parseInt(e.target.value) || 0 }))} style={S.formInput} />
                       </div>
                       <button onClick={addSparepartRow} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Tambah</button>
-                      <button onClick={() => setShowAddSparepart(false)} style={S.actionBtn}><X size={14} /></button>
+                      <button onClick={() => { setShowAddSparepart(false); setSpSearch(""); }} style={S.actionBtn}><X size={14} /></button>
                     </div>
                   </div>
                 </div>
@@ -456,27 +519,102 @@ export default function ServiceOrderDetailPage() {
       {/* Edit Fields Modal */}
       {showEditModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 500, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)", maxHeight: "80vh", overflow: "auto" }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 520, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)", maxHeight: "85vh", overflow: "auto" }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 16 }}>Edit Service Order</h3>
-            <div style={{ marginBottom: 12 }}>
+
+            {/* Customer & Vehicle */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#0176d3", textTransform: "uppercase", marginBottom: 8 }}>Customer & Kendaraan</div>
+            <div style={{ marginBottom: 10 }}>
               <label style={S.formLabel}>Customer</label>
               <select value={editFields.customerId} onChange={e => setEditFields(prev => ({ ...prev, customerId: e.target.value }))} style={S.formInput}>
                 <option value="">-- Pilih Customer --</option>
                 {allCustomers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 10 }}>
               <label style={S.formLabel}>Kendaraan</label>
               <select value={editFields.vehicleId} onChange={e => setEditFields(prev => ({ ...prev, vehicleId: e.target.value }))} style={S.formInput}>
                 <option value="">-- Pilih Kendaraan --</option>
                 {allVehicles.map(v => <option key={v.id} value={v.id}>{v.plateNo} — {v.brand} {v.model}</option>)}
               </select>
             </div>
+
+            {/* Schedule */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#0176d3", textTransform: "uppercase", marginTop: 12, marginBottom: 8 }}>Schedule</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+              <div>
+                <label style={S.formLabel}>Plan Service Date</label>
+                <input type="date" value={editFields.planServiceDate} onChange={e => setEditFields(prev => ({ ...prev, planServiceDate: e.target.value }))} style={S.formInput} />
+              </div>
+              <div>
+                <label style={S.formLabel}>Plan Service Time</label>
+                <input type="time" value={editFields.planServiceTime} onChange={e => setEditFields(prev => ({ ...prev, planServiceTime: e.target.value }))} style={S.formInput} />
+              </div>
+            </div>
+
+            {/* Advisor */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#0176d3", textTransform: "uppercase", marginTop: 12, marginBottom: 8 }}>Personal & Referensi</div>
+            <div style={{ marginBottom: 10 }}>
+              <label style={S.formLabel}>Service Advisor</label>
+              <select value={editFields.saId} onChange={e => setEditFields(prev => ({ ...prev, saId: e.target.value }))} style={S.formInput}>
+                <option value="">-- Pilih SA --</option>
+                {allUsers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+              <label style={S.formLabel}>Salesperson</label>
+              <select value={editFields.salesperson} onChange={e => setEditFields(prev => ({ ...prev, salesperson: e.target.value }))} style={S.formInput}>
+                <option value="">-- Pilih --</option>
+                <option>-</option>
+                <option>Andi</option>
+                <option>Budi</option>
+                <option>Citra</option>
+                <option>Dedi</option>
+                <option>Dinda</option>
+              </select>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+              <div>
+                <label style={S.formLabel}>Booking Source</label>
+                <select value={editFields.bookingSource} onChange={e => setEditFields(prev => ({ ...prev, bookingSource: e.target.value }))} style={S.formInput}>
+                  <option value="">-- Pilih --</option>
+                  <option>WhatsApp</option>
+                  <option>Telepon</option>
+                  <option>Walk-in</option>
+                  <option>Website</option>
+                  <option>Instagram</option>
+                </select>
+              </div>
+              <div>
+                <label style={S.formLabel}>Reference Number</label>
+                <input type="text" value={editFields.referenceNumber} onChange={e => setEditFields(prev => ({ ...prev, referenceNumber: e.target.value }))} style={S.formInput} placeholder="-" />
+              </div>
+            </div>
+
+            {/* Vehicle Details */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#0176d3", textTransform: "uppercase", marginTop: 12, marginBottom: 8 }}>Detail Kendaraan</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+              <div>
+                <label style={S.formLabel}>Odometer</label>
+                <input type="text" value={editFields.odometer} onChange={e => setEditFields(prev => ({ ...prev, odometer: e.target.value }))} style={S.formInput} placeholder="Contoh: 45.230" />
+              </div>
+              <div>
+                <label style={S.formLabel}>Color</label>
+                <select value={editFields.color} onChange={e => setEditFields(prev => ({ ...prev, color: e.target.value }))} style={S.formInput}>
+                  <option value="">-- Pilih --</option>
+                  <option>HITAM</option><option>PUTIH</option><option>SILVER</option><option>ABU-ABU</option>
+                  <option>MERAH</option><option>BIRU</option><option>HIJAU</option><option>KUNING</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Complaint */}
             <div style={{ marginBottom: 12 }}>
               <label style={S.formLabel}>Keluhan (Complaint)</label>
-              <textarea value={editFields.complaint} onChange={e => setEditFields(prev => ({ ...prev, complaint: e.target.value }))} style={{ ...S.formInput, minHeight: 80 }} rows={3} />
+              <textarea value={editFields.complaint} onChange={e => setEditFields(prev => ({ ...prev, complaint: e.target.value }))} style={{ ...S.formInput, minHeight: 60 }} rows={2} />
             </div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
               <button onClick={() => setShowEditModal(false)} style={S.actionBtn}>Batal</button>
               <button onClick={handleSaveFields} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Simpan</button>
             </div>

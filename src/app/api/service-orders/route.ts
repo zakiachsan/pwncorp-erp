@@ -31,6 +31,7 @@ export const GET = withAuth(async (req: NextRequest) => {
         customer: { select: { id: true, name: true } },
         vehicle: { select: { id: true, plateNo: true, brand: true, model: true } },
         sa: { select: { id: true, name: true } },
+        store: { select: { id: true, name: true, code: true } },
         _count: { select: { spareparts: true, services: true, workOrders: true } },
       },
       orderBy: { date: "desc" },
@@ -46,7 +47,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { customerId, vehicleId, complaint, bookingSource, referenceNumber, planServiceTime, spareparts, services } = body;
+  const { customerId, vehicleId, complaint, salesperson, bookingSource, referenceNumber, planServiceTime, odometer, color, spareparts, services } = body;
 
   if (!customerId || !vehicleId) {
     return NextResponse.json({ error: "customerId and vehicleId are required" }, { status: 400 });
@@ -83,9 +84,12 @@ export const POST = withAuth(async (req: NextRequest) => {
       saId: user.id,
       storeId: user.storeId,
       complaint,
+      salesperson,
       bookingSource,
       referenceNumber,
       planServiceTime,
+      odometer,
+      color,
       total,
       spareparts: { create: spItems },
       services: { create: svItems },

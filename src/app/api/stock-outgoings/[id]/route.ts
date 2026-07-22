@@ -3,47 +3,46 @@ import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const transfer = await prisma.stockTransfer.findUnique({
-    where: { id: params.id },
+  const outgoing = await prisma.stockOutgoing.findFirst({
+    where: { OR: [{ id: params.id }, { docNo: params.id }] },
     include: {
       items: { include: { sparepart: { select: { sku: true, name: true, stockQty: true } } } },
     },
   });
-  if (!transfer) return NextResponse.json({ error: "Transfer not found" }, { status: 404 });
-  return NextResponse.json({ data: transfer });
+  if (!outgoing) return NextResponse.json({ error: "Stock Outgoing not found" }, { status: 404 });
+  return NextResponse.json({ data: outgoing });
 });
 
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { action, notes } = body;
+  const { action } = body;
 
-  const existing = await prisma.stockTransfer.findUnique({
+  const existing = await prisma.stockOutgoing.findUnique({
     where: { id: params.id },
     include: { items: true },
   });
-  if (!existing) return NextResponse.json({ error: "Transfer not found" }, { status: 404 });
+  if (!existing) return NextResponse.json({ error: "Stock Outgoing not found" }, { status: 404 });
 
   const validTransitions: Record<string, string[]> = {
     Draft: ["Confirmed", "Cancelled"],
     Confirmed: ["Approved", "Cancelled"],
-    Approved: ["Received"],
-    Received: [],
+    Approved: [],
     Cancelled: [],
   };
 
   if (!action) return NextResponse.json({ error: "action is required" }, { status: 400 });
-  const targetStatus = action === "confirm" ? "Confirmed" : action === "approve" ? "Approved" : action === "receive" ? "Received" : action === "cancel" ? "Cancelled" : null;
+  const targetStatus = action === "confirm" ? "Confirmed" : action === "approve" ? "Approved" : action === "cancel" ? "Cancelled" : null;
   if (!targetStatus) return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   if (!validTransitions[existing.status]?.includes(targetStatus)) {
     return NextResponse.json({ error: `Cannot transition from ${existing.status} to ${targetStatus}` }, { status: 400 });
   }
 
-  // On Received: deduct stock from source
-  if (targetStatus === "Received") {
+  // On Approved: deduct stock
+  if (targetStatus === "Approved") {
     for (const item of existing.items) {
       const sp = await prisma.sparepart.findUnique({ where: { id: item.sparepartId } });
-      if (sp && sp.stockQty >= item.qty) {
+      if (sp) {
         const qtyBefore = sp.stockQty;
         await prisma.sparepart.update({
           where: { id: item.sparepartId },
@@ -53,12 +52,12 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
           data: {
             sparepartId: item.sparepartId,
             storeId: existing.storeId,
-            changeType: "transfer_out",
+            changeType: "out",
             qtyChange: item.qty,
             qtyBefore,
             qtyAfter: qtyBefore - item.qty,
-            refDoc: "TRF",
-            refNo: existing.transferNo,
+            refDoc: "SO",
+            refNo: existing.docNo,
             date: new Date(),
           },
         });
@@ -66,14 +65,11 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
     }
   }
 
-  const updateData: any = { status: targetStatus };
-  if (notes !== undefined) updateData.notes = notes;
-
-  const transfer = await prisma.stockTransfer.update({
+  const outgoing = await prisma.stockOutgoing.update({
     where: { id: params.id },
-    data: updateData,
+    data: { status: targetStatus },
     include: { items: { include: { sparepart: { select: { sku: true, name: true } } } } },
   });
 
-  return NextResponse.json({ data: transfer });
+  return NextResponse.json({ data: outgoing });
 });

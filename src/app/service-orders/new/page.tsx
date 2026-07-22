@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ArrowLeft, Save, ChevronDown, Plus, Search, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, ChevronDown, Plus, Search, Trash2, Loader2, X } from "lucide-react";
 
 // ─── Types ───
 interface Customer { id: string; name: string; phone?: string; type?: string }
@@ -10,6 +10,39 @@ interface Vehicle { id: string; plateNo: string; brand: string; model?: string; 
 interface Service { id: string; sku: string; name: string; standardPrice?: number; price?: number }
 interface Sparepart { id: string; sku: string; name: string; stockQty: number; sellPrice: number }
 interface User { id: string; name: string; role?: { name: string } }
+
+// ─── Vehicle type → brand → model mapping ───
+const vehicleBrands: Record<string, string[]> = {
+  CAR: ["TOYOTA", "HONDA", "MITSUBISHI", "SUZUKI", "DAIHATSU", "ISUZU", "NISSAN", "MAZDA", "HYUNDAI", "KIA", "BMW", "MERCEDES BENZ", "WULING", "CHERY", "MG"],
+  MOTORCYCLE: ["HONDA", "YAMAHA", "SUZUKI", "KAWASAKI", "VESPA", "TVS", "ROYAL ENFIELD"],
+  TRUCK: ["ISUZU", "MITSUBISHI", "HINO", "TOYOTA", "UD TRUCKS", "SCANIA", "MERCEDES BENZ"],
+};
+
+const brandModels: Record<string, string[]> = {
+  TOYOTA: ["AVANZA", "KIJANG INNOVA", "FORTUNER", "RUSH", "YARIS", "VIOS", "CAMRY", "COROLLA", "HILUX", "AGYA", "CALYA", "ALPHARD", "VELLFIRE", "LAND CRUISER", "RAIZE", "VELOZ", "SUPRA", "86", "DYNA", "HIACE"],
+  HONDA: ["CIVIC", "ACCORD", "CR-V", "HR-V", "BR-V", "JAZZ", "BRIO", "MOBILIO", "CITY", "WR-V", "ODYSSEY", "FREED", "CIVIC TYPE R", "BEAT", "VARIO", "SCOOPY", "PCX", "CBR", "SUPRA X", "REVO", "CRF", "CB"],
+  MITSUBISHI: ["PAJERO", "XPANDER", "L300", "TRITON", "OUTLANDER", "MIRAGE", "PAJERO SPORT", "ECLIPSE CROSS", "DELICA", "COLT", "FUSO", "COLT DIESEL", "CANTER", "FIGHTER"],
+  SUZUKI: ["ERTIGA", "CARRY", "APV", "IGNIS", "SX4", "BALENO", "JIMNY", "XL7", "SWIFT", "VITARA", "GRAND VITARA", "KARIMUN", "SATRIA", "GSX", "NEX", "ADDRESS", "BURGMAN"],
+  DAIHATSU: ["XENIA", "TERIOS", "SIGRA", "AYLA", "GRAN MAX", "LUXIO", "SIRION", "ROCKY", "TAFT", "COPEN", "HIJET"],
+  ISUZU: ["ELF", "D-MAX", "MU-X", "GIGA", "TRAGA", "PANTHER", "F SERIES"],
+  NISSAN: ["X-TRAIL", "LIVINA", "MARCH", "SERENA", "TERRA", "NAVARA", "JUKE", "KICKS", "GT-R"],
+  MAZDA: ["CX-5", "CX-3", "CX-9", "MAZDA 2", "MAZDA 3", "MAZDA 6", "MX-5", "BT-50"],
+  HYUNDAI: ["CRETA", "SANTA FE", "PALISADE", "STARGAZER", "IONIQ", "TUCSON", "KONA"],
+  KIA: ["SELTOS", "SONET", "SPORTAGE", "CARNIVAL", "SORENTO", "RIO", "PICANTO"],
+  BMW: ["3 SERIES", "5 SERIES", "7 SERIES", "X1", "X3", "X5", "X7", "M3", "M4", "M5"],
+  "MERCEDES BENZ": ["A-CLASS", "C-CLASS", "E-CLASS", "S-CLASS", "GLA", "GLC", "GLE", "GLS", "CLA"],
+  WULING: ["CONFERO", "CORTEZ", "ALMAZ", "AIR EV", "FORMO"],
+  CHERY: ["TIGGO", "OMODA", "EQ1"],
+  MG: ["ZS", "HS", "5", "4", "CYBERSTER"],
+  YAMAHA: ["NMAX", "AEROX", "XMAX", "R15", "R25", "MT-15", "MT-25", "WR 155", "FAZZIO", "MIO", "GEAR", "JUPITER", "VEGA", "LEXI", "FREEGO"],
+  KAWASAKI: ["NINJA", "Z900", "VERSYS", "KLX", "D-TRACKER", "W175", "ELIMINATOR", "VULCAN"],
+  VESPA: ["PRIMAVERA", "SPRINT", "GTS", "LX", "946"],
+  TVS: ["APACHE", "DAZZ", "NEO", "ROCKZ", "SPORT"],
+  "ROYAL ENFIELD": ["CLASSIC 350", "METEOR 350", "HUNTER 350", "HIMALAYAN", "INTERCEPTOR 650", "CONTINENTAL GT 650"],
+  HINO: ["DUTRO", "RANGER", "500 SERIES", "700 SERIES", "PROFIA"],
+  "UD TRUCKS": ["QUESTER", "CRONER", "KUZER"],
+  SCANIA: ["P SERIES", "G SERIES", "R SERIES", "S SERIES"],
+};
 
 // ─── Initial empty form ───
 const emptyForm = {
@@ -138,9 +171,12 @@ export default function NewServiceOrderPage() {
         customerId: form.customerId,
         vehicleId: form.vehicleId,
         complaint: form.complaint || null,
+        salesperson: form.salesperson || null,
         bookingSource: form.bookingSource || null,
         referenceNumber: form.referenceNumber || null,
         planServiceTime: form.planServiceTime || null,
+        odometer: form.odometer || null,
+        color: form.color || null,
         spareparts: sparepartItems.filter((sp) => sp.sparepartId),
         services: serviceItems.filter((sv) => sv.serviceId),
       };
@@ -200,6 +236,53 @@ export default function NewServiceOrderPage() {
   };
   const removeSparepartItem = (idx: number) => {
     setSparepartItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // ─── Inline new vehicle form ───
+  const [showNewVehicle, setShowNewVehicle] = useState(false);
+  const [newVeh, setNewVeh] = useState({ plateNo: "", type: "", brand: "", model: "", year: "" });
+  const [newVehSaving, setNewVehSaving] = useState(false);
+
+  const newVehBrands = newVeh.type ? vehicleBrands[newVeh.type] || [] : [];
+  const newVehModels = newVeh.brand ? brandModels[newVeh.brand] || [] : [];
+
+  const handleCreateVehicle = async () => {
+    if (!newVeh.plateNo || !newVeh.brand || !form.customerId) return;
+    setNewVehSaving(true);
+    try {
+      const res = await fetch("/api/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId: form.customerId,
+          plateNo: newVeh.plateNo,
+          brand: newVeh.brand,
+          model: newVeh.model || undefined,
+          year: newVeh.year ? parseInt(newVeh.year) : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Gagal");
+      const v = json.data;
+      // Add to local list and select
+      setVehicles((prev) => [...prev, { ...v, customer: { id: form.customerId, name: form.customer } }]);
+      setForm((prev) => ({
+        ...prev,
+        vehicleId: v.id,
+        registrationNo: v.plateNo,
+        vehicleMake: v.brand || "",
+        vehicleModel: v.model || "",
+        year: v.year ? String(v.year) : "",
+        vehicleType: newVeh.type,
+      }));
+      setShowNewVehicle(false);
+      setRegOpen(false);
+      setNewVeh({ plateNo: "", type: "", brand: "", model: "", year: "" });
+    } catch (e: any) {
+      setError(e.message || "Gagal membuat kendaraan");
+    } finally {
+      setNewVehSaving(false);
+    }
   };
 
   // ─── Derived values ───
@@ -336,6 +419,20 @@ export default function NewServiceOrderPage() {
                     />
                   </div>
 
+                  {/* Add new vehicle option — top */}
+                  <div
+                    onClick={() => { if (!form.customerId) { setError("Pilih customer terlebih dahulu sebelum menambah kendaraan"); return; } setRegOpen(false); setShowNewVehicle(true); }}
+                    style={{
+                      padding: "8px 12px", fontSize: 13, cursor: "pointer",
+                      color: "#0176d3", fontWeight: 600, borderBottom: "1px solid #ecebea",
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f7ff")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <Plus size={14} /> Tambah Kendaraan Baru
+                  </div>
+
                   {filteredVehicles.length > 0 ? filteredVehicles.map((v) => {
                     return (
                       <div
@@ -366,6 +463,58 @@ export default function NewServiceOrderPage() {
             </div>
           </div>
 
+          {/* Inline New Vehicle Form */}
+          {showNewVehicle && (
+            <div style={{ marginBottom: 14, background: "#f0f7ff", border: "1px solid #0176d3", borderRadius: 8, padding: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#0176d3" }}>Kendaraan Baru — {form.customer || "Customer"}</span>
+                <button onClick={() => setShowNewVehicle(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#747678", padding: 2 }}><X size={16} /></button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <input
+                  type="text" placeholder="Plat Nomor *" value={newVeh.plateNo}
+                  onChange={(e) => setNewVeh((p) => ({ ...p, plateNo: e.target.value }))}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none" }}
+                />
+                <select value={newVeh.type} onChange={(e) => setNewVeh((p) => ({ ...p, type: e.target.value, brand: "", model: "" }))}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff" }}>
+                  <option value="">Tipe Kendaraan *</option>
+                  {Object.keys(vehicleBrands).map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <select value={newVeh.brand} onChange={(e) => setNewVeh((p) => ({ ...p, brand: e.target.value, model: "" }))}
+                  disabled={newVehBrands.length === 0}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: newVehBrands.length === 0 ? "#f5f5f5" : "#fff", color: newVehBrands.length === 0 ? "#8e8f8e" : "#001526" }}>
+                  <option value="">{newVehBrands.length === 0 ? "Pilih tipe dulu..." : "Merk *"}</option>
+                  {newVehBrands.map((b) => <option key={b} value={b}>{b}</option>)}
+                </select>
+                <select value={newVeh.model} onChange={(e) => setNewVeh((p) => ({ ...p, model: e.target.value }))}
+                  disabled={newVehModels.length === 0}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: newVehModels.length === 0 ? "#f5f5f5" : "#fff", color: newVehModels.length === 0 ? "#8e8f8e" : "#001526" }}>
+                  <option value="">{newVehModels.length === 0 ? "Pilih merk dulu..." : "Model"}</option>
+                  {newVehModels.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <select value={newVeh.year} onChange={(e) => setNewVeh((p) => ({ ...p, year: e.target.value }))}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff", gridColumn: "span 2" }}>
+                  <option value="">Tahun</option>
+                  {Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => new Date().getFullYear() - i).map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              <button
+                onClick={handleCreateVehicle}
+                disabled={newVehSaving || !newVeh.plateNo || !newVeh.brand}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5, padding: "6px 14px",
+                  fontSize: 12, fontWeight: 600, color: "#fff", borderRadius: 6, cursor: "pointer",
+                  background: newVehSaving || !newVeh.plateNo || !newVeh.brand ? "#a0c4e8" : "#0176d3",
+                  border: "1px solid #0176d3",
+                }}
+              >
+                {newVehSaving ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Plus size={13} />}
+                {newVehSaving ? "Menyimpan..." : "Simpan Kendaraan"}
+              </button>
+            </div>
+          )}
+
           <FInput label="PLAN SERVICE DATE" type="date" value={form.planServiceDate} onChange={(v) => update("planServiceDate", v)} placeholder="Pilih tanggal" />
           <FInput label="PLAN SERVICE TIME" type="time" value={form.planServiceTime} onChange={(v) => update("planServiceTime", v)} placeholder="Pilih waktu" />
           <FCreatable label="SERVICE ADVISOR" value={form.serviceAdvisor} onChange={(v) => update("serviceAdvisor", v)} placeholder="Pilih SA" presets={saOptions.map((u) => u.label)} />
@@ -375,9 +524,9 @@ export default function NewServiceOrderPage() {
         </div>
         {/* Right Column */}
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-          <FSelect label="VEHICLE TYPE" value={form.vehicleType} onChange={(v) => update("vehicleType", v)} options={["CAR", "MOTORCYCLE", "TRUCK"]} />
-          <FCreatable label="VEHICLE MAKE" value={form.vehicleMake} onChange={(v) => update("vehicleMake", v)} placeholder="Pilih / ketik merk" presets={["TOYOTA", "HONDA", "MITSUBISHI", "SUZUKI", "DAIHATSU", "ISUZU", "HYUNDAI", "NISSAN", "MAZDA", "KIA", "BMW", "MERCEDES BENZ", "AUDI"]} />
-          <FCreatable label="VEHICLE MODEL" value={form.vehicleModel} onChange={(v) => update("vehicleModel", v)} placeholder="Pilih / ketik model" presets={["AVANZA", "INNOVA", "FORTUNER", "CIVIC", "JAZZ", "BRIO", "PAJERO", "ERTIGA", "XENIA", "ELF", "L300", "CARENS", "SANTA FE", "X-TRAIL", "CX-5"]} />
+          <FSelect label="VEHICLE TYPE" value={form.vehicleType} onChange={(v) => { update("vehicleType", v); update("vehicleMake", ""); update("vehicleModel", ""); }} options={["CAR", "MOTORCYCLE", "TRUCK"]} />
+          <FCreatable label="VEHICLE MAKE" value={form.vehicleMake} onChange={(v) => { update("vehicleMake", v); update("vehicleModel", ""); }} placeholder={form.vehicleType ? "Pilih / ketik merk" : "Pilih vehicle type dulu"} presets={vehicleBrands[form.vehicleType] || []} />
+          <FCreatable label="VEHICLE MODEL" value={form.vehicleModel} onChange={(v) => update("vehicleModel", v)} placeholder={form.vehicleMake ? "Pilih / ketik model" : "Pilih merk dulu"} presets={brandModels[form.vehicleMake] || []} />
           <FInput label="ODOMETER" value={form.odometer} onChange={(v) => update("odometer", v)} placeholder="Contoh: 45.230" />
           <FCreatable label="YEAR" value={form.year} onChange={(v) => update("year", v)} placeholder="Pilih / ketik tahun" presets={["2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015"]} />
           <FCreatable label="COLOR" value={form.color} onChange={(v) => update("color", v)} placeholder="Pilih / ketik warna" presets={["HITAM", "PUTIH", "SILVER", "ABU-ABU", "MERAH", "BIRU", "HIJAU", "KUNING", "ORANYE", "COKLAT", "EMAS"]} />
@@ -418,14 +567,12 @@ export default function NewServiceOrderPage() {
             </div>
             {serviceItems.map((item, idx) => (
               <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
-                <select
+                <SearchableItemSelect
+                  items={services.map((s) => ({ id: s.id, label: `${s.name} (${s.sku})` }))}
                   value={item.serviceId}
-                  onChange={(e) => updateServiceItem(idx, "serviceId", e.target.value)}
-                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff" }}
-                >
-                  <option value="">Pilih jasa...</option>
-                  {services.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.sku})</option>)}
-                </select>
+                  onChange={(id) => updateServiceItem(idx, "serviceId", id)}
+                  placeholder="Cari jasa..."
+                />
                 <input
                   type="number"
                   min={1}
@@ -482,14 +629,12 @@ export default function NewServiceOrderPage() {
             </div>
             {sparepartItems.map((item, idx) => (
               <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
-                <select
+                <SearchableItemSelect
+                  items={spareparts.map((sp) => ({ id: sp.id, label: `${sp.name} (${sp.sku}) - Stok: ${sp.stockQty}` }))}
                   value={item.sparepartId}
-                  onChange={(e) => updateSparepartItem(idx, "sparepartId", e.target.value)}
-                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff" }}
-                >
-                  <option value="">Pilih suku cadang...</option>
-                  {spareparts.map((sp) => <option key={sp.id} value={sp.id}>{sp.name} ({sp.sku}) - Stok: {sp.stockQty}</option>)}
-                </select>
+                  onChange={(id) => updateSparepartItem(idx, "sparepartId", id)}
+                  placeholder="Cari suku cadang..."
+                />
                 <input
                   type="number"
                   min={1}
@@ -756,6 +901,43 @@ function FSelect({ label, options, value, onChange }: { label: string; options: 
         <option value="">Pilih {label.toLowerCase()}</option>
         {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
       </select>
+    </div>
+  );
+}
+
+/* ─── Searchable Item Select (for service/sparepart rows) ─── */
+function SearchableItemSelect({ items, value, onChange, placeholder }: {
+  items: { id: string; label: string }[]; value: string; onChange: (id: string) => void; placeholder: string;
+}) {
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const selected = items.find((i) => i.id === value);
+  const filtered = items.filter((i) => !search || i.label.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div style={{ position: "relative" }}>
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={open ? search : (selected?.label || "")}
+        onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
+        onFocus={() => { setSearch(""); setOpen(true); }}
+        onBlur={() => setTimeout(() => setOpen(false), 200)}
+        style={{ width: "100%", padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff", boxSizing: "border-box" }}
+      />
+      {open && filtered.length > 0 && (
+        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+          {filtered.map((i) => (
+            <div
+              key={i.id}
+              onMouseDown={() => { onChange(i.id); setSearch(""); setOpen(false); }}
+              style={{ padding: "6px 10px", fontSize: 12, cursor: "pointer", background: value === i.id ? "#f0f7ff" : "transparent" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f7ff")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = value === i.id ? "#f0f7ff" : "transparent")}
+            >{i.label}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

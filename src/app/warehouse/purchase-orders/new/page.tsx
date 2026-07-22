@@ -196,6 +196,7 @@ export default function NewPurchaseOrderPage() {
               <tr>
                 <th style={{ width: 40 }}>#</th>
                 <th>Sparepart</th>
+                <th className="text-right" style={{ width: 80 }}>Stock</th>
                 <th style={{ width: 110 }}>Qty</th>
                 <th style={{ width: 160 }}>Unit Price</th>
                 <th style={{ width: 160 }}>Total</th>
@@ -203,23 +204,30 @@ export default function NewPurchaseOrderPage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((it, i) => (
+              {items.map((it, i) => {
+                const sp = spareparts.find(s => s.id === it.sparepartId);
+                return (
                 <tr key={i}>
                   <td className="text-[--color-text-secondary]">{i + 1}</td>
                   <td>
                     <select
                       className="form-select w-full"
                       value={it.sparepartId}
-                      onChange={(e) => setItem(i, "sparepartId", e.target.value)}
+                      onChange={(e) => {
+                        setItem(i, "sparepartId", e.target.value);
+                        const sel = spareparts.find(s => s.id === e.target.value);
+                        if (sel) setItem(i, "unitPrice", sel.buyPrice || sel.sellPrice || 0);
+                      }}
                     >
                       <option value="">-- Select Sparepart --</option>
-                      {spareparts.map((sp) => (
-                        <option key={sp.id} value={sp.id}>
-                          {sp.sku ? `${sp.sku} — ` : ""}{sp.name}
+                      {spareparts.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.sku ? `${s.sku} — ` : ""}{s.name}
                         </option>
                       ))}
                     </select>
                   </td>
+                  <td className="text-right text-[--color-text-secondary]">{sp ? sp.stockQty : "-"}</td>
                   <td>
                     <input
                       type="number"
@@ -251,7 +259,8 @@ export default function NewPurchaseOrderPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>

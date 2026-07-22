@@ -12,9 +12,14 @@ export default function NewPurchaseInvoicePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/purchase-orders?limit=50")
+    fetch("/api/purchase-orders?limit=50&status=RECEIVED")
       .then((r) => r.json())
-      .then((j) => setPos(j.data || []))
+      .then((j) => {
+        const received = j.data || [];
+        return fetch("/api/purchase-orders?limit=50&status=PARTIAL")
+          .then((r2) => r2.json())
+          .then((j2) => setPos([...received, ...(j2.data || [])]));
+      })
       .catch(() => {});
   }, []);
 

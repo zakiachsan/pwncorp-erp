@@ -25,7 +25,7 @@ export default function NewPurchaseDeliveryPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/purchase-orders?limit=50")
+    fetch("/api/purchase-orders?limit=50&status=SENT")
       .then((r) => r.json())
       .then((json) => { setPurchaseOrders(json.data || []); setLoadingMaster(false); })
       .catch(() => { setError("Failed to load purchase orders"); setLoadingMaster(false); });

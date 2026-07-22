@@ -6,6 +6,22 @@ import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X } from "l
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
+// Format ISO date string → "23 Jul 2026"
+const fmtDate = (d: any): string => {
+  if (!d || d === "-") return "-";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return "-";
+  return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+};
+
+// Normalize date value → "YYYY-MM-DD" (for date inputs)
+const toDateInput = (d: any): string => {
+  if (!d || d === "-") return "";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return "";
+  return dt.toISOString().split("T")[0];
+};
+
 const statusColor = (s: string) => {
   const map: Record<string, string> = {
     DRAFT: "#6b7280",
@@ -112,14 +128,14 @@ export default function WorkOrderDetailPage() {
           vehicleModel: so.vehicle.model || found.vehicleModel || found.vehicle?.model || "-",
           vehicleType: so.vehicle?.brand ? "CAR" : (found.vehicleType || found.vehicle?.type || "CAR"),
           year: so.vehicle?.year || found.vehicle?.year || "-",
-          color: so.vehicle?.color || found.vehicle?.color || "-",
-          odometer: so.vehicle?.odometer || found.vehicle?.odometer || "-",
-          store: w.store?.name || w.store || "-",
+          color: so.color || so.vehicle?.color || found.vehicle?.color || "-",
+          odometer: so.odometer || so.vehicle?.odometer || found.vehicle?.odometer || "-",
+          store: so.store?.name || w.store?.name || w.store || "-",
           serviceAdvisor: so.sa?.name || found.so?.serviceAdvisor || "-",
           mekanik: w.mekanik?.name || found.assignedTo || "-",
           mekanikId: w.mekanikId || "",
           status: (w.status || "DRAFT").toUpperCase(),
-          planStartDate: w.startDate || found.planStartDate || "-",
+          planStartDate: w.startDate || so.date || found.planStartDate || "-",
           planEndDate: w.targetDate || found.planEndDate || "-",
           actualStartDate: found.actualStartDate || "-",
           actualEndDate: found.actualEndDate || "-",
@@ -137,6 +153,22 @@ export default function WorkOrderDetailPage() {
       })
       .catch(() => { setError("Work Order tidak ditemukan"); setLoading(false); });
   }, [woNo]);
+
+  // Init edit data when wo changes
+  useEffect(() => {
+    if (!wo) return;
+    setEditServices(wo.services || []);
+    setEditSpareparts(wo.spareparts || []);
+    setEditFields({
+      mekanikId: wo.mekanikId || "",
+      startDate: toDateInput(wo.planStartDate),
+      targetDate: toDateInput(wo.planEndDate),
+    });
+    // Fetch mekanik list
+    fetch("/api/users?limit=100").then(r => r.json()).then(d => {
+      setAllMekanik((d.data || d.users || []).filter((u: any) => u.role?.name === "Mekanik" || u.role === "Mekanik"));
+    }).catch(() => {});
+  }, [wo]);
 
   if (loading) {
     return (
@@ -184,22 +216,6 @@ export default function WorkOrderDetailPage() {
     }
   };
 
-  // Init edit data when wo changes
-  useEffect(() => {
-    if (!wo) return;
-    setEditServices(wo.services || []);
-    setEditSpareparts(wo.spareparts || []);
-    setEditFields({
-      mekanikId: wo.mekanikId || "",
-      startDate: wo.planStartDate !== "-" ? wo.planStartDate : "",
-      targetDate: wo.planEndDate !== "-" ? wo.planEndDate : "",
-    });
-    // Fetch mekanik list
-    fetch("/api/users?limit=100").then(r => r.json()).then(d => {
-      setAllMekanik((d.data || d.users || []).filter((u: any) => u.role?.name === "Mekanik" || u.role === "Mekanik"));
-    }).catch(() => {});
-  }, [wo]);
-
   // --- Edit handlers ---
   const updateEditService = (idx: number, field: string, value: any) => {
     setEditServices(prev => {
@@ -242,6 +258,8 @@ export default function WorkOrderDetailPage() {
           itemName: s.item || s.description || "",
           qty: s.quantity || 1,
           unitPrice: s.priceExTax || 0,
+          assignedTo: s.assignedTo || null,
+          estimatedTime: s.estimatedTime || null,
         })),
         ...editSpareparts.map(s => ({
           itemType: "sparepart",
@@ -263,7 +281,7 @@ export default function WorkOrderDetailPage() {
         const d = j.data;
         const so = d.so || {};
         const svcs = (d.items || []).filter((it: any) => it.itemType === "service").map((it: any) => ({
-          item: it.itemName || it.name || "-", description: it.description || "-", quantity: it.qty || 1, priceExTax: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId,
+          item: it.itemName || it.name || "-", description: it.description || "-", quantity: it.qty || 1, priceExTax: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId, assignedTo: it.assignedTo || "-", estimatedTime: it.estimatedTime || "-",
         }));
         const sps = (d.items || []).filter((it: any) => it.itemType === "sparepart").map((it: any) => ({
           code: it.sku || it.itemId || "-", name: it.itemName || "-", qty: it.qty || 0, price: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId,
@@ -331,7 +349,7 @@ export default function WorkOrderDetailPage() {
         </div>
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
-          <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: wo.planStartDate !== "-" ? wo.planStartDate : "", targetDate: wo.planEndDate !== "-" ? wo.planEndDate : "" }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
+          <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
         </div>
       </div>
 
@@ -386,9 +404,9 @@ export default function WorkOrderDetailPage() {
             </div>
             <div style={S.infoCol}>
               <div style={S.infoColTitle}>Schedule & Staff</div>
-              <F2 label="Plan Start" value={wo.planStartDate} />
-              <F2 label="Plan End" value={wo.planEndDate} />
-              <F2 label="Actual Start" value={wo.actualStartDate} />
+              <F2 label="Plan Start" value={fmtDate(wo.planStartDate)} />
+              <F2 label="Plan End" value={fmtDate(wo.planEndDate)} />
+              <F2 label="Actual Start" value={fmtDate(wo.actualStartDate)} />
               <F2 label="Service Advisor" value={wo.serviceAdvisor} />
               <F2 label="Mekanik" value={wo.mekanik} />
             </div>
@@ -430,7 +448,7 @@ export default function WorkOrderDetailPage() {
 
           {svcLineTab === "services" && (
             <div>
-              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} />
+              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} allMekanik={allMekanik} />
             </div>
           )}
 
@@ -718,8 +736,8 @@ export default function WorkOrderDetailPage() {
                   <F label="YEAR" value={wo.year} />
                   <F label="COLOR" value={wo.color} />
                   <F label="ODOMETER" value={wo.odometer} />
-                  <F label="PLAN START" value={wo.planStartDate} />
-                  <F label="PLAN END" value={wo.planEndDate} />
+                  <F label="PLAN START" value={fmtDate(wo.planStartDate)} />
+                  <F label="PLAN END" value={fmtDate(wo.planEndDate)} />
                 </div>
               </div>
               <h3 style={{ fontSize: 13, fontWeight: 600, color: "#0176d3", marginBottom: 8 }}>Services</h3>
@@ -902,10 +920,11 @@ function StatusBtn({ label, color, onClick }: { label: string; color: string; on
 }
 
 /* ─── Editable WO Services Table ─── */
-function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost }: {
+function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, allMekanik }: {
   services: any[]; editMode: boolean; totalCost: number;
   onUpdate: (idx: number, field: string, value: any) => void;
   onRemove: (idx: number) => void;
+  allMekanik: any[];
 }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
@@ -916,16 +935,16 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost }: {
             <th style={S.th}>Item</th>
             <th className="hidden sm:table-cell" style={S.th}>Description</th>
             <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-            {!editMode && <th className="hidden md:table-cell" style={S.th}>Assigned To</th>}
-            {!editMode && <th className="hidden md:table-cell" style={S.th}>Est. Time</th>}
-            {!editMode && <th className="hidden sm:table-cell" style={S.th}>Status</th>}
+            <th className="hidden md:table-cell" style={S.th}>Assigned To</th>
+            <th className="hidden md:table-cell" style={S.th}>Est. Time</th>
+            <th className="hidden sm:table-cell" style={S.th}>Status</th>
             <th style={{ ...S.th, textAlign: "right" }}>Total</th>
             {editMode && <th style={{ ...S.th, width: 40 }}></th>}
           </tr>
         </thead>
         <tbody>
           {services.length === 0 && (
-            <tr><td colSpan={editMode ? 5 : 8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
+            <tr><td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
           )}
           {services.map((svc: any, i: number) => (
             <tr key={i} style={S.tr}>
@@ -938,11 +957,24 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost }: {
                     style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                 ) : svc.quantity}
               </td>
-              {!editMode && <td className="hidden md:table-cell" style={S.td}>{svc.assignedTo}</td>}
-              {!editMode && <td className="hidden md:table-cell" style={S.td}>{svc.estimatedTime}</td>}
-              {!editMode && <td className="hidden sm:table-cell" style={S.td}>
+              <td className="hidden md:table-cell" style={S.td}>
+                {editMode ? (
+                  <select value={svc.assignedTo && svc.assignedTo !== "-" ? svc.assignedTo : ""} onChange={e => onUpdate(i, "assignedTo", e.target.value)}
+                    style={{ width: "100%", padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, background: "#fff" }}>
+                    <option value="">-- Pilih --</option>
+                    {allMekanik.map((m: any) => <option key={m.id} value={m.name}>{m.name}</option>)}
+                  </select>
+                ) : svc.assignedTo}
+              </td>
+              <td className="hidden md:table-cell" style={S.td}>
+                {editMode ? (
+                  <input type="date" value={svc.estimatedTime && svc.estimatedTime !== "-" ? svc.estimatedTime : ""} onChange={e => onUpdate(i, "estimatedTime", e.target.value)}
+                    style={{ width: 130, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4 }} />
+                ) : svc.estimatedTime}
+              </td>
+              <td className="hidden sm:table-cell" style={S.td}>
                 <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
-              </td>}
+              </td>
               <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
               {editMode && (
                 <td style={S.td}>
@@ -954,7 +986,7 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost }: {
         </tbody>
         <tfoot>
           <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-            <td colSpan={editMode ? 3 : 7} style={S.td}></td>
+            <td colSpan={7} style={S.td}></td>
             <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalCost)}</td>
             {editMode && <td style={S.td}></td>}
           </tr>

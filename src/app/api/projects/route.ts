@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
+import { generateProjectNumber } from "@/lib/numbering";
 
 export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
@@ -44,8 +45,11 @@ export const POST = withAuth(async (req: NextRequest) => {
   if (!name) return NextResponse.json({ error: "Name is required" }, { status: 400 });
   if (!customerId) return NextResponse.json({ error: "Customer is required" }, { status: 400 });
 
+  const projectNo = await generateProjectNumber(user.storeId);
+
   const project = await prisma.project.create({
     data: {
+      projectNo,
       storeId: user.storeId,
       name,
       customerId,

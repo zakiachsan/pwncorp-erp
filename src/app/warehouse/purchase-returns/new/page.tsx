@@ -2,41 +2,81 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+
+const formatIDR = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 export default function NewPurchaseReturnPage() {
   const router = useRouter();
   const [pos, setPos] = useState<any[]>([]);
-  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [poItems, setPoItems] = useState<any[]>([]);
   const [form, setForm] = useState({
-    docNo: `RET/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`,
-    poId: "", supplierId: "", total: 0, status: "Draft", reason: "", date: new Date().toISOString().slice(0, 10),
+    poId: "", supplierId: "", returnType: "Return", warehouse: "", reason: "",
+    date: new Date().toISOString().slice(0, 10),
   });
+  const [items, setItems] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/purchase-orders?limit=50").then((r) => r.json()),
-      fetch("/api/suppliers?limit=200").then((r) => r.json()),
-    ]).then(([poJson, suppJson]) => {
-      setPos(poJson.data || []);
-      setSuppliers(suppJson.data || []);
+      fetch("/api/purchase-orders?limit=50&status=RECEIVED").then(r => r.json()),
+      fetch("/api/purchase-orders?limit=50&status=PARTIAL").then(r => r.json()),
+      fetch("/api/warehouses?limit=100").then(r => r.json()),
+    ]).then(([rec, part, wh]) => {
+      setPos([...(rec.data || []), ...(part.data || [])]);
+      setWarehouses(wh.data || []);
     }).catch(() => {});
   }, []);
 
+  const onPoSelect = async (poId: string) => {
+    setForm(f => ({ ...f, poId }));
+    setError("");
+    if (!poId) { setItems([]); setPoItems([]); return; }
+    try {
+      const res = await fetch(`/api/purchase-orders/${poId}`);
+      const json = await res.json();
+      const po = json.data;
+      setForm(f => ({ ...f, supplierId: po.supplierId || "" }));
+      const its = (po.items || []).map((it: any) => ({
+        sparepartId: it.sparepartId,
+        sku: it.sparepart?.sku || "-",
+        name: it.sparepart?.name || "-",
+        maxQty: it.qty || 0,
+        qty: it.qty || 0,
+        unitPrice: it.unitPrice || 0,
+      }));
+      setPoItems(its);
+      setItems(its);
+    } catch { setError("Gagal load PO items"); }
+  };
+
+  const updateItem = (i: number, field: string, value: any) => {
+    setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [field]: value } : it));
+  };
+  const removeItem = (i: number) => setItems(prev => prev.filter((_, idx) => idx !== i));
+
+  const grandTotal = items.reduce((s, it) => s + (it.qty || 0) * (it.unitPrice || 0), 0);
+
   const handleSave = async () => {
     setError("");
-    if (!form.docNo || !form.poId || !form.supplierId) {
-      setError("Doc No, PO, dan Supplier wajib diisi");
-      return;
-    }
+    if (!form.poId || !form.supplierId) { setError("PO dan Supplier wajib diisi"); return; }
+    if (!items.length) { setError("Minimal 1 item"); return; }
     setSaving(true);
     try {
       const res = await fetch("/api/purchase-returns", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          poId: form.poId,
+          supplierId: form.supplierId,
+          returnType: form.returnType,
+          warehouse: form.warehouse || null,
+          reason: form.reason,
+          date: form.date,
+          items: items.map(it => ({ sparepartId: it.sparepartId, qty: it.qty, unitPrice: it.unitPrice })),
+        }),
       });
       const json = await res.json();
       if (!res.ok) { setError(json.error || "Gagal menyimpan"); setSaving(false); return; }
@@ -44,66 +84,117 @@ export default function NewPurchaseReturnPage() {
     } catch { setError("Gagal menyimpan"); setSaving(false); }
   };
 
+  const selectedPo = pos.find(p => p.id === form.poId);
+
   return (
-    <div style={{ padding: "0 12px 24px" }} className="sm:px-6 max-w-2xl">
-      <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => router.back()} className="p-1.5 border border-[#d8d8d8] rounded-lg cursor-pointer">
-          <ArrowLeft size={16} />
-        </button>
-        <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>New Purchase Return</h1>
+    <div>
+      <div className="view-header">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/warehouse/purchase-returns")} className="btn btn--sm"><ArrowLeft size={16} /></button>
+          <div className="view-title">New Purchase Return</div>
+        </div>
       </div>
 
-      <div className="bg-white border border-[#ecebea] rounded-lg p-4 sm:p-6 space-y-4">
-        {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</div>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {error && <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
+
+      <div className="card-slds p-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="form-label">Doc No *</label>
-            <input className="form-input" value={form.docNo} onChange={(e) => setForm({ ...form, docNo: e.target.value })} />
+            <label className="form-label">Purchase Order *</label>
+            <select className="form-select" value={form.poId} onChange={e => onPoSelect(e.target.value)}>
+              <option value="">-- Pilih PO --</option>
+              {pos.map(po => <option key={po.id} value={po.id}>{po.poNo} — {po.supplier?.companyName || ""}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="form-label">Supplier</label>
+            <input className="form-input bg-gray-100" value={selectedPo?.supplier?.companyName || ""} disabled />
+          </div>
+          <div>
+            <label className="form-label">Return Type</label>
+            <select className="form-select" value={form.returnType} onChange={e => setForm({ ...form, returnType: e.target.value })}>
+              <option value="Return">Return (Tukar Barang)</option>
+              <option value="Deposit">Deposit (Potongan)</option>
+            </select>
+          </div>
+          <div>
+            <label className="form-label">Warehouse</label>
+            <select className="form-select" value={form.warehouse} onChange={e => setForm({ ...form, warehouse: e.target.value })}>
+              <option value="">-- Pilih --</option>
+              {warehouses.map(w => <option key={w.id} value={w.name}>{w.name}</option>)}
+            </select>
           </div>
           <div>
             <label className="form-label">Date</label>
-            <input type="date" className="form-input" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+            <input type="date" className="form-input" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
           </div>
           <div>
-            <label className="form-label">Purchase Order *</label>
-            <select className="form-select" value={form.poId} onChange={(e) => setForm({ ...form, poId: e.target.value })}>
-              <option value="">-- Pilih PO --</option>
-              {pos.map((po) => (
-                <option key={po.id} value={po.id}>{po.poNo} — {po.supplier?.companyName || ""}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="form-label">Supplier *</label>
-            <select className="form-select" value={form.supplierId} onChange={(e) => setForm({ ...form, supplierId: e.target.value })}>
-              <option value="">-- Pilih Supplier --</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>{s.companyName}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="form-label">Total (Rp)</label>
-            <input type="number" className="form-input" value={form.total} onChange={(e) => setForm({ ...form, total: Number(e.target.value) })} />
-          </div>
-          <div>
-            <label className="form-label">Status</label>
-            <select className="form-select" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-              <option>Draft</option>
-              <option>Approved</option>
-            </select>
-          </div>
-          <div className="sm:col-span-2">
             <label className="form-label">Reason</label>
-            <textarea className="form-input" rows={3} value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
+            <input className="form-input" value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} placeholder="Alasan retur..." />
           </div>
         </div>
-        <div className="flex gap-3 pt-2">
-          <button onClick={handleSave} disabled={saving} className="btn btn--brand flex items-center gap-2">
-            <Save size={14} /> {saving ? "Saving..." : "Save"}
-          </button>
-          <button onClick={() => router.back()} className="btn btn--outline">Cancel</button>
+      </div>
+
+      <div className="card-slds p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Return Items</h3>
         </div>
+        {!form.poId ? (
+          <p className="text-sm text-[--color-text-secondary] py-4 text-center">Pilih PO untuk load items.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 40 }}>#</th>
+                  <th>SKU</th>
+                  <th>Product</th>
+                  <th className="text-right">Max Qty</th>
+                  <th className="text-right" style={{ width: 100 }}>Return Qty</th>
+                  <th className="text-right" style={{ width: 140 }}>Unit Price</th>
+                  <th className="text-right" style={{ width: 140 }}>Total</th>
+                  <th style={{ width: 50 }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it, i) => (
+                  <tr key={i}>
+                    <td>{i + 1}</td>
+                    <td className="font-medium" style={{ color: "var(--color-brand)" }}>{it.sku}</td>
+                    <td>{it.name}</td>
+                    <td className="text-right text-[--color-text-secondary]">{it.maxQty}</td>
+                    <td>
+                      <input type="number" min={1} max={it.maxQty} className="form-input w-full text-right"
+                        value={it.qty} onChange={e => updateItem(i, "qty", Math.min(parseInt(e.target.value) || 1, it.maxQty))} />
+                    </td>
+                    <td>
+                      <input type="number" min={0} className="form-input w-full text-right"
+                        value={it.unitPrice} onChange={e => updateItem(i, "unitPrice", parseFloat(e.target.value) || 0)} />
+                    </td>
+                    <td className="text-right font-semibold">{formatIDR((it.qty || 0) * (it.unitPrice || 0))}</td>
+                    <td className="text-center">
+                      <button onClick={() => removeItem(i)} className="text-red-500 hover:text-red-700"><Trash2 size={16} /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="font-bold border-t-2">
+                  <td colSpan={6} className="text-right text-sm">Grand Total</td>
+                  <td className="text-right text-lg text-[--color-brand]">{formatIDR(grandTotal)}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 justify-end">
+        <button className="btn btn--sm" onClick={() => router.push("/warehouse/purchase-returns")} disabled={saving}>Cancel</button>
+        <button className="btn btn--brand btn--sm" onClick={handleSave} disabled={saving}>
+          <Save size={14} /> {saving ? "Saving..." : "Save"}
+        </button>
       </div>
     </div>
   );

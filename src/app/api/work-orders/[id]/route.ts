@@ -10,6 +10,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
         include: {
           customer: true,
           vehicle: true,
+          store: { select: { name: true } },
           sa: { select: { id: true, name: true } },
           spareparts: { include: { sparepart: true } },
           services: { include: { service: true } },
@@ -139,6 +140,8 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
           qty: item.qty || 1,
           unitPrice: item.unitPrice || 0,
           total: (item.qty || 1) * (item.unitPrice || 0),
+          assignedTo: item.assignedTo || null,
+          estimatedTime: item.estimatedTime || null,
         },
       });
     }

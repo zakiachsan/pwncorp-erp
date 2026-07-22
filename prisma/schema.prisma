@@ -61,6 +61,7 @@ model Store {
   stockReturns      StockReturn[]
   stockTransfers StockTransfer[]
   stockOpnames   StockOpname[]
+  stockOutgoings StockOutgoing[]
   bankAccounts    BankAccount[]
   pettyCashes     PettyCash[]
   projects        Project[]
@@ -168,6 +169,8 @@ model Sparepart {
   soStockItems     StockOrderItem[]
   transferItems    TransferItem[]
   opnameItems      OpnameItem[]
+  returnItems      ReturnItem[]
+  outgoingItems    StockOutgoingItem[]
   stockHistories   StockHistory[]
 
   @@map("spareparts")
@@ -219,9 +222,12 @@ model ServiceOrder {
   storeId     String   @map("store_id")
   store       Store    @relation(fields: [storeId], references: [id])
   complaint   String?
+  salesperson String?
   bookingSource String?  @map("booking_source")
   referenceNumber String? @map("reference_number")
   planServiceTime String? @map("plan_service_time")
+  odometer    String?
+  color       String?
   status      String   @default("Draft") // Draft / Approved / Cancelled / Delivered
   total       Float    @default(0)
   date        DateTime @default(now())
@@ -283,15 +289,17 @@ model WorkOrder {
 }
 
 model WOItem {
-  id        String    @id @default(cuid())
-  woId      String    @map("wo_id")
-  wo        WorkOrder @relation(fields: [woId], references: [id])
-  itemType  String    @map("item_type") // sparepart / service
-  itemId    String    @map("item_id")
-  itemName  String    @map("item_name")
-  qty       Int       @default(1)
-  unitPrice Float     @default(0) @map("unit_price")
-  total     Float     @default(0)
+  id            String    @id @default(cuid())
+  woId          String    @map("wo_id")
+  wo            WorkOrder @relation(fields: [woId], references: [id])
+  itemType      String    @map("item_type") // sparepart / service
+  itemId        String    @map("item_id")
+  itemName      String    @map("item_name")
+  qty           Int       @default(1)
+  unitPrice     Float     @default(0) @map("unit_price")
+  total         Float     @default(0)
+  assignedTo    String?   @map("assigned_to")
+  estimatedTime String?   @map("estimated_time")
 
   @@map("wo_items")
 }
@@ -465,8 +473,9 @@ model PurchaseDelivery {
   po          PurchaseOrder @relation(fields: [poId], references: [id])
   storeId     String        @map("store_id")
   store       Store         @relation(fields: [storeId], references: [id])
+  notes       String?
   receivedAt  DateTime?     @map("received_at")
-  status      String        @default("Draft") // Draft / Received
+  status      String        @default("Draft") // Draft / Received / Cancelled
   createdAt   DateTime      @default(now()) @map("created_at")
 
   items DeliveryItem[]
@@ -510,13 +519,30 @@ model PurchaseReturn {
   po         PurchaseOrder @relation(fields: [poId], references: [id])
   supplierId String        @map("supplier_id")
   supplier   Supplier      @relation(fields: [supplierId], references: [id])
+  returnType String        @default("Return") @map("return_type") // Return / Deposit
+  warehouse  String?
   total      Float         @default(0)
-  status     String        @default("Draft")
+  status     String        @default("Draft") // Draft / Sent / Approved / Completed / Cancelled
   reason     String?
   date       DateTime      @default(now())
   createdAt  DateTime      @default(now()) @map("created_at")
 
+  items ReturnItem[]
+
   @@map("purchase_returns")
+}
+
+model ReturnItem {
+  id          String         @id @default(cuid())
+  returnId    String         @map("return_id")
+  purchaseReturn PurchaseReturn @relation(fields: [returnId], references: [id])
+  sparepartId String         @map("sparepart_id")
+  sparepart   Sparepart      @relation(fields: [sparepartId], references: [id])
+  qty         Int            @default(1)
+  unitPrice   Float          @default(0) @map("unit_price")
+  total       Float          @default(0)
+
+  @@map("return_items")
 }
 
 model StockOrder {
@@ -630,6 +656,35 @@ model OpnameItem {
   reason       String?
 
   @@map("opname_items")
+}
+
+model StockOutgoing {
+  id          String   @id @default(cuid())
+  docNo       String   @unique @map("doc_no")
+  storeId     String   @map("store_id")
+  store       Store    @relation(fields: [storeId], references: [id])
+  warehouse   String?
+  notes       String?
+  total       Float    @default(0)
+  status      String   @default("Draft") // Draft / Confirmed / Approved / Cancelled
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  items StockOutgoingItem[]
+
+  @@map("stock_outgoings")
+}
+
+model StockOutgoingItem {
+  id              String         @id @default(cuid())
+  outgoingId      String         @map("outgoing_id")
+  stockOutgoing   StockOutgoing  @relation(fields: [outgoingId], references: [id])
+  sparepartId     String         @map("sparepart_id")
+  sparepart       Sparepart      @relation(fields: [sparepartId], references: [id])
+  qty             Int            @default(1)
+  unitPrice       Float          @default(0) @map("unit_price")
+
+  @@map("stock_outgoing_items")
 }
 
 model StockHistory {
@@ -850,6 +905,7 @@ model PaymentRequest {
 // ─── PROJECT ───
 model Project {
   id             String   @id @default(cuid())
+  projectNo      String   @unique @map("project_no")
   name           String
   customerId     String   @map("customer_id")
   customer       Customer @relation(fields: [customerId], references: [id])

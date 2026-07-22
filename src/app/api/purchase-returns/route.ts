@@ -20,6 +20,7 @@ export const GET = withAuth(async (req: NextRequest) => {
       include: {
         po: { select: { id: true, poNo: true } },
         supplier: { select: { id: true, companyName: true } },
+        items: { include: { sparepart: { select: { sku: true, name: true } } } },
       },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
@@ -34,25 +35,54 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { docNo, poId, supplierId, total, status, reason, date } = body;
+  const { poId, supplierId, returnType, warehouse, items, reason, date } = body;
 
-  if (!docNo) return NextResponse.json({ error: "Document number is required" }, { status: 400 });
   if (!poId) return NextResponse.json({ error: "Purchase Order is required" }, { status: 400 });
   if (!supplierId) return NextResponse.json({ error: "Supplier is required" }, { status: 400 });
+  if (!items || !items.length) return NextResponse.json({ error: "Items are required" }, { status: 400 });
+
+  // Validate PO
+  const po = await prisma.purchaseOrder.findFirst({
+    where: { id: poId, storeId: user.storeId },
+    include: { items: true },
+  });
+  if (!po) return NextResponse.json({ error: "Purchase order not found" }, { status: 404 });
+
+  // Validate qty: return qty <= PO item qty
+  for (const item of items) {
+    const poItem = po.items.find((pi: any) => pi.sparepartId === item.sparepartId);
+    if (poItem && item.qty > poItem.qty) {
+      return NextResponse.json({ error: `Return qty exceeds PO qty for item ${item.sparepartId}` }, { status: 400 });
+    }
+  }
+
+  const docNo = `PR/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+  const total = items.reduce((sum: number, i: any) => sum + (i.qty * (i.unitPrice || 0)), 0);
 
   const ret = await prisma.purchaseReturn.create({
     data: {
       docNo,
       poId,
       supplierId,
-      total: total || 0,
-      status: status || "Draft",
-      reason,
-      date: date ? new Date(date) : undefined,
+      returnType: returnType || "Return",
+      warehouse: warehouse || null,
+      total,
+      status: "Draft",
+      reason: reason || null,
+      date: date ? new Date(date) : new Date(),
+      items: {
+        create: items.map((i: any) => ({
+          sparepartId: i.sparepartId,
+          qty: i.qty || 0,
+          unitPrice: i.unitPrice || 0,
+          total: (i.qty || 0) * (i.unitPrice || 0),
+        })),
+      },
     },
     include: {
       po: { select: { id: true, poNo: true } },
       supplier: { select: { id: true, companyName: true } },
+      items: { include: { sparepart: { select: { sku: true, name: true } } } },
     },
   });
 

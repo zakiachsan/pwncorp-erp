@@ -81,6 +81,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
           { label: "Purchase Returns", href: "/warehouse/purchase-returns" },
           { label: "Warehouse Stock Transfer", href: "/warehouse/stock-transfer" },
           { label: "Warehouse Stock Opname", href: "/warehouse/stock-opname" },
+          { label: "Stock Outgoing", href: "/warehouse/stock-outgoing" },
           { label: "Warehouse Stock Histories", href: "/warehouse/stock-histories" },
 
         ],

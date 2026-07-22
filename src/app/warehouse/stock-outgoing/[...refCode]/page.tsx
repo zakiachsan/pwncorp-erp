@@ -2,9 +2,9 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Printer, CheckCircle, Ban, ArrowRight } from "lucide-react";
+import { ArrowLeft, Printer, CheckCircle, Ban } from "lucide-react";
 
-const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
+const formatIDR = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const fmtDate = (d: any) => {
   if (!d) return "-";
   const dt = new Date(d);
@@ -12,63 +12,60 @@ const fmtDate = (d: any) => {
   return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 };
 
-const workflowSteps = ["DRAFT", "CONFIRMED", "APPROVED", "RECEIVED"];
+const workflowSteps = ["DRAFT", "CONFIRMED", "APPROVED"];
 
-export default function StockTransferDetailPage() {
+export default function StockOutgoingDetailPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.refCode as string[];
   const refCode = refCodeArray ? refCodeArray.join("/") : "";
-  const [transfer, setTransfer] = useState<any>(null);
+  const [outgoing, setOutgoing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
 
-  const fetchTransfer = () => {
-    fetch(`/api/stock-transfers?search=${encodeURIComponent(refCode)}&limit=1`)
+  const fetchOutgoing = () => {
+    fetch(`/api/stock-outgoings?search=${encodeURIComponent(refCode)}&limit=1`)
       .then((r) => r.json())
       .then((json) => {
         const found = (json.data || [])[0];
-        if (!found) { setError("Stock Transfer tidak ditemukan: " + refCode); setLoading(false); return; }
-        return fetch(`/api/stock-transfers/${found.id}`)
+        if (!found) { setError("Stock Outgoing tidak ditemukan: " + refCode); setLoading(false); return; }
+        return fetch(`/api/stock-outgoings/${found.id}`)
           .then((r2) => r2.json())
-          .then((j2) => { setTransfer(j2.data || found); setLoading(false); });
+          .then((j2) => { setOutgoing(j2.data || found); setLoading(false); });
       })
       .catch(() => { setError("Failed to load data"); setLoading(false); });
   };
 
-  useEffect(() => { fetchTransfer(); }, [refCode]);
+  useEffect(() => { fetchOutgoing(); }, [refCode]);
 
   const doAction = async (action: string) => {
     setConfirmAction(null);
     try {
-      const res = await fetch(`/api/stock-transfers/${transfer.id}`, {
+      const res = await fetch(`/api/stock-outgoings/${outgoing.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Gagal");
-      fetchTransfer();
+      fetchOutgoing();
     } catch (e: any) { alert(e.message); }
   };
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
-  if (!transfer) return null;
+  if (!outgoing) return null;
 
-  const isDraft = transfer.status === "Draft";
-  const isConfirmed = transfer.status === "Confirmed";
-  const isApproved = transfer.status === "Approved";
-  const isCancelled = transfer.status === "Cancelled";
-  const currentStepIdx = workflowSteps.indexOf(transfer.status?.toUpperCase());
-  const items = transfer.items || [];
-  const totalQty = items.reduce((s: number, x: any) => s + (x.qty || 0), 0);
+  const isDraft = outgoing.status === "Draft";
+  const isConfirmed = outgoing.status === "Confirmed";
+  const isCancelled = outgoing.status === "Cancelled";
+  const currentStepIdx = workflowSteps.indexOf(outgoing.status?.toUpperCase());
+  const items = outgoing.items || [];
 
   const confirmLabels: Record<string, { title: string; desc: string; color: string }> = {
-    confirm: { title: "Confirm Transfer?", desc: "Transfer akan dikonfirmasi untuk diproses.", color: "#0176d3" },
-    approve: { title: "Approve Transfer?", desc: "Transfer disetujui dan siap dikirim.", color: "#f59e0b" },
-    receive: { title: "Receive Transfer?", desc: "Barang diterima dan stock gudang asal akan dikurangi.", color: "#2e844a" },
-    cancel: { title: "Cancel Transfer?", desc: "Transfer akan dibatalkan.", color: "#ea001e" },
+    confirm: { title: "Confirm Outgoing?", desc: "Data akan dikonfirmasi dan tidak bisa diedit lagi.", color: "#0176d3" },
+    approve: { title: "Approve Outgoing?", desc: "Stock akan dikurangi. Tindakan ini tidak bisa dibatalkan.", color: "#2e844a" },
+    cancel: { title: "Cancel Outgoing?", desc: "Stock Outgoing akan dibatalkan.", color: "#ea001e" },
   };
 
   return (
@@ -76,10 +73,10 @@ export default function StockTransferDetailPage() {
       {/* Header */}
       <div className="view-header">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push("/warehouse/stock-transfer")} className="btn btn--sm"><ArrowLeft size={16} /></button>
+          <button onClick={() => router.push("/warehouse/stock-outgoing")} className="btn btn--sm"><ArrowLeft size={16} /></button>
           <div>
-            <div className="view-title">Stock Transfer</div>
-            <div className="text-xs text-[--color-text-secondary]">{transfer.transferNo}</div>
+            <div className="view-title">Stock Outgoing</div>
+            <div className="text-xs text-[--color-text-secondary]">{outgoing.docNo}</div>
           </div>
         </div>
         <div className="flex gap-2">
@@ -95,18 +92,13 @@ export default function StockTransferDetailPage() {
           )}
           {isConfirmed && (
             <>
-              <button onClick={() => setConfirmAction("approve")} className="btn btn--sm" style={{ background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}>
+              <button onClick={() => setConfirmAction("approve")} className="btn btn--sm" style={{ background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
                 <CheckCircle size={14} /> Approve
               </button>
               <button onClick={() => setConfirmAction("cancel")} className="btn btn--sm" style={{ background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}>
                 <Ban size={14} /> Cancel
               </button>
             </>
-          )}
-          {isApproved && (
-            <button onClick={() => setConfirmAction("receive")} className="btn btn--sm" style={{ background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
-              <ArrowRight size={14} /> Receive
-            </button>
           )}
           <button onClick={() => window.print()} className="btn btn--sm"><Printer size={14} /> Print</button>
         </div>
@@ -115,7 +107,7 @@ export default function StockTransferDetailPage() {
       {/* Cancelled Banner */}
       {isCancelled && (
         <div className="mb-4 px-4 py-2 rounded-md text-sm font-semibold" style={{ background: "#fef2f2", color: "#ea001e", border: "1px solid #fecaca" }}>
-          Transfer ini telah DIBATALKAN
+          Stock Outgoing ini telah DIBATALKAN
         </div>
       )}
 
@@ -143,19 +135,20 @@ export default function StockTransferDetailPage() {
       {/* Details */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, marginBottom: 20 }}>
         <div>
-          <F label="TRANSFER NUMBER" value={transfer.transferNo || "-"} />
-          <F label="FROM (WAREHOUSE)" value={transfer.fromWarehouse || "-"} />
-          <F label="TO (STORE)" value={transfer.toStore || "-"} />
-          <F label="STATUS" value={transfer.status} />
+          <F label="DOC NUMBER" value={outgoing.docNo || "-"} />
+          <F label="WAREHOUSE" value={outgoing.warehouse || "-"} />
+          <F label="NOTES" value={outgoing.notes || "-"} />
+          <F label="STATUS" value={outgoing.status} />
         </div>
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-          <F label="DATE" value={fmtDate(transfer.date)} />
-          <F label="CREATED AT" value={transfer.createdAt ? new Date(transfer.createdAt).toLocaleString("id-ID") : "-"} />
+          <F label="DATE" value={fmtDate(outgoing.date)} />
+          <F label="CREATED AT" value={outgoing.createdAt ? new Date(outgoing.createdAt).toLocaleString("id-ID") : "-"} />
+          <F label="TOTAL" value={formatIDR(outgoing.total || 0)} />
         </div>
       </div>
 
       {/* Items Table */}
-      <div style={{ fontSize: 13, fontWeight: 600, color: "#0176d3", marginBottom: 8 }}>Transfer Items</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: "#0176d3", marginBottom: 8 }}>Outgoing Items</div>
       <div style={S.tableWrap}>
         <table style={S.table}>
           <thead>
@@ -164,7 +157,9 @@ export default function StockTransferDetailPage() {
               <th style={S.th}>SKU</th>
               <th style={S.th}>Product</th>
               <th style={{ ...S.th, textAlign: "right" }}>Current Stock</th>
-              <th style={{ ...S.th, textAlign: "right" }}>Transfer Qty</th>
+              <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+              <th style={{ ...S.th, textAlign: "right" }}>Unit Price</th>
+              <th style={{ ...S.th, textAlign: "right" }}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -175,18 +170,14 @@ export default function StockTransferDetailPage() {
                 <td style={S.td}>{item.sparepart?.name || "-"}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>{item.sparepart?.stockQty ?? "-"}</td>
                 <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{item.qty || 0}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{formatIDR(item.unitPrice || 0)}</td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{formatIDR((item.qty || 0) * (item.unitPrice || 0))}</td>
               </tr>
             ))}
             {items.length === 0 && (
-              <tr><td colSpan={5} style={{ ...S.td, textAlign: "center", color: "#8e8f8e" }}>No items</td></tr>
+              <tr><td colSpan={7} style={{ ...S.td, textAlign: "center", color: "#8e8f8e" }}>No items</td></tr>
             )}
           </tbody>
-          <tfoot>
-            <tr style={{ fontWeight: 700, borderTop: "2px solid #001526" }}>
-              <td colSpan={4} style={{ ...S.td, textAlign: "right" }}>Total Qty</td>
-              <td style={{ ...S.td, textAlign: "right", color: "#0176d3" }}>{totalQty}</td>
-            </tr>
-          </tfoot>
         </table>
       </div>
 

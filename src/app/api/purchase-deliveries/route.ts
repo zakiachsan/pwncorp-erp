@@ -22,6 +22,7 @@ export const GET = withAuth(async (req: NextRequest) => {
       where,
       include: {
         po: { select: { poNo: true, supplier: { select: { companyName: true } } } },
+        items: { include: { sparepart: { select: { sku: true, name: true } } } },
         _count: { select: { items: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -37,27 +38,56 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { poId, items, receivedAt } = body;
+  const { poId, items, notes } = body;
 
   if (!poId || !items || !items.length) {
     return NextResponse.json({ error: "poId and items are required" }, { status: 400 });
   }
 
-  // Validate PO
+  // Validate PO exists and is SENT
   const po = await prisma.purchaseOrder.findFirst({
     where: { id: poId, storeId: user.storeId },
     include: { items: true },
   });
   if (!po) return NextResponse.json({ error: "Purchase order not found" }, { status: 404 });
+  if (po.status !== "SENT") {
+    return NextResponse.json({ error: `PO must be in SENT status to create delivery. Current: ${po.status}` }, { status: 400 });
+  }
 
   const deliveryNo = await generateDeliveryNumber(user.storeId);
+
+  // Calculate already-received qty from previous deliveries
+  const prevDeliveries = await prisma.purchaseDelivery.findMany({
+    where: { poId, status: { in: ["Draft", "Received"] } },
+    include: { items: true },
+  });
+  const receivedMap: Record<string, number> = {};
+  for (const pd of prevDeliveries) {
+    for (const it of pd.items) {
+      receivedMap[it.sparepartId] = (receivedMap[it.sparepartId] || 0) + it.qtyReceived;
+    }
+  }
+
+  // Validate qty: received <= ordered - already received
+  for (const item of items) {
+    const poItem = po.items.find((pi: any) => pi.sparepartId === item.sparepartId);
+    if (!poItem) continue;
+    const alreadyReceived = receivedMap[item.sparepartId] || 0;
+    const maxQty = poItem.qty - alreadyReceived;
+    if (item.qtyReceived > maxQty) {
+      return NextResponse.json({
+        error: `Qty received for ${item.sparepartId} exceeds remaining (${maxQty}). Already received: ${alreadyReceived}, ordered: ${poItem.qty}`,
+      }, { status: 400 });
+    }
+  }
 
   const delivery = await prisma.purchaseDelivery.create({
     data: {
       deliveryNo,
       poId,
       storeId: user.storeId,
-      receivedAt: receivedAt ? new Date(receivedAt) : new Date(),
+      status: "Draft",
+      notes: notes || null,
       items: {
         create: items.map((i: any) => ({
           sparepartId: i.sparepartId,
@@ -71,47 +101,6 @@ export const POST = withAuth(async (req: NextRequest) => {
       items: { include: { sparepart: { select: { sku: true, name: true } } } },
     },
   });
-
-  // Auto-update stock and PO status
-  if (receivedAt || true) {  // Immediately received
-    for (const item of items) {
-      const received = item.qtyReceived || 0;
-      if (received > 0) {
-        // Update sparepart stock
-        const sparepart = await prisma.sparepart.findUnique({ where: { id: item.sparepartId } });
-        if (sparepart) {
-          const qtyBefore = sparepart.stockQty;
-          await prisma.sparepart.update({
-            where: { id: item.sparepartId },
-            data: { stockQty: { increment: received } },
-          });
-          // Stock history
-          await prisma.stockHistory.create({
-            data: {
-              sparepartId: item.sparepartId,
-              storeId: user.storeId,
-              changeType: "in",
-              qtyChange: received,
-              qtyBefore,
-              qtyAfter: qtyBefore + received,
-              refDoc: "DO",
-              refNo: deliveryNo,
-              date: new Date(),
-            },
-          });
-        }
-      }
-    }
-    // Update delivery + PO status
-    await prisma.purchaseDelivery.update({
-      where: { id: delivery.id },
-      data: { status: "Received" },
-    });
-    await prisma.purchaseOrder.update({
-      where: { id: poId },
-      data: { status: "RECEIVED" },
-    });
-  }
 
   return NextResponse.json({ data: delivery }, { status: 201 });
 });

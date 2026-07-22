@@ -76,6 +76,13 @@ export async function generatePONumber(storeId: string): Promise<string> {
 }
 
 /**
+ * Project number: PRJ/{STORE_CODE}/{YYMM}{SEQ}
+ */
+export async function generateProjectNumber(storeId: string): Promise<string> {
+  return generateDocNumber("PRJ", storeId, "project", "projectNo");
+}
+
+/**
  * Delivery number: DO/{STORE_CODE}/{YYMM}{SEQ}
  */
 export async function generateDeliveryNumber(storeId: string): Promise<string> {

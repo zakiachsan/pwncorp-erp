@@ -127,7 +127,6 @@ export default function ProjectListPage() {
           <thead>
             <tr>
               <th>No. PRJ</th>
-              <th>No. Pesanan</th>
               <th>Nama Project</th>
               <th>Customer</th>
               <th>Periode</th>
@@ -153,8 +152,7 @@ export default function ProjectListPage() {
                     className="font-medium cursor-pointer"
                     style={{ color: "var(--color-brand)", whiteSpace: "nowrap" }}
                     onClick={() => router.push(`/project/${p.id}`)}
-                  >{p.id}</td>
-                  <td className="text-sm"><span style={{ color: "#8e8f8e" }}>-</span></td>
+                  >{p.projectNo || p.id}</td>
                   <td className="font-medium">{p.name}</td>
                   <td>{p.customer?.name || "-"}</td>
                   <td className="text-[--color-text-secondary] text-sm">{periode}</td>

@@ -9,6 +9,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
       customer: true,
       vehicle: true,
       sa: { select: { id: true, name: true } },
+      store: { select: { id: true, name: true, code: true } },
       spareparts: { include: { sparepart: true } },
       services: { include: { service: true } },
       workOrders: {
@@ -27,7 +28,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { complaint, status, customerId, vehicleId, spareparts, services } = body;
+  const { complaint, salesperson, status, customerId, vehicleId, odometer, color, bookingSource, referenceNumber, planServiceTime, saId, date, spareparts, services } = body;
 
   const existing = await prisma.serviceOrder.findUnique({
     where: { id: params.id },
@@ -54,8 +55,16 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   let updateData: any = {};
 
   if (complaint !== undefined) updateData.complaint = complaint;
+  if (salesperson !== undefined) updateData.salesperson = salesperson;
   if (customerId !== undefined) updateData.customerId = customerId;
   if (vehicleId !== undefined) updateData.vehicleId = vehicleId;
+  if (odometer !== undefined) updateData.odometer = odometer;
+  if (color !== undefined) updateData.color = color;
+  if (bookingSource !== undefined) updateData.bookingSource = bookingSource;
+  if (referenceNumber !== undefined) updateData.referenceNumber = referenceNumber;
+  if (planServiceTime !== undefined) updateData.planServiceTime = planServiceTime;
+  if (saId !== undefined) updateData.saId = saId;
+  if (date !== undefined) updateData.date = new Date(date);
   if (status !== undefined) updateData.status = status;
 
   // If items are being replaced, recalculate total
