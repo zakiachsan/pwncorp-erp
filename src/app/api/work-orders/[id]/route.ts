@@ -19,7 +19,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
       mekanik: { select: { id: true, name: true } },
       items: true,
       invoices: { include: { payments: true } },
-      stockOrders: true,
+      stockOrders: { include: { items: { include: { sparepart: { select: { sku: true, name: true, stockQty: true } } } } } },
     },
   });
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });

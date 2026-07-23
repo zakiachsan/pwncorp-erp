@@ -31,7 +31,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { warehouse, items } = body;
+  const { warehouse, items, description } = body;
 
   if (!items || !items.length) {
     return NextResponse.json({ error: "items are required" }, { status: 400 });
@@ -44,6 +44,7 @@ export const POST = withAuth(async (req: NextRequest) => {
       refCode,
       storeId: user.storeId,
       warehouse: warehouse || null,
+      description: description || null,
       items: {
         create: items.map((i: any) => ({
           sparepartId: i.sparepartId,

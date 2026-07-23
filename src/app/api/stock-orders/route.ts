@@ -50,9 +50,9 @@ export const POST = withAuth(async (req: NextRequest) => {
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });
 
   // Check WO status allows stock order
-  if (!["Confirmed", "In Progress"].includes(wo.status)) {
+  if (!["Draft", "Confirmed", "In Progress"].includes(wo.status)) {
     return NextResponse.json({
-      error: `WO status must be Confirmed or In Progress, currently: ${wo.status}`,
+      error: `WO status must be Draft, Confirmed, or In Progress, currently: ${wo.status}`,
     }, { status: 400 });
   }
 
@@ -64,8 +64,9 @@ export const POST = withAuth(async (req: NextRequest) => {
       woId,
       storeId: user.storeId,
       warehouse: warehouse || null,
+      status: "DRAFT",
       items: {
-        create: items.map((item: any) => ({
+        create: items.filter((item: any) => item.sparepartId).map((item: any) => ({
           sparepartId: item.sparepartId,
           qty: item.qty,
         })),
@@ -76,6 +77,11 @@ export const POST = withAuth(async (req: NextRequest) => {
       items: { include: { sparepart: { select: { sku: true, name: true } } } },
     },
   });
+
+  // Auto-update WO status to IN PROGRESS
+  if (wo.status === "Draft") {
+    await prisma.workOrder.update({ where: { id: woId }, data: { status: "IN PROGRESS" } });
+  }
 
   return NextResponse.json({ data: so }, { status: 201 });
 });

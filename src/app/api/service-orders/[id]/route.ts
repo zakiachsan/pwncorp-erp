@@ -12,6 +12,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
       store: { select: { id: true, name: true, code: true } },
       spareparts: { include: { sparepart: true } },
       services: { include: { service: true } },
+      inspectionItems: { orderBy: { sortOrder: "asc" } },
       workOrders: {
         include: {
           mekanik: { select: { id: true, name: true } },
@@ -28,7 +29,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { complaint, salesperson, status, customerId, vehicleId, odometer, color, bookingSource, referenceNumber, planServiceTime, saId, date, spareparts, services } = body;
+  const { complaint, salesperson, status, customerId, vehicleId, odometer, color, bookingSource, referenceNumber, planServiceTime, saId, date, spareparts, services, inspectionItems } = body;
 
   const existing = await prisma.serviceOrder.findUnique({
     where: { id: params.id },
@@ -39,8 +40,8 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   // Validate status transition
   if (status) {
     const validTransitions: Record<string, string[]> = {
-      "Draft": ["Delivered", "Approved", "Cancelled"],
-      "Delivered": ["Approved", "Cancelled"],
+      "Draft": ["Diagnosis", "Approved", "Cancelled"],
+      "Diagnosis": ["Approved", "Cancelled"],
       "Approved": ["Cancelled"],
       "Cancelled": [],
     };
@@ -93,6 +94,23 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
     }
   }
 
+  // Handle inspection items
+  if (inspectionItems !== undefined) {
+    await prisma.inspectionItem.deleteMany({ where: { soId: params.id } });
+    for (let i = 0; i < inspectionItems.length; i++) {
+      const item = inspectionItems[i];
+      await prisma.inspectionItem.create({
+        data: {
+          soId: params.id,
+          description: item.description || "",
+          feedback: item.feedback || null,
+          inspected: item.inspected || false,
+          sortOrder: i,
+        },
+      });
+    }
+  }
+
   updateData.total = total;
 
   const so = await prisma.serviceOrder.update({
@@ -104,6 +122,7 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
       sa: { select: { id: true, name: true } },
       spareparts: { include: { sparepart: { select: { sku: true, name: true } } } },
       services: { include: { service: { select: { sku: true, name: true } } } },
+      inspectionItems: { orderBy: { sortOrder: "asc" } },
     },
   });
 

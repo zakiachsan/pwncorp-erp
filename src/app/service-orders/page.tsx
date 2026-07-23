@@ -21,7 +21,7 @@ interface ServiceOrder {
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
     Draft: "pill pill--draft",
-    Delivered: "pill pill--delivered",
+    Diagnosis: "pill pill--delivered",
     Approved: "pill pill--approved",
     Cancelled: "pill pill--cancelled",
     "In Progress": "pill pill--in-progress",
@@ -118,7 +118,7 @@ export default function ServiceOrdersPage() {
               <option value="Approved">Approved</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
-              <option value="Delivered">Delivered</option>
+              <option value="Diagnosis">Diagnosis</option>
               <option value="Cancelled">Cancelled</option>
             </select>
           </div>

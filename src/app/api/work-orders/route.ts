@@ -40,7 +40,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { soId, mekanikId, targetDate } = body;
+  const { soId, mekanikId, targetDate, serviceMekaniks } = body;
 
   if (!soId) return NextResponse.json({ error: "soId is required" }, { status: 400 });
 
@@ -50,7 +50,7 @@ export const POST = withAuth(async (req: NextRequest) => {
     include: { spareparts: true, services: true },
   });
   if (!so) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
-  if (so.status !== "Approved" && so.status !== "Delivered") {
+  if (so.status !== "Approved" && so.status !== "Diagnosis") {
     return NextResponse.json({ error: "Service order must be Approved or Delivered before creating work order" }, { status: 400 });
   }
 
@@ -75,8 +75,10 @@ export const POST = withAuth(async (req: NextRequest) => {
       total: sp.total,
     });
   }
+  let serviceIdx = 0;
   for (const sv of so.services) {
     const service = await prisma.service.findUnique({ where: { id: sv.serviceId } });
+    const assignedTo = serviceMekaniks?.[serviceIdx] || null;
     items.push({
       itemType: "service",
       itemId: sv.serviceId,
@@ -84,7 +86,9 @@ export const POST = withAuth(async (req: NextRequest) => {
       qty: sv.qty,
       unitPrice: sv.unitPrice,
       total: sv.total,
+      assignedTo,
     });
+    serviceIdx++;
   }
 
   const wo = await prisma.workOrder.create({

@@ -47,7 +47,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { customerId, vehicleId, complaint, salesperson, bookingSource, referenceNumber, planServiceTime, odometer, color, spareparts, services } = body;
+  const { customerId, vehicleId, complaint, salesperson, bookingSource, referenceNumber, planServiceTime, odometer, color, spareparts, services, inspectionItems } = body;
 
   if (!customerId || !vehicleId) {
     return NextResponse.json({ error: "customerId and vehicleId are required" }, { status: 400 });
@@ -93,6 +93,14 @@ export const POST = withAuth(async (req: NextRequest) => {
       total,
       spareparts: { create: spItems },
       services: { create: svItems },
+      inspectionItems: inspectionItems ? {
+        create: (inspectionItems as any[]).map((item: any, i: number) => ({
+          description: item.description || "",
+          feedback: item.feedback || null,
+          inspected: item.inspected || false,
+          sortOrder: i,
+        })),
+      } : undefined,
     },
     include: {
       customer: { select: { id: true, name: true } },
@@ -100,6 +108,7 @@ export const POST = withAuth(async (req: NextRequest) => {
       sa: { select: { id: true, name: true } },
       spareparts: { include: { sparepart: { select: { id: true, sku: true, name: true } } } },
       services: { include: { service: { select: { id: true, sku: true, name: true } } } },
+      inspectionItems: { orderBy: { sortOrder: "asc" } },
     },
   });
 

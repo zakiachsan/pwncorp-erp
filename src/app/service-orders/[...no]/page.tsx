@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Printer, FileText, CheckCircle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2 } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -17,13 +17,16 @@ export default function ServiceOrderDetailPage() {
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showCreateWOConfirm, setShowCreateWOConfirm] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
-  const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
+  const [svcLineTab, setSvcLineTab] = useState<"inspection" | "services" | "spareparts">("inspection");
 
   // Edit mode
   const [editMode, setEditMode] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
   const [services, setServices] = useState<any[]>([]);
   const [spareparts, setSpareparts] = useState<any[]>([]);
+  const [inspectionItems, setInspectionItems] = useState<any[]>([]);
+  const [inspectionSaving, setInspectionSaving] = useState(false);
+  const [inspectionEditMode, setInspectionEditMode] = useState(false);
   const [editFields, setEditFields] = useState({ complaint: "", customerId: "", vehicleId: "", planServiceDate: "", planServiceTime: "", saId: "", salesperson: "", bookingSource: "", referenceNumber: "", odometer: "", color: "" });
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -60,6 +63,7 @@ export default function ServiceOrderDetailPage() {
               setOrder(d);
               setServices((d.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } })));
               setSpareparts((d.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } })));
+              setInspectionItems((d.inspectionItems || []).map((item: any) => ({ id: item.id, description: item.description || "", feedback: item.feedback || "", inspected: item.inspected || false })));
               setEditFields({
                 complaint: d.complaint || "",
                 customerId: d.customerId || "",
@@ -115,9 +119,9 @@ export default function ServiceOrderDetailPage() {
     setShowDeliverConfirm(false);
     await fetch(`/api/service-orders/${order.id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Delivered" }),
+      body: JSON.stringify({ status: "Diagnosis" }),
     });
-    setOrder((prev: any) => ({ ...prev, status: "Delivered" }));
+    setOrder((prev: any) => ({ ...prev, status: "Diagnosis" }));
     try {
       const res = await fetch("/api/work-orders", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -203,6 +207,40 @@ export default function ServiceOrderDetailPage() {
     setSpareparts(prev => prev.filter((_, i) => i !== idx));
   };
 
+  // Inspection item handlers
+  const addInspectionItem = () => {
+    setInspectionItems(prev => [...prev, { description: "", feedback: "", inspected: false }]);
+  };
+  const updateInspectionItem = (idx: number, field: string, value: any) => {
+    setInspectionItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+  };
+  const removeInspectionItem = (idx: number) => {
+    setInspectionItems(prev => prev.filter((_, i) => i !== idx));
+  };
+  const toggleInspected = (idx: number) => {
+    setInspectionItems(prev => prev.map((item, i) => i === idx ? { ...item, inspected: !item.inspected } : item));
+  };
+  const saveInspectionItems = async () => {
+    setInspectionSaving(true);
+    try {
+      const res = await fetch(`/api/service-orders/${order.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inspectionItems }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || "Gagal");
+      // Refresh order data
+      const refreshRes = await fetch(`/api/service-orders/${order.id}`);
+      const refreshJ = await refreshRes.json();
+      if (refreshJ.data) {
+        setInspectionItems((refreshJ.data.inspectionItems || []).map((item: any) => ({ id: item.id, description: item.description || "", feedback: item.feedback || "", inspected: item.inspected || false })));
+        setOrder(refreshJ.data);
+      }
+    } catch (e: any) { alert(e.message); }
+    finally { setInspectionSaving(false); }
+  };
+
   const handleSaveEdits = async () => {
     setEditSaving(true);
     try {
@@ -270,7 +308,7 @@ export default function ServiceOrderDetailPage() {
     color: order.color || order.vehicle?.color || "-",
   };
   const isDraft = order.status === "Draft";
-  const isDelivered = order.status === "Delivered";
+  const isDelivered = order.status === "Diagnosis";
   const isApproved = order.status === "Approved";
   const hasWO = (order.workOrders || []).length > 0;
   const wo = hasWO ? (order.workOrders || [])[0] : null;
@@ -283,11 +321,20 @@ export default function ServiceOrderDetailPage() {
           <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
           <div className="flex flex-wrap gap-1.5">
             <span style={{ ...S.badge, ...(order.status === "Draft" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
-            <span style={{ ...S.badge, ...(order.status === "Delivered" ? S.badgeActive : S.badgeInactive) }}>DELIVERED</span>
+            <span style={{ ...S.badge, ...(order.status === "Diagnosis" ? S.badgeActive : S.badgeInactive) }}>DIAGNOSIS</span>
             <span style={{ ...S.badge, ...(order.status === "Approved" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
-          </div>
-        </div>
-      </div>
+            </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+            {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Diagnosis</button>}
+            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}</>}
+            {isApproved && !hasWO && <button onClick={() => router.push(`/work-orders/new?sroId=${order.id}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
+            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
+            <button style={S.actionBtn}><Printer size={14} /> Print</button>
+            <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
+            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer || "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
+            </div>
+            </div>
 
       {/* Tab Bar */}
       <div className="flex gap-0 mb-4 border-b-2 border-[#ecebea] overflow-x-auto">
@@ -299,17 +346,6 @@ export default function ServiceOrderDetailPage() {
       {/* ─── Details Tab ─── */}
       {activeTab === "details" && (
         <>
-          {/* Workflow Actions */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Deliver</button>}
-            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{!hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}</>}
-            {isApproved && !hasWO && services.length > 0 && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
-            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
-            <button style={S.actionBtn}><Printer size={14} /> Print</button>
-            <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
-            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer || "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
-          </div>
-
           {/* 3-Column Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div style={S.infoCol}>
@@ -340,8 +376,14 @@ export default function ServiceOrderDetailPage() {
             </div>
           </div>
 
-          {/* Line Tabs: Services | Spareparts */}
+          {/* Line Tabs: Inspection List | Services | Spareparts */}
           <div style={{ marginBottom: 0, display: "flex", gap: 0, alignItems: "center" }}>
+            <button onClick={() => setSvcLineTab("inspection")} style={{
+              padding: "7px 16px", fontSize: 12, fontWeight: svcLineTab === "inspection" ? 600 : 400,
+              color: svcLineTab === "inspection" ? "#0176d3" : "#444746",
+              border: "none", borderBottom: svcLineTab === "inspection" ? "2px solid #0176d3" : "2px solid transparent",
+              background: "transparent", cursor: "pointer",
+            }}>Inspection List</button>
             <button onClick={() => setSvcLineTab("services")} style={{
               padding: "7px 16px", fontSize: 12, fontWeight: svcLineTab === "services" ? 600 : 400,
               color: svcLineTab === "services" ? "#0176d3" : "#444746",
@@ -355,19 +397,93 @@ export default function ServiceOrderDetailPage() {
               background: "transparent", cursor: "pointer",
             }}>Spareparts</button>
             <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-              {!editMode ? (
-                <button onClick={() => setEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit Items</button>
-              ) : (
-                <>
-                  <button onClick={() => { svcLineTab === "services" ? (setShowAddService(true), setSvcSearch("")) : (setShowAddSparepart(true), setSpSearch("")); }} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
-                  <button onClick={() => { setEditMode(false); setServices((order.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } }))); setSpareparts((order.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } }))); }} style={S.actionBtn}>Batal</button>
-                  <button onClick={handleSaveEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
-                    <Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}
-                  </button>
-                </>
+              {svcLineTab !== "inspection" && (
+                !editMode ? (
+                  <button onClick={() => setEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit Items</button>
+                ) : (
+                  <>
+                    <button onClick={() => { svcLineTab === "services" ? (setShowAddService(true), setSvcSearch("")) : (setShowAddSparepart(true), setSpSearch("")); }} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
+                    <button onClick={() => { setEditMode(false); setServices((order.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } }))); setSpareparts((order.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } }))); }} style={S.actionBtn}>Batal</button>
+                    <button onClick={handleSaveEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
+                      <Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}
+                    </button>
+                  </>
+                )
               )}
             </div>
           </div>
+
+          {svcLineTab === "inspection" && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8, gap: 6 }}>
+                {!inspectionEditMode ? (
+                  <button onClick={() => setInspectionEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit</button>
+                ) : (
+                  <>
+                    <button onClick={addInspectionItem} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
+                    <button onClick={() => { setInspectionEditMode(false); setInspectionItems((order.inspectionItems || []).map((item: any) => ({ id: item.id, description: item.description || "", feedback: item.feedback || "", inspected: item.inspected || false }))); }} style={S.actionBtn}>Batal</button>
+                    <button onClick={async () => { await saveInspectionItems(); setInspectionEditMode(false); }} disabled={inspectionSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
+                      <Save size={13} /> {inspectionSaving ? "Saving..." : "Simpan"}
+                    </button>
+                  </>
+                )}
+              </div>
+              <div style={S.tableWrap}>
+                <table style={S.table}>
+                  <thead>
+                    <tr>
+                      <th style={{ ...S.th, width: 40 }}>No</th>
+                      <th style={S.th}>Description</th>
+                      <th style={S.th}>Feedback</th>
+                      <th style={{ ...S.th, width: 80, textAlign: "center" }}>Inspected</th>
+                      {inspectionEditMode && <th style={{ ...S.th, width: 40 }}></th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inspectionItems.length > 0 ? (
+                      inspectionItems.map((item: any, i: number) => (
+                        <tr key={i}>
+                          <td style={S.td}>{i + 1}</td>
+                          {inspectionEditMode ? (
+                            <>
+                              <td style={S.td}>
+                                <input type="text" className="form-input w-full" style={{ padding: "4px 8px", fontSize: 13 }}
+                                  value={item.description} onChange={e => updateInspectionItem(i, "description", e.target.value)} placeholder="Deskripsi..." />
+                              </td>
+                              <td style={S.td}>
+                                <input type="text" className="form-input w-full" style={{ padding: "4px 8px", fontSize: 13 }}
+                                  value={item.feedback || ""} onChange={e => updateInspectionItem(i, "feedback", e.target.value)} placeholder="Feedback..." />
+                              </td>
+                              <td style={{ ...S.td, textAlign: "center" }}>
+                                <button onClick={() => toggleInspected(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                                  {item.inspected ? <CheckCircle size={18} style={{ color: "#2e844a" }} /> : <Circle size={18} style={{ color: "#d8d8d8" }} />}
+                                </button>
+                              </td>
+                              <td style={{ ...S.td, textAlign: "center" }}>
+                                <button onClick={() => removeInspectionItem(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 2 }}>
+                                  <Trash2 size={14} />
+                                </button>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td style={S.td}>{item.description || "-"}</td>
+                              <td style={S.td}>{item.feedback || "-"}</td>
+                              <td style={{ ...S.td, textAlign: "center" }}>
+                                {item.inspected ? <CheckCircle size={18} style={{ color: "#2e844a" }} /> : <Circle size={18} style={{ color: "#d8d8d8" }} />}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan={inspectionEditMode ? 5 : 4} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada inspection item</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {svcLineTab === "services" && (
             <div>
@@ -512,8 +628,8 @@ export default function ServiceOrderDetailPage() {
       )}
 
       {/* Modals */}
-      {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DELIVERED ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
-      {showDeliverConfirm && <Modal title="Deliver Service Order?" message="Status akan berubah dari DRAFT ke DELIVERED." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Deliver" />}
+      {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DIAGNOSIS ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
+      {showDeliverConfirm && <Modal title="Diagnosis Service Order?" message="Status akan berubah dari DRAFT ke DIAGNOSIS." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Diagnosis" />}
       {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${services.length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
 
       {/* Edit Fields Modal */}

@@ -16,7 +16,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { action, items } = body;
+  const { action, items: bodyItems } = body;
 
   const existing = await prisma.stockOpname.findUnique({
     where: { id: params.id },
@@ -39,9 +39,33 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
       return NextResponse.json({ error: `Cannot transition from ${existing.status} to ${targetStatus}` }, { status: 400 });
     }
 
-    // On Approved: apply stock adjustments
+    // On Complete: update items with counted/approved/reason from form
+    if (targetStatus === "Completed" && bodyItems && Array.isArray(bodyItems)) {
+      for (const item of bodyItems) {
+        if (item.id) {
+          const physicalQty = parseInt(item.physicalQty) || 0;
+          const approvedQty = parseInt(item.approvedQty) || physicalQty;
+          const adjustment = approvedQty - (item.systemQty || 0);
+          await prisma.opnameItem.update({
+            where: { id: item.id },
+            data: {
+              physicalQty,
+              adjustment,
+              reason: item.reason || null,
+            },
+          });
+        }
+      }
+    }
+
+    // On Approved: apply stock adjustments based on adjustment
     if (targetStatus === "Approved") {
-      for (const item of existing.items) {
+      // Re-fetch items after potential complete update
+      const freshItems = await prisma.opnameItem.findMany({
+        where: { opnameId: params.id },
+        include: { sparepart: true },
+      });
+      for (const item of freshItems) {
         const adj = item.adjustment;
         if (adj !== 0) {
           const sp = await prisma.sparepart.findUnique({ where: { id: item.sparepartId } });
@@ -79,9 +103,9 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
     return NextResponse.json({ error: "Only Draft opnames can be edited" }, { status: 400 });
   }
 
-  if (items !== undefined) {
+  if (bodyItems !== undefined) {
     await prisma.opnameItem.deleteMany({ where: { opnameId: params.id } });
-    for (const item of items) {
+    for (const item of bodyItems) {
       await prisma.opnameItem.create({
         data: {
           opnameId: params.id,

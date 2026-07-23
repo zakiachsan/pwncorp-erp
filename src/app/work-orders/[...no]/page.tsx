@@ -147,6 +147,7 @@ export default function WorkOrderDetailPage() {
           updatedBy: w.updatedBy || "-",
           createdAt: w.createdAt || "-",
           updatedAt: w.updatedAt || "-",
+          stockOrders: w.stockOrders || [],
         });
         setLoading(false);
       })
@@ -419,7 +420,7 @@ export default function WorkOrderDetailPage() {
         <div>
           {/* Status Action Buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {wo.status === "DRAFT" && <StatusBtn label="In Progress" color="#0176d3" onClick={() => handleStatusUpdate("In Progress")} />}
+            {wo.status === "DRAFT" && <button onClick={() => router.push(`/stock-workflow/stock-orders/new?woId=${wo.id}`)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Create Stock Orders</button>}
             {wo.status === "IN PROGRESS" && <StatusBtn label="QC" color="#8b5cf6" onClick={() => handleStatusUpdate("QC")} />}
             {wo.status === "QC" && <StatusBtn label="Completed" color="#2e844a" onClick={() => handleStatusUpdate("Completed")} />}
           </div>
@@ -604,7 +605,43 @@ export default function WorkOrderDetailPage() {
       {activeTab === "stockOrders" && (
         <div>
           <h3 style={S.sectionTitle}>Stock Orders</h3>
-          <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada stock orders.</p></div>
+          {(wo.stockOrders || []).length > 0 ? (
+            <div style={{ ...S.tableWrap, marginBottom: 12 }}>
+              <table style={S.table}>
+                <thead>
+                  <tr>
+                    <th style={S.th}>Order No</th>
+                    <th style={S.th}>Date</th>
+                    <th style={S.th}>Warehouse</th>
+                    <th style={{ ...S.th, textAlign: "right" }}>Items</th>
+                    <th style={S.th}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(wo.stockOrders || []).map((so: any, i: number) => (
+                    <tr key={so.id || i}>
+                      <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
+                        onClick={() => router.push(`/stock-workflow/stock-orders/${so.orderNo}`)}>{so.orderNo}</td>
+                      <td style={S.td}>{so.date ? new Date(so.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                      <td style={S.td}>{so.warehouse || "-"}</td>
+                      <td style={{ ...S.td, textAlign: "right" }}>{so.items?.length || so._count?.items || 0}</td>
+                      <td style={S.td}>
+                        <span style={{
+                          display: "inline-block", padding: "2px 8px", borderRadius: 9999,
+                          fontSize: 10, fontWeight: 600, color: "#fff",
+                          background: so.status === "CONFIRMED" || so.status === "Confirmed" ? "#0176d3" :
+                            so.status === "RECEIVED" || so.status === "Received" ? "#2e844a" :
+                            so.status === "CANCELLED" || so.status === "Cancelled" ? "#ea001e" : "#6b7280",
+                        }}>{so.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Belum ada stock orders.</p></div>
+          )}
         </div>
       )}
 

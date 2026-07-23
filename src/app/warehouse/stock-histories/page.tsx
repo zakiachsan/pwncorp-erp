@@ -83,7 +83,7 @@ export default function StockHistoriesPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>No</th>
               <th><span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>Date <ArrowUpDown size={12} style={{ opacity: 0.5 }} /></span></th>
               <th>Type</th>
               <th>Product SKU</th>
@@ -95,9 +95,9 @@ export default function StockHistoriesPage() {
             </tr>
           </thead>
           <tbody>
-            {data.map((item: any) => (
+            {data.map((item: any, i: number) => (
               <tr key={item.id}>
-                <td>{item.id}</td>
+                <td>{i + 1}</td>
                 <td className="text-[--color-text-secondary]">{fmtDate(item.date)}</td>
                 <td>
                   <span className="cursor-pointer font-medium" style={{ color: "var(--color-brand)" }} onClick={() => router.push(handleTypeClick(item.refDoc || item.changeType, item.refNo || ""))}>

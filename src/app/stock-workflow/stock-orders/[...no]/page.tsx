@@ -1,226 +1,230 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Printer, Search } from "lucide-react";
-
-const statusWorkflow = ["DRAFT", "STORE CONFIRMED", "WAREHOUSE SENT", "STORE RECEIVED"];
+import { useRouter, useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Printer, CheckCircle, Ban, Send, Package } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
+const fmtDate = (d: any) => {
+  if (!d) return "-";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return "-";
+  return dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+};
+
+const workflowSteps = ["DRAFT", "CONFIRMED", "WAREHOUSE SENT", "RECEIVED"];
 
 export default function StockOrderDetailPage() {
-  const params = useParams();
   const router = useRouter();
-  const rawNo = params.no as string[];
-  const orderNo = rawNo ? rawNo.join("/") : "";
+  const params = useParams();
+  const refCodeArray = params.no as string[];
+  const refCode = refCodeArray ? (Array.isArray(refCodeArray) ? refCodeArray.join("/") : refCodeArray) : "";
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [confirmAction, setConfirmAction] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch(`/api/stock-orders?search=${encodeURIComponent(orderNo)}&limit=1`)
+  const fetchOrder = () => {
+    fetch(`/api/stock-orders?search=${encodeURIComponent(refCode)}&limit=1`)
       .then((r) => r.json())
       .then((json) => {
         const found = (json.data || [])[0];
-        if (!found) { setError("Stock Order tidak ditemukan: " + orderNo); setLoading(false); return; }
-        setOrder({
-          refCode: found.orderNo || orderNo,
-          referenceNumber: found.refNo || "-",
-          fromWarehouse: found.warehouse || "-",
-          deliverTo: found.deliverTo || found.store || "-",
-          createdBy: found.createdBy || "-",
-          updatedBy: found.updatedBy || "-",
-          notes: found.notes || "",
-          createdAt: found.createdAt || found.date || "-",
-          updatedAt: found.updatedAt || "-",
-          confirmedDate: found.confirmedDate || "-",
-          sentDate: found.sentDate || "-",
-          receivedDate: found.receivedAt || "-",
-          source: found.source || "Web",
-          journals: found.journals || [],
-          status: found.status || "DRAFT",
-          items: (found.items || []).map((it: any, i: number) => ({
-            no: i + 1,
-            sku: it.sku || it.sparepart?.sku || "-",
-            product: it.name || it.sparepart?.name || "-",
-            productCode: it.productCode || it.sparepart?.code || "",
-            order: it.orderQty || it.qty || 0,
-            sent: it.sentQty || 0,
-            receive: it.receiveQty || 0,
-            avgCost: it.avgCost || it.price || 0,
-          })),
-        });
-        setLoading(false);
+        if (!found) { setError("Stock Order tidak ditemukan: " + refCode); setLoading(false); return; }
+        return fetch(`/api/stock-orders/${found.id}`)
+          .then((r2) => r2.json())
+          .then((j2) => { setOrder(j2.data || found); setLoading(false); });
       })
-      .catch(() => { setError("Failed to load stock order"); setLoading(false); });
-  }, [orderNo]);
+      .catch(() => { setError("Failed to load data"); setLoading(false); });
+  };
 
-  if (loading) {
-    return (
-      <div style={{ padding: 24 }}>
-        <button onClick={() => router.push("/stock-workflow/stock-orders")} style={S.backBtn}>
-          <ArrowLeft size={16} /> Stock Orders
-        </button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Loading...</p></div>
-      </div>
-    );
-  }
+  useEffect(() => { fetchOrder(); }, [refCode]);
 
-  if (error || !order) {
-    return (
-      <div style={{ padding: 24 }}>
-        <button onClick={() => router.push("/stock-workflow/stock-orders")} style={S.backBtn}>
-          <ArrowLeft size={16} /> Stock Orders
-        </button>
-        <div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>{error || "Stock Order tidak ditemukan: " + orderNo}</p></div>
-      </div>
-    );
-  }
+  const doAction = async (action: string) => {
+    setConfirmAction(null);
+    try {
+      const res = await fetch(`/api/stock-orders/${order.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Gagal");
+      fetchOrder();
+    } catch (e: any) { alert(e.message); }
+  };
 
-  const currentStepIdx = statusWorkflow.indexOf(order.status);
-  const totalOrder = order.items.reduce((s: number, x: any) => s + x.order, 0);
-  const totalSent = order.items.reduce((s: number, x: any) => s + x.sent, 0);
-  const totalReceive = order.items.reduce((s: number, x: any) => s + x.receive, 0);
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (!order) return null;
+
+  const status = order.status?.toUpperCase() || "DRAFT";
+  const isDraft = status === "DRAFT" || status === "PENDING";
+  const isConfirmed = status === "CONFIRMED";
+  const isWarehouseSent = status === "WAREHOUSE SENT";
+  const isCancelled = status === "CANCELLED";
+  const currentStepIdx = isCancelled ? -1 : workflowSteps.indexOf(status);
+  const items = order.items || [];
+  const totalQty = items.reduce((s: number, x: any) => s + (x.qty || 0), 0);
+  const totalSentQty = items.reduce((s: number, x: any) => s + (x.sentQty || 0), 0);
+
+  const confirmLabels: Record<string, { title: string; desc: string; color: string }> = {
+    confirm: { title: "Confirm Stock Order?", desc: "Stock order akan dikonfirmasi ke gudang.", color: "#0176d3" },
+    warehouse_sent: { title: "Warehouse Sent?", desc: "Barang sudah dikirim dari gudang.", color: "#f59e0b" },
+    receive: { title: "Receive Stock Order?", desc: "Barang sudah diterima di store.", color: "#2e844a" },
+    cancel: { title: "Cancel Stock Order?", desc: "Stock order akan dibatalkan.", color: "#ea001e" },
+  };
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 700, color: "#001526", margin: 0 }}>Stock Order (Warehouse)</h1>
+      {/* Header */}
+      <div className="view-header">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/stock-workflow/stock-orders")} className="btn btn--sm"><ArrowLeft size={16} /></button>
+          <div>
+            <div className="view-title">Stock Order</div>
+            <div className="text-xs text-[--color-text-secondary]">{order.orderNo}</div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {isDraft && (
+            <>
+              <button onClick={() => setConfirmAction("confirm")} className="btn btn--sm" style={{ background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>
+                <CheckCircle size={14} /> Confirm
+              </button>
+              <button onClick={() => setConfirmAction("cancel")} className="btn btn--sm" style={{ background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}>
+                <Ban size={14} /> Cancel
+              </button>
+            </>
+          )}
+          {isConfirmed && (
+            <button onClick={() => router.push(`/stock-workflow/stock-orders/review/${order.orderNo}`)} className="btn btn--sm" style={{ background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}>
+              <Send size={14} /> Review Qty to Send
+            </button>
+          )}
+          {isWarehouseSent && (
+            <button onClick={() => setConfirmAction("receive")} className="btn btn--sm" style={{ background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
+              <CheckCircle size={14} /> Receive
+            </button>
+          )}
+          <button onClick={() => window.print()} className="btn btn--sm"><Printer size={14} /> Print</button>
+        </div>
       </div>
 
-      <div style={S.workflowBar}>
+      {/* Cancelled Banner */}
+      {isCancelled && (
+        <div className="mb-4 px-4 py-2 rounded-md text-sm font-semibold" style={{ background: "#fef2f2", color: "#ea001e", border: "1px solid #fecaca" }}>
+          Stock Order ini telah DIBATALKAN
+        </div>
+      )}
+
+      {/* Workflow Bar */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px", background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8, marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
           <div style={{ display: "flex", gap: 6 }}>
-            {statusWorkflow.map((step, i) => (
-              <span key={step} style={{ ...S.badge, background: i === currentStepIdx ? "#0176d3" : "transparent", color: i === currentStepIdx ? "#fff" : "#8e8f8e", border: `1px solid ${i === currentStepIdx ? "#0176d3" : "#d8d8d8"}` }}>{step}</span>
-            ))}
+            {isCancelled ? (
+              <span style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 4, fontSize: 10, fontWeight: 700, background: "#ea001e", color: "#fff" }}>CANCELLED</span>
+            ) : (
+              workflowSteps.map((step, i) => (
+                <span key={step} style={{
+                  display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 4,
+                  fontSize: 10, fontWeight: 700, letterSpacing: "0.03em",
+                  background: i <= currentStepIdx ? "#2e844a" : "transparent",
+                  color: i <= currentStepIdx ? "#fff" : "#8e8f8e",
+                  border: `1px solid ${i <= currentStepIdx ? "#2e844a" : "#d8d8d8"}`,
+                }}>{step}</span>
+              ))
+            )}
           </div>
         </div>
-        <button style={S.actionBtn}><Printer size={14} /> Print</button>
+        {order.wo && (
+          <div>
+            <span style={{ fontSize: 12, color: "#444746" }}>WO: </span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", cursor: "pointer" }}
+              onClick={() => router.push(`/work-orders/${order.wo.woNo}`)}>{order.wo.woNo}</span>
+          </div>
+        )}
       </div>
 
-      <div style={S.tabBar}>
-        <button style={{ ...S.tab, color: "#fff", background: "#0176d3", fontWeight: 600 }}>Details</button>
-      </div>
-
+      {/* Details */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, marginBottom: 20 }}>
         <div>
-          <F label="REF CODE" value={order.refCode} />
-          <F label="REFERENCE NUMBER" value={order.referenceNumber} />
-          <F label="FROM WAREHOUSE" value={order.fromWarehouse} link />
-          <F label="DELIVER TO" value={order.deliverTo} link />
-          <F label="CREATED BY" value={order.createdBy} link />
-          <F label="UPDATED BY" value={order.updatedBy} link />
-          <F label="NOTES" value={order.notes || "-"} />
+          <F label="ORDER NUMBER" value={order.orderNo || "-"} />
+          <F label="WAREHOUSE" value={order.warehouse || "-"} />
+          <F label="WORK ORDER" value={order.wo?.woNo || "-"} />
         </div>
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-          <F label="CREATED AT" value={order.createdAt} />
-          <F label="UPDATED AT" value={order.updatedAt} />
-          <F label="CONFIRMED DATE" value={order.confirmedDate} />
-          <F label="SENT DATE" value={order.sentDate} />
-          <F label="RECEIVED DATE" value={order.receivedDate} />
-          <F label="SOURCE" value={order.source} />
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 2 }}>JOURNAL</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {order.journals.map((j: string) => (
-                <span key={j} style={{ fontSize: 13, fontWeight: 500, color: "#0176d3", cursor: "pointer" }}>{j}</span>
-              ))}
-              {order.journals.length === 0 && <span style={{ fontSize: 13, color: "#8e8f8e" }}>-</span>}
-            </div>
-          </div>
+          <F label="STATUS" value={order.status} />
+          <F label="DATE" value={fmtDate(order.date)} />
+          <F label="CREATED AT" value={order.createdAt ? new Date(order.createdAt).toLocaleString("id-ID") : "-"} />
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 12 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <input type="text" placeholder="SKU" style={S.inputSmall} />
-          <input type="text" placeholder="Product Name" style={S.inputSmall} />
-          <button style={S.searchBtn}><Search size={14} /> Search</button>
-        </div>
-        <button style={S.actionBtn}>Export</button>
-      </div>
-
-      <div style={S.tableWrap}>
-        <table style={S.table}>
+      {/* Items Table */}
+      <div style={{ fontSize: 13, fontWeight: 600, color: "#0176d3", marginBottom: 8 }}>Stock Order Items</div>
+      <div style={{ border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden", background: "#fff" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" as const, fontSize: 13 }}>
           <thead>
             <tr>
-              <th style={{ ...S.th, width: 36 }}>No</th>
+              <th style={S.th}>No</th>
               <th style={S.th}>SKU</th>
               <th style={S.th}>Product</th>
-              <th style={S.th}>Product Code</th>
-              <th style={{ ...S.th, textAlign: "right" }}>Order</th>
-              <th style={{ ...S.th, textAlign: "right" }}>Sent</th>
-              <th style={{ ...S.th, textAlign: "right" }}>Receive</th>
-              <th style={{ ...S.th, textAlign: "right" }}>Average Cost (Rp)</th>
+              <th style={{ ...S.th, textAlign: "right" }}>Current Stock</th>
+              <th style={{ ...S.th, textAlign: "right" }}>Order Qty</th>
+              <th style={{ ...S.th, textAlign: "right" }}>Sent Qty</th>
             </tr>
           </thead>
           <tbody>
-            {order.items.length === 0 && (
-              <tr>
-                <td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada item</td>
-              </tr>
-            )}
-            {order.items.map((item: any) => (
-              <tr key={item.no} style={S.tr}>
-                <td style={S.td}>{item.no}</td>
-                <td
-                  style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
-                  onClick={() => router.push(`/products/${item.sku}`)}
-                >{item.sku}</td>
-                <td style={S.td}>{item.product}</td>
-                <td style={S.td}>{item.productCode || "-"}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{item.order}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{item.sent}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{item.receive}</td>
-                <td style={{ ...S.td, textAlign: "right" }}>{fmt(item.avgCost)}</td>
+            {items.map((item: any, idx: number) => (
+              <tr key={item.id || idx}>
+                <td style={S.td}>{idx + 1}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{item.sparepart?.sku || "-"}</td>
+                <td style={S.td}>{item.sparepart?.name || "-"}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>{item.sparepart?.stockQty ?? "-"}</td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{item.qty || 0}</td>
+                <td style={{ ...S.td, textAlign: "right", fontWeight: 600, color: (item.sentQty || 0) > 0 ? "#2e844a" : "#8e8f8e" }}>{item.sentQty || 0}</td>
               </tr>
             ))}
+            {items.length === 0 && (
+              <tr><td colSpan={6} style={{ ...S.td, textAlign: "center", color: "#8e8f8e" }}>No items</td></tr>
+            )}
           </tbody>
           <tfoot>
-            <tr style={{ background: "#f3f3f3", fontWeight: 700 }}>
-              <td style={{ ...S.td, fontWeight: 700 }} colSpan={4}>TOTAL ALL PAGE</td>
-              <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalOrder}</td>
-              <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalSent}</td>
-              <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{totalReceive}</td>
-              <td style={S.td}></td>
+            <tr style={{ fontWeight: 700, borderTop: "2px solid #001526" }}>
+              <td colSpan={4} style={{ ...S.td, textAlign: "right" }}>Total</td>
+              <td style={{ ...S.td, textAlign: "right", color: "#0176d3" }}>{totalQty}</td>
+              <td style={{ ...S.td, textAlign: "right", color: totalSentQty > 0 ? "#2e844a" : "#8e8f8e" }}>{totalSentQty}</td>
             </tr>
           </tfoot>
         </table>
       </div>
 
-      <div style={{ marginTop: 16 }}>
-        <button onClick={() => router.push("/stock-workflow/stock-orders")} style={S.backBtn}>
-          <ArrowLeft size={16} /> Stock Orders
-        </button>
-      </div>
+      {/* Confirm Modal */}
+      {confirmAction && confirmLabels[confirmAction] && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 420, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 12 }}>{confirmLabels[confirmAction].title}</h3>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20 }}>{confirmLabels[confirmAction].desc}</p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setConfirmAction(null)} className="btn btn--sm">Batal</button>
+              <button onClick={() => doAction(confirmAction)} className="btn btn--sm" style={{ background: confirmLabels[confirmAction].color, color: "#fff", border: `1px solid ${confirmLabels[confirmAction].color}` }}>Ya, Lanjut</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function F({ label, value, link = false }: { label: string; value: string; link?: boolean }) {
+function F({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 500, color: link ? "#0176d3" : "#001526" }}>{value}</div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: "#001526" }}>{value}</div>
     </div>
   );
 }
 
 const S: Record<string, React.CSSProperties> = {
-  backBtn: { display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13, fontWeight: 500, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" },
-  card: { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" },
-  workflowBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 14px", background: "#f9f9f9", border: "1px solid #ecebea", borderRadius: 8, marginBottom: 12 },
-  badge: { display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 4, fontSize: 10, fontWeight: 700, letterSpacing: "0.03em" as const },
-  actionBtn: { display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", fontSize: 12, fontWeight: 500, color: "#001526", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" },
-  tabBar: { display: "flex", gap: 0, marginBottom: 16, background: "#ecebea", borderRadius: 8, padding: 3, width: "fit-content" },
-  tab: { padding: "7px 18px", fontSize: 13, border: "none", borderRadius: 6, cursor: "pointer", transition: "all 150ms", whiteSpace: "nowrap" as const },
-  inputSmall: { padding: "6px 10px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 6, background: "#fff", color: "#001526", width: 120 },
-  searchBtn: { display: "inline-flex", alignItems: "center", gap: 4, padding: "6px 12px", fontSize: 12, fontWeight: 500, color: "#0176d3", background: "#fff", border: "1px solid #0176d3", borderRadius: 6, cursor: "pointer" },
-  tableWrap: { border: "1px solid #ecebea", borderRadius: 8, overflow: "hidden", background: "#fff" },
-  table: { width: "100%", borderCollapse: "collapse" as const, fontSize: 13 },
   th: { padding: "8px 10px", textAlign: "left" as const, fontWeight: 600, fontSize: 11, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", background: "#fff", borderBottom: "1px solid #ecebea" },
   td: { padding: "8px 10px", borderBottom: "1px solid #f0f0f0", color: "#001526", background: "#fff" },
-  tr: { transition: "background 100ms" },
 };

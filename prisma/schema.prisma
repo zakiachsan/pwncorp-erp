@@ -233,11 +233,25 @@ model ServiceOrder {
   date        DateTime @default(now())
   createdAt   DateTime @default(now()) @map("created_at")
 
-  spareparts SOSparepart[]
-  services   SOService[]
-  workOrders WorkOrder[]
+  spareparts     SOSparepart[]
+  services       SOService[]
+  inspectionItems InspectionItem[]
+  workOrders     WorkOrder[]
 
   @@map("service_orders")
+}
+
+model InspectionItem {
+  id          String        @id @default(cuid())
+  soId        String        @map("so_id")
+  so          ServiceOrder  @relation(fields: [soId], references: [id])
+  description String
+  feedback    String?
+  inspected   Boolean       @default(false)
+  sortOrder   Int           @default(0) @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  @@map("inspection_items")
 }
 
 model SOSparepart {
@@ -569,6 +583,7 @@ model StockOrderItem {
   sparepartId String     @map("sparepart_id")
   sparepart   Sparepart  @relation(fields: [sparepartId], references: [id])
   qty         Int        @default(1)
+  sentQty     Int        @default(0) @map("sent_qty")
 
   @@map("stock_order_items")
 }
@@ -635,6 +650,7 @@ model StockOpname {
   storeId   String   @map("store_id")
   store     Store    @relation(fields: [storeId], references: [id])
   warehouse String?
+  description String?
   status    String   @default("Draft") // Draft / Completed
   date      DateTime @default(now())
   createdAt DateTime @default(now()) @map("created_at")

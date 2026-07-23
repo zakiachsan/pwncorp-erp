@@ -163,6 +163,20 @@ export default function NewServiceOrderPage() {
       return;
     }
 
+    // Validate plan service time not in the past
+    if (form.planServiceDate && form.planServiceTime) {
+      const now = new Date();
+      const planDate = form.planServiceDate; // YYYY-MM-DD
+      const todayStr = now.toISOString().split("T")[0]; // YYYY-MM-DD
+      if (planDate === todayStr) {
+        const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+        if (form.planServiceTime < currentTime) {
+          setError(`Waktu service tidak boleh mundur. Saat ini jam ${currentTime}, tidak bisa pilih jam ${form.planServiceTime}`);
+          return;
+        }
+      }
+    }
+
     try {
       setSaving(true);
       setError(null);
@@ -546,6 +560,27 @@ export default function NewServiceOrderPage() {
             border: "1px solid #d8d8d8", borderRadius: 6, outline: "none", resize: "vertical",
           }}
         />
+      </div>
+
+      {/* Inspection List Section */}
+      <div style={{ marginTop: 24, borderTop: "1px solid #ecebea", paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#001526" }}>Inspection List</div>
+          <button style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+            <Plus size={14} /> Tambah
+          </button>
+        </div>
+        <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+            <span>No</span>
+            <span>Description</span>
+            <span>Feedback</span>
+            <span style={{ textAlign: "center" }}>Inspected</span>
+          </div>
+          <div style={{ padding: "24px 12px", textAlign: "center", color: "#8e8f8e", fontSize: 13 }}>
+            Belum ada inspection item
+          </div>
+        </div>
       </div>
 
       {/* Services Section */}
