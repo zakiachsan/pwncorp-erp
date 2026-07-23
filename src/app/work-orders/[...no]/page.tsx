@@ -112,7 +112,7 @@ export default function WorkOrderDetailPage() {
           }));
 
         const invoices = (w.invoices || []).map((inv: any) => ({
-          docNo: inv.invoiceNo || inv.id,
+          docNo: inv.invNo || inv.invoiceNo || inv.id,
           invoiceDate: inv.date || inv.invoiceDate || "-",
           status: inv.status || "UNPAID",
           total: inv.total || 0,
@@ -391,7 +391,7 @@ export default function WorkOrderDetailPage() {
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
           <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
-          <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}` }} onClick={handleCreateInvoice} disabled={creatingInvoice || wo.invoices?.length > 0}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Invoice Created" : "Create Invoice"}</button>
+          <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}`, cursor: wo.invoices?.length > 0 ? "pointer" : "default" }} onClick={wo.invoices?.length > 0 ? () => router.push(`/finance/invoices/service/${wo.invoices[0]?.docNo}`) : handleCreateInvoice} disabled={creatingInvoice}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Show Invoice" : "Create Invoice"}</button>
         </div>
       </div>
 
