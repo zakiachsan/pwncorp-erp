@@ -35,7 +35,7 @@ export default function InvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const isPurchase = invoiceNo.startsWith("PI/");
+  const isPurchase = invoiceNo.startsWith("SPI/") || invoiceNo.startsWith("PI/");
   const isReceivable = invoiceNo.startsWith("IR/");
 
   useEffect(() => {
