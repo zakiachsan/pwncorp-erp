@@ -105,7 +105,7 @@ export default function StockHistoriesPage() {
                   </span>
                 </td>
                 <td>
-                  <span className="cursor-pointer font-medium" style={{ color: "var(--color-brand)" }} onClick={() => router.push(`/products/${item.sparepart?.sku}`)}>{item.sparepart?.sku || "-"}</span>
+                  <span className="cursor-pointer font-medium" style={{ color: "var(--color-brand)" }} onClick={() => router.push(`/master-data/sparepart/${item.sparepart?.sku}`)}>{item.sparepart?.sku || "-"}</span>
                 </td>
                 <td>{item.sparepart?.name || "-"}</td>
                 <td>{item.qtyChange}</td>

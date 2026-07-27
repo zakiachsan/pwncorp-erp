@@ -8,7 +8,7 @@ export const config = {
     "/stock-workflow/:path*",
     "/warehouse/:path*",
     "/master-data/:path*",
-    "/products/:path*",
+    "/master-data/sparepart/:path*",
     "/service-packages/:path*",
     "/inventory/:path*",
     "/project/:path*",

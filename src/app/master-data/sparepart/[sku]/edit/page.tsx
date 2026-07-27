@@ -51,7 +51,7 @@ export default function ProductEditPage() {
       });
       if (res.ok) {
         alert("Product updated!");
-        router.push(`/products/${sku}`);
+        router.push(`/master-data/sparepart/${sku}`);
       } else {
         const err = await res.json();
         alert(err.error || "Failed to update");

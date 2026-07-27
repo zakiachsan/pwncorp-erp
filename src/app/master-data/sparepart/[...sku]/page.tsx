@@ -80,7 +80,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div style={{ padding: "0 24px 24px" }}>
-        <button onClick={() => router.push("/products")} style={S.backBtn}>
+        <button onClick={() => router.push("/master-data/sparepart")} style={S.backBtn}>
           <ArrowLeft size={16} /> Kembali ke Products
         </button>
         <div style={{ ...S.card, marginTop: 12 }}><p style={{ color: "#444746" }}>Loading...</p></div>
@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
   if (error || !product) {
     return (
       <div style={{ padding: "0 24px 24px" }}>
-        <button onClick={() => router.push("/products")} style={S.backBtn}>
+        <button onClick={() => router.push("/master-data/sparepart")} style={S.backBtn}>
           <ArrowLeft size={16} /> Kembali ke Products
         </button>
         <div style={{ ...S.card, marginTop: 12 }}><p style={{ color: "#ea001e" }}>{error || "Product not found"}</p></div>
@@ -102,7 +102,7 @@ export default function ProductDetailPage() {
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       <div className="flex items-center gap-3 mb-3">
-        <button onClick={() => router.push("/products")} style={S.backBtn}>
+        <button onClick={() => router.push("/master-data/sparepart")} style={S.backBtn}>
           <ArrowLeft size={16} />
         </button>
       </div>
@@ -110,7 +110,7 @@ export default function ProductDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-[10px_16px] bg-[#e6f0fa] border border-[#b8d4f0] rounded-lg mb-4">
         <span style={{ fontSize: 15, fontWeight: 700, color: "#0176d3" }}>{product.sku} - {product.name}</span>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => router.push(`/products/${product.sku}/edit`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Edit size={14} /> Edit</button>
+          <button onClick={() => router.push(`/master-data/sparepart/${product.sku}/edit`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Edit size={14} /> Edit</button>
           <button style={S.actionBtn}>QR Codes</button>
           <button style={S.actionBtn}>Barcodes</button>
         </div>

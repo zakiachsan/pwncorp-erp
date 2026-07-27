@@ -94,7 +94,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
       {
         label: "Spareparts",
         icon: <Package size={18} />,
-        href: "/products",
+        href: "/master-data/sparepart",
       },
       {
         label: "Customers",

@@ -193,7 +193,7 @@ export default function StockHistoryDetailPage() {
                 {delivery.items.map((item: any) => (
                   <tr key={item.no} style={S.tr}>
                     <td style={S.td}>{item.no}</td>
-                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/products/${item.sku}`)}>{item.sku}</td>
+                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/master-data/sparepart/${item.sku}`)}>{item.sku}</td>
                     <td style={S.td}>{item.product}</td>
                     <td style={S.td}>{item.productCode}</td>
                     <td style={{ ...S.td, textAlign: "right" }}>{item.qty}</td>

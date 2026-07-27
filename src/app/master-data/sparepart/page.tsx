@@ -2,29 +2,37 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, AlertTriangle, Download, Upload, X } from "lucide-react";
-import { exportToCsv, parseCsv, validateRows, mapRowToApi, makeFilename, downloadTemplate, sparepartColumns, type CsvColumn } from "@/lib/csv-utils";
+import { Package, Star, Download, Upload, Search, X } from "lucide-react";
+import { exportToCsv, parseCsv, validateRows, mapRowToApi, makeFilename, downloadTemplate, sparepartColumns } from "@/lib/csv-utils";
 
-interface Sparepart {
+interface Product {
   id: string;
   sku: string;
   name: string;
+  code?: string;
   brand: string;
-  category: string;
-  stockQty: number;
-  minStock: number;
+  type?: string;
+  category?: string;
   sellPrice: number;
+  stockQty: number;
+  isBundle: boolean;
   supplier?: { id: string; companyName: string } | null;
 }
 
-export default function SparepartMasterPage() {
+function formatRupiah(n: number): string {
+  return "Rp " + n.toLocaleString("id-ID").replace(/,/g, ".");
+}
+
+export default function ProductsPage() {
   const router = useRouter();
-  const [data, setData] = useState<Sparepart[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<"active" | "inactive">("active");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null);
   const [importState, setImportState] = useState<{
     open: boolean;
     preview: Record<string, string>[];
@@ -32,34 +40,26 @@ export default function SparepartMasterPage() {
     valid: Record<string, string>[];
     skipped: { row: number; reason: string }[];
   }>({ open: false, preview: [], total: 0, valid: [], skipped: [] });
-  const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null);
-  const [showImportModal, setShowImportModal] = useState(false);
 
-  const fetchData = () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (categoryFilter !== "All") params.set("category", categoryFilter);
-    if (search) params.set("search", search);
-    const qs = params.toString();
-    fetch(`/api/spareparts${qs ? "?" + qs : ""}`)
+  useEffect(() => {
+    fetch("/api/spareparts?limit=50")
       .then((r) => r.json())
-      .then((json) => { setData(json.data || []); setLoading(false); })
-      .catch(() => { setError("Failed to load spareparts"); setLoading(false); });
-  };
-
-  useEffect(() => { fetchData(); }, [categoryFilter, search]);
-
-  const formatPrice = (price: number) => {
-    return "Rp " + (price || 0).toLocaleString("id-ID");
-  };
+      .then((json) => {
+        setProducts(json.data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Gagal memuat data");
+        setLoading(false);
+      });
+  }, []);
 
   const handleExport = () => {
-    const exportData = data.map((sp) => ({
-      ...sp,
-      supplierName: sp.supplier?.companyName || "",
+    const exportData = products.map((p) => ({
+      ...p,
+      supplierName: p.supplier?.companyName || "",
     }));
-    exportToCsv(exportData, sparepartColumns, makeFilename("spareparts"));
+    exportToCsv(exportData, sparepartColumns, makeFilename("sparepart"));
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,15 +109,28 @@ export default function SparepartMasterPage() {
     setImporting(false);
     setImportState({ open: false, preview: [], total: 0, valid: [], skipped: [] });
     setImportResult({ success, failed, skipped: importState.skipped.length });
-    if (success > 0) fetchData();
+
+    // Refresh data
+    fetch("/api/spareparts?limit=50")
+      .then((r) => r.json())
+      .then((json) => setProducts(json.data || []))
+      .catch(() => {});
   };
+
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const tabs = [
+    { key: "active" as const, label: "Active" },
+    { key: "inactive" as const, label: "Inactive" },
+  ];
 
   return (
     <div>
       <div className="view-header">
         <div className="view-title">
-          <PackageIcon className="w-6 h-6 text-[--color-brand-secondary]" />
+          <Package className="w-6 h-6 text-[--color-brand-secondary]" />
           Sparepart Catalog
+          <Star className="w-5 h-5 text-[--color-brand-secondary] ml-1" />
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={handleExport} className="btn btn--sm">
@@ -128,7 +141,7 @@ export default function SparepartMasterPage() {
           </button>
           <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFileSelect} />
           <button onClick={() => router.push("/master-data/sparepart/new")} className="btn btn--brand btn--sm">
-            <Plus size={14} /> Add Sparepart
+            + Add Sparepart
           </button>
         </div>
       </div>
@@ -140,67 +153,86 @@ export default function SparepartMasterPage() {
         </div>
       )}
 
+      <div className="flex border-b border-[--color-border-light] mb-4 gap-0 overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-3 text-sm whitespace-nowrap border-b-2 transition-colors ${
+              activeTab === tab.key
+                ? "text-[--color-brand] border-[--color-brand] font-semibold"
+                : "text-[--color-text-secondary] border-transparent hover:text-[--color-brand]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="filter-section">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
-            <label className="form-label">Kategori</label>
-            <select className="form-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-              <option value="All">All Categories</option>
-              <option>Oli</option>
-              <option>Filter</option>
-              <option>Rem</option>
-              <option>Pengapian</option>
-              <option>Kelistrikan</option>
+            <label className="form-label">SKU</label>
+            <input type="text" className="form-input" placeholder="Search SKU..." />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Name</label>
+            <input type="text" className="form-input" placeholder="Product name..." />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Product Code</label>
+            <input type="text" className="form-input" placeholder="Product code..." />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Product Brand</label>
+            <select className="form-select">
+              <option>All Brands</option>
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="Kode / Nama Sparepart..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <label className="form-label">Product Type</label>
+            <select className="form-select">
+              <option>All Types</option>
+            </select>
           </div>
           <div className="form-group">
-            <label className="form-label">&nbsp;</label>
-            <button className="btn btn--brand btn--sm flex-1 justify-center">
-              <Search size={14} /> Cari
+            <label className="form-label">Category</label>
+            <select className="form-select">
+              <option>All Categories</option>
+            </select>
+          </div>
+          <div className="form-group flex items-end">
+            <button className="btn btn--brand btn--sm w-full">
+              <Search size={14} /> Search
             </button>
           </div>
         </div>
       </div>
 
-      {loading && <div className="p-8 text-center text-[--color-text-secondary]">Loading...</div>}
-      {error && <div className="p-8 text-center text-red-500">{error}</div>}
-
-      {!loading && !error && (
+      {loading ? (
+        <div className="p-8 text-center">Loading...</div>
+      ) : (
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Kode</th>
-                <th>Nama Sparepart</th>
-                <th>Brand</th>
-                <th>Kategori</th>
-                <th>Stock</th>
-                <th>Harga</th>
+                <th>SKU</th>
+                <th>NAME</th>
+                <th>BRAND</th>
+                <th>CATEGORY</th>
+                <th>STOCK</th>
+                <th>PRICE</th>
               </tr>
             </thead>
             <tbody>
-              {data.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-center py-8 text-[--color-text-secondary]">No spareparts found</td>
-                </tr>
-              )}
-              {data.map((sp) => (
-                <tr key={sp.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/master-data/sparepart/${sp.sku || sp.id}`)}>
-                  <td className="font-medium text-[--color-brand]">{sp.sku}</td>
-                  <td className="font-medium">{sp.name}</td>
-                  <td className="text-[--color-text-secondary]">{sp.brand}</td>
-                  <td><span className="pill bg-gray-200 text-gray-700">{sp.category}</span></td>
-                  <td>
-                    <span className={sp.stockQty <= (sp.minStock || 5) ? "text-[--color-error] font-semibold" : ""}>
-                      {sp.stockQty}
-                      {sp.stockQty <= (sp.minStock || 5) && <AlertTriangle size={12} className="inline ml-1 text-[--color-warning]" />}
-                    </span>
-                  </td>
-                  <td className="font-medium">{formatPrice(sp.sellPrice)}</td>
+              {products.map((product) => (
+                <tr key={product.id} className="cursor-pointer" onClick={() => router.push(`/master-data/sparepart/${product.sku}`)}>
+                  <td>{product.sku}</td>
+                  <td>{product.name}</td>
+                  <td>{product.brand}</td>
+                  <td>{product.category || product.type || "-"}</td>
+                  <td>{product.stockQty}</td>
+                  <td>{formatRupiah(product.sellPrice)}</td>
                 </tr>
               ))}
             </tbody>
@@ -210,11 +242,11 @@ export default function SparepartMasterPage() {
 
       {/* Import Preview Modal */}
       {importState.open && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-          <div style={{ background: "white", borderRadius: 12, padding: 24, maxWidth: 800, width: "90%", maxHeight: "80vh", overflow: "auto" }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Import Preview</h3>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 800, width: "95%", maxHeight: "85vh", overflow: "auto", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 16 }}>Import Preview</h3>
             <p style={{ fontSize: 13, color: "#444746", marginBottom: 12 }}>
-              Total rows: <strong>{importState.total}</strong> | Valid: <strong>{importState.valid.length}</strong> | Skipped: <strong>{importState.skipped.length}</strong>
+              Total: {importState.total} rows | Valid: {importState.valid.length} | Skipped: {importState.skipped.length}
             </p>
 
             {importState.skipped.length > 0 && (
@@ -291,13 +323,5 @@ export default function SparepartMasterPage() {
         </div>
       )}
     </div>
-  );
-}
-
-function PackageIcon({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" />
-    </svg>
   );
 }
