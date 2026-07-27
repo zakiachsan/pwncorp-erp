@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X, FileText } from "lucide-react";
+import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X, FileText, Play } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -24,10 +24,12 @@ const toDateInput = (d: any): string => {
 
 const statusColor = (s: string) => {
   const map: Record<string, string> = {
+    WAITING: "#fe9339",
     DRAFT: "#6b7280",
     CREATED: "#fe9339",
     "WAITING STOCK": "#fe9339",
     "IN PROGRESS": "#0176d3",
+    "WAITING FOR QC": "#8b5cf6",
     QC: "#8b5cf6",
     COMPLETED: "#2e844a",
     CANCELLED: "#ea001e",
@@ -35,15 +37,15 @@ const statusColor = (s: string) => {
   return map[s] || "#6b7280";
 };
 
-const workflowSteps = ["DRAFT", "IN PROGRESS", "QC", "COMPLETED"];
+const workflowSteps = ["WAITING", "IN PROGRESS", "WAITING FOR QC", "COMPLETED"];
 
 function getWorkflowStepIndex(status: string): number {
   if (!status) return -1;
   const s = status.toUpperCase();
-  if (s === "DRAFT") return 0;
-  if (["WAITING STOCK", "CONFIRMED"].includes(s)) return 0;
+  if (s === "WAITING" || s === "DRAFT") return 0;
+  if (["WAITING STOCK", "CONFIRMED", "CREATED"].includes(s)) return 0;
   if (s === "IN PROGRESS") return 1;
-  if (s === "QC") return 2;
+  if (s === "WAITING FOR QC" || s === "QC") return 2;
   if (s === "COMPLETED") return 3;
   if (s === "CANCELLED") return -2;
   return -1;
@@ -60,8 +62,14 @@ export default function WorkOrderDetailPage() {
   const [showPrint, setShowPrint] = useState(false);
   const [creatingInvoice, setCreatingInvoice] = useState(false);
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
+  const [showStartActions, setShowStartActions] = useState(false);
+  const [serviceProgress, setServiceProgress] = useState<Record<number, string>>({});
   const [photoDesc, setPhotoDesc] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [photoList, setPhotoList] = useState<{ url: string; description: string; uploadedBy: string; uploadedAt: string }[]>([]);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
   // Edit mode
   const [editMode, setEditMode] = useState(false);
@@ -135,7 +143,7 @@ export default function WorkOrderDetailPage() {
           serviceAdvisor: so.sa?.name || found.so?.serviceAdvisor || "-",
           mekanik: w.mekanik?.name || found.assignedTo || "-",
           mekanikId: w.mekanikId || "",
-          status: (w.status || "DRAFT").toUpperCase(),
+          status: (w.status || "WAITING").toUpperCase(),
           planStartDate: w.startDate || so.date || found.planStartDate || "-",
           planEndDate: w.targetDate || found.planEndDate || "-",
           actualStartDate: found.actualStartDate || "-",
@@ -149,6 +157,14 @@ export default function WorkOrderDetailPage() {
           updatedAt: w.updatedAt || "-",
           stockOrders: w.stockOrders || [],
         });
+        // Load photos from DB
+        setPhotoList((w.photos || []).map((p: any) => ({
+          id: p.id,
+          url: p.url,
+          description: p.description || "Foto",
+          uploadedBy: p.uploadedBy || "-",
+          uploadedAt: p.createdAt || new Date().toISOString(),
+        })));
         setLoading(false);
       })
       .catch(() => { setError("Failed to load work order"); setLoading(false); });
@@ -171,6 +187,16 @@ export default function WorkOrderDetailPage() {
       setAllMekanik((d.data || d.users || []).filter((u: any) => u.role?.name === "Mekanik" || u.role === "Mekanik"));
     }).catch(() => {});
   }, [wo]);
+
+  // Auto-transition to WAITING FOR QC when all services are completed
+  useEffect(() => {
+    if (wo?.status === "IN PROGRESS" && wo.services?.length > 0) {
+      const allCompleted = wo.services.every((_: any, i: number) => serviceProgress[i] === "completed");
+      if (allCompleted) {
+        handleStatusUpdate("WAITING FOR QC");
+      }
+    }
+  }, [serviceProgress, wo?.status, wo?.services]);
 
   if (loading) {
     return (
@@ -390,8 +416,19 @@ export default function WorkOrderDetailPage() {
         </div>
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
+          {(wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (
+            <button style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }} onClick={() => { handleStatusUpdate("IN PROGRESS"); setShowStartActions(true); }}><Play size={14} /> Start</button>
+          )}
+          {showStartActions && (
+            <>
+              <span style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b", cursor: "default" }}>Pending</span>
+              <button style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }} onClick={() => { setShowStartActions(false); handleStatusUpdate("WAITING"); }}>Cancel</button>
+            </>
+          )}
           <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
-          <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}`, cursor: wo.invoices?.length > 0 ? "pointer" : "default" }} onClick={wo.invoices?.length > 0 ? () => router.push(`/finance/invoices/service/${wo.invoices[0]?.docNo}`) : handleCreateInvoice} disabled={creatingInvoice}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Show Invoice" : "Create Invoice"}</button>
+          {wo.status === "COMPLETED" && (
+            <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}`, cursor: wo.invoices?.length > 0 ? "pointer" : "default" }} onClick={wo.invoices?.length > 0 ? () => router.push(`/finance/invoices/service/${wo.invoices[0]?.docNo}`) : handleCreateInvoice} disabled={creatingInvoice}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Show Invoice" : "Create Invoice"}</button>
+          )}
         </div>
       </div>
 
@@ -420,9 +457,8 @@ export default function WorkOrderDetailPage() {
         <div>
           {/* Status Action Buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {wo.status === "DRAFT" && <button onClick={() => router.push(`/stock-workflow/stock-orders/new?woId=${wo.id}`)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Create Stock Orders</button>}
-            {wo.status === "IN PROGRESS" && <StatusBtn label="QC" color="#8b5cf6" onClick={() => handleStatusUpdate("QC")} />}
-            {wo.status === "QC" && <StatusBtn label="Completed" color="#2e844a" onClick={() => handleStatusUpdate("Completed")} />}
+            {(wo.status === "DRAFT" || wo.status === "WAITING") && <button onClick={() => router.push(`/stock-workflow/stock-orders/new?woId=${wo.id}`)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Create Stock Orders</button>}
+            {(wo.status === "WAITING FOR QC" || wo.status === "QC") && <StatusBtn label="Completed" color="#2e844a" onClick={() => handleStatusUpdate("COMPLETED")} />}
           </div>
 
           {/* 3-Column Info Grid */}
@@ -490,7 +526,7 @@ export default function WorkOrderDetailPage() {
 
           {svcLineTab === "services" && (
             <div>
-              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} allMekanik={allMekanik} />
+              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} allMekanik={allMekanik} woStatus={wo.status} serviceProgress={serviceProgress} onStartService={(idx) => setServiceProgress(prev => ({ ...prev, [idx]: "in_progress" }))} onCompleteService={(idx) => setServiceProgress(prev => ({ ...prev, [idx]: "completed" }))} />
             </div>
           )}
 
@@ -678,75 +714,92 @@ export default function WorkOrderDetailPage() {
           {/* Upload Form */}
           <div style={{ ...S.card, marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: "#001526", marginBottom: 8 }}>Upload Foto Baru</div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                placeholder="Masukkan deskripsi foto..."
-                value={photoDesc}
-                onChange={(e) => setPhotoDesc(e.target.value)}
-                className="flex-1 h-9 px-3 border border-[#d8d8d8] rounded-lg text-sm outline-none focus:border-[#0176d3]"
-              />
-              <label className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-[#0176d3] rounded-lg cursor-pointer hover:bg-[#0165b3] transition-colors whitespace-nowrap">
-                <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  setUploading(true);
-                  const formData = new FormData();
-                  formData.append("file", file);
-                  formData.append("description", photoDesc || "Foto");
-                  try {
-                    const res = await fetch(`/api/upload?woId=${wo.id}`, { method: "POST", body: formData });
-                    if (res.ok) {
-                      alert("Foto berhasil diupload");
-                      setPhotoDesc("");
-                    } else {
-                      alert("Gagal upload foto");
-                    }
-                  } catch {
-                    alert("Gagal upload foto");
-                  }
-                  setUploading(false);
-                }} />
-                {uploading ? "Uploading..." : "Upload Foto"}
-              </label>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Masukkan deskripsi foto..."
+                  value={photoDesc}
+                  onChange={(e) => setPhotoDesc(e.target.value)}
+                  className="flex-1 h-9 px-3 border border-[#d8d8d8] rounded-lg text-sm outline-none focus:border-[#0176d3]"
+                />
+                <label className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-[#0176d3] rounded-lg cursor-pointer hover:bg-[#0165b3] transition-colors whitespace-nowrap">
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setSelectedFile(file);
+                    setPreviewUrl(URL.createObjectURL(file));
+                  }} />
+                  Pilih Foto
+                </label>
+              </div>
+
+              {/* Preview */}
+              {previewUrl && selectedFile && (
+                <div style={{ display: "flex", gap: 16, alignItems: "flex-start", padding: 12, background: "#f9f9f9", borderRadius: 8, border: "1px solid #ecebea" }}>
+                  <img src={previewUrl} alt="Preview" style={{ width: 160, height: 120, objectFit: "cover", borderRadius: 6, border: "1px solid #d8d8d8" }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, color: "#444746", marginBottom: 4 }}>{selectedFile.name}</div>
+                    <div style={{ fontSize: 11, color: "#8e8f8e" }}>{(selectedFile.size / 1024).toFixed(0)} KB</div>
+                    <div style={{ fontSize: 13, color: "#001526", marginTop: 8 }}>{photoDesc || "Foto"}</div>
+                    <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                      <button
+                        disabled={uploading}
+                        onClick={async () => {
+                          setUploading(true);
+                          const formData = new FormData();
+                          formData.append("file", selectedFile);
+                          formData.append("description", photoDesc || "Foto");
+                          try {
+                            const res = await fetch(`/api/upload?woId=${wo.id}`, { method: "POST", body: formData });
+                            if (res.ok) {
+                              const data = await res.json();
+                              setPhotoList(prev => [...prev, { url: data.data.url, description: photoDesc || "Foto", uploadedBy: data.data.uploadedBy, uploadedAt: data.data.uploadedAt }]);
+                              setSelectedFile(null);
+                              setPreviewUrl(null);
+                              setPhotoDesc("");
+                            } else {
+                              alert("Gagal upload foto");
+                            }
+                          } catch {
+                            alert("Gagal upload foto");
+                          }
+                          setUploading(false);
+                        }}
+                        style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3", fontSize: 12 }}
+                      >
+                        {uploading ? "Uploading..." : "Simpan Foto"}
+                      </button>
+                      <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); }} style={{ ...S.actionBtn, fontSize: 12 }}>Batal</button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Photo List as Links */}
+          {/* Photo List */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[
-              { id: 1, photo: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=300&fit=crop", caption: "Pengecekan mesin sebelum service", uploadedBy: "Hendra", date: "24 Jun 2026 09:15 AM" },
-              { id: 2, photo: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop", caption: "Proses penggantian oli mesin", uploadedBy: "Hendra", date: "24 Jun 2026 10:30 AM" },
-              { id: 3, photo: "https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=400&h=300&fit=crop", caption: "Spooring mobil kelas I", uploadedBy: "WOYO", date: "24 Jun 2026 11:45 AM" },
-              { id: 4, photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&h=300&fit=crop", caption: "Balancing ring >19 inch", uploadedBy: "Toha", date: "24 Jun 2026 02:15 PM" },
-              { id: 5, photo: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&h=300&fit=crop", caption: "Pengecekan akhir sebelum serah terima", uploadedBy: "Bambang", date: "25 Jun 2026 08:00 AM" },
-            ].map((p) => (
-              <div key={p.id} style={{ ...S.card, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                <div className="flex-1 min-w-0">
-                  <a
-                    href={p.photo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ fontSize: 13, fontWeight: 500, color: "#0176d3", textDecoration: "none", cursor: "pointer" }}
-                    className="hover:underline"
-                  >
-                    📷 {p.caption}
-                  </a>
-                  <div style={{ fontSize: 11, color: "#8e8f8e", marginTop: 2 }}>
-                    Oleh: {p.uploadedBy} • {p.date}
-                  </div>
+            {photoList.length === 0 ? (
+              <div style={{ ...S.card, textAlign: "center", color: "#8e8f8e", fontSize: 13 }}>Belum ada foto</div>
+            ) : photoList.map((p, i) => (
+              <div key={i} style={{ ...S.card, display: "flex", gap: 16, alignItems: "center" }}>
+                <img src={p.url} alt={p.description} onClick={() => setLightboxPhoto(p.url)} style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 4, border: "1px solid #d8d8d8", cursor: "pointer" }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, color: "#001526" }}>{p.description}</div>
+                  <div style={{ fontSize: 11, color: "#8e8f8e" }}>oleh {p.uploadedBy} • {new Date(p.uploadedAt).toLocaleDateString("id-ID")}</div>
                 </div>
-                <a
-                  href={p.photo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "4px 10px", fontSize: 11, fontWeight: 500, color: "#0176d3", background: "#f0f7ff", borderRadius: 4, textDecoration: "none", whiteSpace: "nowrap" }}
-                >
-                  Lihat Foto ↗
-                </a>
               </div>
             ))}
           </div>
+
+          {/* Lightbox */}
+          {lightboxPhoto && (
+            <div onClick={() => setLightboxPhoto(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, cursor: "pointer" }}>
+              <button onClick={() => setLightboxPhoto(null)} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", padding: 8 }}>✕</button>
+              <img src={lightboxPhoto} alt="Preview" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "90vw", maxHeight: "90vh", objectFit: "contain", borderRadius: 8, cursor: "default" }} />
+            </div>
+          )}
         </div>
       )}
 
@@ -998,12 +1051,18 @@ function StatusBtn({ label, color, onClick }: { label: string; color: string; on
 }
 
 /* ─── Editable WO Services Table ─── */
-function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, allMekanik }: {
+function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, allMekanik, woStatus, serviceProgress, onStartService, onCompleteService }: {
   services: any[]; editMode: boolean; totalCost: number;
   onUpdate: (idx: number, field: string, value: any) => void;
   onRemove: (idx: number) => void;
   allMekanik: any[];
+  woStatus?: string;
+  serviceProgress?: Record<number, string>;
+  onStartService?: (idx: number) => void;
+  onCompleteService?: (idx: number) => void;
 }) {
+  const showProgressCols = woStatus === "IN PROGRESS" && !editMode;
+  const colCount = showProgressCols ? 9 : 8;
   return (
     <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
@@ -1015,14 +1074,21 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
             <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
             <th className="hidden md:table-cell" style={S.th}>Assigned To</th>
             <th className="hidden md:table-cell" style={S.th}>Est. Time</th>
-            <th className="hidden sm:table-cell" style={S.th}>Status</th>
+            {showProgressCols ? (
+              <>
+                <th className="hidden sm:table-cell" style={S.th}>Progress</th>
+                <th className="hidden sm:table-cell" style={S.th}>Complete</th>
+              </>
+            ) : (
+              <th className="hidden sm:table-cell" style={S.th}>Status</th>
+            )}
             <th style={{ ...S.th, textAlign: "right" }}>Total</th>
             {editMode && <th style={{ ...S.th, width: 40 }}></th>}
           </tr>
         </thead>
         <tbody>
           {services.length === 0 && (
-            <tr><td colSpan={8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
+            <tr><td colSpan={colCount} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
           )}
           {services.map((svc: any, i: number) => (
             <tr key={i} style={S.tr}>
@@ -1050,9 +1116,30 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
                     style={{ width: 130, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4 }} />
                 ) : svc.estimatedTime}
               </td>
-              <td className="hidden sm:table-cell" style={S.td}>
-                <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
-              </td>
+              {showProgressCols ? (
+                <>
+                  <td className="hidden sm:table-cell" style={S.td}>
+                    {serviceProgress?.[i] === "in_progress" || serviceProgress?.[i] === "completed" ? (
+                      <span style={{ ...S.pill, background: "#0176d3" }}>In Progress</span>
+                    ) : (
+                      <button onClick={() => onStartService?.(i)} style={{ padding: "3px 10px", fontSize: 10, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Start</button>
+                    )}
+                  </td>
+                  <td className="hidden sm:table-cell" style={S.td}>
+                    {serviceProgress?.[i] === "completed" ? (
+                      <span style={{ ...S.pill, background: "#2e844a" }}>Completed</span>
+                    ) : serviceProgress?.[i] === "in_progress" ? (
+                      <button onClick={() => onCompleteService?.(i)} style={{ padding: "3px 10px", fontSize: 10, fontWeight: 600, color: "#fff", background: "#2e844a", border: "none", borderRadius: 4, cursor: "pointer" }}>Complete</button>
+                    ) : (
+                      <span style={{ ...S.pill, background: "#d8d8d8", color: "#8e8f8e" }}>-</span>
+                    )}
+                  </td>
+                </>
+              ) : (
+                <td className="hidden sm:table-cell" style={S.td}>
+                  <span style={{ ...S.pill, background: svc.status === "Completed" ? "#2e844a" : svc.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{svc.status}</span>
+                </td>
+              )}
               <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
               {editMode && (
                 <td style={S.td}>
@@ -1064,7 +1151,7 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
         </tbody>
         <tfoot>
           <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-            <td colSpan={7} style={S.td}></td>
+            <td colSpan={showProgressCols ? 8 : 7} style={S.td}></td>
             <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalCost)}</td>
             {editMode && <td style={S.td}></td>}
           </tr>

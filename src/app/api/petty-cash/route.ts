@@ -49,7 +49,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { description, type, amount } = body;
+  const { description, type, amount, category, date } = body;
 
   if (!description || !type || !amount) {
     return NextResponse.json({ error: "description, type (in/out), and amount are required" }, { status: 400 });
@@ -67,7 +67,15 @@ export const POST = withAuth(async (req: NextRequest) => {
   }
 
   const entry = await prisma.pettyCash.create({
-    data: { storeId: user.storeId, description, type, amount, balance: newBalance, date: new Date() },
+    data: {
+      storeId: user.storeId,
+      description,
+      type,
+      amount,
+      balance: newBalance,
+      category: category || "Lain-lain",
+      date: date ? new Date(date) : new Date(),
+    },
   });
 
   return NextResponse.json({ data: entry }, { status: 201 });

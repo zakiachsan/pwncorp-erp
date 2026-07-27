@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
+import { logActivity } from "@/lib/activity-log";
 
 export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
@@ -58,7 +59,7 @@ export const POST = withAuth(async (req: NextRequest) => {
   // Validate invoice
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, storeId: user.storeId },
-    include: { customer: true, ar: true },
+    include: { customer: true, ar: true, wo: { select: { id: true, soId: true, woNo: true } } },
   });
   if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   if (invoice.status === "PAID") {
@@ -143,6 +144,8 @@ export const POST = withAuth(async (req: NextRequest) => {
     // Journal is non-critical — log but don't fail payment
     console.error("Auto-journal failed:", err);
   }
+
+  await logActivity({ userId: user.id, action: "PAYMENT_RECEIVED", entity: "Payment", entityId: payment.id, details: { invNo: invoice.invNo, woNo: invoice.wo?.woNo, soId: invoice.wo?.soId, amount, method: paymentMethod || "cash", newStatus } });
 
   return NextResponse.json({
     data: {

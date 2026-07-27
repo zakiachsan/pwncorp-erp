@@ -88,3 +88,25 @@ export async function generateProjectNumber(storeId: string): Promise<string> {
 export async function generateDeliveryNumber(storeId: string): Promise<string> {
   return generateDocNumber("DO", storeId, "purchaseDelivery", "deliveryNo");
 }
+
+/**
+ * Transfer number: TRF/{YYMM}{SEQ}
+ */
+export async function generateTransferNumber(_storeId: string): Promise<string> {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const datePrefix = `${yy}${mm}`;
+  const count = await prisma.transfer.count({
+    where: { transferNo: { startsWith: `TRF/${datePrefix}` } },
+  });
+  const seq = String(count + 1).padStart(3, "0");
+  return `TRF/${datePrefix}${seq}`;
+}
+
+/**
+ * Receipt number: RCT/{STORE_CODE}/{YYMM}{SEQ}
+ */
+export async function generateReceiptNumber(storeId: string): Promise<string> {
+  return generateDocNumber("RCT", storeId, "receipt", "receiptNo");
+}

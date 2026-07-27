@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 import { generateSONumber } from "@/lib/numbering";
+import { logActivity } from "@/lib/activity-log";
 
 export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
@@ -111,6 +112,8 @@ export const POST = withAuth(async (req: NextRequest) => {
       inspectionItems: { orderBy: { sortOrder: "asc" } },
     },
   });
+
+  await logActivity({ userId: user.id, action: "SO_CREATED", entity: "ServiceOrder", entityId: so.id, details: { soNo: so.soNo, customer: so.customer.name, vehicle: so.vehicle.plateNo } });
 
   return NextResponse.json({ data: so }, { status: 201 });
 });

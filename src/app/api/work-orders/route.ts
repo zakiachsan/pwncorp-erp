@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 import { generateWONumber } from "@/lib/numbering";
+import { logActivity } from "@/lib/activity-log";
 
 export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
@@ -50,8 +51,8 @@ export const POST = withAuth(async (req: NextRequest) => {
     include: { spareparts: true, services: true },
   });
   if (!so) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
-  if (so.status !== "Approved" && so.status !== "Diagnosis") {
-    return NextResponse.json({ error: "Service order must be Approved or Delivered before creating work order" }, { status: 400 });
+  if (so.status !== "Completed") {
+    return NextResponse.json({ error: "Service order must be Completed before creating work order" }, { status: 400 });
   }
 
   // Check if WO already exists for this SO
@@ -106,6 +107,8 @@ export const POST = withAuth(async (req: NextRequest) => {
       items: true,
     },
   });
+
+  await logActivity({ userId: user.id, action: "WO_CREATED", entity: "WorkOrder", entityId: wo.id, details: { woNo: wo.woNo, soId, soNo: so.soNo, mekanikName: mekanikId || null, itemCount: items.length } });
 
   return NextResponse.json({ data: wo }, { status: 201 });
 });

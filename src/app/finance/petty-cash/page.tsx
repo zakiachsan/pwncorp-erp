@@ -24,12 +24,12 @@ export default function PettyCashPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [balance, setBalance] = useState(0);
-  const [dateFrom, setDateFrom] = useState<Date>(new Date());
-  const [dateTo, setDateTo] = useState<Date>(new Date());
+  const [dateFrom, setDateFrom] = useState<Date>(() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(1); return d; });
+  const [dateTo, setDateTo] = useState<Date>(() => { const d = new Date(); d.setHours(23, 59, 59, 999); return d; });
   const [filterCategory, setFilterCategory] = useState("Semua");
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), desc: "", category: "ATK & Perlengkapan", nominal: "" });
+  const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), desc: "", category: "ATK & Perlengkapan", nominal: "", type: "out" as "in" | "out" });
 
   useEffect(() => {
     setLoading(true);
@@ -45,7 +45,7 @@ export default function PettyCashPage() {
           type: (pc.type === "masuk" || pc.type === "in") ? "masuk" : "keluar",
         }));
         setData(entries);
-        setBalance(json.balance || 0);
+        setBalance(json.summary?.currentBalance || 0);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load petty cash"); setLoading(false); });
@@ -69,13 +69,44 @@ export default function PettyCashPage() {
   const totalKeluar = data.filter((d) => d.type === "keluar").reduce((s, d) => s + d.nominal, 0);
   const sisa = totalMasuk - totalKeluar;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.desc || !form.nominal) return;
-    const id = `PC-${new Date().getFullYear()}/${String(data.length + 1).padStart(4, "0")}`;
-    const newEntry: CashEntry = { id, date: form.date, description: form.desc, category: form.category, nominal: parseInt(form.nominal.replace(/[^0-9]/g, "")) || 0, type: "keluar" };
-    setData((prev) => [newEntry, ...prev]);
-    setModalOpen(false);
-    setForm({ date: new Date().toISOString().slice(0, 10), desc: "", category: "ATK & Perlengkapan", nominal: "" });
+    const amount = parseInt(form.nominal.replace(/[^0-9]/g, "")) || 0;
+    if (amount <= 0) return;
+
+    try {
+      const res = await fetch("/api/petty-cash", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: form.desc,
+          type: form.type,
+          amount,
+          category: form.category,
+          date: form.date,
+        }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const pc = json.data;
+        const newEntry: CashEntry = {
+          id: pc.id || `PC-${Date.now()}`,
+          date: form.date,
+          description: form.desc,
+          category: form.category,
+          nominal: amount,
+          type: form.type === "in" ? "masuk" : "keluar",
+        };
+        setData((prev) => [newEntry, ...prev]);
+        setModalOpen(false);
+        setForm({ date: new Date().toISOString().slice(0, 10), desc: "", category: "ATK & Perlengkapan", nominal: "", type: "out" });
+      } else {
+        const err = await res.json();
+        alert(err.error || "Gagal menyimpan");
+      }
+    } catch {
+      alert("Gagal menyimpan");
+    }
   };
 
   return (
@@ -85,9 +116,14 @@ export default function PettyCashPage() {
           <BookIcon className="w-6 h-6 text-[--color-brand-secondary]" />
           Buku Kasir
         </div>
-        <button onClick={() => setModalOpen(true)} className="btn btn--brand btn--sm">
-          <Plus size={14} /> Catat Pengeluaran
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => { setForm(f => ({ ...f, type: "in" })); setModalOpen(true); }} className="btn btn--sm" style={{ background: "var(--color-success)", color: "#fff" }}>
+            <Plus size={14} /> Setor Kas
+          </button>
+          <button onClick={() => { setForm(f => ({ ...f, type: "out" })); setModalOpen(true); }} className="btn btn--brand btn--sm">
+            <Plus size={14} /> Catat Pengeluaran
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -173,7 +209,7 @@ export default function PettyCashPage() {
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
           <div className="relative bg-white rounded-lg shadow-lg w-full max-w-lg border border-[--color-border-light]">
             <div className="px-6 py-4 border-b border-[--color-border-light] flex items-center justify-between">
-              <h2 className="text-base font-bold text-[--color-text-primary]">Catat Pengeluaran Kas</h2>
+              <h2 className="text-base font-bold text-[--color-text-primary]">{form.type === "in" ? "Setor Kas" : "Catat Pengeluaran Kas"}</h2>
               <button onClick={() => setModalOpen(false)} className="text-[--color-text-placeholder] hover:text-[--color-text-secondary]"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">

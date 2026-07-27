@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
+import { logActivity } from "@/lib/activity-log";
 
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const so = await prisma.serviceOrder.findUnique({
@@ -33,16 +34,17 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
 
   const existing = await prisma.serviceOrder.findUnique({
     where: { id: params.id },
-    include: { spareparts: true, services: true },
+    include: { spareparts: true, services: true, inspectionItems: true },
   });
   if (!existing) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
 
   // Validate status transition
   if (status) {
     const validTransitions: Record<string, string[]> = {
-      "Draft": ["Diagnosis", "Approved", "Cancelled"],
-      "Diagnosis": ["Approved", "Cancelled"],
-      "Approved": ["Cancelled"],
+          "Draft": ["Diagnosis", "Delivery", "Completed", "Cancelled"],
+          "Diagnosis": ["Delivery", "Completed", "Cancelled"],
+          "Delivery": ["Completed", "Cancelled"],
+          "Completed": ["Cancelled"],
       "Cancelled": [],
     };
     if (!validTransitions[existing.status]?.includes(status)) {
@@ -126,10 +128,60 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
     },
   });
 
+  // Log changes
+  if (status !== undefined && status !== existing.status) {
+    await logActivity({ userId: user.id, action: "SO_STATUS_CHANGED", entity: "ServiceOrder", entityId: params.id, details: { from: existing.status, to: status } });
+  }
+  const changedFields: Record<string, any> = {};
+  for (const key of ["complaint", "salesperson", "customerId", "vehicleId", "odometer", "color", "bookingSource", "referenceNumber", "planServiceTime", "saId", "date"]) {
+    if ((body as any)[key] === undefined) continue;
+    const oldVal = key === "date" ? new Date((existing as any)[key]).toISOString().slice(0, 10) : String((existing as any)[key] ?? "");
+    const newVal = key === "date" ? new Date((body as any)[key]).toISOString().slice(0, 10) : String((body as any)[key] ?? "");
+    if (oldVal !== newVal) {
+      changedFields[key] = { from: (existing as any)[key], to: (body as any)[key] };
+    }
+  }
+  if (Object.keys(changedFields).length > 0) {
+    await logActivity({ userId: user.id, action: "SO_UPDATED", entity: "ServiceOrder", entityId: params.id, details: changedFields });
+  }
+  if (inspectionItems !== undefined) {
+    const oldNames = (existing.inspectionItems || []).map((i: any) => i.description);
+    const newNames = (inspectionItems as any[]).map((i: any) => i.description || "");
+    const added = newNames.filter(n => !oldNames.includes(n));
+    const removed = oldNames.filter(n => !newNames.includes(n));
+    await logActivity({ userId: user.id, action: "SO_INSPECTION_UPDATED", entity: "ServiceOrder", entityId: params.id, details: { added, removed, before: oldNames.length, after: newNames.length } });
+  }
+  if (spareparts !== undefined) {
+    const oldIds = (existing.spareparts || []).map((s: any) => s.sparepartId);
+    const newIds = (spareparts as any[]).map((s: any) => s.sparepartId);
+    const addedIds = newIds.filter(id => !oldIds.includes(id));
+    const removedIds = oldIds.filter(id => !newIds.includes(id));
+    // Resolve names for added/removed
+    const allIds = Array.from(new Set([...addedIds, ...removedIds]));
+    const spData = allIds.length > 0 ? await prisma.sparepart.findMany({ where: { id: { in: allIds } }, select: { id: true, name: true } }) : [];
+    const nameMap = Object.fromEntries(spData.map(s => [s.id, s.name]));
+    const added = addedIds.map(id => nameMap[id] || id);
+    const removed = removedIds.map(id => nameMap[id] || id);
+    await logActivity({ userId: user.id, action: "SO_SPAREPARTS_UPDATED", entity: "ServiceOrder", entityId: params.id, details: { added, removed, before: oldIds.length, after: newIds.length } });
+  }
+  if (services !== undefined) {
+    const oldIds = (existing.services || []).map((s: any) => s.serviceId);
+    const newIds = (services as any[]).map((s: any) => s.serviceId);
+    const addedIds = newIds.filter(id => !oldIds.includes(id));
+    const removedIds = oldIds.filter(id => !newIds.includes(id));
+    const allIds = Array.from(new Set([...addedIds, ...removedIds]));
+    const svcData = allIds.length > 0 ? await prisma.service.findMany({ where: { id: { in: allIds } }, select: { id: true, name: true } }) : [];
+    const nameMap = Object.fromEntries(svcData.map(s => [s.id, s.name]));
+    const added = addedIds.map(id => nameMap[id] || id);
+    const removed = removedIds.map(id => nameMap[id] || id);
+    await logActivity({ userId: user.id, action: "SO_SERVICES_UPDATED", entity: "ServiceOrder", entityId: params.id, details: { added, removed, before: oldIds.length, after: newIds.length } });
+  }
+
   return NextResponse.json({ data: so });
 });
 
 export const DELETE = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
+  const user = (await getCurrentUser()) as any;
   const existing = await prisma.serviceOrder.findUnique({ where: { id: params.id } });
   if (!existing) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
 
@@ -138,5 +190,6 @@ export const DELETE = withAuth(async (req: NextRequest, { params }: { params: { 
   }
 
   await prisma.serviceOrder.update({ where: { id: params.id }, data: { status: "Cancelled" } });
+  await logActivity({ userId: user.id, action: "SO_CANCELLED", entity: "ServiceOrder", entityId: params.id, details: { soNo: existing.soNo } });
   return NextResponse.json({ data: { success: true } });
 });

@@ -298,6 +298,7 @@ model WorkOrder {
   invoices  Invoice[]
   stockOrders StockOrder[]
   stockReturns StockReturn[]
+  photos    Photo[]
 
   @@map("work_orders")
 }
@@ -896,6 +897,7 @@ model PettyCash {
   type        String   // in / out
   amount      Float
   balance     Float
+  category    String?  @default("Lain-lain")
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("petty_cash")
@@ -964,4 +966,17 @@ model ActivityLog {
   timestamp DateTime @default(now())
 
   @@map("activity_logs")
+}
+
+// ─── PHOTOS ───
+model Photo {
+  id          String   @id @default(cuid())
+  woId        String   @map("wo_id")
+  wo          WorkOrder @relation(fields: [woId], references: [id])
+  url         String
+  description String?
+  uploadedBy  String?  @map("uploaded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("photos")
 }

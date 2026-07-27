@@ -6,6 +6,94 @@ import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
+const ACTION_LABELS: Record<string, string> = {
+  SO_CREATED: "SO Dibuat",
+  SO_STATUS_CHANGED: "Status Berubah",
+  SO_UPDATED: "SO Diperbarui",
+  SO_INSPECTION_UPDATED: "Inspection Diperbarui",
+  SO_SPAREPARTS_UPDATED: "Spareparts Diperbarui",
+  SO_SERVICES_UPDATED: "Services Diperbarui",
+  SO_CANCELLED: "SO Dibatalkan",
+  WO_CREATED: "Work Order Dibuat",
+  WO_STATUS_CHANGED: "WO Status Berubah",
+  INVOICE_CREATED: "Invoice Dibuat",
+  PAYMENT_RECEIVED: "Pembayaran Diterima",
+};
+
+const FIELD_LABELS: Record<string, string> = {
+  complaint: "Keluhan",
+  salesperson: "Salesperson",
+  customerId: "Customer",
+  vehicleId: "Kendaraan",
+  odometer: "Odometer",
+  color: "Warna",
+  bookingSource: "Booking Source",
+  referenceNumber: "Ref Number",
+  planServiceTime: "Jam Service",
+  saId: "Service Advisor",
+  date: "Tanggal",
+};
+
+function formatActionLabel(action: string): string {
+  return ACTION_LABELS[action] || action.replace(/_/g, " ");
+}
+
+function formatChangeDescription(log: any): string {
+  try {
+    const d = typeof log.details === "string" ? JSON.parse(log.details) : log.details || {};
+    switch (log.action) {
+      case "SO_CREATED":
+        return `${d.soNo || ""} dibuat untuk ${d.customer || ""} — ${d.vehicle || ""}`;
+      case "SO_STATUS_CHANGED":
+        return `Status berubah dari ${d.from || "?"} ke ${d.to || "?"}`;
+      case "SO_UPDATED": {
+        const keys = Object.keys(d).filter(k => String(d[k]?.from) !== String(d[k]?.to));
+        if (keys.length === 0) return "Tidak ada perubahan";
+        return keys.map(k => {
+          const label = FIELD_LABELS[k] || k;
+          const rawFrom = d[k]?.from;
+          const rawTo = d[k]?.to;
+          const from = rawFrom == null || rawFrom === "" ? "kosong" : k === "date" ? new Date(rawFrom).toLocaleDateString("id-ID") : String(rawFrom);
+          const to = rawTo == null || rawTo === "" ? "kosong" : k === "date" ? new Date(rawTo).toLocaleDateString("id-ID") : String(rawTo);
+          return `Data ${label} diubah dari ${from} menjadi ${to}`;
+        }).join(". ");
+      }
+      case "SO_INSPECTION_UPDATED": {
+        const parts = [];
+        if (d.added?.length) parts.push(`Ditambah: ${d.added.join(", ")}`);
+        if (d.removed?.length) parts.push(`Dihapus: ${d.removed.join(", ")}`);
+        return parts.length > 0 ? parts.join(". ") : `Inspection items: ${d.before || 0} → ${d.after || 0}`;
+      }
+      case "SO_SPAREPARTS_UPDATED": {
+        const parts = [];
+        if (d.added?.length) parts.push(`Ditambah: ${d.added.join(", ")}`);
+        if (d.removed?.length) parts.push(`Dihapus: ${d.removed.join(", ")}`);
+        return parts.length > 0 ? parts.join(". ") : `Spareparts: ${d.before || 0} → ${d.after || 0}`;
+      }
+      case "SO_SERVICES_UPDATED": {
+        const parts = [];
+        if (d.added?.length) parts.push(`Ditambah: ${d.added.join(", ")}`);
+        if (d.removed?.length) parts.push(`Dihapus: ${d.removed.join(", ")}`);
+        return parts.length > 0 ? parts.join(". ") : `Services: ${d.before || 0} → ${d.after || 0}`;
+      }
+      case "SO_CANCELLED":
+        return `${d.soNo || "SO"} dibatalkan`;
+      case "WO_CREATED":
+        return `${d.woNo || "WO"} dibuat — ${d.itemCount || 0} items`;
+      case "WO_STATUS_CHANGED":
+        return `WO status: ${d.from || "?"} → ${d.to || "?"}`;
+      case "INVOICE_CREATED":
+        return `Invoice ${d.invNo || ""} dibuat — Total Rp ${(d.total || 0).toLocaleString("id-ID")}`;
+      case "PAYMENT_RECEIVED":
+        return `Pembayaran Rp ${(d.amount || 0).toLocaleString("id-ID")} (${d.method || "cash"}) — Invoice ${d.invNo || ""}`;
+      default:
+        return JSON.stringify(d);
+    }
+  } catch {
+    return String(log.details || "-");
+  }
+}
+
 export default function ServiceOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -48,6 +136,10 @@ export default function ServiceOrderDetailPage() {
   const [spSearch, setSpSearch] = useState("");
   const [svcDropdownOpen, setSvcDropdownOpen] = useState(false);
   const [spDropdownOpen, setSpDropdownOpen] = useState(false);
+
+  // Changes log
+  const [changes, setChanges] = useState<any[]>([]);
+  const [changesLoading, setChangesLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -102,17 +194,29 @@ export default function ServiceOrderDetailPage() {
     }
   }, [editFields.customerId]);
 
+  const fetchChanges = async () => {
+    if (!order?.id) return;
+    setChangesLoading(true);
+    try {
+      const res = await fetch(`/api/service-orders/${order.id}/changes`);
+      const data = await res.json();
+      setChanges(data.data || []);
+    } catch { /* silent */ }
+    setChangesLoading(false);
+  };
+
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#ea001e", fontSize: 14 }}>{error}</p></div></div>;
   if (!order) return <div style={{ padding: 24 }}><button onClick={() => router.push("/service-orders")} style={S.backBtn}><ArrowLeft size={16} /> Kembali</button><div style={S.card}><p style={{ color: "#444746", fontSize: 14 }}>Data tidak ditemukan: {orderNo}</p></div></div>;
 
   const handleApprove = async () => {
     setShowApproveConfirm(false);
+    const nextStatus = isDiagnosis ? "Delivery" : "Completed";
     await fetch(`/api/service-orders/${order.id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Approved" }),
+      body: JSON.stringify({ status: nextStatus }),
     });
-    setOrder((prev: any) => ({ ...prev, status: "Approved" }));
+    setOrder((prev: any) => ({ ...prev, status: nextStatus }));
   };
 
   const handleDeliver = async () => {
@@ -308,8 +412,9 @@ export default function ServiceOrderDetailPage() {
     color: order.color || order.vehicle?.color || "-",
   };
   const isDraft = order.status === "Draft";
-  const isDelivered = order.status === "Diagnosis";
-  const isApproved = order.status === "Approved";
+  const isDiagnosis = order.status === "Diagnosis";
+  const isDelivered = order.status === "Delivery";
+  const isCompleted = order.status === "Completed";
   const hasWO = (order.workOrders || []).length > 0;
   const wo = hasWO ? (order.workOrders || [])[0] : null;
 
@@ -322,14 +427,16 @@ export default function ServiceOrderDetailPage() {
           <div className="flex flex-wrap gap-1.5">
             <span style={{ ...S.badge, ...(order.status === "Draft" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
             <span style={{ ...S.badge, ...(order.status === "Diagnosis" ? S.badgeActive : S.badgeInactive) }}>DIAGNOSIS</span>
-            <span style={{ ...S.badge, ...(order.status === "Approved" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
+            <span style={{ ...S.badge, ...(order.status === "Delivery" ? S.badgeActive : S.badgeInactive) }}>DELIVERY</span>
+            <span style={{ ...S.badge, ...(order.status === "Completed" ? S.badgeActive : S.badgeInactive) }}>COMPLETED</span>
             </div>
             </div>
             <div className="flex flex-wrap gap-2">
             {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Diagnosis</button>}
-            {isDelivered && <><button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>{hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}</>}
-            {isApproved && !hasWO && <button onClick={() => router.push(`/work-orders/new?sroId=${order.id}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
-            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
+            {isDiagnosis && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Move to Delivery</button>}
+            {isDelivered && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Complete</button>}
+            {isCompleted && !hasWO && <button onClick={() => router.push(`/work-orders/new?sroId=${order.id}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
+            {isCompleted && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
             <button style={S.actionBtn}><Printer size={14} /> Print</button>
             <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
             <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer || "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
@@ -340,7 +447,7 @@ export default function ServiceOrderDetailPage() {
       <div className="flex gap-0 mb-4 border-b-2 border-[#ecebea] overflow-x-auto">
         <button onClick={() => setActiveTab("details")} style={activeTab === "details" ? S.tabActive : S.tab}>Details</button>
         <button onClick={() => setActiveTab("docref")} style={activeTab === "docref" ? S.tabActive : S.tab}>Document Reference</button>
-        <button onClick={() => setActiveTab("changes")} style={activeTab === "changes" ? S.tabActive : S.tab}>Changes</button>
+        <button onClick={() => setActiveTab("changes")} style={activeTab === "changes" ? S.tabActive : S.tab} onMouseEnter={() => { if (changes.length === 0 && !changesLoading && order) fetchChanges(); }}>Changes</button>
       </div>
 
       {/* ─── Details Tab ─── */}
@@ -623,12 +730,49 @@ export default function ServiceOrderDetailPage() {
       {/* ─── Changes Tab ─── */}
       {activeTab === "changes" && (
         <div style={S.card}>
-          <p style={{ color: "#444746", fontSize: 14 }}>Riwayat perubahan belum tersedia.</p>
+          {changesLoading ? (
+            <p style={{ color: "#444746", fontSize: 14 }}>Memuat riwayat...</p>
+          ) : changes.length === 0 ? (
+            <p style={{ color: "#444746", fontSize: 14 }}>Riwayat perubahan belum tersedia.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {changes.map((log: any, i: number) => {
+                const ts = new Date(log.timestamp);
+                const dateStr = ts.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+                const timeStr = ts.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+                const actionColor = log.action.includes("CREATED") ? "#0b8043"
+                  : log.action.includes("CANCELLED") ? "#ea001e"
+                  : log.action.includes("STATUS") ? "#0176d3"
+                  : "#444746";
+                const actionBg = log.action.includes("CREATED") ? "#e6f4ea"
+                  : log.action.includes("CANCELLED") ? "#fce8e6"
+                  : log.action.includes("STATUS") ? "#e8f0fe"
+                  : "#f3f2f2";
+                const desc = formatChangeDescription(log);
+                return (
+                  <div key={log.id} style={{ display: "flex", gap: 12, padding: "12px 0", borderBottom: i < changes.length - 1 ? "1px solid #ecebea" : undefined }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 10 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: actionColor, flexShrink: 0 }} />
+                      {i < changes.length - 1 && <div style={{ width: 2, flex: 1, background: "#ecebea", marginTop: 4 }} />}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: actionColor, background: actionBg, padding: "2px 8px", borderRadius: 4 }}>{formatActionLabel(log.action)}</span>
+                        <span style={{ fontSize: 11, color: "#939393" }}>{dateStr} {timeStr}</span>
+                      </div>
+                      <p style={{ fontSize: 13, color: "#444746", margin: "4px 0 0", lineHeight: 1.5 }}>{desc}</p>
+                      {log.user && <p style={{ fontSize: 11, color: "#939393", margin: "2px 0 0" }}>oleh {log.user.name}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
       {/* Modals */}
-      {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DIAGNOSIS ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
+      {showApproveConfirm && <Modal title={isDiagnosis ? "Move to Delivery?" : "Complete Service Order?"} message={isDiagnosis ? "Status akan berubah dari DIAGNOSIS ke DELIVERY." : "Status akan berubah dari DELIVERY ke COMPLETED."} onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText={isDiagnosis ? "Ya, Move to Delivery" : "Ya, Complete"} />}
       {showDeliverConfirm && <Modal title="Diagnosis Service Order?" message="Status akan berubah dari DRAFT ke DIAGNOSIS." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Diagnosis" />}
       {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${services.length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
 

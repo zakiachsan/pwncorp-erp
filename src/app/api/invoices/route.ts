@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 import { generateInvNumber } from "@/lib/numbering";
+import { logActivity } from "@/lib/activity-log";
 
 export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
@@ -109,6 +110,8 @@ export const POST = withAuth(async (req: NextRequest) => {
       },
     });
   }
+
+  await logActivity({ userId: user.id, action: "INVOICE_CREATED", entity: "Invoice", entityId: invoice.id, details: { invNo: invoice.invNo, woNo: wo.woNo, soId: wo.soId, total } });
 
   return NextResponse.json({ data: invoice }, { status: 201 });
 });

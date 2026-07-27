@@ -87,6 +87,7 @@ export default function NewServiceOrderPage() {
   // ─── Line Items ───
   const [serviceItems, setServiceItems] = useState<{ serviceId: string; qty: number; unitPrice: number }[]>([]);
   const [sparepartItems, setSparepartItems] = useState<{ sparepartId: string; qty: number; unitPrice: number }[]>([]);
+  const [inspectionItems, setInspectionItems] = useState<{ description: string; feedback: string; inspected: boolean }[]>([]);
 
   // ─── Fetch all data on mount ───
   useEffect(() => {
@@ -193,6 +194,7 @@ export default function NewServiceOrderPage() {
         color: form.color || null,
         spareparts: sparepartItems.filter((sp) => sp.sparepartId),
         services: serviceItems.filter((sv) => sv.serviceId),
+        inspectionItems: inspectionItems.filter((item) => item.description),
       };
 
       const res = await fetch("/api/service-orders", {
@@ -250,6 +252,17 @@ export default function NewServiceOrderPage() {
   };
   const removeSparepartItem = (idx: number) => {
     setSparepartItems((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // ─── Inspection items helpers ───
+  const addInspectionItem = () => {
+    setInspectionItems([...inspectionItems, { description: "", feedback: "", inspected: false }]);
+  };
+  const updateInspectionItem = (idx: number, field: string, value: any) => {
+    setInspectionItems((prev) => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+  };
+  const removeInspectionItem = (idx: number) => {
+    setInspectionItems((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // ─── Inline new vehicle form ───
@@ -566,20 +579,35 @@ export default function NewServiceOrderPage() {
       <div style={{ marginTop: 24, borderTop: "1px solid #ecebea", paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "#001526" }}>Inspection List</div>
-          <button style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+          <button onClick={addInspectionItem} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
             <Plus size={14} /> Tambah
           </button>
         </div>
         <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
             <span>No</span>
             <span>Description</span>
             <span>Feedback</span>
             <span style={{ textAlign: "center" }}>Inspected</span>
+            <span></span>
           </div>
-          <div style={{ padding: "24px 12px", textAlign: "center", color: "#8e8f8e", fontSize: 13 }}>
-            Belum ada inspection item
-          </div>
+          {inspectionItems.length === 0 ? (
+            <div style={{ padding: "24px 12px", textAlign: "center", color: "#8e8f8e", fontSize: 13 }}>
+              Belum ada inspection item
+            </div>
+          ) : inspectionItems.map((item, idx) => (
+            <div key={idx} style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px 40px", gap: 0, padding: "6px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
+              <span style={{ fontSize: 12, color: "#444746" }}>{idx + 1}</span>
+              <input value={item.description} onChange={e => updateInspectionItem(idx, "description", e.target.value)} placeholder="Deskripsi..." style={{ border: "1px solid #d8d8d8", borderRadius: 4, fontSize: 13, padding: "4px 8px", outline: "none", background: "#fff" }} />
+              <input value={item.feedback} onChange={e => updateInspectionItem(idx, "feedback", e.target.value)} placeholder="Feedback..." style={{ border: "1px solid #d8d8d8", borderRadius: 4, fontSize: 13, padding: "4px 8px", outline: "none", background: "#fff" }} />
+              <div style={{ textAlign: "center" }}>
+                <input type="checkbox" checked={item.inspected} onChange={e => updateInspectionItem(idx, "inspected", e.target.checked)} style={{ cursor: "pointer" }} />
+              </div>
+              <button onClick={() => removeInspectionItem(idx)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Trash2 size={14} color="#ea001e" />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 

@@ -1,10 +1,52 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Save, ArrowRight } from "lucide-react";
 
 export default function TransferCreatePage() {
   const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+  const [form, setForm] = useState({
+    fromBankId: "",
+    toBankId: "",
+    amount: 0,
+    description: "",
+    date: new Date().toISOString().split("T")[0],
+  });
+
+  useEffect(() => {
+    fetch("/api/bank-accounts?limit=100").then(r => r.json()).then(d => setBankAccounts(d.data || [])).catch(() => {});
+  }, []);
+
+  const handleSave = async () => {
+    if (!form.fromBankId || !form.toBankId || !form.amount) {
+      alert("Akun sumber, tujuan, dan jumlah wajib diisi");
+      return;
+    }
+    if (form.fromBankId === form.toBankId) {
+      alert("Akun sumber dan tujuan harus berbeda");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/transfers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        router.push("/finance/transfers");
+      } else {
+        const err = await res.json();
+        alert(err.error || "Gagal menyimpan");
+      }
+    } catch {
+      alert("Gagal menyimpan");
+    }
+    setSaving(false);
+  };
 
   return (
     <div>
@@ -13,7 +55,9 @@ export default function TransferCreatePage() {
           <button onClick={() => router.back()} className="btn btn--sm"><ArrowLeft size={16} /></button>
           <div className="view-title">Buat Transfer Baru</div>
         </div>
-        <button className="btn btn--brand btn--sm"><Save size={14} /> Simpan</button>
+        <button onClick={handleSave} disabled={saving} className="btn btn--brand btn--sm">
+          <Save size={14} /> {saving ? "Menyimpan..." : "Simpan"}
+        </button>
       </div>
 
       <div className="card-slds max-w-2xl">
@@ -22,11 +66,11 @@ export default function TransferCreatePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="form-group">
               <label className="form-label">Dari Akun *</label>
-              <select className="form-select">
+              <select className="form-select" value={form.fromBankId} onChange={e => setForm(f => ({ ...f, fromBankId: e.target.value }))}>
                 <option value="">Pilih Akun Sumber</option>
-                <option>Kas</option>
-                <option>Bank BCA</option>
-                <option>Bank Mandiri</option>
+                {bankAccounts.map((ba: any) => (
+                  <option key={ba.id} value={ba.id}>{ba.bankName} - {ba.accountNo}</option>
+                ))}
               </select>
             </div>
             <div className="form-group">
@@ -37,25 +81,25 @@ export default function TransferCreatePage() {
             </div>
             <div className="form-group">
               <label className="form-label">Ke Akun *</label>
-              <select className="form-select">
+              <select className="form-select" value={form.toBankId} onChange={e => setForm(f => ({ ...f, toBankId: e.target.value }))}>
                 <option value="">Pilih Akun Tujuan</option>
-                <option>Kas</option>
-                <option>Bank BCA</option>
-                <option>Bank Mandiri</option>
+                {bankAccounts.map((ba: any) => (
+                  <option key={ba.id} value={ba.id}>{ba.bankName} - {ba.accountNo}</option>
+                ))}
               </select>
             </div>
           </div>
           <div className="form-group">
             <label className="form-label">Tanggal Transfer *</label>
-            <input type="date" className="form-input" />
+            <input type="date" className="form-input" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
           </div>
           <div className="form-group">
             <label className="form-label">Jumlah *</label>
-            <input type="number" className="form-input" placeholder="0" />
+            <input type="number" className="form-input" placeholder="0" value={form.amount || ""} onChange={e => setForm(f => ({ ...f, amount: Number(e.target.value) }))} />
           </div>
           <div className="form-group">
             <label className="form-label">Deskripsi *</label>
-            <textarea className="form-input" rows={3} placeholder="Deskripsi transfer..." />
+            <textarea className="form-input" rows={3} placeholder="Deskripsi transfer..." value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
           </div>
         </div>
       </div>

@@ -20,6 +20,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
       items: true,
       invoices: { include: { payments: true } },
       stockOrders: { include: { items: { include: { sparepart: { select: { sku: true, name: true, stockQty: true } } } } } },
+      photos: { orderBy: { createdAt: "desc" } },
     },
   });
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });
@@ -51,7 +52,8 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { status, mekanikId, startDate, targetDate, items } = body;
+  const { status: rawStatus, mekanikId, startDate, targetDate, items } = body;
+  let status = rawStatus;
 
   const existing = await prisma.workOrder.findUnique({
     where: { id: params.id },
@@ -61,42 +63,30 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
 
   // Validate status transition
   if (status) {
+    const normStatus = status.toUpperCase();
+    const normExisting = existing.status.toUpperCase();
     const validTransitions: Record<string, string[]> = {
-      "Draft": ["In Progress", "Waiting Stock", "Cancelled"],
-      "Waiting Stock": ["In Progress", "Confirmed", "Cancelled"],
-      "Confirmed": ["In Progress", "Cancelled"],
-      "In Progress": ["QC", "Cancelled"],
-      "QC": ["Completed", "In Progress"],
-      "Completed": [],
-      "Cancelled": [],
+      "DRAFT": ["WAITING", "IN PROGRESS", "CANCELLED"],
+      "WAITING": ["IN PROGRESS", "CANCELLED"],
+      "IN PROGRESS": ["WAITING FOR QC", "CANCELLED"],
+      "WAITING FOR QC": ["COMPLETED", "IN PROGRESS", "CANCELLED"],
+      "COMPLETED": [],
+      "CANCELLED": [],
     };
-    if (!validTransitions[existing.status]?.includes(status)) {
+    if (!validTransitions[normExisting]?.includes(normStatus)) {
       return NextResponse.json({
         error: `Cannot transition from ${existing.status} to ${status}`,
       }, { status: 400 });
     }
-
-    // Stock check when confirming
-    if (status === "Confirmed") {
-      const sparepartItems = existing.items.filter(i => i.itemType === "sparepart");
-      for (const item of sparepartItems) {
-        const sparepart = await prisma.sparepart.findUnique({ where: { id: item.itemId } });
-        if (!sparepart) continue;
-        if (sparepart.stockQty < item.qty && sparepart.isTracking) {
-          // Auto-transition to Waiting Stock if insufficient
-          await prisma.workOrder.update({
-            where: { id: params.id },
-            data: { status: "Waiting Stock" },
-          });
-          return NextResponse.json({
-            error: `Insufficient stock for ${sparepart.name}: need ${item.qty}, have ${sparepart.stockQty}. Status set to Waiting Stock.`,
-          }, { status: 400 });
-        }
-      }
-    }
+    // Normalize status to title case for DB
+    const titleCase: Record<string, string> = {
+      "DRAFT": "Draft", "WAITING": "Waiting", "IN PROGRESS": "In Progress",
+      "WAITING FOR QC": "Waiting for QC", "COMPLETED": "Completed", "CANCELLED": "Cancelled",
+    };
+    status = titleCase[normStatus] || status;
 
     // Auto-deduct stock when moving to In Progress (mekanik starts working)
-    if (status === "In Progress" && existing.status === "Confirmed") {
+    if (normStatus === "IN PROGRESS") {
       const sparepartItems = existing.items.filter(i => i.itemType === "sparepart");
       for (const item of sparepartItems) {
         await prisma.sparepart.update({
