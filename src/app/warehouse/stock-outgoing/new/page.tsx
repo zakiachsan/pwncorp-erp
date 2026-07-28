@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const formatIDR = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
@@ -118,10 +119,10 @@ export default function NewStockOutgoingPage() {
                     </td>
                     <td className="text-right text-[--color-text-secondary]">{sp ? sp.stockQty : "-"}</td>
                     <td>
-                      <input type="number" min={1} className="form-input w-full text-right" value={it.qty} onChange={e => updateItem(i, "qty", parseInt(e.target.value) || 1)} />
+                      <FormattedNumberInput className="form-input w-full text-right" value={it.qty} onChange={val => updateItem(i, "qty", Math.max(1, val) || 1)} />
                     </td>
                     <td>
-                      <input type="number" min={0} className="form-input w-full text-right" value={it.unitPrice} onChange={e => updateItem(i, "unitPrice", parseFloat(e.target.value) || 0)} />
+                      <FormattedNumberInput className="form-input w-full text-right" value={it.unitPrice} onChange={val => updateItem(i, "unitPrice", val)} />
                     </td>
                     <td className="text-right font-semibold">{formatIDR((it.qty || 0) * (it.unitPrice || 0))}</td>
                     <td className="text-center">

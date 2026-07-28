@@ -3,6 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, CheckCircle, Ban, ShieldCheck } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -215,15 +216,15 @@ export default function StockOpnameDetailPage() {
                       <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{it.sku} — {it.name}</td>
                       <td style={{ ...S.td, textAlign: "right", background: "#f9f9f9" }}>{it.systemQty}</td>
                       <td style={{ ...S.td, textAlign: "right" }}>
-                        <input type="number" min={0} className="form-input text-right" style={{ width: 80 }}
-                          value={it.countedQty} onChange={e => updateCounted(i, "countedQty", e.target.value)} />
+                        <FormattedNumberInput className="form-input text-right" style={{ width: 80 }}
+                                                  value={parseInt(it.countedQty) || 0} onChange={val => updateCounted(i, "countedQty", String(val))} />
                       </td>
                       <td style={{ ...S.td, textAlign: "right", fontWeight: 600, color: diff !== 0 ? "#ea001e" : "#2e844a" }}>
                         {diff > 0 ? `+${diff}` : diff}
                       </td>
                       <td style={{ ...S.td, textAlign: "right" }}>
-                        <input type="number" min={0} className="form-input text-right" style={{ width: 80 }}
-                          value={it.approvedQty} onChange={e => updateCounted(i, "approvedQty", e.target.value)} />
+                        <FormattedNumberInput className="form-input text-right" style={{ width: 80 }}
+                                                  value={parseInt(it.approvedQty) || 0} onChange={val => updateCounted(i, "approvedQty", String(val))} />
                       </td>
                       <td style={S.td}>
                         <input type="text" className="form-input" style={{ width: 140 }} placeholder="Alasan..."

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function NewStockReturnPage() {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function NewStockReturnPage() {
                     <option key={sp.id} value={sp.id}>{sp.sku} — {sp.name}</option>
                   ))}
                 </select>
-                <input type="number" min={1} className="form-input col-span-3" value={item.qty} onChange={(e) => setItem(i, "qty", Number(e.target.value))} />
+                <FormattedNumberInput className="form-input col-span-3" value={item.qty} onChange={(val) => setItem(i, "qty", Math.max(1, val) || 1)} />
                 <button onClick={() => removeItem(i)} disabled={items.length === 1} className="col-span-1 p-2 text-red-500 disabled:opacity-30">
                   <Trash2 size={14} />
                 </button>

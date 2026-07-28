@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Save, ChevronDown, Plus, Search, Trash2, Loader2, X } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 // ─── Types ───
 interface Customer { id: string; name: string; phone?: string; type?: string }
@@ -636,18 +637,14 @@ export default function NewServiceOrderPage() {
                   onChange={(id) => updateServiceItem(idx, "serviceId", id)}
                   placeholder="Cari jasa..."
                 />
-                <input
-                  type="number"
-                  min={1}
+                <FormattedNumberInput
                   value={item.qty}
-                  onChange={(e) => updateServiceItem(idx, "qty", parseInt(e.target.value) || 1)}
+                  onChange={(val) => updateServiceItem(idx, "qty", Math.max(1, val) || 1)}
                   style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "center" }}
                 />
-                <input
-                  type="number"
-                  min={0}
+                <FormattedNumberInput
                   value={item.unitPrice}
-                  onChange={(e) => updateServiceItem(idx, "unitPrice", parseFloat(e.target.value) || 0)}
+                  onChange={(val) => updateServiceItem(idx, "unitPrice", val)}
                   style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "right" }}
                 />
                 <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600 }}>
@@ -698,18 +695,14 @@ export default function NewServiceOrderPage() {
                   onChange={(id) => updateSparepartItem(idx, "sparepartId", id)}
                   placeholder="Cari suku cadang..."
                 />
-                <input
-                  type="number"
-                  min={1}
+                <FormattedNumberInput
                   value={item.qty}
-                  onChange={(e) => updateSparepartItem(idx, "qty", parseInt(e.target.value) || 1)}
+                  onChange={(val) => updateSparepartItem(idx, "qty", Math.max(1, val) || 1)}
                   style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "center" }}
                 />
-                <input
-                  type="number"
-                  min={0}
+                <FormattedNumberInput
                   value={item.unitPrice}
-                  onChange={(e) => updateSparepartItem(idx, "unitPrice", parseFloat(e.target.value) || 0)}
+                  onChange={(val) => updateSparepartItem(idx, "unitPrice", val)}
                   style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "right" }}
                 />
                 <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600 }}>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Save, Package } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -153,8 +154,8 @@ export default function NewStockOrderPage() {
                   <td className="font-medium" style={{ color: "var(--color-brand)" }}>{it.sku} — {it.name}</td>
                   <td className="text-right text-[--color-text-secondary]">{it.stockQty}</td>
                   <td>
-                    <input type="number" min={1} className="form-input w-full text-right" value={it.orderQty}
-                      onChange={e => updateItem(i, "orderQty", parseInt(e.target.value) || 1)} />
+                    <FormattedNumberInput className="form-input w-full text-right" value={it.orderQty}
+                      onChange={val => updateItem(i, "orderQty", Math.max(1, val) || 1)} />
                   </td>
                   <td className="text-right">{fmt(it.avgCost)}</td>
                   <td>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const emptyForm = {
   sku: "", code: "", name: "", brand: "", category: "", type: "",
@@ -113,19 +114,19 @@ export default function NewProductPage() {
           </div>
           <div>
             <label className="form-label">Buy Price (Rp)</label>
-            <input type="number" className="form-input" value={form.buyPrice} onChange={(e) => set("buyPrice", Number(e.target.value))} />
+            <FormattedNumberInput className="form-input" value={form.buyPrice} onChange={(val) => set("buyPrice", val)} />
           </div>
           <div>
             <label className="form-label">Sell Price (Rp)</label>
-            <input type="number" className="form-input" value={form.sellPrice} onChange={(e) => set("sellPrice", Number(e.target.value))} />
+            <FormattedNumberInput className="form-input" value={form.sellPrice} onChange={(val) => set("sellPrice", val)} />
           </div>
           <div>
             <label className="form-label">Min Stock</label>
-            <input type="number" className="form-input" value={form.minStock} onChange={(e) => set("minStock", Number(e.target.value))} />
+            <FormattedNumberInput className="form-input" value={form.minStock} onChange={(val) => set("minStock", val)} />
           </div>
           <div>
             <label className="form-label">Stock Qty</label>
-            <input type="number" className="form-input" value={form.stockQty} onChange={(e) => set("stockQty", Number(e.target.value))} />
+            <FormattedNumberInput className="form-input" value={form.stockQty} onChange={(val) => set("stockQty", val)} />
           </div>
           <div>
             <label className="form-label">Location</label>

@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -627,11 +628,11 @@ export default function ServiceOrderDetailPage() {
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={S.formLabel}>Qty</label>
-                        <input type="number" min={1} value={newService.qty} onChange={e => setNewService(prev => ({ ...prev, qty: parseInt(e.target.value) || 1 }))} style={S.formInput} />
+                        <FormattedNumberInput value={newService.qty} onChange={val => setNewService(prev => ({ ...prev, qty: Math.max(1, val) || 1 }))} style={S.formInput} />
                       </div>
                       <div style={{ width: 130 }}>
                         <label style={S.formLabel}>Unit Price</label>
-                        <input type="number" min={0} value={newService.unitPrice} onChange={e => setNewService(prev => ({ ...prev, unitPrice: parseInt(e.target.value) || 0 }))} style={S.formInput} />
+                        <FormattedNumberInput value={newService.unitPrice} onChange={val => setNewService(prev => ({ ...prev, unitPrice: val }))} style={S.formInput} />
                       </div>
                       <button onClick={addServiceRow} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Tambah</button>
                       <button onClick={() => { setShowAddService(false); setSvcSearch(""); }} style={S.actionBtn}><X size={14} /></button>
@@ -686,11 +687,11 @@ export default function ServiceOrderDetailPage() {
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={S.formLabel}>Qty</label>
-                        <input type="number" min={1} value={newSparepart.qty} onChange={e => setNewSparepart(prev => ({ ...prev, qty: parseInt(e.target.value) || 1 }))} style={S.formInput} />
+                        <FormattedNumberInput value={newSparepart.qty} onChange={val => setNewSparepart(prev => ({ ...prev, qty: Math.max(1, val) || 1 }))} style={S.formInput} />
                       </div>
                       <div style={{ width: 130 }}>
                         <label style={S.formLabel}>Unit Price</label>
-                        <input type="number" min={0} value={newSparepart.unitPrice} onChange={e => setNewSparepart(prev => ({ ...prev, unitPrice: parseInt(e.target.value) || 0 }))} style={S.formInput} />
+                        <FormattedNumberInput value={newSparepart.unitPrice} onChange={val => setNewSparepart(prev => ({ ...prev, unitPrice: val }))} style={S.formInput} />
                       </div>
                       <button onClick={addSparepartRow} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Tambah</button>
                       <button onClick={() => { setShowAddSparepart(false); setSpSearch(""); }} style={S.actionBtn}><X size={14} /></button>
@@ -925,13 +926,13 @@ function ServicesTableEdit({ services, totalQty, grandTotal, editMode, onUpdate,
                 <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => !editMode && router.push(`/master-data/services/${s.sku || ""}`)}>{s.sku} - {s.name}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (
-                    <input type="number" min={1} value={svc.qty} onChange={e => onUpdate(i, "qty", parseInt(e.target.value) || 1)}
-                      style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                    <FormattedNumberInput value={svc.qty} onChange={val => onUpdate(i, "qty", Math.max(1, val) || 1)}
+                      style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                   ) : svc.qty}
                 </td>
                 <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (
-                    <input type="number" min={0} value={svc.unitPrice} onChange={e => onUpdate(i, "unitPrice", parseInt(e.target.value) || 0)}
+                    <FormattedNumberInput value={svc.unitPrice} onChange={val => onUpdate(i, "unitPrice", val)}
                       style={{ width: 100, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                   ) : fmt(svc.unitPrice)}
                 </td>
@@ -989,13 +990,13 @@ function SparepartTableEdit({ spareparts, editMode, onUpdate, onRemove }: {
                 <td style={S.td}>{s.name || "-"}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (
-                    <input type="number" min={1} value={sp.qty} onChange={e => onUpdate(i, "qty", parseInt(e.target.value) || 1)}
-                      style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                    <FormattedNumberInput value={sp.qty} onChange={val => onUpdate(i, "qty", Math.max(1, val) || 1)}
+                      style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                   ) : sp.qty}
                 </td>
                 <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (
-                    <input type="number" min={0} value={sp.unitPrice} onChange={e => onUpdate(i, "unitPrice", parseInt(e.target.value) || 0)}
+                    <FormattedNumberInput value={sp.unitPrice} onChange={val => onUpdate(i, "unitPrice", val)}
                       style={{ width: 100, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                   ) : fmt(sp.unitPrice)}
                 </td>

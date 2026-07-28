@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Save, ChevronDown, Plus, X } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function NewSparepartPage() {
   const router = useRouter();
@@ -89,9 +90,18 @@ export default function NewSparepartPage() {
         </div>
         {/* Right Column */}
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-          <FInput label="BUY PRICE" placeholder="Contoh: 75000" type="number" value={fieldValues["BUY PRICE"] || ""} onChange={(v) => updateField("BUY PRICE", v)} />
-          <FInput label="SELL PRICE" placeholder="Contoh: 85000" type="number" value={fieldValues["SELL PRICE"] || ""} onChange={(v) => updateField("SELL PRICE", v)} />
-          <FInput label="MIN STOCK" placeholder="Contoh: 10" type="number" value={fieldValues["MIN STOCK"] || ""} onChange={(v) => updateField("MIN STOCK", v)} />
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>BUY PRICE</div>
+            <FormattedNumberInput placeholder="Contoh: 75000" value={parseFloat(fieldValues["BUY PRICE"]) || 0} onChange={(val) => updateField("BUY PRICE", String(val))} style={{ width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>SELL PRICE</div>
+            <FormattedNumberInput placeholder="Contoh: 85000" value={parseFloat(fieldValues["SELL PRICE"]) || 0} onChange={(val) => updateField("SELL PRICE", String(val))} style={{ width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 4 }}>MIN STOCK</div>
+            <FormattedNumberInput placeholder="Contoh: 10" value={parseFloat(fieldValues["MIN STOCK"]) || 0} onChange={(val) => updateField("MIN STOCK", String(val))} style={{ width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+          </div>
           <FInput label="LOCATION" placeholder="Contoh: Rak A-01" value={fieldValues["LOCATION"] || ""} onChange={(v) => updateField("LOCATION", v)} />
           <div style={{ marginTop: 20 }}>
             <button onClick={handleSave} disabled={loading} style={{ ...S.saveBtn, background: loading ? "#a0c4e8" : "#0176d3", color: "#fff", border: "1px solid #0176d3", cursor: loading ? "not-allowed" : "pointer" }}>

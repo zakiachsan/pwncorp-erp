@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Truck, Plus, Trash2, ArrowLeft, Save, Loader2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 interface ItemRow {
   sparepartId: string;
@@ -142,22 +143,18 @@ export default function NewPurchaseRequestPage() {
                     </select>
                   </td>
                   <td>
-                    <input
-                      type="number"
-                      min={1}
-                      className="form-input w-full"
-                      value={it.qty}
-                      onChange={(e) => setItem(i, "qty", Number(e.target.value))}
-                    />
+                    <FormattedNumberInput
+                                          className="form-input w-full"
+                                          value={it.qty}
+                                          onChange={(val) => setItem(i, "qty", Math.max(1, val) || 1)}
+                                        />
                   </td>
                   <td>
-                    <input
-                      type="number"
-                      min={0}
-                      className="form-input w-full"
-                      value={it.unitPrice}
-                      onChange={(e) => setItem(i, "unitPrice", Number(e.target.value))}
-                    />
+                    <FormattedNumberInput
+                                          className="form-input w-full"
+                                          value={it.unitPrice}
+                                          onChange={(val) => setItem(i, "unitPrice", val)}
+                                        />
                   </td>
                   <td className="font-medium">{formatIDR((it.qty || 0) * (it.unitPrice || 0))}</td>
                   <td className="text-center">

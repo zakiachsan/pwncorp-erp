@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function NewPurchaseInvoicePage() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function NewPurchaseInvoicePage() {
           </div>
           <div>
             <label className="form-label">Total (Rp) *</label>
-            <input type="number" className="form-input" value={form.total} onChange={(e) => setForm({ ...form, total: Number(e.target.value) })} />
+            <FormattedNumberInput className="form-input" value={form.total} onChange={(val) => setForm({ ...form, total: val })} />
           </div>
           <div>
             <label className="form-label">Due Date</label>

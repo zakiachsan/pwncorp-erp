@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X, FileText, Play } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -98,6 +99,7 @@ export default function WorkOrderDetailPage() {
         const services = items
           .filter((it: any) => it.itemType === "service" || it.itemType === "SERVICE")
           .map((it: any, i: number) => ({
+            itemId: it.itemId || "",
             item: it.name || it.itemName || it.description || "-",
             description: it.description || it.itemName || "-",
             quantity: it.qty || it.quantity || 1,
@@ -112,6 +114,7 @@ export default function WorkOrderDetailPage() {
         const spareparts = items
           .filter((it: any) => it.itemType === "sparepart" || it.itemType === "SPAREPART")
           .map((it: any) => ({
+            itemId: it.itemId || "",
             code: it.sku || it.code || it.itemId || "-",
             name: it.sparepartName || it.itemName || "-",
             qty: it.qty || it.quantity || 0,
@@ -1097,8 +1100,8 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
               <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
               <td style={{ ...S.td, textAlign: "right" }}>
                 {editMode ? (
-                  <input type="number" min={1} value={svc.quantity} onChange={e => onUpdate(i, "quantity", parseInt(e.target.value) || 1)}
-                    style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  <FormattedNumberInput value={svc.quantity} onChange={val => onUpdate(i, "quantity", Math.max(1, val) || 1)}
+                                      style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                 ) : svc.quantity}
               </td>
               <td className="hidden md:table-cell" style={S.td}>
@@ -1195,13 +1198,13 @@ function WOSparepartTable({ spareparts, editMode, onUpdate, onRemove, totalCost 
               <td style={S.td}>{sp.name}</td>
               <td style={{ ...S.td, textAlign: "right" }}>
                 {editMode ? (
-                  <input type="number" min={1} value={sp.qty} onChange={e => onUpdate(i, "qty", parseInt(e.target.value) || 1)}
-                    style={{ width: 56, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  <FormattedNumberInput value={sp.qty} onChange={val => onUpdate(i, "qty", Math.max(1, val) || 1)}
+                    style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                 ) : sp.qty}
               </td>
               <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
                 {editMode ? (
-                  <input type="number" min={0} value={sp.price} onChange={e => onUpdate(i, "price", parseInt(e.target.value) || 0)}
+                  <FormattedNumberInput value={sp.price} onChange={val => onUpdate(i, "price", val)}
                     style={{ width: 100, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                 ) : fmt(sp.price)}
               </td>

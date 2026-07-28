@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Save, Plus, Trash2, CheckCircle, XCircle } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 interface ItemRow {
   sparepartId: string;
@@ -308,7 +309,7 @@ export default function NewPOPage() {
                         </select>
                       </td>
                       <td className="text-right">
-                        <input type="number" className="form-input text-right" value={item.qty} onChange={(e) => updateItem(idx, "qty", parseInt(e.target.value) || 0)} style={{ width: 80 }} />
+                        <FormattedNumberInput className="form-input text-right" value={item.qty} onChange={(val) => updateItem(idx, "qty", val)} style={{ width: 80 }} />
                       </td>
                       <td>
                         <select className="form-select" value={item.unit} onChange={(e) => updateItem(idx, "unit", e.target.value)} style={{ width: 80 }}>
@@ -375,11 +376,10 @@ export default function NewPOPage() {
                           return (
                             <td key={v.id} className="text-center" style={{ background: isLowest ? "#f0fdf4" : undefined }}>
                               <div className="flex flex-col items-center">
-                                <input
-                                  type="number"
+                                <FormattedNumberInput
                                   className="form-input text-center text-xs"
-                                  value={price || ""}
-                                  onChange={(e) => updateVendorPrice(vIdx, itemIdx, parseInt(e.target.value) || 0)}
+                                  value={price || 0}
+                                  onChange={(val) => updateVendorPrice(vIdx, itemIdx, val)}
                                   placeholder="0"
                                   style={{ width: 110, fontSize: 11 }}
                                 />

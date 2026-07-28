@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 interface InvoiceItem {
   id: number;
@@ -174,8 +175,8 @@ export default function InvoiceCreatePage() {
                   {items.map((item) => (
                     <tr key={item.id}>
                       <td><input type="text" className="form-input" value={item.description} onChange={(e) => updateItem(item.id, "description", e.target.value)} placeholder="Nama item / jasa" /></td>
-                      <td className="text-right"><input type="number" className="form-input text-right" value={item.qty} onChange={(e) => updateItem(item.id, "qty", Number(e.target.value))} style={{ width: 60 }} /></td>
-                      <td className="text-right"><input type="number" className="form-input text-right" value={item.unitPrice} onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))} style={{ width: 120 }} /></td>
+                      <td className="text-right"><FormattedNumberInput className="form-input text-right" value={item.qty} onChange={(val) => updateItem(item.id, "qty", Math.max(1, val) || 1)} style={{ width: 60 }} /></td>
+                      <td className="text-right"><FormattedNumberInput className="form-input text-right" value={item.unitPrice} onChange={(val) => updateItem(item.id, "unitPrice", val)} style={{ width: 120 }} /></td>
                       <td className="text-right font-medium">Rp {(item.qty * item.unitPrice).toLocaleString("id-ID")}</td>
                       <td><button onClick={() => removeItem(item.id)} className="text-[--color-error] hover:text-red-700 p-1"><Trash2 size={14} /></button></td>
                     </tr>

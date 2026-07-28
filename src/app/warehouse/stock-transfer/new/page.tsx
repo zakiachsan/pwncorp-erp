@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowUpDown, Save, Plus, Trash2, AlertTriangle } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 type Sparepart = { id: string; sku: string; code?: string | null; name: string; stockQty: number; unit?: string };
 type TransferRow = { sparepartId: string; qty: number };
@@ -187,13 +188,11 @@ export default function NewStockTransferPage() {
                       {sp ? `${sp.stockQty}${sp.unit ? " " + sp.unit : ""}` : "-"}
                     </td>
                     <td>
-                      <input
-                        type="number"
-                        min={1}
-                        className="form-input text-right"
-                        value={item.qty}
-                        onChange={(e) => setItem(i, "qty", parseInt(e.target.value) || 0)}
-                      />
+                      <FormattedNumberInput
+                                              className="form-input text-right"
+                                              value={item.qty}
+                                              onChange={(val) => setItem(i, "qty", Math.max(1, val) || 1)}
+                                            />
                     </td>
                     <td>
                       <button

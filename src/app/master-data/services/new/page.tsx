@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { ArrowLeft, Save } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function CreateServicePage() {
   const router = useRouter();

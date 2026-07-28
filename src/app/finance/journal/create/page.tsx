@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 import { useState, useEffect } from "react";
 
 interface JournalLine {
@@ -156,8 +157,8 @@ export default function JournalCreatePage() {
                           ))}
                         </select>
                       </td>
-                      <td className="text-right"><input type="number" className="form-input text-right" value={line.debit} onChange={(e) => updateLine(line.id, "debit", Number(e.target.value))} style={{ width: 120 }} /></td>
-                      <td className="text-right"><input type="number" className="form-input text-right" value={line.credit} onChange={(e) => updateLine(line.id, "credit", Number(e.target.value))} style={{ width: 120 }} /></td>
+                      <td className="text-right"><FormattedNumberInput className="form-input text-right" value={line.debit} onChange={(val) => updateLine(line.id, "debit", val)} style={{ width: 120 }} /></td>
+                      <td className="text-right"><FormattedNumberInput className="form-input text-right" value={line.credit} onChange={(val) => updateLine(line.id, "credit", val)} style={{ width: 120 }} /></td>
                       <td><button onClick={() => removeLine(line.id)} className="text-[--color-error] hover:text-red-700 p-1"><Trash2 size={14} /></button></td>
                     </tr>
                   ))}

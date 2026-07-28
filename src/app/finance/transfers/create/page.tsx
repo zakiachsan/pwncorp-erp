@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Save, ArrowRight } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function TransferCreatePage() {
   const router = useRouter();
@@ -95,7 +96,7 @@ export default function TransferCreatePage() {
           </div>
           <div className="form-group">
             <label className="form-label">Jumlah *</label>
-            <input type="number" className="form-input" placeholder="0" value={form.amount || ""} onChange={e => setForm(f => ({ ...f, amount: Number(e.target.value) }))} />
+            <FormattedNumberInput className="form-input" placeholder="0" value={form.amount || 0} onChange={val => setForm(f => ({ ...f, amount: val }))} />
           </div>
           <div className="form-group">
             <label className="form-label">Deskripsi *</label>

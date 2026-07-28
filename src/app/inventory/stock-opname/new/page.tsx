@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Save, Plus, Trash2, AlertTriangle } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 type Sparepart = { id: string; sku: string; code?: string | null; name: string; stockQty: number; unit?: string };
 type OpnameRow = { sparepartId: string; name: string; systemStock: string; actualStock: string; reason: string };
@@ -220,7 +221,6 @@ export default function NewStockOpnamePage() {
                       </td>
                       <td style={S.td}>
                         <input
-                          type="number"
                           placeholder="0"
                           value={item.systemStock}
                           readOnly
@@ -229,10 +229,9 @@ export default function NewStockOpnamePage() {
                       </td>
                       <td style={S.td}>
                         <input
-                          type="number"
                           placeholder="0"
                           value={item.actualStock}
-                          onChange={(e) => handleItemChange(i, "actualStock", e.target.value)}
+                          onChange={(val) => handleItemChange(i, "actualStock", String(val))}
                           style={{ ...S.input, textAlign: "right" }}
                         />
                       </td>

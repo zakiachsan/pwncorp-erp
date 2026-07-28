@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Save, ChevronDown, Plus } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function EditSparepartPage() {
   const params = useParams();
@@ -151,9 +152,9 @@ export default function EditSparepartPage() {
         </div>
         {/* Right Column */}
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
-          <FInput label="BUY PRICE" value={formData.buyPrice} onChange={(v) => setFormData({ ...formData, buyPrice: v })} type="number" />
-          <FInput label="SELL PRICE" value={formData.sellPrice} onChange={(v) => setFormData({ ...formData, sellPrice: v })} type="number" />
-          <FInput label="MIN STOCK" value={formData.minStock} onChange={(v) => setFormData({ ...formData, minStock: v })} type="number" />
+          <FormattedNumberInput value={parseFloat(formData.buyPrice) || 0} onChange={(val) => setFormData({ ...formData, buyPrice: String(val) })} style={{ width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+          <FormattedNumberInput value={parseFloat(formData.sellPrice) || 0} onChange={(val) => setFormData({ ...formData, sellPrice: String(val) })} style={{ width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
+          <FormattedNumberInput value={parseFloat(formData.minStock) || 0} onChange={(val) => setFormData({ ...formData, minStock: String(val) })} style={{ width: "100%", padding: "8px 12px", fontSize: 13, color: "#001526", border: "1px solid #d8d8d8", borderRadius: 6, outline: "none" }} />
           <FInput label="LOCATION" value={formData.location} onChange={(v) => setFormData({ ...formData, location: v })} placeholder="Contoh: Rak A-01" />
           {/* Supplier dropdown */}
           <div style={{ marginBottom: 14 }}>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function ServicePackageEditPage() {
   const params = useParams();
@@ -94,7 +95,7 @@ export default function ServicePackageEditPage() {
           </div>
           <div>
             <label className="form-label">Price (Rp)</label>
-            <input type="number" className="form-input" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+            <FormattedNumberInput className="form-input" value={form.price} onChange={(val) => setForm({ ...form, price: val })} />
           </div>
           <div>
             <label className="form-label">Tax</label>

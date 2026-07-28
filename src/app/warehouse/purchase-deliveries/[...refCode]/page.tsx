@@ -3,6 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Printer, CheckCircle, Ban, Edit, Save, X, Truck } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -278,8 +279,8 @@ export default function PurchaseDeliveryDetailPage() {
                       <td style={S.td}>{item.name}</td>
                       <td style={{ ...S.td, textAlign: "right" }}>{item.qtyOrdered}</td>
                       <td>
-                        <input type="number" min={0} max={item.qtyOrdered} className="form-input w-full text-right"
-                          value={item.qtyReceived} onChange={e => updateEditItem(i, "qtyReceived", parseInt(e.target.value) || 0)} />
+                        <FormattedNumberInput className="form-input w-full text-right"
+                                                  value={item.qtyReceived} onChange={val => updateEditItem(i, "qtyReceived", val)} />
                       </td>
                     </tr>
                   ))}

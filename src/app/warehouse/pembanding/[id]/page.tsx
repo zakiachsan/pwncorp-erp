@@ -3,6 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Plus, Trash2, Check, Star } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 export default function PembandingDetailPage() {
   const router = useRouter();
@@ -170,7 +171,7 @@ export default function PembandingDetailPage() {
                 </div>
                 <div>
                   <label className="form-label">Lead Time (hari)</label>
-                  <input type="number" className="form-input" value={form.leadTime} onChange={(e) => setForm({ ...form, leadTime: Number(e.target.value) })} />
+                  <FormattedNumberInput className="form-input" value={form.leadTime} onChange={(val) => setForm({ ...form, leadTime: val })} />
                 </div>
               </div>
               <div>
@@ -185,7 +186,7 @@ export default function PembandingDetailPage() {
                     return (
                       <div key={i} className="grid grid-cols-12 gap-2 items-center">
                         <div className="col-span-8 text-sm">{sp?.sparepart?.sku} — {sp?.sparepart?.name}</div>
-                        <input type="number" className="form-input col-span-4" placeholder="Harga" value={item.unitPrice || ""} onChange={(e) => setItem(i, "unitPrice", Number(e.target.value))} />
+                        <FormattedNumberInput className="form-input col-span-4" placeholder="Harga" value={item.unitPrice || 0} onChange={(val) => setItem(i, "unitPrice", val)} />
                       </div>
                     );
                   })}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Save, Plus, Trash2, Search } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 type Sparepart = { id: string; sku: string; name: string; stockQty: number };
 type OpnameRow = { sparepartId: string; systemQty: string; physicalQty: string; reason: string };
@@ -175,8 +176,8 @@ export default function NewStockOpnamePage() {
                   )}
                 </td>
                 <td>
-                  <input type="number" min={0} className="form-input text-right" value={item.physicalQty}
-                    onChange={e => setItem(i, "physicalQty", e.target.value)} placeholder="0" />
+                  <FormattedNumberInput className="form-input text-right" value={parseInt(item.physicalQty) || 0}
+                    onChange={val => setItem(i, "physicalQty", String(val))} placeholder="0" />
                 </td>
                 <td>
                   <button onClick={() => removeItem(i)} disabled={items.length <= 1}

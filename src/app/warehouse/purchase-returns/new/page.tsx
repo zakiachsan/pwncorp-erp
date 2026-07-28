@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const formatIDR = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
@@ -164,12 +165,12 @@ export default function NewPurchaseReturnPage() {
                     <td>{it.name}</td>
                     <td className="text-right text-[--color-text-secondary]">{it.maxQty}</td>
                     <td>
-                      <input type="number" min={1} max={it.maxQty} className="form-input w-full text-right"
-                        value={it.qty} onChange={e => updateItem(i, "qty", Math.min(parseInt(e.target.value) || 1, it.maxQty))} />
+                      <FormattedNumberInput className="form-input w-full text-right"
+                        value={it.qty} onChange={val => updateItem(i, "qty", Math.min(Math.max(1, val) || 1, it.maxQty))} />
                     </td>
                     <td>
-                      <input type="number" min={0} className="form-input w-full text-right"
-                        value={it.unitPrice} onChange={e => updateItem(i, "unitPrice", parseFloat(e.target.value) || 0)} />
+                      <FormattedNumberInput className="form-input w-full text-right"
+                        value={it.unitPrice} onChange={val => updateItem(i, "unitPrice", val)} />
                     </td>
                     <td className="text-right font-semibold">{formatIDR((it.qty || 0) * (it.unitPrice || 0))}</td>
                     <td className="text-center">

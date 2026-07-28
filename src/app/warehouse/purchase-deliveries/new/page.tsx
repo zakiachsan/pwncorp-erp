@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Truck, ArrowLeft, Save, Loader2 } from "lucide-react";
+import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 interface DeliveryItemRow {
   sparepartId: string;
@@ -178,13 +179,11 @@ export default function NewPurchaseDeliveryPage() {
                     </td>
                     <td>{it.qtyOrdered}</td>
                     <td>
-                      <input
-                        type="number"
-                        min={0}
-                        className="form-input w-full"
-                        value={it.qtyReceived}
-                        onChange={(e) => setQtyReceived(i, Number(e.target.value))}
-                      />
+                      <FormattedNumberInput
+                                              className="form-input w-full"
+                                              value={it.qtyReceived}
+                                              onChange={(val) => setQtyReceived(i, val)}
+                                            />
                     </td>
                   </tr>
                 ))}
