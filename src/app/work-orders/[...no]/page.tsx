@@ -419,8 +419,20 @@ export default function WorkOrderDetailPage() {
         </div>
         <div className="flex gap-2">
           <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
-          {(wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (
-            <button style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }} onClick={() => { handleStatusUpdate("IN PROGRESS"); setShowStartActions(true); }}><Play size={14} /> Start</button>
+          {/* Start button - only show if no spareparts OR stock orders already created */}
+          {(wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (() => {
+            const hasSpareparts = (wo.spareparts || []).length > 0;
+            const hasStockOrders = (wo.stockOrders || []).length > 0;
+            // Can only start if: no spareparts needed, OR stock orders already created
+            const canStart = !hasSpareparts || hasStockOrders;
+            if (!canStart) return null;
+            return (
+              <button style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }} onClick={() => { handleStatusUpdate("IN PROGRESS"); setShowStartActions(true); }}><Play size={14} /> Start</button>
+            );
+          })()}
+          {/* Show message if stock orders needed but not created yet */}
+          {(wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (wo.spareparts || []).length > 0 && (wo.stockOrders || []).length === 0 && (
+            <span style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b", cursor: "default", fontSize: 11 }}>Buat Stock Orders dulu</span>
           )}
           {showStartActions && (
             <>
