@@ -15,7 +15,7 @@ export default function JournalDetailPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`/api/journal/${no}`)
+    fetch(`/api/journal/${encodeURIComponent(no)}`)
       .then((r) => r.json())
       .then((json) => { setJournal(json.data); setLoading(false); })
       .catch(() => { setError("Failed to load journal"); setLoading(false); });

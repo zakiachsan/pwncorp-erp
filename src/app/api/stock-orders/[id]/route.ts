@@ -143,5 +143,55 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
     },
   });
 
+  // Auto journal on RECEIVED: Persediaan (D) vs Hutang Usaha (K)
+  if (targetStatus === "RECEIVED") {
+    try {
+      const persediaanCOA = await prisma.cOA.findFirst({ where: { code: "1300" } });
+      const hutangCOA = await prisma.cOA.findFirst({ where: { code: "2100" } });
+      if (persediaanCOA && hutangCOA) {
+        let totalValue = 0;
+        const details: any[] = [];
+        for (const item of existing.items) {
+          const sp = item.sparepart;
+          const sentQty = item.sentQty || item.qty;
+          const itemTotal = (sp?.buyPrice || 0) * sentQty;
+          totalValue += itemTotal;
+          if (itemTotal > 0) {
+            details.push({
+              coaId: persediaanCOA.id,
+              description: `Persediaan ${sp?.name || sp?.sku || item.sparepartId} x${sentQty}`,
+              debit: itemTotal,
+              credit: 0,
+            });
+          }
+        }
+        if (totalValue > 0) {
+          details.push({
+            coaId: hutangCOA.id,
+            description: `Hutang Pembelian ${so.orderNo}`,
+            debit: 0,
+            credit: totalValue,
+          });
+          const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+          await prisma.journalEntry.create({
+            data: {
+              jeNo,
+              date: new Date(),
+              description: `Stock Order ${so.orderNo} diterima`,
+              refType: "stock_order",
+              refId: so.id,
+              storeId: so.storeId,
+              status: "Posted",
+              createdById: user.id,
+              details: { create: details },
+            },
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Auto-journal (stock order received) failed:", err);
+    }
+  }
+
   return NextResponse.json({ data: so });
 });

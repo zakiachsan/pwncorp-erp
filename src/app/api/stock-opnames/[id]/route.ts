@@ -90,6 +90,80 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
       }
     }
 
+    // Auto journal on Approved: Persediaan (D/K) based on adjustment
+    if (targetStatus === "Approved") {
+      try {
+        const persediaanCOA = await prisma.cOA.findFirst({ where: { code: "1300" } });
+        const hppCOA = await prisma.cOA.findFirst({ where: { code: "5100" } });
+        const pendapatanCOA = await prisma.cOA.findFirst({ where: { code: "4200" } });
+        if (persediaanCOA) {
+          const freshItems = await prisma.opnameItem.findMany({
+            where: { opnameId: params.id },
+            include: { sparepart: true },
+          });
+          let surplusTotal = 0;
+          let deficitTotal = 0;
+          const details: any[] = [];
+          for (const item of freshItems) {
+            if (item.adjustment === 0) continue;
+            const sp = item.sparepart;
+            const adjValue = Math.abs(item.adjustment) * (sp?.buyPrice || 0);
+            if (item.adjustment > 0) {
+              surplusTotal += adjValue;
+              details.push({
+                coaId: persediaanCOA.id,
+                description: `Surplus ${sp?.name || sp?.sku} x${item.adjustment}`,
+                debit: adjValue,
+                credit: 0,
+              });
+            } else {
+              deficitTotal += adjValue;
+              details.push({
+                coaId: hppCOA?.id || persediaanCOA.id,
+                description: `Defisit ${sp?.name || sp?.sku} x${Math.abs(item.adjustment)}`,
+                debit: adjValue,
+                credit: 0,
+              });
+            }
+          }
+          if (surplusTotal > 0 && pendapatanCOA) {
+            details.push({
+              coaId: pendapatanCOA.id,
+              description: `Surplus Opname ${existing.refCode}`,
+              debit: 0,
+              credit: surplusTotal,
+            });
+          }
+          if (deficitTotal > 0 && persediaanCOA) {
+            details.push({
+              coaId: persediaanCOA.id,
+              description: `Defisit Opname ${existing.refCode}`,
+              debit: 0,
+              credit: deficitTotal,
+            });
+          }
+          if (details.length > 0) {
+            const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+            await prisma.journalEntry.create({
+              data: {
+                jeNo,
+                date: new Date(),
+                description: `Stock Opname ${existing.refCode} disetujui`,
+                refType: "stock_opname",
+                refId: existing.id,
+                storeId: existing.storeId,
+                status: "Posted",
+                createdById: user.id,
+                details: { create: details },
+              },
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Auto-journal (stock opname) failed:", err);
+      }
+    }
+
     const updated = await prisma.stockOpname.update({
       where: { id: params.id },
       data: { status: targetStatus },

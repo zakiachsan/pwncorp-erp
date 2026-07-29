@@ -113,5 +113,48 @@ export const POST = withAuth(async (req: NextRequest) => {
 
   await logActivity({ userId: user.id, action: "INVOICE_CREATED", entity: "Invoice", entityId: invoice.id, details: { invNo: invoice.invNo, woNo: wo.woNo, soId: wo.soId, total } });
 
+  // Auto journal: Piutang Usaha (D) vs Pendapatan (K)
+  try {
+    const piutangCOA = await prisma.cOA.findFirst({ where: { code: "1200" } });
+    // Split revenue: sparepart items → 4200, service items → 4100
+    const sparepartTotal = wo.items.filter(i => i.itemType === "sparepart").reduce((s, i) => s + i.total, 0);
+    const serviceTotal = wo.items.filter(i => i.itemType !== "sparepart").reduce((s, i) => s + i.total, 0);
+    const jasaCOA = await prisma.cOA.findFirst({ where: { code: "4100" } });
+    const sparepartCOA = await prisma.cOA.findFirst({ where: { code: "4200" } });
+
+    if (piutangCOA) {
+      const details: any[] = [
+        { coaId: piutangCOA.id, description: `Piutang ${invoice.invNo} - ${wo.so.customer.name}`, debit: total, credit: 0 },
+      ];
+      if (serviceTotal > 0 && jasaCOA) {
+        details.push({ coaId: jasaCOA.id, description: `Pendapatan Jasa ${invoice.invNo}`, debit: 0, credit: serviceTotal });
+      }
+      if (sparepartTotal > 0 && sparepartCOA) {
+        details.push({ coaId: sparepartCOA.id, description: `Pendapatan Sparepart ${invoice.invNo}`, debit: 0, credit: sparepartTotal });
+      }
+      // Fallback: all to pendapatan jasa if sparepart COA missing
+      if (details.length === 1 && jasaCOA) {
+        details.push({ coaId: jasaCOA.id, description: `Pendapatan ${invoice.invNo}`, debit: 0, credit: total });
+      }
+
+      const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+      await prisma.journalEntry.create({
+        data: {
+          jeNo,
+          date: new Date(),
+          description: `Invoice ${invoice.invNo} - ${wo.so.customer.name}`,
+          refType: "invoice",
+          refId: invoice.id,
+          storeId: user.storeId,
+          status: "Posted",
+          createdById: user.id,
+          details: { create: details },
+        },
+      });
+    }
+  } catch (err) {
+    console.error("Auto-journal (invoice) failed:", err);
+  }
+
   return NextResponse.json({ data: invoice }, { status: 201 });
 });

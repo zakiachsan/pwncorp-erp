@@ -113,7 +113,7 @@ export default function JournalPage() {
           </thead>
           <tbody>
             {journals.map((j: any) => (
-              <tr key={j.id} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${j.jeNo || j.id}`)}>
+              <tr key={j.id} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${encodeURIComponent(j.jeNo || j.id)}`)}>
                 <td className="font-medium text-[--color-brand]">{j.jeNo}</td>
                 <td className="text-[--color-text-secondary]">{j.date ? new Date(j.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
                 <td>{j.description}</td>

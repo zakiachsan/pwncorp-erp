@@ -109,17 +109,15 @@ export const POST = withAuth(async (req: NextRequest) => {
     });
   }
 
-  // Auto journal entry: Kas (D) vs Pendapatan (K)
+  // Auto journal entry: Kas/Bank (D) vs Piutang Usaha (K)
   try {
-    // Find the Kas/Bank COA account
-    const kasCOA = await prisma.cOA.findFirst({
-      where: { name: { contains: "Kas", mode: "insensitive" }, kategori: "Asset" },
-    });
-    const revenueCOA = await prisma.cOA.findFirst({
-      where: { name: { contains: "Pendapatan", mode: "insensitive" }, kategori: "Revenue" },
-    });
+    // Determine Kas COA based on payment method
+    let kasCode = "1110"; // default: Kas Tunai
+    if (paymentMethod === "transfer") kasCode = "1120"; // Bank BCA
+    const kasCOA = await prisma.cOA.findFirst({ where: { code: kasCode } });
+    const piutangCOA = await prisma.cOA.findFirst({ where: { code: "1200" } });
 
-    if (kasCOA && revenueCOA) {
+    if (kasCOA && piutangCOA) {
       const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
       await prisma.journalEntry.create({
         data: {
@@ -134,15 +132,14 @@ export const POST = withAuth(async (req: NextRequest) => {
           details: {
             create: [
               { coaId: kasCOA.id, description: `Penerimaan ${invoice.invNo}`, debit: amount, credit: 0 },
-              { coaId: revenueCOA.id, description: `Pendapatan ${invoice.invNo}`, debit: 0, credit: amount },
+              { coaId: piutangCOA.id, description: `Pelunasan Piutang ${invoice.invNo}`, debit: 0, credit: amount },
             ],
           },
         },
       });
     }
   } catch (err) {
-    // Journal is non-critical — log but don't fail payment
-    console.error("Auto-journal failed:", err);
+    console.error("Auto-journal (payment) failed:", err);
   }
 
   await logActivity({ userId: user.id, action: "PAYMENT_RECEIVED", entity: "Payment", entityId: payment.id, details: { invNo: invoice.invNo, woNo: invoice.wo?.woNo, soId: invoice.wo?.soId, amount, method: paymentMethod || "cash", newStatus } });

@@ -64,6 +64,55 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
       data: { status: "Received", receivedAt: new Date() },
     });
 
+    // Auto journal: Persediaan (D) vs Hutang Usaha (K)
+    try {
+      const persediaanCOA = await prisma.cOA.findFirst({ where: { code: "1300" } });
+      const hutangCOA = await prisma.cOA.findFirst({ where: { code: "2100" } });
+      if (persediaanCOA && hutangCOA) {
+        let totalValue = 0;
+        const details: any[] = [];
+        for (const item of delivery.items) {
+          if (item.qtyReceived > 0) {
+            const sp = await prisma.sparepart.findUnique({ where: { id: item.sparepartId } });
+            const itemTotal = (sp?.buyPrice || 0) * item.qtyReceived;
+            totalValue += itemTotal;
+            if (itemTotal > 0) {
+              details.push({
+                coaId: persediaanCOA.id,
+                description: `Persediaan ${sp?.name || sp?.sku} x${item.qtyReceived}`,
+                debit: itemTotal,
+                credit: 0,
+              });
+            }
+          }
+        }
+        if (totalValue > 0) {
+          details.push({
+            coaId: hutangCOA.id,
+            description: `Hutang Pembelian ${delivery.deliveryNo}`,
+            debit: 0,
+            credit: totalValue,
+          });
+          const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+          await prisma.journalEntry.create({
+            data: {
+              jeNo,
+              date: new Date(),
+              description: `Purchase Delivery ${delivery.deliveryNo} diterima`,
+              refType: "purchase_delivery",
+              refId: delivery.id,
+              storeId: delivery.storeId,
+              status: "Posted",
+              createdById: user.id,
+              details: { create: details },
+            },
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Auto-journal (purchase delivery) failed:", err);
+    }
+
     // Check if PO is fully received → update PO status
     const allDeliveries = await prisma.purchaseDelivery.findMany({
       where: { poId: delivery.poId, status: "Received" },

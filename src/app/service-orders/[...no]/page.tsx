@@ -103,6 +103,7 @@ export default function ServiceOrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showDeliverConfirm, setShowDeliverConfirm] = useState(false);
+  const [showGoToDeliveryConfirm, setShowGoToDeliveryConfirm] = useState(false);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showCreateWOConfirm, setShowCreateWOConfirm] = useState(false);
@@ -259,6 +260,15 @@ export default function ServiceOrderDetailPage() {
         setOrder((prev: any) => ({ ...prev, workOrders: [j.data] }));
       }
     } catch {}
+  };
+
+  const handleGoToDelivery = async () => {
+    setShowGoToDeliveryConfirm(false);
+    await fetch(`/api/service-orders/${order.id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Delivery" }),
+    });
+    setOrder((prev: any) => ({ ...prev, status: "Delivery" }));
   };
 
   const handleCreateWO = async () => {
@@ -429,6 +439,7 @@ export default function ServiceOrderDetailPage() {
   };
   const isDraft = order.status === "Draft";
   const isDiagnosis = order.status === "Diagnosis";
+  const isDelivery = order.status === "Delivery";
   const isApproved = order.status === "Approved";
   const activeWOs = (order.workOrders || []).filter((wo: any) => wo.status?.toUpperCase() !== "CANCELLED");
   const hasWO = activeWOs.length > 0;
@@ -443,6 +454,7 @@ export default function ServiceOrderDetailPage() {
           <div className="flex flex-wrap gap-1.5">
             <span style={{ ...S.badge, ...(order.status === "Draft" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
             <span style={{ ...S.badge, ...(order.status === "Diagnosis" ? S.badgeActive : S.badgeInactive) }}>DIAGNOSIS</span>
+            <span style={{ ...S.badge, ...(order.status === "Delivery" ? S.badgeActive : S.badgeInactive) }}>DELIVERY</span>
             <span style={{ ...S.badge, ...(order.status === "Approved" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
             </div>
             </div>
@@ -455,8 +467,10 @@ export default function ServiceOrderDetailPage() {
                 setShowDeliverConfirm(true);
               }
             }} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Diagnosis</button>}
-            {isDiagnosis && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>}
+            {isDiagnosis && <button onClick={() => setShowGoToDeliveryConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Delivery</button>}
             {isDiagnosis && <button onClick={() => setShowCancelConfirm(true)} style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}><X size={14} /> Cancel</button>}
+            {isDelivery && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>}
+            {isDelivery && <button onClick={() => setShowCancelConfirm(true)} style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}><X size={14} /> Cancel</button>}
             {isApproved && !hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
             {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/detail/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
             <div style={{ position: "relative" }} ref={printDropdownRef}>
@@ -831,9 +845,10 @@ export default function ServiceOrderDetailPage() {
       )}
 
       {/* Modals */}
-      {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DIAGNOSIS ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
+      {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DELIVERY ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
       {showCancelConfirm && <Modal title="Cancel Service Order?" message="Service Order akan dibatalkan. Tindakan ini tidak dapat diurungkan." onCancel={() => setShowCancelConfirm(false)} onConfirm={handleCancel} confirmText="Ya, Cancel" />}
       {showDeliverConfirm && <Modal title="Diagnosis Service Order?" message="Status akan berubah dari DRAFT ke DIAGNOSIS." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Diagnosis" />}
+      {showGoToDeliveryConfirm && <Modal title="Delivery Service Order?" message="Status akan berubah dari DIAGNOSIS ke DELIVERY." onCancel={() => setShowGoToDeliveryConfirm(false)} onConfirm={handleGoToDelivery} confirmText="Ya, Delivery" />}
       {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${services.length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
       {showInspectionWarning && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>

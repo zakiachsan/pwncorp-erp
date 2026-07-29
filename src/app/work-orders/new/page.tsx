@@ -20,7 +20,6 @@ export default function NewWorkOrderPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [sparepartDropdownOpen, setSparepartDropdownOpen] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -69,18 +68,13 @@ export default function NewWorkOrderPage() {
     setServiceSpareparts(prev => {
       const current = prev[serviceIdx] || [];
       if (current.includes(sparepartId)) {
-        return { ...prev, [serviceIdx]: current.filter(id => id !== sparepartId) };
+        // Deselect if already selected
+        return { ...prev, [serviceIdx]: [] };
       } else {
-        return { ...prev, [serviceIdx]: [...current, sparepartId] };
+        // Replace with new selection (single select only)
+        return { ...prev, [serviceIdx]: [sparepartId] };
       }
     });
-  };
-
-  const removeSparepart = (serviceIdx: number, sparepartId: string) => {
-    setServiceSpareparts(prev => ({
-      ...prev,
-      [serviceIdx]: (prev[serviceIdx] || []).filter(id => id !== sparepartId),
-    }));
   };
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
@@ -190,78 +184,26 @@ export default function NewWorkOrderPage() {
                           {mekanikList.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                         </select>
                       </td>
-                      <td style={{ position: "relative" }}>
-                        <div style={{ position: "relative" }}>
-                          {/* Selected spareparts tags */}
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 4 }}>
-                            {(serviceSpareparts[i] || []).map(spId => {
-                              const sp = spareparts.find((s: any) => s.sparepartId === spId || s.sparepart?.id === spId);
-                              return sp ? (
-                                <span key={spId} style={{ 
-                                  display: "inline-flex", alignItems: "center", gap: 4,
-                                  padding: "2px 8px", fontSize: 11, background: "#e8f0fe", 
-                                  color: "#0176d3", borderRadius: 4, fontWeight: 500
-                                }}>
-                                  {sp.sparepart?.sku || sp.sku}
-                                  <X size={12} style={{ cursor: "pointer" }} onClick={() => removeSparepart(i, spId)} />
-                                </span>
-                              ) : null;
-                            })}
-                          </div>
-                          {/* Dropdown trigger */}
-                          <div 
-                            style={{ 
-                              padding: "6px 10px", fontSize: 12, border: "1px solid #d8d8d8", 
-                              borderRadius: 4, cursor: "pointer", background: "#fff",
-                              display: "flex", justifyContent: "space-between", alignItems: "center"
-                            }}
-                            onClick={() => setSparepartDropdownOpen(prev => ({ ...prev, [i]: !prev[i] }))}
-                          >
-                            <span style={{ color: (serviceSpareparts[i] || []).length > 0 ? "#001526" : "#8e8f8e" }}>
-                              {(serviceSpareparts[i] || []).length > 0 ? `${(serviceSpareparts[i] || []).length} sparepart dipilih` : "-- Pilih Sparepart --"}
-                            </span>
-                            <span style={{ fontSize: 10 }}>▼</span>
-                          </div>
-                          {/* Dropdown list - only show spareparts from this SO */}
-                          {sparepartDropdownOpen[i] && (
-                            <div style={{ 
-                              position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, 
-                              background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, 
-                              maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                              marginTop: 4
-                            }}>
-                              {spareparts.map((sp: any) => {
-                                const spId = sp.sparepartId || sp.sparepart?.id;
-                                const spName = sp.sparepart?.name || sp.name || "-";
-                                const spSku = sp.sparepart?.sku || sp.sku || "-";
-                                return (
-                                  <div
-                                    key={spId}
-                                    onClick={(e) => { e.stopPropagation(); toggleSparepart(i, spId); }}
-                                    style={{ 
-                                      padding: "6px 10px", fontSize: 12, cursor: "pointer",
-                                      background: (serviceSpareparts[i] || []).includes(spId) ? "#e8f0fe" : "transparent",
-                                      display: "flex", alignItems: "center", gap: 8
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
-                                    onMouseLeave={e => e.currentTarget.style.background = (serviceSpareparts[i] || []).includes(spId) ? "#e8f0fe" : "transparent"}
-                                  >
-                                    <input 
-                                      type="checkbox" 
-                                      checked={(serviceSpareparts[i] || []).includes(spId)}
-                                      readOnly
-                                      style={{ pointerEvents: "none" }}
-                                    />
-                                    <span>{spSku} - {spName}</span>
-                                  </div>
-                                );
-                              })}
-                              {spareparts.length === 0 && (
-                                <div style={{ padding: "8px 10px", fontSize: 12, color: "#8e8f8e" }}>Tidak ada sparepart di SO ini</div>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                      <td>
+                        <select className="form-select w-full" value={(serviceSpareparts[i] || [])[0] || ""} onChange={e => {
+                          const val = e.target.value;
+                          setServiceSpareparts(prev => ({ ...prev, [i]: val ? [val] : [] }));
+                        }}>
+                          <option value="">-- Pilih Sparepart --</option>
+                          {spareparts.filter((sp: any) => {
+                            const spId = sp.sparepartId || sp.sparepart?.id;
+                            // Check if this sparepart is selected in ANY other row
+                            return !Object.entries(serviceSpareparts).some(([idx, selected]) => {
+                              if (parseInt(idx) === i) return false; // skip current row
+                              return selected.includes(spId);
+                            });
+                          }).map((sp: any) => {
+                            const spId = sp.sparepartId || sp.sparepart?.id;
+                            const spName = sp.sparepart?.name || sp.name || "-";
+                            const spSku = sp.sparepart?.sku || sp.sku || "-";
+                            return <option key={spId} value={spId}>{spSku} - {spName}</option>;
+                          })}
+                        </select>
                       </td>
                     </tr>
                   ))}

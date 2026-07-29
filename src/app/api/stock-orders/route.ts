@@ -50,9 +50,10 @@ export const POST = withAuth(async (req: NextRequest) => {
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });
 
   // Check WO status allows stock order
-  if (!["Draft", "Confirmed", "In Progress", "Revised"].includes(wo.status)) {
+  const allowedStatuses = ["DRAFT", "WAITING", "IN PROGRESS", "REVISED"];
+  if (!allowedStatuses.includes(wo.status?.toUpperCase())) {
     return NextResponse.json({
-      error: `WO status must be Draft, Confirmed, In Progress, or Revised, currently: ${wo.status}`,
+      error: `WO status must be Draft, Waiting, In Progress, or Revised, currently: ${wo.status}`,
     }, { status: 400 });
   }
 
@@ -77,11 +78,6 @@ export const POST = withAuth(async (req: NextRequest) => {
       items: { include: { sparepart: { select: { sku: true, name: true } } } },
     },
   });
-
-  // Auto-update WO status to IN PROGRESS
-  if (wo.status === "Draft") {
-    await prisma.workOrder.update({ where: { id: woId }, data: { status: "IN PROGRESS" } });
-  }
 
   return NextResponse.json({ data: so }, { status: 201 });
 });

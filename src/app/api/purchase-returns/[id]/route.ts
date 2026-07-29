@@ -74,6 +74,56 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
       }
     }
 
+    // Auto journal on Completed: Hutang Usaha (D) vs Persediaan (K)
+    if (targetStatus === "Completed") {
+      try {
+        const hutangCOA = await prisma.cOA.findFirst({ where: { code: "2100" } });
+        const persediaanCOA = await prisma.cOA.findFirst({ where: { code: "1300" } });
+        if (hutangCOA && persediaanCOA) {
+          let totalValue = 0;
+          const details: any[] = [];
+          for (const item of ret.items) {
+            const sp = item.sparepart;
+            const itemTotal = (sp?.buyPrice || 0) * item.qty;
+            totalValue += itemTotal;
+            if (itemTotal > 0) {
+              details.push({
+                coaId: hutangCOA.id,
+                description: `Hutang Retur ${sp?.name || sp?.sku} x${item.qty}`,
+                debit: itemTotal,
+                credit: 0,
+              });
+            }
+          }
+          if (totalValue > 0) {
+            details.push({
+              coaId: persediaanCOA.id,
+              description: `Persediaan Retur ${ret.docNo}`,
+              debit: 0,
+              credit: totalValue,
+            });
+            const storeId = (ret as any).storeId || (await prisma.purchaseOrder.findUnique({ where: { id: ret.poId } }))?.storeId || "";
+            const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+            await prisma.journalEntry.create({
+              data: {
+                jeNo,
+                date: new Date(),
+                description: `Purchase Return ${ret.docNo} selesai`,
+                refType: "purchase_return",
+                refId: ret.id,
+                storeId,
+                status: "Posted",
+                createdById: user.id,
+                details: { create: details },
+              },
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Auto-journal (purchase return) failed:", err);
+      }
+    }
+
     const updated = await prisma.purchaseReturn.update({
       where: { id: params.id },
       data: { status: targetStatus },

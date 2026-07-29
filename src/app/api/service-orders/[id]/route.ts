@@ -42,7 +42,8 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   if (status) {
     const validTransitions: Record<string, string[]> = {
       "Draft": ["Diagnosis", "Cancelled"],
-      "Diagnosis": ["Approved", "Cancelled"],
+      "Diagnosis": ["Delivery", "Cancelled"],
+      "Delivery": ["Approved", "Cancelled"],
       "Approved": ["Cancelled"],
       "Cancelled": [],
     };

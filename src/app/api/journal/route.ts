@@ -33,7 +33,9 @@ export const GET = withAuth(async (req: NextRequest) => {
       where,
       include: {
         createdBy: { select: { id: true, name: true } },
-        _count: { select: { details: true } },
+        details: {
+          select: { debit: true, credit: true },
+        },
       },
       orderBy: { date: "desc" },
       skip: (page - 1) * limit,
@@ -42,7 +44,14 @@ export const GET = withAuth(async (req: NextRequest) => {
     prisma.journalEntry.count({ where }),
   ]);
 
-  return NextResponse.json({ data, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  // Calculate totalDebit/totalCredit for each entry
+  const dataWithTotals = data.map((j: any) => ({
+    ...j,
+    totalDebit: j.details.reduce((s: number, d: any) => s + (d.debit || 0), 0),
+    totalCredit: j.details.reduce((s: number, d: any) => s + (d.credit || 0), 0),
+  }));
+
+  return NextResponse.json({ data: dataWithTotals, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
 });
 
 export const POST = withAuth(async (req: NextRequest) => {
