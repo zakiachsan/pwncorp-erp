@@ -21,7 +21,7 @@ async function main() {
     
     const vehicles = await prisma.vehicle.findMany();
     console.log('\n=== VEHICLES ===');
-    vehicles.forEach((v: any) => console.log(v.id, v.plateNumber, v.brand, v.model, v.year));
+    vehicles.forEach((v: any) => console.log(v.id, v.plateNo, v.brand, v.model, v.year));
     
     // Check existing SRO
     const sro = await prisma.serviceOrder.findUnique({
@@ -31,7 +31,7 @@ async function main() {
     console.log('\n=== SRO/WM/2607003 ===');
     console.log('Status:', sro?.status);
     console.log('Customer:', sro?.customer?.name);
-    console.log('Vehicle:', sro?.vehicle?.plateNumber, sro?.vehicle?.brand, sro?.vehicle?.model);
+    console.log('Vehicle:', sro?.vehicle?.plateNo, sro?.vehicle?.brand, sro?.vehicle?.model);
     console.log('Services:', sro?.services?.length);
   } catch (e: any) {
     console.error('ERROR:', e.message);
