@@ -16,6 +16,7 @@ interface ServiceOrder {
   total: number;
   createdAt: string;
   _count?: { workOrders: number; invoices: number };
+  workOrders?: { id: string; woNo: string; invoices: { id: string; invNo: string }[] }[];
 }
 
 const statusPill = (status: string) => {
@@ -232,10 +233,17 @@ export default function ServiceOrdersPage() {
                     <div style={{ display: "flex", gap: 6 }}>
                       <span
                         title={
-                          (order._count?.workOrders ?? 0) > 0
-                            ? "Work Order sudah dibuat"
+                          (order.workOrders || []).filter((w: any) => w.status?.toUpperCase() !== "CANCELLED").length > 0
+                            ? `Work Orders: ${order.workOrders?.filter((w: any) => w.status?.toUpperCase() !== "CANCELLED").map((w: any) => w.woNo).join(", ")}`
                             : "Belum ada Work Order"
                         }
+                        onClick={(e) => {
+                          const activeWO = order.workOrders?.find((w: any) => w.status?.toUpperCase() !== "CANCELLED");
+                          if (activeWO) {
+                            e.stopPropagation();
+                            router.push(`/work-orders/detail/${activeWO.woNo}`);
+                          }
+                        }}
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -245,19 +253,26 @@ export default function ServiceOrdersPage() {
                           borderRadius: 4,
                           fontSize: 11,
                           fontWeight: 700,
-                          background: (order._count?.workOrders ?? 0) > 0 ? "#2e844a" : "#d8d8d8",
-                          color: (order._count?.workOrders ?? 0) > 0 ? "#fff" : "#8e8f8e",
-                          cursor: "default",
+                          background: (order.workOrders || []).filter((w: any) => w.status?.toUpperCase() !== "CANCELLED").length > 0 ? "#2e844a" : "#d8d8d8",
+                          color: (order.workOrders || []).filter((w: any) => w.status?.toUpperCase() !== "CANCELLED").length > 0 ? "#fff" : "#8e8f8e",
+                          cursor: (order.workOrders || []).filter((w: any) => w.status?.toUpperCase() !== "CANCELLED").length > 0 ? "pointer" : "default",
                         }}
                       >
                         WO
                       </span>
                       <span
                         title={
-                          (order._count?.invoices ?? 0) > 0
-                            ? "Invoice sudah dibuat"
+                          (order.workOrders?.some(w => w.invoices.length > 0) ?? false)
+                            ? `Invoices: ${order.workOrders?.flatMap(w => w.invoices.map(i => i.invNo)).join(", ")}`
                             : "Belum ada Invoice"
                         }
+                        onClick={(e) => {
+                          const firstInv = order.workOrders?.flatMap(w => w.invoices)[0];
+                          if (firstInv) {
+                            e.stopPropagation();
+                            router.push(`/finance/invoices/detail/service/${firstInv.invNo}`);
+                          }
+                        }}
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -267,9 +282,9 @@ export default function ServiceOrdersPage() {
                           borderRadius: 4,
                           fontSize: 11,
                           fontWeight: 700,
-                          background: (order._count?.invoices ?? 0) > 0 ? "#0176d3" : "#d8d8d8",
-                          color: (order._count?.invoices ?? 0) > 0 ? "#fff" : "#8e8f8e",
-                          cursor: "default",
+                          background: (order.workOrders?.some(w => w.invoices.length > 0) ?? false) ? "#0176d3" : "#d8d8d8",
+                          color: (order.workOrders?.some(w => w.invoices.length > 0) ?? false) ? "#fff" : "#8e8f8e",
+                          cursor: (order.workOrders?.some(w => w.invoices.length > 0) ?? false) ? "pointer" : "default",
                         }}
                       >
                         INV

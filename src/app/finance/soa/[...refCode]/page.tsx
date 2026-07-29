@@ -279,11 +279,11 @@ export default function SOADetailPage() {
                   <tr key={i} style={S.tr}>
                     <td style={S.td}>{i + 1}</td>
                     <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
-                      onClick={() => router.push(`/finance/invoices/service/${inv.no}`)}>{inv.no}</td>
+                      onClick={() => router.push(`/finance/invoices/detail/service/${inv.no}`)}>{inv.no}</td>
                     <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
                       onClick={() => router.push(`/service-orders/${inv.sro}`)}>{inv.sro}</td>
                     <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
-                      onClick={() => router.push(`/work-orders/${inv.swo}`)}>{inv.swo}</td>
+                      onClick={() => router.push(`/work-orders/detail/${inv.swo}`)}>{inv.swo}</td>
                     <td style={S.td}>{inv.date}</td>
                     <td style={S.td}>{inv.dueDate}</td>
                     <td style={S.td}>

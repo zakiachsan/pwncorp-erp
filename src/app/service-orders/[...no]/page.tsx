@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2, ChevronDown } from "lucide-react";
 import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
@@ -104,6 +104,7 @@ export default function ServiceOrderDetailPage() {
   const [error, setError] = useState("");
   const [showDeliverConfirm, setShowDeliverConfirm] = useState(false);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showCreateWOConfirm, setShowCreateWOConfirm] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "docref" | "changes">("details");
   const [svcLineTab, setSvcLineTab] = useState<"inspection" | "services" | "spareparts">("inspection");
@@ -141,6 +142,19 @@ export default function ServiceOrderDetailPage() {
   // Changes log
   const [changes, setChanges] = useState<any[]>([]);
   const [changesLoading, setChangesLoading] = useState(false);
+  const [printDropdownOpen, setPrintDropdownOpen] = useState(false);
+  const [showInspectionWarning, setShowInspectionWarning] = useState(false);
+  const printDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (printDropdownRef.current && !printDropdownRef.current.contains(e.target as Node)) {
+        setPrintDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -212,12 +226,20 @@ export default function ServiceOrderDetailPage() {
 
   const handleApprove = async () => {
     setShowApproveConfirm(false);
-    const nextStatus = isDiagnosis ? "Delivery" : "Completed";
     await fetch(`/api/service-orders/${order.id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: nextStatus }),
+      body: JSON.stringify({ status: "Approved" }),
     });
-    setOrder((prev: any) => ({ ...prev, status: nextStatus }));
+    setOrder((prev: any) => ({ ...prev, status: "Approved" }));
+  };
+
+  const handleCancel = async () => {
+    setShowCancelConfirm(false);
+    await fetch(`/api/service-orders/${order.id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "Cancelled" }),
+    });
+    setOrder((prev: any) => ({ ...prev, status: "Cancelled" }));
   };
 
   const handleDeliver = async () => {
@@ -241,14 +263,7 @@ export default function ServiceOrderDetailPage() {
 
   const handleCreateWO = async () => {
     setShowCreateWOConfirm(false);
-    const res = await fetch("/api/work-orders", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ soId: order.id }),
-    });
-    if (res.ok) {
-      const j = await res.json();
-      setOrder((prev: any) => ({ ...prev, workOrders: [j.data] }));
-    }
+    router.push(`/work-orders/new?sroId=${order.id}`);
   };
 
   // --- Edit handlers ---
@@ -414,10 +429,10 @@ export default function ServiceOrderDetailPage() {
   };
   const isDraft = order.status === "Draft";
   const isDiagnosis = order.status === "Diagnosis";
-  const isDelivered = order.status === "Delivery";
-  const isCompleted = order.status === "Completed";
-  const hasWO = (order.workOrders || []).length > 0;
-  const wo = hasWO ? (order.workOrders || [])[0] : null;
+  const isApproved = order.status === "Approved";
+  const activeWOs = (order.workOrders || []).filter((wo: any) => wo.status?.toUpperCase() !== "CANCELLED");
+  const hasWO = activeWOs.length > 0;
+  const wo = hasWO ? activeWOs[0] : null;
 
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
@@ -428,18 +443,48 @@ export default function ServiceOrderDetailPage() {
           <div className="flex flex-wrap gap-1.5">
             <span style={{ ...S.badge, ...(order.status === "Draft" ? S.badgeActive : S.badgeInactive) }}>DRAFT</span>
             <span style={{ ...S.badge, ...(order.status === "Diagnosis" ? S.badgeActive : S.badgeInactive) }}>DIAGNOSIS</span>
-            <span style={{ ...S.badge, ...(order.status === "Delivery" ? S.badgeActive : S.badgeInactive) }}>DELIVERY</span>
-            <span style={{ ...S.badge, ...(order.status === "Completed" ? S.badgeActive : S.badgeInactive) }}>COMPLETED</span>
+            <span style={{ ...S.badge, ...(order.status === "Approved" ? S.badgeActive : S.badgeInactive) }}>APPROVED</span>
             </div>
             </div>
             <div className="flex flex-wrap gap-2">
-            {isDraft && <button onClick={() => setShowDeliverConfirm(true)} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Diagnosis</button>}
-            {isDiagnosis && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Move to Delivery</button>}
-            {isDelivered && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Complete</button>}
-            {isCompleted && !hasWO && <button onClick={() => router.push(`/work-orders/new?sroId=${order.id}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
-            {isCompleted && hasWO && <button onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
-            <button style={S.actionBtn}><Printer size={14} /> Print</button>
-            <button style={S.actionBtn}><FileText size={14} /> Proforma Inv</button>
+            {isDraft && <button onClick={() => {
+              const allInspected = inspectionItems.length > 0 && inspectionItems.every(item => item.inspected);
+              if (!allInspected) {
+                setShowInspectionWarning(true);
+              } else {
+                setShowDeliverConfirm(true);
+              }
+            }} style={{ ...S.actionBtn, background: "#2563eb", color: "#fff", border: "1px solid #2563eb" }}><CheckCircle size={14} /> Diagnosis</button>}
+            {isDiagnosis && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>}
+            {isDiagnosis && <button onClick={() => setShowCancelConfirm(true)} style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}><X size={14} /> Cancel</button>}
+            {isApproved && !hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
+            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/detail/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
+            <div style={{ position: "relative" }} ref={printDropdownRef}>
+              <button style={S.actionBtn} onClick={() => setPrintDropdownOpen(!printDropdownOpen)}>
+                <Printer size={14} /> Print <ChevronDown size={12} style={{ marginLeft: 2 }} />
+              </button>
+              {printDropdownOpen && (
+                <div style={{
+                  position: "absolute", top: "100%", left: 0, marginTop: 4,
+                  background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 50, minWidth: 140,
+                }}>
+                  <div
+                    onMouseDown={() => { setPrintDropdownOpen(false); /* TODO: default print */ }}
+                    style={{ padding: "8px 12px", fontSize: 13, cursor: "pointer", borderBottom: "1px solid #ecebea" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f7ff")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >Default</div>
+                  <div
+                    onMouseDown={() => { setPrintDropdownOpen(false); /* TODO: custom print */ }}
+                    style={{ padding: "8px 12px", fontSize: 13, cursor: "pointer" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f7ff")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >Custom</div>
+                </div>
+              )}
+            </div>
+            <button style={S.actionBtn}><FileText size={14} /> Performance Inv</button>
             <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer || "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
             </div>
             </div>
@@ -704,6 +749,7 @@ export default function ServiceOrderDetailPage() {
                 editMode={editMode}
                 onUpdate={updateSparepartRow}
                 onRemove={removeSparepartRow}
+                router={router}
               />
             </div>
           )}
@@ -713,12 +759,24 @@ export default function ServiceOrderDetailPage() {
       {/* ─── Document Reference Tab ─── */}
       {activeTab === "docref" && (
         <>
-          {hasWO && (
+          {(order.workOrders || []).length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Work Orders</div>
               <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
                 <table style={S.table}><thead><tr><th style={S.th}>Document Number</th><th className="hidden sm:table-cell" style={S.th}>Created Date</th><th style={S.th}>Status</th></tr></thead>
-                  <tbody><tr style={S.tr}><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/${wo.woNo || wo.documentNumber}`)}>{wo.woNo || wo.documentNumber || "-"}</td><td className="hidden sm:table-cell" style={S.td}>{wo.createdAt ? new Date(wo.createdAt).toLocaleDateString("id-ID") : (wo.createdDate || "-")}</td><td style={S.td}><span style={{ ...S.pill, background: wo.status === "COMPLETED" || wo.status === "Completed" ? "#2e844a" : wo.status === "IN PROGRESS" || wo.status === "In Progress" ? "#0176d3" : "#fe9339" }}>{wo.status}</span></td></tr></tbody>
+                  <tbody>
+                    {(order.workOrders || []).map((woItem: any, idx: number) => {
+                      const woStatus = woItem.status?.toUpperCase() || "";
+                      const statusBg = woStatus === "COMPLETED" ? "#2e844a" : woStatus === "CANCELLED" ? "#ea001e" : woStatus === "IN PROGRESS" ? "#0176d3" : "#fe9339";
+                      return (
+                        <tr key={idx} style={S.tr}>
+                          <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/detail/${woItem.woNo || woItem.documentNumber}`)}>{woItem.woNo || woItem.documentNumber || "-"}</td>
+                          <td className="hidden sm:table-cell" style={S.td}>{woItem.createdAt ? new Date(woItem.createdAt).toLocaleDateString("id-ID") : (woItem.createdDate || "-")}</td>
+                          <td style={S.td}><span style={{ ...S.pill, background: statusBg, color: "#fff" }}>{woItem.status}</span></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -773,9 +831,25 @@ export default function ServiceOrderDetailPage() {
       )}
 
       {/* Modals */}
-      {showApproveConfirm && <Modal title={isDiagnosis ? "Move to Delivery?" : "Complete Service Order?"} message={isDiagnosis ? "Status akan berubah dari DIAGNOSIS ke DELIVERY." : "Status akan berubah dari DELIVERY ke COMPLETED."} onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText={isDiagnosis ? "Ya, Move to Delivery" : "Ya, Complete"} />}
+      {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DIAGNOSIS ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
+      {showCancelConfirm && <Modal title="Cancel Service Order?" message="Service Order akan dibatalkan. Tindakan ini tidak dapat diurungkan." onCancel={() => setShowCancelConfirm(false)} onConfirm={handleCancel} confirmText="Ya, Cancel" />}
       {showDeliverConfirm && <Modal title="Diagnosis Service Order?" message="Status akan berubah dari DRAFT ke DIAGNOSIS." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Diagnosis" />}
       {showCreateWOConfirm && <Modal title="Create Work Orders?" message={`Work Order baru dari ${services.length} service item.`} onCancel={() => setShowCreateWOConfirm(false)} onConfirm={handleCreateWO} confirmText="Ya, Create Work Orders" />}
+      {showInspectionWarning && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 420, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526", marginBottom: 12 }}>⚠️ Inspection Belum Selesai</h3>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20, lineHeight: 1.5 }}>
+              Semua item pada Inspection List harus diceklis terlebih dahulu sebelum melakukan Diagnosis.
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button onClick={() => setShowInspectionWarning(false)} style={{ padding: "8px 20px", fontSize: 13, fontWeight: 600, background: "#0176d3", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}>
+                Mengerti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Fields Modal */}
       {showEditModal && (
@@ -959,10 +1033,11 @@ function ServicesTableEdit({ services, totalQty, grandTotal, editMode, onUpdate,
 }
 
 /* ─── Editable Sparepart Table ─── */
-function SparepartTableEdit({ spareparts, editMode, onUpdate, onRemove }: {
+function SparepartTableEdit({ spareparts, editMode, onUpdate, onRemove, router }: {
   spareparts: any[]; editMode: boolean;
   onUpdate: (idx: number, field: string, value: any) => void;
   onRemove: (idx: number) => void;
+  router: any;
 }) {
   const total = spareparts.reduce((s: number, sp: any) => s + (sp.total || 0), 0);
   return (
@@ -986,7 +1061,7 @@ function SparepartTableEdit({ spareparts, editMode, onUpdate, onRemove }: {
             return (
               <tr key={i} style={S.tr}>
                 <td style={S.td}>{i + 1}</td>
-                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{s.sku || "-"}</td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => s.sku && router.push(`/master-data/sparepart/${s.sku}`)}>{s.sku || "-"}</td>
                 <td style={S.td}>{s.name || "-"}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (

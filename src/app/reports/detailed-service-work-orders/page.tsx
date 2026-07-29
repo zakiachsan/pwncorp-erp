@@ -169,7 +169,7 @@ export default function DetailedServiceWorkOrdersPage() {
                 <td style={TD}>{row.no}</td>
                 <td style={TD}>{row.serviceDate}</td>
                 <td style={{ ...TD, ...L }}>{row.store}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/work-orders/${row.swo}`)}>{row.swo}</td>
+                <td style={{ ...TD, ...L }} onClick={() => router.push(`/work-orders/detail/${row.swo}`)}>{row.swo}</td>
                 <td style={TD}><span className={statusPill(row.status)}>{row.status}</span></td>
                 <td style={{ ...TD, ...L }}>{row.customer}</td>
                 <td style={TD}>{row.vehicleType}</td>
@@ -193,7 +193,7 @@ export default function DetailedServiceWorkOrdersPage() {
                 <td style={TD}>{row.feedback || "—"}</td>
                 <td style={{ ...TD, ...L }} onClick={() => router.push(`/service-orders/${row.sro}`)}>{row.sro}</td>
                 <td style={TD}>{row.serviceReservation || "—"}</td>
-                <td style={{ ...TD, ...L }} onClick={() => row.sri && router.push(`/finance/invoices/service/${row.sri}`)}>{row.sri || "—"}</td>
+                <td style={{ ...TD, ...L }} onClick={() => row.sri && router.push(`/finance/invoices/detail/service/${row.sri}`)}>{row.sri || "—"}</td>
                 <td style={TD}>{row.insuranceProvider || "—"}</td>
               </tr>
             ))}

@@ -107,7 +107,7 @@ export default function InvoicesPage() {
           </thead>
           <tbody>
             {invoices.map((inv: any) => (
-              <tr key={inv.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/${inv.invNo || inv.id}`)}>
+              <tr key={inv.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/detail/${inv.invNo || inv.id}`)}>
                 <td className="font-medium text-[--color-brand]">{inv.invNo}</td>
                 <td className="text-[--color-text-secondary]">{inv.so?.soNo || "-"}</td>
                 <td>{inv.customer?.name || "-"}</td>

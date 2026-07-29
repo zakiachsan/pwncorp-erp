@@ -162,7 +162,7 @@ export default function AnggaranPage() {
                     <td className="text-sm">{i + 1}</td>
                     <td>
                       <span className="font-medium cursor-pointer" style={{ color: "var(--color-brand)" }}
-                        onClick={() => router.push(`/work-orders/${row.swoId}`)}>
+                        onClick={() => router.push(`/work-orders/detail/${row.swoId}`)}>
                         {row.swoId}
                       </span>
                     </td>

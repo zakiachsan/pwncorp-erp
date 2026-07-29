@@ -140,7 +140,7 @@ export default function StockOrderDetailPage() {
           <div>
             <span style={{ fontSize: 12, color: "#444746" }}>WO: </span>
             <span style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", cursor: "pointer" }}
-              onClick={() => router.push(`/work-orders/${order.wo.woNo}`)}>{order.wo.woNo}</span>
+              onClick={() => router.push(`/work-orders/detail/${order.wo.woNo}`)}>{order.wo.woNo}</span>
           </div>
         )}
       </div>
@@ -150,7 +150,19 @@ export default function StockOrderDetailPage() {
         <div>
           <F label="ORDER NUMBER" value={order.orderNo || "-"} />
           <F label="WAREHOUSE" value={order.warehouse || "-"} />
-          <F label="WORK ORDER" value={order.wo?.woNo || "-"} />
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em", marginBottom: 2 }}>WORK ORDER</div>
+            {order.wo?.woNo ? (
+              <div
+                style={{ fontSize: 13, fontWeight: 500, color: "#0176d3", cursor: "pointer", textDecoration: "underline" }}
+                onClick={() => router.push(`/work-orders/detail/${order.wo.woNo}`)}
+              >
+                {order.wo.woNo}
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, fontWeight: 500, color: "#001526" }}>-</div>
+            )}
+          </div>
         </div>
         <div style={{ borderLeft: "1px solid #ecebea", paddingLeft: 32 }}>
           <F label="STATUS" value={order.status} />

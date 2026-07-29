@@ -114,7 +114,7 @@ export default function ServiceInvoiceDetailPage() {
                 <tbody>
                   <tr
                     style={{ ...S.tr, cursor: woNo !== "-" ? "pointer" : "default" }}
-                    onClick={() => woNo !== "-" && router.push(`/work-orders/${woNo}`)}
+                    onClick={() => woNo !== "-" && router.push(`/work-orders/detail/${woNo}`)}
                   >
                     <td style={{ ...S.miniTd, color: woNo !== "-" ? "#0176d3" : "#444746", fontWeight: 500 }}>{woNo}</td>
                   </tr>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Printer, ChevronRight, Edit, Save, Trash2, Plus, X, FileText, Play } from "lucide-react";
+import { ArrowLeft, Printer, ChevronRight, ChevronDown, Edit, Save, Trash2, Plus, X, FileText, Play } from "lucide-react";
 import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
@@ -32,13 +32,14 @@ const statusColor = (s: string) => {
     "IN PROGRESS": "#0176d3",
     "WAITING FOR QC": "#8b5cf6",
     QC: "#8b5cf6",
+    REVISED: "#f59e0b",
     COMPLETED: "#2e844a",
     CANCELLED: "#ea001e",
   };
   return map[s] || "#6b7280";
 };
 
-const workflowSteps = ["WAITING", "IN PROGRESS", "WAITING FOR QC", "COMPLETED"];
+const workflowSteps = ["WAITING", "IN PROGRESS", "WAITING FOR QC", "REVISED", "COMPLETED"];
 
 function getWorkflowStepIndex(status: string): number {
   if (!status) return -1;
@@ -47,7 +48,8 @@ function getWorkflowStepIndex(status: string): number {
   if (["WAITING STOCK", "CONFIRMED", "CREATED"].includes(s)) return 0;
   if (s === "IN PROGRESS") return 1;
   if (s === "WAITING FOR QC" || s === "QC") return 2;
-  if (s === "COMPLETED") return 3;
+  if (s === "REVISED") return 3;
+  if (s === "COMPLETED") return 4;
   if (s === "CANCELLED") return -2;
   return -1;
 }
@@ -60,10 +62,16 @@ export default function WorkOrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"details" | "docRef" | "stockOrders" | "changes" | "photos">("details");
-  const [showPrint, setShowPrint] = useState(false);
+  const [showPrintDropdown, setShowPrintDropdown] = useState(false);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [creatingInvoice, setCreatingInvoice] = useState(false);
   const [svcLineTab, setSvcLineTab] = useState<"services" | "spareparts">("services");
   const [showStartActions, setShowStartActions] = useState(false);
+  const [showStartBlockModal, setShowStartBlockModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showReviseModal, setShowReviseModal] = useState(false);
+  const [showCompletedBlockModal, setShowCompletedBlockModal] = useState(false);
+  const [completedBlockMsg, setCompletedBlockMsg] = useState("");
   const [serviceProgress, setServiceProgress] = useState<Record<number, string>>({});
   const [photoDesc, setPhotoDesc] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -107,9 +115,10 @@ export default function WorkOrderDetailPage() {
             discount: it.discount || "-",
             subtotal: (it.qty || 1) * (it.price || 0),
             total: it.total || (it.qty || 1) * (it.price || 0),
-            assignedTo: it.assignedTo || w.mekanik?.name || "-",
+            assignedTo: it.assignedToName || it.assignedTo || w.mekanik?.name || "-",
             status: it.status || "Waiting",
             estimatedTime: it.estimatedTime || "-",
+            linkedSpareparts: it.linkedSpareparts || [],
           }));
         const spareparts = items
           .filter((it: any) => it.itemType === "sparepart" || it.itemType === "SPAREPART")
@@ -230,6 +239,36 @@ export default function WorkOrderDetailPage() {
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!wo?.id) return;
+    // Validate stock orders before marking Completed when status is REVISED
+    if (newStatus === "COMPLETED" && wo.status === "REVISED") {
+      const sparepartItems = (wo.spareparts || []);
+      const stockOrders = wo.stockOrders || [];
+      
+      // Check 1: Are there spareparts without stock orders?
+      const stockOrderSparepartIds = new Set();
+      for (const so of stockOrders) {
+        for (const item of (so.items || [])) {
+          stockOrderSparepartIds.add(item.sparepartId);
+        }
+      }
+      const unstockedSpareparts = sparepartItems.filter((sp: any) => !stockOrderSparepartIds.has(sp.itemId));
+      
+      // Check 2: Are there stock orders not yet Received?
+      const notReceived = stockOrders.filter((so: any) => so.status?.toUpperCase() !== "RECEIVED");
+      
+      if (unstockedSpareparts.length > 0 || notReceived.length > 0) {
+        let msg = "Tidak bisa Completed karena:\n";
+        if (unstockedSpareparts.length > 0) {
+          msg += `• ${unstockedSpareparts.length} sparepart belum dibuatkan stock order: ${unstockedSpareparts.map((sp: any) => sp.name).join(", ")}\n`;
+        }
+        if (notReceived.length > 0) {
+          msg += `• ${notReceived.length} stock order belum Received: ${notReceived.map((so: any) => so.orderNo).join(", ")}`;
+        }
+        setCompletedBlockMsg(msg);
+        setShowCompletedBlockModal(true);
+        return;
+      }
+    }
     try {
       const res = await fetch(`/api/work-orders/${wo.id}`, {
         method: "PUT",
@@ -238,6 +277,39 @@ export default function WorkOrderDetailPage() {
       });
       if (res.ok) {
         setWo((prev: any) => ({ ...prev, status: newStatus.toUpperCase() }));
+        // Refresh full data when status changes to REVISED (to sync new SO items)
+        if (newStatus.toUpperCase() === "REVISED") {
+          const refreshRes = await fetch(`/api/work-orders/${wo.id}`);
+          const refreshData = await refreshRes.json();
+          if (refreshData.data) {
+            const w = refreshData.data;
+            const items = w.items || [];
+            const services = items
+              .filter((it: any) => it.itemType === "service")
+              .map((it: any) => ({
+                item: it.itemName || "-",
+                description: it.description || it.itemName || "-",
+                quantity: it.qty || 1,
+                priceExTax: it.unitPrice || 0,
+                total: it.total || 0,
+                itemId: it.itemId,
+                assignedTo: it.assignedToName || it.assignedTo || "-",
+                estimatedTime: it.estimatedTime || "-",
+                linkedSpareparts: it.linkedSpareparts || [],
+              }));
+            const spareparts = items
+              .filter((it: any) => it.itemType === "sparepart")
+              .map((it: any) => ({
+                code: it.sku || it.itemId || "-",
+                name: it.sparepartName || it.itemName || "-",
+                qty: it.qty || 0,
+                price: it.unitPrice || 0,
+                total: it.total || 0,
+                itemId: it.itemId,
+              }));
+            setWo((prev: any) => ({ ...prev, services, spareparts, stockOrders: w.stockOrders || [] }));
+          }
+        }
       } else {
         const err = await res.json();
         alert(err.error || "Gagal update status");
@@ -312,7 +384,7 @@ export default function WorkOrderDetailPage() {
         const d = j.data;
         const so = d.so || {};
         const svcs = (d.items || []).filter((it: any) => it.itemType === "service").map((it: any) => ({
-          item: it.itemName || it.name || "-", description: it.description || "-", quantity: it.qty || 1, priceExTax: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId, assignedTo: it.assignedTo || "-", estimatedTime: it.estimatedTime || "-",
+          item: it.itemName || it.name || "-", description: it.description || "-", quantity: it.qty || 1, priceExTax: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId, assignedTo: it.assignedToName || it.assignedTo || "-", estimatedTime: it.estimatedTime || "-", linkedSpareparts: it.linkedSpareparts || [],
         }));
         const sps = (d.items || []).filter((it: any) => it.itemType === "sparepart").map((it: any) => ({
           code: it.sku || it.itemId || "-", name: it.itemName || "-", qty: it.qty || 0, price: it.unitPrice || 0, total: it.total || 0, itemId: it.itemId,
@@ -396,8 +468,12 @@ export default function WorkOrderDetailPage() {
           <span style={{ fontSize: 12, fontWeight: 600, color: "#444746" }}>Workflow</span>
           <div className="flex flex-wrap gap-1.5">
             {workflowSteps.map((step, i) => {
-              const isActive = i <= currentStepIdx;
-              const canClick = !isActive && i === currentStepIdx + 1;
+              const isActive = wo.status !== "CANCELLED" && i <= currentStepIdx;
+              // Allow clicking next step, or WAITING FOR QC when status is REVISED
+              const canClick = wo.status !== "CANCELLED" && !isActive && (
+                i === currentStepIdx + 1 || 
+                (wo.status === "REVISED" && step === "WAITING FOR QC")
+              );
               return (
                 <span
                   key={step}
@@ -415,34 +491,55 @@ export default function WorkOrderDetailPage() {
                 >{step}</span>
               );
             })}
+
+            {wo.status === "CANCELLED" && (
+              <span style={{ ...S.badge, background: statusColor("CANCELLED"), color: "#fff", border: `1px solid ${statusColor("CANCELLED")}` }}>CANCELLED</span>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
-          <button style={S.actionBtn} onClick={() => setShowPrint(true)}><Printer size={14} /> Print</button>
-          {/* Start button - only show if no spareparts OR stock orders already created */}
-          {(wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (() => {
-            const hasSpareparts = (wo.spareparts || []).length > 0;
-            const hasStockOrders = (wo.stockOrders || []).length > 0;
-            // Can only start if: no spareparts needed, OR stock orders already created
-            const canStart = !hasSpareparts || hasStockOrders;
-            if (!canStart) return null;
-            return (
-              <button style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }} onClick={() => { handleStatusUpdate("IN PROGRESS"); setShowStartActions(true); }}><Play size={14} /> Start</button>
-            );
-          })()}
-          {/* Show message if stock orders needed but not created yet */}
-          {(wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (wo.spareparts || []).length > 0 && (wo.stockOrders || []).length === 0 && (
-            <span style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b", cursor: "default", fontSize: 11 }}>Buat Stock Orders dulu</span>
+          <div style={{ position: "relative" }}>
+            <button style={S.actionBtn} onClick={() => setShowPrintDropdown(!showPrintDropdown)}><Printer size={14} /> Print <ChevronDown size={12} /></button>
+            {showPrintDropdown && (
+              <div style={{ position: "absolute", top: "100%", right: 0, marginTop: 4, background: "#fff", border: "1px solid #ecebea", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 50, minWidth: 180 }}>
+                <button onClick={() => { setShowPrintDropdown(false); setShowPrintPreview(true); }} style={{ display: "block", width: "100%", padding: "10px 16px", fontSize: 13, textAlign: "left", border: "none", background: "transparent", cursor: "pointer", borderBottom: "1px solid #f5f5f5" }} onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>Normal</button>
+                <button onClick={() => { setShowPrintDropdown(false); router.push(`/work-orders/print/receipt/${woNo}`); }} style={{ display: "block", width: "100%", padding: "10px 16px", fontSize: 13, textAlign: "left", border: "none", background: "transparent", cursor: "pointer", borderBottom: "1px solid #f5f5f5" }} onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>Receipt</button>
+                <button onClick={() => { setShowPrintDropdown(false); router.push(`/work-orders/print/delivery-note/${woNo}`); }} style={{ display: "block", width: "100%", padding: "10px 16px", fontSize: 13, textAlign: "left", border: "none", background: "transparent", cursor: "pointer" }} onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>Delivery Note</button>
+              </div>
+            )}
+          </div>
+          {/* Start button - only show when status is WAITING/DRAFT and not cancelled */}
+          {wo.status !== "CANCELLED" && (wo.status === "WAITING" || wo.status === "DRAFT" || wo.status === "CREATED") && !showStartActions && (
+            <button style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }} onClick={() => {
+              const hasSpareparts = (wo.spareparts || []).length > 0;
+              const hasStockOrders = (wo.stockOrders || []).length > 0;
+              const allStockOrdersReceived = hasStockOrders && wo.stockOrders.every((so: any) => so.status?.toUpperCase() === "RECEIVED");
+              // Check stock orders status before starting
+              if (hasSpareparts && !allStockOrdersReceived) {
+                setShowStartBlockModal(true);
+                return;
+              }
+              handleStatusUpdate("IN PROGRESS"); setShowStartActions(true);
+            }}><Play size={14} /> Start</button>
           )}
-          {showStartActions && (
+
+          {wo.status !== "CANCELLED" && showStartActions && (
             <>
               <span style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b", cursor: "default" }}>Pending</span>
               <button style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }} onClick={() => { setShowStartActions(false); handleStatusUpdate("WAITING"); }}>Cancel</button>
             </>
           )}
-          <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
+          {wo.status !== "CANCELLED" && wo.status !== "COMPLETED" && (
+            <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => { setEditFields({ mekanikId: wo.mekanikId || "", startDate: toDateInput(wo.planStartDate), targetDate: toDateInput(wo.planEndDate) }); setShowEditModal(true); }}><Edit size={14} /> Edit</button>
+          )}
+          {wo.status !== "CANCELLED" && wo.status !== "COMPLETED" && (
+            <button style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }} onClick={() => setShowCancelModal(true)}><Trash2 size={14} /> Cancel</button>
+          )}
           {wo.status === "COMPLETED" && (
-            <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}`, cursor: wo.invoices?.length > 0 ? "pointer" : "default" }} onClick={wo.invoices?.length > 0 ? () => router.push(`/finance/invoices/service/${wo.invoices[0]?.docNo}`) : handleCreateInvoice} disabled={creatingInvoice}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Show Invoice" : "Create Invoice"}</button>
+            <>
+              <button style={{ ...S.actionBtn, background: wo.invoices?.length > 0 ? "#6b7280" : "#2e844a", color: "#fff", border: `1px solid ${wo.invoices?.length > 0 ? "#6b7280" : "#2e844a"}`, cursor: wo.invoices?.length > 0 ? "pointer" : "default" }} onClick={wo.invoices?.length > 0 ? () => router.push(`/finance/invoices/detail/service/${wo.invoices[0]?.docNo}`) : handleCreateInvoice} disabled={creatingInvoice}><FileText size={14} /> {creatingInvoice ? "Creating..." : wo.invoices?.length > 0 ? "Show Invoice" : "Create Invoice"}</button>
+              <button style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }} onClick={() => setShowReviseModal(true)}><Edit size={14} /> Revise</button>
+            </>
           )}
         </div>
       </div>
@@ -472,8 +569,9 @@ export default function WorkOrderDetailPage() {
         <div>
           {/* Status Action Buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {(wo.status === "DRAFT" || wo.status === "WAITING") && <button onClick={() => router.push(`/stock-workflow/stock-orders/new?woId=${wo.id}`)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Create Stock Orders</button>}
-            {(wo.status === "WAITING FOR QC" || wo.status === "QC") && <StatusBtn label="Completed" color="#2e844a" onClick={() => handleStatusUpdate("COMPLETED")} />}
+            {wo.status !== "CANCELLED" && (wo.status === "DRAFT" || wo.status === "WAITING") && !wo.stockOrders?.length && <button onClick={() => router.push(`/stock-workflow/stock-orders/new?woId=${wo.id}`)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Create Stock Orders</button>}
+            {wo.status === "REVISED" && <button onClick={() => router.push(`/stock-workflow/stock-orders/new?woId=${wo.id}`)} style={{ padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 4, cursor: "pointer" }}>Create Stock Orders</button>}
+            {(wo.status === "WAITING FOR QC" || wo.status === "QC" || wo.status === "REVISED") && <StatusBtn label="Completed" color="#2e844a" onClick={() => handleStatusUpdate("COMPLETED")} />}
           </div>
 
           {/* 3-Column Info Grid */}
@@ -528,9 +626,10 @@ export default function WorkOrderDetailPage() {
               background: "transparent", cursor: "pointer",
             }}>Spareparts</button>
             <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-              {!editMode ? (
+              {!editMode && wo.status !== "CANCELLED" && wo.status !== "COMPLETED" && (
                 <button onClick={() => setEditMode(true)} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={13} /> Edit Items</button>
-              ) : (
+              )}
+              {editMode && (
                 <>
                   <button onClick={() => { setEditMode(false); setEditServices(wo.services || []); setEditSpareparts(wo.spareparts || []); }} style={S.actionBtn}>Batal</button>
                   <button onClick={handleSaveWOEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}><Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}</button>
@@ -634,7 +733,7 @@ export default function WorkOrderDetailPage() {
                       <td style={S.td}>{i + 1}</td>
                       <td
                         style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
-                        onClick={() => router.push(`/finance/invoices/service/${sri.docNo}`)}
+                        onClick={() => router.push(`/finance/invoices/detail/service/${sri.docNo}`)}
                       >{sri.docNo}</td>
                       <td className="hidden sm:table-cell" style={S.td}>{sri.invoiceDate}</td>
                       <td style={S.td}>
@@ -672,7 +771,7 @@ export default function WorkOrderDetailPage() {
                   {(wo.stockOrders || []).map((so: any, i: number) => (
                     <tr key={so.id || i}>
                       <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }}
-                        onClick={() => router.push(`/stock-workflow/stock-orders/${so.orderNo}`)}>{so.orderNo}</td>
+                        onClick={() => router.push(`/stock-workflow/stock-orders/detail/${so.orderNo}`)}>{so.orderNo}</td>
                       <td style={S.td}>{so.date ? new Date(so.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
                       <td style={S.td}>{so.warehouse || "-"}</td>
                       <td style={{ ...S.td, textAlign: "right" }}>{so.items?.length || so._count?.items || 0}</td>
@@ -846,10 +945,92 @@ export default function WorkOrderDetailPage() {
         </div>
       )}
 
+      {/* Start Block Modal - Stock Orders not received */}
+      {showStartBlockModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 440, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 20 }}>⚠️</span>
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526" }}>Belum Bisa Start</h3>
+            </div>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 8 }}>Work Order belum bisa di-Start karena:</p>
+            <ul style={{ fontSize: 13, color: "#444746", marginBottom: 20, paddingLeft: 20 }}>
+              <li>Stock orders masih dalam status <strong>Draft</strong></li>
+              <li>Silakan proses stock orders sampai status <strong>Received</strong> terlebih dahulu</li>
+            </ul>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowStartBlockModal(false)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Mengerti</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Completed Block Modal - Stock Orders not received when REVISED */}
+      {showCompletedBlockModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 440, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 20 }}>⚠️</span>
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526" }}>Belum Bisa Completed</h3>
+            </div>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20, whiteSpace: "pre-line" }}>{completedBlockMsg}</p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowCompletedBlockModal(false)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}>Mengerti</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 440, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Trash2 size={20} style={{ color: "#ea001e" }} />
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526" }}>Cancel Work Order</h3>
+            </div>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20 }}>
+              Apakah kamu yakin ingin membatalkan Work Order <strong>{wo.documentNumber}</strong>? Status akan berubah menjadi <strong>Cancelled</strong> dan tidak bisa diubah lagi.
+            </p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowCancelModal(false)} style={{ ...S.actionBtn, border: "1px solid #dddbda" }}>Batal</button>
+              <button onClick={async () => { await handleStatusUpdate("CANCELLED"); setShowCancelModal(false); }} style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}>Ya, Cancel WO</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Revise Confirmation Modal */}
+      {showReviseModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: 24, maxWidth: 440, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Edit size={20} style={{ color: "#f59e0b" }} />
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: "#001526" }}>Revise Work Order</h3>
+            </div>
+            <p style={{ fontSize: 14, color: "#444746", marginBottom: 20 }}>
+              Work Order <strong>{wo.documentNumber}</strong> akan di-revise. Status akan berubah menjadi <strong>Revised</strong>. Kamu bisa menambahkan service atau sparepart baru dari halaman Service Orders.
+            </p>
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowReviseModal(false)} style={{ ...S.actionBtn, border: "1px solid #dddbda" }}>Batal</button>
+              <button onClick={async () => { await handleStatusUpdate("REVISED"); setShowReviseModal(false); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}>Ya, Revise WO</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Print Preview Modal */}
-      {showPrint && (
+      {showPrintPreview && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} onClick={() => setShowPrint(false)} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} onClick={() => setShowPrintPreview(false)} />
           <div style={{ position: "relative", background: "#fff", borderRadius: 12, boxShadow: "0 25px 50px rgba(0,0,0,0.25)", width: "100%", maxWidth: 800, maxHeight: "90vh", overflow: "auto" }}>
             <div style={{ padding: "24px 32px", borderBottom: "1px solid #ecebea", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
@@ -948,7 +1129,7 @@ export default function WorkOrderDetailPage() {
               </div>
             </div>
             <div style={{ padding: "16px 32px", borderTop: "1px solid #ecebea", display: "flex", justifyContent: "flex-end" }}>
-              <button onClick={() => setShowPrint(false)} style={{ padding: "8px 24px", fontSize: 13, fontWeight: 600, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" }}>Tutup</button>
+              <button onClick={() => setShowPrintPreview(false)} style={{ padding: "8px 24px", fontSize: 13, fontWeight: 600, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" }}>Tutup</button>
             </div>
           </div>
         </div>
@@ -1077,7 +1258,7 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
   onCompleteService?: (idx: number) => void;
 }) {
   const showProgressCols = woStatus === "IN PROGRESS" && !editMode;
-  const colCount = showProgressCols ? 9 : 8;
+  const colCount = showProgressCols ? 10 : 9;
   return (
     <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
@@ -1088,6 +1269,7 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
             <th className="hidden sm:table-cell" style={S.th}>Description</th>
             <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
             <th className="hidden md:table-cell" style={S.th}>Assigned To</th>
+            <th className="hidden lg:table-cell" style={S.th}>Spareparts</th>
             <th className="hidden md:table-cell" style={S.th}>Est. Time</th>
             {showProgressCols ? (
               <>
@@ -1124,6 +1306,15 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
                     {allMekanik.map((m: any) => <option key={m.id} value={m.name}>{m.name}</option>)}
                   </select>
                 ) : svc.assignedTo}
+              </td>
+              <td className="hidden lg:table-cell" style={{ ...S.td, fontSize: 11 }}>
+                {svc.linkedSpareparts?.length > 0 ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {svc.linkedSpareparts.map((sp: any, j: number) => (
+                      <span key={j} style={{ color: "#444746" }}>{sp.name} <span style={{ color: "#8e8f8e" }}>x{sp.qty}</span></span>
+                    ))}
+                  </div>
+                ) : <span style={{ color: "#8e8f8e" }}>-</span>}
               </td>
               <td className="hidden md:table-cell" style={S.td}>
                 {editMode ? (

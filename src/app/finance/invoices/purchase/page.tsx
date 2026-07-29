@@ -165,7 +165,7 @@ export default function PurchaseInvoicesPage() {
               <tr
                 key={inv.id}
                 style={{ ...S.tr, cursor: "pointer" }}
-                onClick={() => router.push(`/finance/invoices/${inv.docNo || inv.id}`)}
+                onClick={() => router.push(`/finance/invoices/detail/${inv.docNo || inv.id}`)}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >

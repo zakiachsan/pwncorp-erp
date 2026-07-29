@@ -12,6 +12,7 @@ export default function NewStockOrderPage() {
   const [wo, setWo] = useState<any>(null);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [warehouse, setWarehouse] = useState("");
+  const [warehouseId, setWarehouseId] = useState("");
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,21 +32,54 @@ export default function NewStockOrderPage() {
       setWo(w);
       setWarehouses(whJson.data || []);
       // Pre-fill items from WO spareparts (only with valid sparepartId)
-      const woItems = (w.items || [])
-        .filter((it: any) => it.itemType === "sparepart" && it.itemId)
-        .map((it: any) => ({
-          sparepartId: it.itemId,
-          sku: it.sku || "-",
-          name: it.sparepartName || it.itemName || "-",
-          stockQty: it.stockQty || 0,
-          orderQty: it.qty || 1,
-          avgCost: it.unitPrice || 0,
-          storeRemark: "",
-        }));
+      // Deduplicate by sparepartId - sum qty if same sparepart appears multiple times
+      // Filter out spareparts that already have stock orders
+      const existingStockOrderSparepartIds = new Set<string>();
+      for (const so of (w.stockOrders || [])) {
+        for (const item of (so.items || [])) {
+          if (item.sparepartId) existingStockOrderSparepartIds.add(item.sparepartId);
+        }
+      }
+      const sparepartMap = new Map<string, any>();
+      for (const it of (w.items || [])) {
+        if (it.itemType !== "sparepart" || !it.itemId) continue;
+        if (existingStockOrderSparepartIds.has(it.itemId)) continue; // Skip already stock-ordered
+        const existing = sparepartMap.get(it.itemId);
+        if (existing) {
+          existing.orderQty += (it.qty || 1);
+        } else {
+          sparepartMap.set(it.itemId, {
+            sparepartId: it.itemId,
+            sku: it.sku || "-",
+            name: it.sparepartName || it.itemName || "-",
+            stockQty: 0, // Will be populated when warehouse is selected
+            orderQty: it.qty || 1,
+            avgCost: it.unitPrice || 0,
+            storeRemark: "",
+          });
+        }
+      }
+      const woItems = Array.from(sparepartMap.values());
       setItems(woItems);
       setLoading(false);
     }).catch(() => { setError("Gagal load data"); setLoading(false); });
   }, []);
+
+  const fetchWarehouseStock = async (whId: string) => {
+    if (!whId) return;
+    try {
+      const res = await fetch(`/api/warehouse-stocks?warehouseId=${whId}`);
+      const json = await res.json();
+      if (json.data) {
+        setItems(prev => prev.map(it => ({
+          ...it,
+          stockQty: json.data[it.sparepartId] || 0,
+        })));
+      }
+    } catch (e) {
+      console.error("Failed to fetch warehouse stock", e);
+    }
+  };
 
   const updateItem = (i: number, field: string, value: any) => {
     setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [field]: value } : it));
@@ -69,7 +103,7 @@ export default function NewStockOrderPage() {
       });
       const json = await res.json();
       if (!res.ok) { setError(json.error || "Gagal membuat stock order"); setSaving(false); return; }
-      router.push(`/stock-workflow/stock-orders/${json.data.orderNo}`);
+      router.push(`/stock-workflow/stock-orders/detail/${json.data.orderNo}`);
     } catch { setError("Gagal membuat stock order"); setSaving(false); }
   };
 
@@ -124,9 +158,15 @@ export default function NewStockOrderPage() {
           </div>
           <div>
             <label className="form-label">Warehouse</label>
-            <select className="form-select" value={warehouse} onChange={e => setWarehouse(e.target.value)}>
+            <select className="form-select" value={warehouseId} onChange={e => {
+              const id = e.target.value;
+              setWarehouseId(id);
+              const selected = warehouses.find(w => w.id === id);
+              setWarehouse(selected?.name || "");
+              if (id) fetchWarehouseStock(id);
+            }}>
               <option value="">-- Pilih Warehouse --</option>
-              {warehouses.map(w => <option key={w.id} value={w.name}>{w.name}</option>)}
+              {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
             </select>
           </div>
         </div>
@@ -152,7 +192,7 @@ export default function NewStockOrderPage() {
                 <tr key={i}>
                   <td>{i + 1}</td>
                   <td className="font-medium" style={{ color: "var(--color-brand)" }}>{it.sku} — {it.name}</td>
-                  <td className="text-right text-[--color-text-secondary]">{it.stockQty}</td>
+                  <td className="text-right text-[--color-text-secondary]">{warehouseId ? it.stockQty : "-"}</td>
                   <td>
                     <FormattedNumberInput className="form-input w-full text-right" value={it.orderQty}
                       onChange={val => updateItem(i, "orderQty", Math.max(1, val) || 1)} />

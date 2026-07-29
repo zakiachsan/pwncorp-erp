@@ -100,7 +100,7 @@ export default function ARPage() {
           </thead>
           <tbody>
             {arData.map((ar: any) => (
-              <tr key={ar.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/${ar.invoice?.invNo || ar.id}`)}>
+              <tr key={ar.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/invoices/detail/${ar.invoice?.invNo || ar.id}`)}>
                 <td className="font-medium text-[--color-brand]">{ar.invoice?.invNo || ar.invoiceId || "-"}</td>
                 <td>{ar.customer?.name || "-"}</td>
                 <td className="text-right font-medium">{fmt(ar.amount || 0)}</td>

@@ -17,7 +17,7 @@ function handleTypeClick(type: string, refCode: string) {
   if (type === "Purchase Delivery") return `/warehouse/purchase-deliveries/${refCode}`;
   if (type === "Stock Transfer") return `/warehouse/stock-transfer/${refCode}`;
   if (type === "Stock Opname") return `/warehouse/stock-opname/${refCode}`;
-  if (type === "Stock Order") return `/stock-workflow/stock-orders/${refCode}`;
+  if (type === "Stock Order") return `/stock-workflow/stock-orders/detail/${refCode}`;
   return "#";
 }
 

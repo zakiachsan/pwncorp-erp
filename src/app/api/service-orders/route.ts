@@ -34,6 +34,7 @@ export const GET = withAuth(async (req: NextRequest) => {
         sa: { select: { id: true, name: true } },
         store: { select: { id: true, name: true, code: true } },
         _count: { select: { spareparts: true, services: true, workOrders: true } },
+        workOrders: { select: { id: true, woNo: true, status: true, invoices: { select: { id: true, invNo: true } } } },
       },
       orderBy: { date: "desc" },
       skip: (page - 1) * limit,

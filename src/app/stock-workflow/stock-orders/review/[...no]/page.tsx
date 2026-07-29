@@ -63,7 +63,7 @@ export default function ReviewStockOrderPage() {
       });
       const json = await res.json();
       if (!res.ok) { setError(json.error || "Gagal"); setSaving(false); return; }
-      router.push(`/stock-workflow/stock-orders/${order.orderNo}`);
+      router.push(`/stock-workflow/stock-orders/detail/${order.orderNo}`);
     } catch { setError("Gagal"); setSaving(false); }
   };
 

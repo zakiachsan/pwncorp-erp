@@ -113,7 +113,7 @@ export default function ProjectDetailPage() {
           <h3 style={S.sectionTitle}>Service Orders</h3>
           {p.sroList.length > 0 ? (<div style={S.tableWrap}><table style={S.table}><thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>No. SRO</th><th style={S.th}>Status</th></tr></thead><tbody>{p.sroList.map((s: string, i: number) => (<tr key={s} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/service-orders/${s}`)}>{s}</td><td style={S.td}><span style={{ ...S.pill, background: "#fe9339" }}>Linked</span></td></tr>))}</tbody></table></div>) : (<div style={S.card}><p>Belum ada Service Order</p></div>)}
           <h3 style={{ ...S.sectionTitle, marginTop: 20 }}>Work Orders</h3>
-          {p.swoList.length > 0 ? (<div style={S.tableWrap}><table style={S.table}><thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>No. SWO</th><th style={S.th}>Status</th></tr></thead><tbody>{p.swoList.map((sw: string, i: number) => (<tr key={sw} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/${sw}`)}>{sw}</td><td style={S.td}><span style={{ ...S.pill, background: "#0176d3" }}>Active</span></td></tr>))}</tbody></table></div>) : (<div style={S.card}><p>Belum ada Work Order</p></div>)}
+          {p.swoList.length > 0 ? (<div style={S.tableWrap}><table style={S.table}><thead><tr><th style={{ ...S.th, width: 36 }}>No.</th><th style={S.th}>No. SWO</th><th style={S.th}>Status</th></tr></thead><tbody>{p.swoList.map((sw: string, i: number) => (<tr key={sw} style={S.tr}><td style={S.td}>{i + 1}</td><td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/work-orders/detail/${sw}`)}>{sw}</td><td style={S.td}><span style={{ ...S.pill, background: "#0176d3" }}>Active</span></td></tr>))}</tbody></table></div>) : (<div style={S.card}><p>Belum ada Work Order</p></div>)}
         </div>
       )}
 
@@ -175,7 +175,7 @@ export default function ProjectDetailPage() {
                         <td style={style({ textAlign: "right", fontWeight: 500, color: "#001526" })}>{fmtRp(svc.realisasi)}</td>
                         <td style={style()}>
                           {svc.swoId ? (
-                            <span style={{ display: "block", color: "#0176d3", cursor: "pointer", fontWeight: 500, fontSize: 11, maxWidth: 100, wordBreak: "break-all", lineHeight: 1.4 }} onClick={() => router.push(`/work-orders/${svc.swoId}`)}>{svc.swoId}</span>
+                            <span style={{ display: "block", color: "#0176d3", cursor: "pointer", fontWeight: 500, fontSize: 11, maxWidth: 100, wordBreak: "break-all", lineHeight: 1.4 }} onClick={() => router.push(`/work-orders/detail/${svc.swoId}`)}>{svc.swoId}</span>
                           ) : <span style={{ color: "#d8d8d8" }}>-</span>}
                         </td>
                       </>

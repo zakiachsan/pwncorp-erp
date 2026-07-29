@@ -164,7 +164,7 @@ export default function WorkOrdersPage() {
                   <td
                     className="font-medium cursor-pointer"
                     style={{ color: "var(--color-brand)" }}
-                    onClick={() => router.push(`/work-orders/${wo.woNo}`)}
+                    onClick={() => router.push(`/work-orders/detail/${wo.woNo}`)}
                   >
                     {wo.woNo}
                   </td>

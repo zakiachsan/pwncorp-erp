@@ -16,7 +16,40 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
     },
   });
   if (!so) return NextResponse.json({ error: "Stock order not found" }, { status: 404 });
-  return NextResponse.json({ data: so });
+
+  // Fetch warehouse-specific stock for each item
+  const warehouse = so.warehouse;
+  let itemsWithWarehouseStock = so.items;
+  
+  if (warehouse) {
+    const warehouseObj = await prisma.warehouse.findFirst({
+      where: { name: warehouse, storeId: so.storeId },
+    });
+    
+    if (warehouseObj) {
+      itemsWithWarehouseStock = await Promise.all(
+        so.items.map(async (item: any) => {
+          const ws = await prisma.warehouseStock.findUnique({
+            where: {
+              warehouseId_sparepartId: {
+                warehouseId: warehouseObj.id,
+                sparepartId: item.sparepartId,
+              },
+            },
+          });
+          return {
+            ...item,
+            sparepart: {
+              ...item.sparepart,
+              stockQty: ws?.qty ?? 0,
+            },
+          };
+        })
+      );
+    }
+  }
+
+  return NextResponse.json({ data: { ...so, items: itemsWithWarehouseStock } });
 });
 
 export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {

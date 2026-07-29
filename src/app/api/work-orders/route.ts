@@ -41,7 +41,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { soId, mekanikId, targetDate, serviceMekaniks } = body;
+  const { soId, mekanikId, targetDate, targetTime, customerWaiting, serviceMekaniks, serviceSpareparts } = body;
 
   if (!soId) return NextResponse.json({ error: "soId is required" }, { status: 400 });
 
@@ -51,12 +51,14 @@ export const POST = withAuth(async (req: NextRequest) => {
     include: { spareparts: true, services: true },
   });
   if (!so) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
-  if (so.status !== "Completed") {
-    return NextResponse.json({ error: "Service order must be Completed before creating work order" }, { status: 400 });
+  if (so.status !== "Approved") {
+    return NextResponse.json({ error: "Service order must be Approved before creating work order" }, { status: 400 });
   }
 
-  // Check if WO already exists for this SO
-  const existingWO = await prisma.workOrder.findFirst({ where: { soId } });
+  // Check if active (non-cancelled) WO already exists for this SO
+  const existingWO = await prisma.workOrder.findFirst({ 
+    where: { soId, status: { not: "Cancelled" } } 
+  });
   if (existingWO) {
     return NextResponse.json({ error: "Work order already exists for this service order" }, { status: 409 });
   }
@@ -65,17 +67,30 @@ export const POST = withAuth(async (req: NextRequest) => {
 
   // Copy items from SO to WO
   const items: any[] = [];
-  for (const sp of so.spareparts) {
-    const sparepart = await prisma.sparepart.findUnique({ where: { id: sp.sparepartId } });
-    items.push({
-      itemType: "sparepart",
-      itemId: sp.sparepartId,
-      itemName: sparepart?.name || "Sparepart",
-      qty: sp.qty,
-      unitPrice: sp.unitPrice,
-      total: sp.total,
-    });
+
+  // First pass: collect service-linked sparepart IDs to avoid duplicates
+  const allLinkedSparepartIds = new Set<string>();
+  let scanIdx = 0;
+  for (const sv of so.services) {
+    (serviceSpareparts?.[scanIdx] || []).forEach((id: string) => allLinkedSparepartIds.add(id));
+    scanIdx++;
   }
+
+  // Add SO spareparts only if NOT already linked to a service
+  for (const sp of so.spareparts) {
+    if (!allLinkedSparepartIds.has(sp.sparepartId)) {
+      const sparepart = await prisma.sparepart.findUnique({ where: { id: sp.sparepartId } });
+      items.push({
+        itemType: "sparepart",
+        itemId: sp.sparepartId,
+        itemName: sparepart?.name || "Sparepart",
+        qty: sp.qty,
+        unitPrice: sp.unitPrice,
+        total: sp.total,
+      });
+    }
+  }
+
   let serviceIdx = 0;
   for (const sv of so.services) {
     const service = await prisma.service.findUnique({ where: { id: sv.serviceId } });
@@ -89,6 +104,22 @@ export const POST = withAuth(async (req: NextRequest) => {
       total: sv.total,
       assignedTo,
     });
+    // Add spareparts linked to this service
+    const linkedSparepartIds = serviceSpareparts?.[serviceIdx] || [];
+    for (const spId of linkedSparepartIds) {
+      const sparepart = await prisma.sparepart.findUnique({ where: { id: spId } });
+      if (sparepart) {
+        items.push({
+          itemType: "sparepart",
+          itemId: spId,
+          itemName: sparepart.name,
+          qty: 1,
+          unitPrice: sparepart.sellPrice || 0,
+          total: sparepart.sellPrice || 0,
+          assignedTo,
+        });
+      }
+    }
     serviceIdx++;
   }
 
@@ -99,6 +130,8 @@ export const POST = withAuth(async (req: NextRequest) => {
       mekanikId: mekanikId || null,
       storeId: user.storeId,
       targetDate: targetDate ? new Date(targetDate) : null,
+      targetTime: targetTime || null,
+      customerWaiting: customerWaiting === true,
       items: { create: items },
     },
     include: {

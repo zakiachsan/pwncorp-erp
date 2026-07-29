@@ -61,6 +61,11 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         href: "/work-orders",
       },
       {
+        label: "Service Invoices",
+        icon: <FileText size={18} />,
+        href: "/finance/invoices/service",
+      },
+      {
         label: "Stock Workflow",
         icon: <Package size={18} />,
         children: [
@@ -226,7 +231,6 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
         children: [
           { label: "Purchase Invoices", href: "/finance/invoices/purchase" },
           { label: "Invoice Payables", href: "/finance/invoices/payables" },
-          { label: "Service Invoices", href: "/finance/invoices/service" },
           { label: "Invoice Receivables", href: "/finance/invoices/receivables" },
         ],
       },

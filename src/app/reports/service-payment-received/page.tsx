@@ -100,7 +100,7 @@ export default function ServicePaymentReceivedPage() {
                 <td style={TD}>{row.no}</td>
                 <td style={TD}>{row.paymentType}</td>
                 <td style={{ ...TD, ...L }}>{row.store}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/service/${row.sri}`)}>{row.sri}</td>
+                <td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/detail/service/${row.sri}`)}>{row.sri}</td>
                 <td style={{ ...TD, ...L }} onClick={() => router.push(`/service-orders/${row.sro}`)}>{row.sro}</td>
                 <td style={TD}>{row.refundDoc || "—"}</td>
                 <td style={TD}>{row.paymentDate}</td>

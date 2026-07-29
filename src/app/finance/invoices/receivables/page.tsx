@@ -132,14 +132,14 @@ export default function InvoiceReceivablesPage() {
               <tr
                 key={inv.id}
                 style={{ ...S.tr, cursor: "pointer" }}
-                onClick={() => router.push(`/finance/invoices/${inv.invoice?.invNo || inv.id}`)}
+                onClick={() => router.push(`/finance/invoices/detail/${inv.invoice?.invNo || inv.id}`)}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >
                 <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.invoice?.invNo || inv.id}</td>
                 <td style={S.td}>
                   <span
-                    onClick={(e) => { e.stopPropagation(); router.push(`/finance/invoices/service/${inv.invoice?.invNo}`); }}
+                    onClick={(e) => { e.stopPropagation(); router.push(`/finance/invoices/detail/service/${inv.invoice?.invNo}`); }}
                     style={{ color: "#0176d3", fontWeight: 500, cursor: "pointer", textDecoration: "underline", textDecorationColor: "#0176d3" }}
                   >
                     {inv.invoice?.invNo || "-"}

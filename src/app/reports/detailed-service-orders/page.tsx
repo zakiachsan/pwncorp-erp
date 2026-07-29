@@ -216,7 +216,7 @@ export default function DetailedServiceOrdersPage() {
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.tax)}</td>
                 <td style={{ ...TD, textAlign: "right" }}>{fmt(row.otherTax)}</td>
                 <td style={{ ...TD, textAlign: "right", fontWeight: 600 }}>{fmt(row.total)}</td>
-                <td style={{ ...TD, ...L }} onClick={() => row.swo && router.push(`/work-orders/${row.swo}`)}>{row.swo || "—"}</td>
+                <td style={{ ...TD, ...L }} onClick={() => row.swo && router.push(`/work-orders/detail/${row.swo}`)}>{row.swo || "—"}</td>
               </tr>
             ))}
           </tbody>

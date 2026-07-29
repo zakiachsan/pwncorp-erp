@@ -178,7 +178,7 @@ export default function SummaryServiceInvoicesPage() {
                 <td style={TD}>{row.no}</td>
                 <td style={TD}>{row.invoiceDate}</td>
                 <td style={{ ...TD, ...L }}>{row.store}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/service/${row.serviceInvoice}`)}>{row.serviceInvoice}</td>
+                <td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/detail/service/${row.serviceInvoice}`)}>{row.serviceInvoice}</td>
                 <td style={TD}>{row.type}</td>
                 <td style={TD}><span className="pill pill--completed">{row.status}</span></td>
                 <td style={{ ...TD, ...L }}>{row.customer}</td>

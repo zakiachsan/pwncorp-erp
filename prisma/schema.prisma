@@ -172,6 +172,7 @@ model Sparepart {
   returnItems      ReturnItem[]
   outgoingItems    StockOutgoingItem[]
   stockHistories   StockHistory[]
+  warehouseStocks  WarehouseStock[]
 
   @@map("spareparts")
 }
@@ -292,6 +293,8 @@ model WorkOrder {
   status     String   @default("Draft") // Draft / Waiting Stock / Confirmed / In Progress / QC / Completed
   startDate  DateTime? @map("start_date")
   targetDate DateTime? @map("target_date")
+  targetTime String?   @map("target_time")
+  customerWaiting Boolean @default(false) @map("customer_waiting")
   createdAt  DateTime @default(now()) @map("created_at")
 
   items     WOItem[]
@@ -465,7 +468,22 @@ model Warehouse {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
 
+  warehouseStocks WarehouseStock[]
+
   @@map("warehouses")
+}
+
+model WarehouseStock {
+  id          String    @id @default(cuid())
+  warehouseId String    @map("warehouse_id")
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  sparepartId String    @map("sparepart_id")
+  sparepart   Sparepart @relation(fields: [sparepartId], references: [id])
+  qty         Int       @default(0)
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([warehouseId, sparepartId])
+  @@map("warehouse_stocks")
 }
 
 model POItem {

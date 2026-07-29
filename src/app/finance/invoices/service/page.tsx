@@ -223,7 +223,7 @@ export default function ServiceInvoicesPage() {
           <tbody>
             {filtered.map((inv) => (
               <tr key={inv.docNo} style={{ ...S.tr, cursor: selectMode ? "default" : "pointer" }}
-                onClick={() => { if (!selectMode) router.push(`/finance/invoices/service/${inv.docNo}`); }}
+                onClick={() => { if (!selectMode) router.push(`/finance/invoices/detail/service/${inv.docNo}`); }}
                 onMouseEnter={(e) => e.currentTarget.style.background = "#f0f7ff"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
               >
@@ -235,7 +235,7 @@ export default function ServiceInvoicesPage() {
                 )}
                 <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{inv.docNo}</td>
                 <td style={S.td}>
-                  <span onClick={(e) => { e.stopPropagation(); router.push(`/work-orders/${inv.swoNo}`); }}
+                  <span onClick={(e) => { e.stopPropagation(); router.push(`/work-orders/detail/${inv.swoNo}`); }}
                     style={{ color: "#0176d3", fontWeight: 500, cursor: "pointer", textDecoration: "underline", textDecorationColor: "#0176d3" }}>
                     {inv.swoNo}
                   </span>

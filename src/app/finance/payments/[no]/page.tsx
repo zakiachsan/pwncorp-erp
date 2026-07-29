@@ -79,7 +79,7 @@ export default function PaymentDetailPage() {
         <div style={S.card}>
           <div style={S.sectionTitle}>Informasi Pembayaran</div>
           <F label="No. Pembayaran" value={paymentNo} />
-          <F label="No. Invoice" value={invoiceNo} link onClick={() => invoiceNo !== "-" && router.push(`/finance/invoices/${invoiceNo}`)} />
+          <F label="No. Invoice" value={invoiceNo} link onClick={() => invoiceNo !== "-" && router.push(`/finance/invoices/detail/${invoiceNo}`)} />
           <F label="Customer" value={customer} />
           <F label="Metode" value={method} />
           <F label="Tanggal" value={date} />

@@ -115,7 +115,7 @@ export default function ServicePaymentTypeInfoPage() {
               <tr key={row.no} style={{ background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
                 <td style={TD}>{row.no}</td>
                 <td style={TD}>{row.date}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/service/${row.serviceInvoice}`)}>{row.serviceInvoice}</td>
+                <td style={{ ...TD, ...L }} onClick={() => router.push(`/finance/invoices/detail/service/${row.serviceInvoice}`)}>{row.serviceInvoice}</td>
                 <td style={TD}>{row.invoiceReceivable}</td>
                 <td style={TD}>{row.store}</td>
                 <td style={{ ...TD, ...L }}>{row.customer}</td>

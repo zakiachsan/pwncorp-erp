@@ -621,7 +621,7 @@ export default function NewServiceOrderPage() {
           </button>
         </div>
         {serviceItems.length > 0 && (
-          <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "visible" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
               <span>Service</span>
               <span style={{ textAlign: "center" }}>Qty</span>
@@ -679,7 +679,7 @@ export default function NewServiceOrderPage() {
           </button>
         </div>
         {sparepartItems.length > 0 && (
-          <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "visible" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
               <span>Suku Cadang</span>
               <span style={{ textAlign: "center" }}>Qty</span>

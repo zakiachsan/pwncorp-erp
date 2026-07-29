@@ -214,7 +214,7 @@ export default function StockOrdersPage() {
                 <td
                   className="font-medium cursor-pointer"
                   style={{ color: "var(--color-brand)" }}
-                  onClick={() => router.push(`/stock-workflow/stock-orders/${row.stockOrder}`)}
+                  onClick={() => router.push(`/stock-workflow/stock-orders/detail/${row.stockOrder}`)}
                 >{row.stockOrder}</td>
                 {activeTab === "serviceOrders" && (
                   <td
@@ -227,7 +227,7 @@ export default function StockOrdersPage() {
                   <td
                     className="font-medium cursor-pointer"
                     style={{ color: "var(--color-brand)" }}
-                    onClick={() => router.push(`/work-orders/${encodeURIComponent(row.woNo)}`)}
+                    onClick={() => router.push(`/work-orders/detail/${encodeURIComponent(row.woNo)}`)}
                   >{row.woNo}</td>
                 )}
                 {activeTab === "warehouse" && <td>{row.refNo}</td>}

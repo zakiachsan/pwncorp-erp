@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Save, Wrench } from "lucide-react";
+import { ArrowLeft, Save, Wrench, X } from "lucide-react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
 
@@ -10,12 +10,17 @@ export default function NewWorkOrderPage() {
   const router = useRouter();
   const [so, setSo] = useState<any>(null);
   const [mekanikList, setMekanikList] = useState<any[]>([]);
+  const [sparepartList, setSparepartList] = useState<any[]>([]);
   const [mekanikId, setMekanikId] = useState("");
   const [serviceMekaniks, setServiceMekaniks] = useState<Record<number, string>>({});
+  const [serviceSpareparts, setServiceSpareparts] = useState<Record<number, string[]>>({});
   const [targetDate, setTargetDate] = useState("");
+  const [targetTime, setTargetTime] = useState("");
+  const [customerWaiting, setCustomerWaiting] = useState("no");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [sparepartDropdownOpen, setSparepartDropdownOpen] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -25,11 +30,13 @@ export default function NewWorkOrderPage() {
     Promise.all([
       fetch(`/api/service-orders/${sroId}`).then(r => r.json()),
       fetch("/api/users?limit=100").then(r => r.json()),
-    ]).then(([soJson, usersJson]) => {
+      fetch("/api/spareparts?limit=200").then(r => r.json()),
+    ]).then(([soJson, usersJson, sparepartsJson]) => {
       if (soJson.error) { setError(soJson.error); setLoading(false); return; }
       setSo(soJson.data);
       const mekaniks = (usersJson.data || []).filter((u: any) => u.role?.name === "Mekanik" || u.role === "Mekanik");
       setMekanikList(mekaniks);
+      setSparepartList(sparepartsJson.data || []);
       setLoading(false);
     }).catch(() => { setError("Gagal load data"); setLoading(false); });
   }, []);
@@ -46,13 +53,34 @@ export default function NewWorkOrderPage() {
           soId: so.id,
           mekanikId: mekanikId || null,
           targetDate: targetDate || null,
+          targetTime: targetTime || null,
+          customerWaiting: customerWaiting === "yes",
           serviceMekaniks: Object.keys(serviceMekaniks).length > 0 ? serviceMekaniks : undefined,
+          serviceSpareparts: Object.keys(serviceSpareparts).length > 0 ? serviceSpareparts : undefined,
         }),
       });
       const json = await res.json();
       if (!res.ok) { setError(json.error || "Gagal membuat WO"); setSaving(false); return; }
-      router.push(`/work-orders/${json.data.woNo}`);
+      router.push(`/work-orders/detail/${json.data.woNo}`);
     } catch { setError("Gagal membuat WO"); setSaving(false); }
+  };
+
+  const toggleSparepart = (serviceIdx: number, sparepartId: string) => {
+    setServiceSpareparts(prev => {
+      const current = prev[serviceIdx] || [];
+      if (current.includes(sparepartId)) {
+        return { ...prev, [serviceIdx]: current.filter(id => id !== sparepartId) };
+      } else {
+        return { ...prev, [serviceIdx]: [...current, sparepartId] };
+      }
+    });
+  };
+
+  const removeSparepart = (serviceIdx: number, sparepartId: string) => {
+    setServiceSpareparts(prev => ({
+      ...prev,
+      [serviceIdx]: (prev[serviceIdx] || []).filter(id => id !== sparepartId),
+    }));
   };
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
@@ -110,10 +138,21 @@ export default function NewWorkOrderPage() {
       {/* WO Settings */}
       <div className="card-slds p-4 mb-4">
         <div className="text-sm font-semibold text-[--color-text-secondary] uppercase mb-3">Work Order Settings</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="form-label">Customer Waiting</label>
+            <select className="form-select w-full" value={customerWaiting} onChange={e => setCustomerWaiting(e.target.value)}>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
           <div>
             <label className="form-label">Target Date</label>
             <input type="date" className="form-input" value={targetDate} onChange={e => setTargetDate(e.target.value)} />
+          </div>
+          <div>
+            <label className="form-label">Target Time</label>
+            <input type="time" className="form-input" value={targetTime} onChange={e => setTargetTime(e.target.value)} />
           </div>
         </div>
       </div>
@@ -124,8 +163,8 @@ export default function NewWorkOrderPage() {
         {services.length > 0 && (
           <div className="mb-4">
             <div className="text-xs font-semibold text-[--color-text-secondary] mb-2">JASA / SERVICES</div>
-            <div className="table-wrap">
-              <table className="data-table">
+            <div className="table-wrap" style={{ overflow: "visible" }}>
+              <table className="data-table" style={{ overflow: "visible" }}>
                 <thead>
                   <tr>
                     <th style={{ width: 40 }}>#</th>
@@ -134,6 +173,7 @@ export default function NewWorkOrderPage() {
                     <th className="text-right">Unit Price</th>
                     <th className="text-right">Total</th>
                     <th>Mekanik</th>
+                    <th style={{ minWidth: 200 }}>Spareparts</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -149,6 +189,79 @@ export default function NewWorkOrderPage() {
                           <option value="">-- Pilih Mekanik --</option>
                           {mekanikList.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                         </select>
+                      </td>
+                      <td style={{ position: "relative" }}>
+                        <div style={{ position: "relative" }}>
+                          {/* Selected spareparts tags */}
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 4 }}>
+                            {(serviceSpareparts[i] || []).map(spId => {
+                              const sp = spareparts.find((s: any) => s.sparepartId === spId || s.sparepart?.id === spId);
+                              return sp ? (
+                                <span key={spId} style={{ 
+                                  display: "inline-flex", alignItems: "center", gap: 4,
+                                  padding: "2px 8px", fontSize: 11, background: "#e8f0fe", 
+                                  color: "#0176d3", borderRadius: 4, fontWeight: 500
+                                }}>
+                                  {sp.sparepart?.sku || sp.sku}
+                                  <X size={12} style={{ cursor: "pointer" }} onClick={() => removeSparepart(i, spId)} />
+                                </span>
+                              ) : null;
+                            })}
+                          </div>
+                          {/* Dropdown trigger */}
+                          <div 
+                            style={{ 
+                              padding: "6px 10px", fontSize: 12, border: "1px solid #d8d8d8", 
+                              borderRadius: 4, cursor: "pointer", background: "#fff",
+                              display: "flex", justifyContent: "space-between", alignItems: "center"
+                            }}
+                            onClick={() => setSparepartDropdownOpen(prev => ({ ...prev, [i]: !prev[i] }))}
+                          >
+                            <span style={{ color: (serviceSpareparts[i] || []).length > 0 ? "#001526" : "#8e8f8e" }}>
+                              {(serviceSpareparts[i] || []).length > 0 ? `${(serviceSpareparts[i] || []).length} sparepart dipilih` : "-- Pilih Sparepart --"}
+                            </span>
+                            <span style={{ fontSize: 10 }}>▼</span>
+                          </div>
+                          {/* Dropdown list - only show spareparts from this SO */}
+                          {sparepartDropdownOpen[i] && (
+                            <div style={{ 
+                              position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, 
+                              background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, 
+                              maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                              marginTop: 4
+                            }}>
+                              {spareparts.map((sp: any) => {
+                                const spId = sp.sparepartId || sp.sparepart?.id;
+                                const spName = sp.sparepart?.name || sp.name || "-";
+                                const spSku = sp.sparepart?.sku || sp.sku || "-";
+                                return (
+                                  <div
+                                    key={spId}
+                                    onClick={(e) => { e.stopPropagation(); toggleSparepart(i, spId); }}
+                                    style={{ 
+                                      padding: "6px 10px", fontSize: 12, cursor: "pointer",
+                                      background: (serviceSpareparts[i] || []).includes(spId) ? "#e8f0fe" : "transparent",
+                                      display: "flex", alignItems: "center", gap: 8
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
+                                    onMouseLeave={e => e.currentTarget.style.background = (serviceSpareparts[i] || []).includes(spId) ? "#e8f0fe" : "transparent"}
+                                  >
+                                    <input 
+                                      type="checkbox" 
+                                      checked={(serviceSpareparts[i] || []).includes(spId)}
+                                      readOnly
+                                      style={{ pointerEvents: "none" }}
+                                    />
+                                    <span>{spSku} - {spName}</span>
+                                  </div>
+                                );
+                              })}
+                              {spareparts.length === 0 && (
+                                <div style={{ padding: "8px 10px", fontSize: 12, color: "#8e8f8e" }}>Tidak ada sparepart di SO ini</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

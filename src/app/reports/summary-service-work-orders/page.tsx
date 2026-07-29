@@ -148,7 +148,7 @@ export default function SummaryServiceWorkOrdersPage() {
             {data.map((row, i) => (
               <tr key={row.no} style={{ background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
                 <td style={TD}>{row.no}</td>
-                <td style={{ ...TD, ...L }} onClick={() => router.push(`/work-orders/${row.swo}`)}>{row.swo}</td>
+                <td style={{ ...TD, ...L }} onClick={() => router.push(`/work-orders/detail/${row.swo}`)}>{row.swo}</td>
                 <td style={{ ...TD, ...L }}>{row.store}</td>
                 <td style={TD}>{row.createdDate}</td>
                 <td style={TD}>{row.serviceDate}</td>

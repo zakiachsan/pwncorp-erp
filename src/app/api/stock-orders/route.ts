@@ -50,9 +50,9 @@ export const POST = withAuth(async (req: NextRequest) => {
   if (!wo) return NextResponse.json({ error: "Work order not found" }, { status: 404 });
 
   // Check WO status allows stock order
-  if (!["Draft", "Confirmed", "In Progress"].includes(wo.status)) {
+  if (!["Draft", "Confirmed", "In Progress", "Revised"].includes(wo.status)) {
     return NextResponse.json({
-      error: `WO status must be Draft, Confirmed, or In Progress, currently: ${wo.status}`,
+      error: `WO status must be Draft, Confirmed, In Progress, or Revised, currently: ${wo.status}`,
     }, { status: 400 });
   }
 
