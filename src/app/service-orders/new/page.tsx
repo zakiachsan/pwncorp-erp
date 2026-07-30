@@ -3,6 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Save, ChevronDown, Plus, Search, Trash2, Loader2, X } from "lucide-react";
+
+const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
+const formatOdometer = (v: string) => {
+  const raw = v.replace(/[^0-9]/g, "");
+  if (raw.length > 10) return "";
+  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+const stripDots = (v: string) => v.replace(/\./g, "");
 import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 // ─── Types ───
@@ -191,7 +199,7 @@ export default function NewServiceOrderPage() {
         bookingSource: form.bookingSource || null,
         referenceNumber: form.referenceNumber || null,
         planServiceTime: form.planServiceTime || null,
-        odometer: form.odometer || null,
+        odometer: form.odometer ? stripDots(form.odometer) : null,
         color: form.color || null,
         spareparts: sparepartItems.filter((sp) => sp.sparepartId),
         services: serviceItems.filter((sv) => sv.serviceId),
@@ -555,7 +563,7 @@ export default function NewServiceOrderPage() {
           <FSelect label="VEHICLE TYPE" value={form.vehicleType} onChange={(v) => { update("vehicleType", v); update("vehicleMake", ""); update("vehicleModel", ""); }} options={["CAR", "MOTORCYCLE", "TRUCK"]} />
           <FCreatable label="VEHICLE MAKE" value={form.vehicleMake} onChange={(v) => { update("vehicleMake", v); update("vehicleModel", ""); }} placeholder={form.vehicleType ? "Pilih / ketik merk" : "Pilih vehicle type dulu"} presets={vehicleBrands[form.vehicleType] || []} />
           <FCreatable label="VEHICLE MODEL" value={form.vehicleModel} onChange={(v) => update("vehicleModel", v)} placeholder={form.vehicleMake ? "Pilih / ketik model" : "Pilih merk dulu"} presets={brandModels[form.vehicleMake] || []} />
-          <FInput label="ODOMETER" value={form.odometer} onChange={(v) => update("odometer", v)} placeholder="Contoh: 45.230" />
+          <FInput label="ODOMETER" value={form.odometer} onChange={(v) => update("odometer", formatOdometer(v))} placeholder="Contoh: 45.230" />
           <FCreatable label="YEAR" value={form.year} onChange={(v) => update("year", v)} placeholder="Pilih / ketik tahun" presets={["2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015"]} />
           <FCreatable label="COLOR" value={form.color} onChange={(v) => update("color", v)} placeholder="Pilih / ketik warna" presets={["HITAM", "PUTIH", "SILVER", "ABU-ABU", "MERAH", "BIRU", "HIJAU", "KUNING", "ORANYE", "COKLAT", "EMAS"]} />
         </div>

@@ -3,6 +3,13 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2, ChevronDown } from "lucide-react";
+
+const formatOdometer = (v: string) => {
+  const raw = v.replace(/[^0-9]/g, "");
+  if (raw.length > 10) return "";
+  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+const stripDots = (v: string) => v.replace(/\./g, "");
 import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
@@ -397,6 +404,8 @@ export default function ServiceOrderDetailPage() {
   const handleSaveFields = async () => {
     try {
       const body: any = { ...editFields };
+      // Strip dots from odometer for DB storage
+      if (body.odometer) body.odometer = stripDots(body.odometer);
       // Map planServiceDate → date for the API
       if (editFields.planServiceDate) body.date = editFields.planServiceDate;
       delete body.planServiceDate;
@@ -433,7 +442,7 @@ export default function ServiceOrderDetailPage() {
     vehicleType: order.vehicle?.brand ? "CAR" : (order.vehicleType || "-"),
     vehicleMake: order.vehicle?.brand || order.vehicleMake || "-",
     vehicleModel: order.vehicle?.model || order.vehicleModel || "-",
-    odometer: order.odometer || order.vehicle?.odometer || "-",
+    odometer: order.odometer ? Number(stripDots(order.odometer)).toLocaleString("id-ID") : (order.vehicle?.odometer || "-"),
     year: order.vehicle?.year || order.year || "-",
     color: order.color || order.vehicle?.color || "-",
   };
@@ -499,7 +508,7 @@ export default function ServiceOrderDetailPage() {
               )}
             </div>
             <button style={S.actionBtn}><FileText size={14} /> Performance Inv</button>
-            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer || "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
+            <button onClick={() => { setEditFields({ complaint: order.complaint || "", customerId: order.customerId || "", vehicleId: order.vehicleId || "", planServiceDate: order.date ? new Date(order.date).toISOString().split("T")[0] : "", planServiceTime: order.planServiceTime || "", saId: order.saId || "", salesperson: order.salesperson || "", bookingSource: order.bookingSource || "", referenceNumber: order.referenceNumber || "", odometer: order.odometer ? Number(stripDots(order.odometer)).toLocaleString("id-ID") : "", color: order.color || "" }); setShowEditModal(true); }} style={{ ...S.actionBtn, background: "#f59e0b", color: "#fff", border: "1px solid #f59e0b" }}><Edit size={14} /> Edit</button>
             </div>
             </div>
 
@@ -946,7 +955,7 @@ export default function ServiceOrderDetailPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
               <div>
                 <label style={S.formLabel}>Odometer</label>
-                <input type="text" value={editFields.odometer} onChange={e => setEditFields(prev => ({ ...prev, odometer: e.target.value }))} style={S.formInput} placeholder="Contoh: 45.230" />
+                <input type="text" value={editFields.odometer} onChange={e => setEditFields(prev => ({ ...prev, odometer: formatOdometer(e.target.value) }))} style={S.formInput} placeholder="Contoh: 45.230" />
               </div>
               <div>
                 <label style={S.formLabel}>Color</label>
