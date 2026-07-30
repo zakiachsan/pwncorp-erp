@@ -78,5 +78,63 @@ export const POST = withAuth(async (req: NextRequest) => {
     },
   });
 
+  // Auto journal: Kas Tunai vs Beban/Pendapatan
+  try {
+    const kasCOA = await prisma.cOA.findFirst({ where: { code: "1110" } });
+    if (kasCOA) {
+      // Map category to expense COA
+      const categoryToCOA: Record<string, string> = {
+        "ATK & Perlengkapan": "5300",
+        "Transportasi": "5200",
+        "Konsumsi": "5200",
+        "Maintenance": "5300",
+        "Lain-lain": "5300",
+      };
+      const expenseCode = categoryToCOA[category || "Lain-lain"] || "5300";
+      const expenseCOA = await prisma.cOA.findFirst({ where: { code: expenseCode } });
+      const pendapatanCOA = await prisma.cOA.findFirst({ where: { code: "4200" } });
+
+      const details: any[] = [];
+      if (type === "in" && pendapatanCOA) {
+        // Kas masuk: Kas Tunai (D) vs Pendapatan (K)
+        details.push({ coaId: kasCOA.id, description: `Kas Masuk: ${description}`, debit: amount, credit: 0 });
+        details.push({ coaId: pendapatanCOA.id, description: `Pendapatan: ${description}`, debit: 0, credit: amount });
+      } else if (type === "out" && expenseCOA) {
+        // Kas keluar: Beban (D) vs Kas Tunai (K)
+        details.push({ coaId: expenseCOA.id, description: `${category}: ${description}`, debit: amount, credit: 0 });
+        details.push({ coaId: kasCOA.id, description: `Kas Keluar: ${description}`, debit: 0, credit: amount });
+      }
+
+      if (details.length === 2) {
+        // Generate JU number: JU-XXX/MM/YYYY
+        const _now = new Date();
+        const _mm = String(_now.getMonth() + 1).padStart(2, '0');
+        const _yyyy = _now.getFullYear();
+        const _dateSuffix = `/${_mm}/${_yyyy}`;
+        const _lastJE = await prisma.journalEntry.findFirst({
+          where: { jeNo: { startsWith: 'JU-' }, jeNo: { endsWith: _dateSuffix } },
+          orderBy: { jeNo: 'desc' },
+        });
+        const _seq = _lastJE ? parseInt(_lastJE.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;
+        const jeNo = `JU-${String(_seq).padStart(3, '0')}${_dateSuffix}`;
+        await prisma.journalEntry.create({
+          data: {
+            jeNo,
+            date: entry.date,
+            description: `Buku Kasir: ${description}`,
+            refType: "petty_cash",
+            refId: entry.id,
+            storeId: user.storeId,
+            status: "Posted",
+            createdById: user.id,
+            details: { create: details },
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Auto-journal (petty cash) failed:", err);
+  }
+
   return NextResponse.json({ data: entry }, { status: 201 });
 });

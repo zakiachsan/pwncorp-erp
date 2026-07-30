@@ -29,19 +29,27 @@ export default function PurchaseDeliveryDetailPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const fetchDelivery = () => {
-    fetch(`/api/purchase-deliveries?search=${encodeURIComponent(refCode)}&limit=1`)
-      .then((r) => r.json())
-      .then((json) => {
-        const found = (json.data || [])[0];
-        if (!found) { setError("Purchase Delivery tidak ditemukan: " + refCode); setLoading(false); return; }
-        return fetch(`/api/purchase-deliveries/${found.id}`)
-          .then((r2) => r2.json())
-          .then((j2) => {
-            setDelivery(j2.data || found);
-            setLoading(false);
-          });
-      })
-      .catch(() => { setError("Failed to load data"); setLoading(false); });
+    if (!refCode) { setError("No reference code"); setLoading(false); return; }
+    
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refCode);
+    
+    if (isUUID) {
+      fetch(`/api/purchase-deliveries/${refCode}`)
+        .then((r) => r.json())
+        .then((j) => { setDelivery(j.data); setLoading(false); })
+        .catch(() => { setError("Purchase Delivery tidak ditemukan"); setLoading(false); });
+    } else {
+      fetch(`/api/purchase-deliveries?search=${encodeURIComponent(refCode)}&limit=1`)
+        .then((r) => r.json())
+        .then((json) => {
+          const found = (json.data || [])[0];
+          if (!found) { setError("Purchase Delivery tidak ditemukan: " + refCode); setLoading(false); return; }
+          return fetch(`/api/purchase-deliveries/${found.id}`)
+            .then((r2) => r2.json())
+            .then((j2) => { setDelivery(j2.data || found); setLoading(false); });
+        })
+        .catch(() => { setError("Failed to load data"); setLoading(false); });
+    }
   };
 
   useEffect(() => { fetchDelivery(); }, [refCode]);

@@ -796,16 +796,23 @@ model JournalDetail {
 }
 
 model AccountReceivable {
-  id        String   @id @default(cuid())
-  invoiceId String   @map("invoice_id")
-  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
-  customerId String  @map("customer_id")
-  customer  Customer @relation(fields: [customerId], references: [id])
-  amount    Float
-  balance   Float
-  dueDate   DateTime @map("due_date")
-  status    String   @default("OPEN") // OPEN / OVERDUE / PAID
-  createdAt DateTime @default(now()) @map("created_at")
+  id            String    @id @default(cuid())
+  invoiceId     String    @map("invoice_id")
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id])
+  customerId    String    @map("customer_id")
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  amount        Float
+  balance       Float
+  dueDate       DateTime  @map("due_date")
+  status        String    @default("DRAFT") // DRAFT / APPROVED / SENT / PAID
+  createdAt     DateTime  @default(now()) @map("created_at")
+  approvedAt    DateTime? @map("approved_at")
+  sentAt        DateTime? @map("sent_at")
+  paidAt        DateTime? @map("paid_at")
+  approvedById  String?   @map("approved_by_id")
+  sentById      String?   @map("sent_by_id")
+  notes         String?
+  source        String    @default("System")
 
   @@map("accounts_receivable")
 }

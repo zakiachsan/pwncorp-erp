@@ -2,9 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Search, Download } from "lucide-react";
-
+import { Search, Download, ExternalLink } from "lucide-react";
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
+
+// Map refType to detail page URL
+const SOURCE_MAP: Record<string, { label: string; getHref: (refId: string) => string }> = {
+  invoice: { label: "Invoice", getHref: (id) => `/finance/invoices/service/${id}` },
+  payment: { label: "Pembayaran", getHref: (id) => `/finance/payments` },
+  petty_cash: { label: "Buku Kasir", getHref: (id) => `/finance/petty-cash` },
+  stock_order: { label: "Stock Order", getHref: (id) => `/stock-workflow/stock-orders/detail/${id}` },
+  stock_return: { label: "Stock Return", getHref: (id) => `/stock-workflow/stock-returns` },
+  purchase_delivery: { label: "Penerimaan Pembelian", getHref: (id) => `/warehouse/purchase-deliveries/${id}` },
+  purchase_invoice: { label: "Invoice Pembelian", getHref: (id) => `/finance/invoices/purchase` },
+  purchase_return: { label: "Retur Pembelian", getHref: (id) => `/warehouse/purchase-returns/${id}` },
+  stock_transfer: { label: "Transfer Stok", getHref: (id) => `/warehouse/stock-transfer/${id}` },
+  stock_opname: { label: "Stock Opname", getHref: (id) => `/warehouse/stock-opname/${id}` },
+};
 
 export default function JournalPage() {
   const router = useRouter();
@@ -34,6 +47,20 @@ export default function JournalPage() {
   const totalCredit = journals.reduce((s: number, j: any) => s + (j.totalCredit || 0), 0);
   const saldoAwal = 150000000;
   const saldoAkhir = saldoAwal + totalDebit - totalCredit;
+
+  const getSourceInfo = (refType: string, refId: string) => {
+    const source = SOURCE_MAP[refType];
+    if (!source) return null;
+    return (
+      <button
+        onClick={(e) => { e.stopPropagation(); router.push(source.getHref(refId)); }}
+        className="inline-flex items-center gap-1 text-xs font-medium text-[--color-brand] hover:underline"
+      >
+        {source.label}
+        <ExternalLink size={10} />
+      </button>
+    );
+  };
 
   return (
     <div>
@@ -99,27 +126,27 @@ export default function JournalPage() {
       </div>
 
       {/* Table */}
-      <div className="table-wrap">
+      <div className="table-wrap overflow-x-auto">
         <table className="data-table">
           <thead>
             <tr>
-              <th>No. Jurnal</th>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th className="text-right">Debit</th>
-              <th className="text-right">Credit</th>
+              <th className="whitespace-nowrap">Tanggal</th>
+              <th className="whitespace-nowrap">No. Jurnal</th>
+              <th className="whitespace-nowrap">Sumber</th>
+              <th className="whitespace-nowrap">Keterangan</th>
+              <th className="text-right whitespace-nowrap">Debit</th>
+              <th className="text-right whitespace-nowrap">Kredit</th>
             </tr>
           </thead>
           <tbody>
             {journals.map((j: any) => (
               <tr key={j.id} className="hover:bg-[#f8f8f8] cursor-pointer" onClick={() => router.push(`/finance/journal/${encodeURIComponent(j.jeNo || j.id)}`)}>
-                <td className="font-medium text-[--color-brand]">{j.jeNo}</td>
-                <td className="text-[--color-text-secondary]">{j.date ? new Date(j.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
-                <td>{j.description}</td>
-                <td>{j.status}</td>
-                <td className="text-right font-medium">{(j.totalDebit || 0) > 0 ? fmt(j.totalDebit) : "-"}</td>
-                <td className="text-right font-medium">{(j.totalCredit || 0) > 0 ? fmt(j.totalCredit) : "-"}</td>
+                <td className="text-[--color-text-secondary] whitespace-nowrap">{j.date ? new Date(j.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td className="font-medium text-[--color-brand] whitespace-nowrap">{j.jeNo}</td>
+                <td className="whitespace-nowrap">{getSourceInfo(j.refType, j.refId)}</td>
+                <td className="max-w-[300px] truncate">{j.description}</td>
+                <td className="text-right font-medium whitespace-nowrap">{(j.totalDebit || 0) > 0 ? fmt(j.totalDebit) : "-"}</td>
+                <td className="text-right font-medium whitespace-nowrap">{(j.totalCredit || 0) > 0 ? fmt(j.totalCredit) : "-"}</td>
               </tr>
             ))}
           </tbody>

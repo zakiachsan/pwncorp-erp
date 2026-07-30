@@ -23,16 +23,27 @@ export default function StockOpnameDetailPage() {
   const [saving, setSaving] = useState(false);
 
   const fetchOpname = () => {
-    fetch(`/api/stock-opnames?search=${encodeURIComponent(refCode)}&limit=1`)
-      .then(r => r.json())
-      .then(json => {
-        const found = (json.data || [])[0];
-        if (!found) { setError("Stock Opname tidak ditemukan: " + refCode); setLoading(false); return; }
-        return fetch(`/api/stock-opnames/${found.id}`)
-          .then(r2 => r2.json())
-          .then(j2 => { setOpname(j2.data || found); setLoading(false); });
-      })
-      .catch(() => { setError("Failed to load data"); setLoading(false); });
+    if (!refCode) { setError("No reference code"); setLoading(false); return; }
+    
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refCode);
+    
+    if (isUUID) {
+      fetch(`/api/stock-opnames/${refCode}`)
+        .then(r => r.json())
+        .then(j => { setOpname(j.data); setLoading(false); })
+        .catch(() => { setError("Stock Opname tidak ditemukan"); setLoading(false); });
+    } else {
+      fetch(`/api/stock-opnames?search=${encodeURIComponent(refCode)}&limit=1`)
+        .then(r => r.json())
+        .then(json => {
+          const found = (json.data || [])[0];
+          if (!found) { setError("Stock Opname tidak ditemukan: " + refCode); setLoading(false); return; }
+          return fetch(`/api/stock-opnames/${found.id}`)
+            .then(r2 => r2.json())
+            .then(j2 => { setOpname(j2.data || found); setLoading(false); });
+        })
+        .catch(() => { setError("Failed to load data"); setLoading(false); });
+    }
   };
 
   useEffect(() => { fetchOpname(); }, [refCode]);

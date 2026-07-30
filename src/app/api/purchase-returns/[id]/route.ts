@@ -103,7 +103,17 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
               credit: totalValue,
             });
             const storeId = (ret as any).storeId || (await prisma.purchaseOrder.findUnique({ where: { id: ret.poId } }))?.storeId || "";
-            const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+            // Generate JU number: JU-XXX/MM/YYYY
+        const _now = new Date();
+        const _mm = String(_now.getMonth() + 1).padStart(2, '0');
+        const _yyyy = _now.getFullYear();
+        const _dateSuffix = `/${_mm}/${_yyyy}`;
+        const _lastJE = await prisma.journalEntry.findFirst({
+          where: { jeNo: { startsWith: 'JU-' }, jeNo: { endsWith: _dateSuffix } },
+          orderBy: { jeNo: 'desc' },
+        });
+        const _seq = _lastJE ? parseInt(_lastJE.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;
+        const jeNo = `JU-${String(_seq).padStart(3, '0')}${_dateSuffix}`;
             await prisma.journalEntry.create({
               data: {
                 jeNo,

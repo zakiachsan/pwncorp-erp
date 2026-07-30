@@ -8,11 +8,13 @@ export const GET = withAuth(async (req: NextRequest) => {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
   const status = searchParams.get("status");
+  const invoiceId = searchParams.get("invoiceId");
 
   const where: any = {
     invoice: { storeId: user.storeId },
   };
   if (status) where.status = status;
+  if (invoiceId) where.invoiceId = invoiceId;
 
   const [data, total] = await Promise.all([
     prisma.accountReceivable.findMany({

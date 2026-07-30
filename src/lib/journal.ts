@@ -16,17 +16,20 @@ export const COA = {
   BEBAN_LISTRIK: '5300',
 } as const;
 
-// Generate JE Number: JE/YYYYMM/XXXX
+// Generate JE Number: JU-XXX/MM/YYYY (Jurnal Umum format)
 async function generateJENo(prisma: PrismaClient, storeId: string): Promise<string> {
   const now = new Date();
-  const ym = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const prefix = `JE/${ym}/`;
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  const prefix = `JU-`;
+  const dateSuffix = `/${mm}/${yyyy}`;
+  // Find last JU number for this month
   const last = await prisma.journalEntry.findFirst({
-    where: { jeNo: { startsWith: prefix } },
+    where: { jeNo: { startsWith: prefix }, jeNo: { endsWith: dateSuffix } },
     orderBy: { jeNo: 'desc' },
   });
-  const seq = last ? parseInt(last.jeNo.split('/').pop() || '0') + 1 : 1;
-  return `${prefix}${String(seq).padStart(4, '0')}`;
+  const seq = last ? parseInt(last.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;
+  return `${prefix}${String(seq).padStart(3, '0')}${dateSuffix}`;
 }
 
 export interface JournalLine {

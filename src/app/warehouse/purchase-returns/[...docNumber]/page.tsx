@@ -30,16 +30,30 @@ export default function PurchaseReturnDetailPage() {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
 
   const fetchReturn = () => {
-    fetch(`/api/purchase-returns?search=${encodeURIComponent(docNumber)}&limit=1`)
-      .then(r => r.json())
-      .then(json => {
-        const found = (json.data || [])[0];
-        if (!found) { setError("Purchase Return tidak ditemukan: " + docNumber); setLoading(false); return; }
-        return fetch(`/api/purchase-returns/${found.id}`)
-          .then(r2 => r2.json())
-          .then(j2 => { setRet(j2.data || found); setLoading(false); });
-      })
-      .catch(() => { setError("Failed to load data"); setLoading(false); });
+    if (!docNumber) { setError("No document number"); setLoading(false); return; }
+    
+    // Check if it's a UUID (from journal refId)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(docNumber);
+    
+    if (isUUID) {
+      // Fetch directly by ID
+      fetch(`/api/purchase-returns/${docNumber}`)
+        .then(r => r.json())
+        .then(j => { setRet(j.data); setLoading(false); })
+        .catch(() => { setError("Purchase Return tidak ditemukan"); setLoading(false); });
+    } else {
+      // Search by doc number
+      fetch(`/api/purchase-returns?search=${encodeURIComponent(docNumber)}&limit=1`)
+        .then(r => r.json())
+        .then(json => {
+          const found = (json.data || [])[0];
+          if (!found) { setError("Purchase Return tidak ditemukan: " + docNumber); setLoading(false); return; }
+          return fetch(`/api/purchase-returns/${found.id}`)
+            .then(r2 => r2.json())
+            .then(j2 => { setRet(j2.data || found); setLoading(false); });
+        })
+        .catch(() => { setError("Failed to load data"); setLoading(false); });
+    }
   };
 
   useEffect(() => { fetchReturn(); }, [docNumber]);

@@ -7,9 +7,18 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
     where: { id: params.id },
     include: {
       customer: true,
+      store: { select: { name: true } },
       wo: {
         include: {
-          so: { select: { soNo: true, vehicle: { select: { plateNo: true, brand: true, model: true } } } },
+          so: {
+            select: {
+              soNo: true, date: true, planServiceTime: true,
+              odometer: true, color: true, salesperson: true, bookingSource: true,
+              referenceNumber: true, status: true, createdAt: true,
+              sa: { select: { id: true, name: true } },
+              vehicle: { select: { plateNo: true, brand: true, model: true, year: true } },
+            },
+          },
         },
       },
       items: true,

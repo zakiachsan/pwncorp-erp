@@ -55,19 +55,24 @@ export default function ServiceInvoicesPage() {
       .then((r) => r.json())
       .then((j) => {
         const data: ApiInvoice[] = j.data || [];
-        const mapped: Invoice[] = data.map((inv) => ({
-          docNo: inv.invNo,
-          swoNo: "-",
-          soNo: inv.so?.soNo || "-",
-          customer: inv.customer?.name || "-",
-          invoiceDate: "-",
-          dueDate: inv.dueDate || "-",
-          status: inv.status,
-          total: inv.total || 0,
-          amountPaid: inv.paidAmount || 0,
-          amountDue: (inv.total || 0) - (inv.paidAmount || 0),
-          services: [],
-        }));
+        const mapped: Invoice[] = data.map((inv) => {
+          const arAmount = inv.ar?.amount || 0;
+          const arBalance = inv.ar?.balance || 0;
+          const received = arAmount - arBalance;
+          return {
+            docNo: inv.invNo,
+            swoNo: inv.wo?.woNo || "-",
+            soNo: inv.so?.soNo || "-",
+            customer: inv.customer?.name || "-",
+            invoiceDate: inv.invoiceDate || "-",
+            dueDate: inv.dueDate || "-",
+            status: inv.status,
+            total: inv.total || 0,
+            amountPaid: received,
+            amountDue: arBalance,
+            services: [],
+          };
+        });
         setInvoices(mapped);
         setLoading(false);
       })

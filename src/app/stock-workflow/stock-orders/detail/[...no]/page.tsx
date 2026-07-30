@@ -25,16 +25,27 @@ export default function StockOrderDetailPage() {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
 
   const fetchOrder = () => {
-    fetch(`/api/stock-orders?search=${encodeURIComponent(refCode)}&limit=1`)
-      .then((r) => r.json())
-      .then((json) => {
-        const found = (json.data || [])[0];
-        if (!found) { setError("Stock Order tidak ditemukan: " + refCode); setLoading(false); return; }
-        return fetch(`/api/stock-orders/${found.id}`)
-          .then((r2) => r2.json())
-          .then((j2) => { setOrder(j2.data || found); setLoading(false); });
-      })
-      .catch(() => { setError("Failed to load data"); setLoading(false); });
+    if (!refCode) { setError("No reference code"); setLoading(false); return; }
+    
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refCode);
+    
+    if (isUUID) {
+      fetch(`/api/stock-orders/${refCode}`)
+        .then((r) => r.json())
+        .then((j) => { setOrder(j.data); setLoading(false); })
+        .catch(() => { setError("Stock Order tidak ditemukan"); setLoading(false); });
+    } else {
+      fetch(`/api/stock-orders?search=${encodeURIComponent(refCode)}&limit=1`)
+        .then((r) => r.json())
+        .then((json) => {
+          const found = (json.data || [])[0];
+          if (!found) { setError("Stock Order tidak ditemukan: " + refCode); setLoading(false); return; }
+          return fetch(`/api/stock-orders/${found.id}`)
+            .then((r2) => r2.json())
+            .then((j2) => { setOrder(j2.data || found); setLoading(false); });
+        })
+        .catch(() => { setError("Failed to load data"); setLoading(false); });
+    }
   };
 
   useEffect(() => { fetchOrder(); }, [refCode]);

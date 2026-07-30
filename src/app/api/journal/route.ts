@@ -70,7 +70,18 @@ export const POST = withAuth(async (req: NextRequest) => {
     return NextResponse.json({ error: `Debit (${totalDebit}) and credit (${totalCredit}) must balance` }, { status: 400 });
   }
 
-  const jeNo = `JE/${new Date().toISOString().slice(2, 10).replace(/-/g, "")}/${String(Date.now()).slice(-4)}`;
+  // Generate JU number: JU-XXX/MM/YYYY
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  const dateSuffix = `/${mm}/${yyyy}`;
+  const prefix = `JU-`;
+  const lastJE = await prisma.journalEntry.findFirst({
+    where: { jeNo: { startsWith: prefix }, jeNo: { endsWith: dateSuffix } },
+    orderBy: { jeNo: 'desc' },
+  });
+  const seq = lastJE ? parseInt(lastJE.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;
+  const jeNo = `${prefix}${String(seq).padStart(3, '0')}${dateSuffix}`;
 
   const je = await prisma.journalEntry.create({
     data: {
