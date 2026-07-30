@@ -6,8 +6,10 @@ export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
+  const all = searchParams.get("all") === "true";
 
-  const where: any = { storeId: user.storeId, isActive: true };
+  const where: any = { isActive: true };
+  if (!all) where.storeId = user.storeId;
   if (search) where.name = { contains: search, mode: "insensitive" };
 
   const data = await prisma.warehouse.findMany({

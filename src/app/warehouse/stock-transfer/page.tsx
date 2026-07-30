@@ -4,20 +4,29 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Search, Star, ArrowUpDown } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 
 export default function StockTransferPage() {
   const router = useRouter();
   const [data, setData] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+  const [filterFrom, setFilterFrom] = useState("");
+  const [filterTo, setFilterTo] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   useEffect(() => {
-    fetch("/api/stock-transfers")
-      .then((r) => r.json())
-      .then((json) => { setData(json.data || []); setLoading(false); })
-      .catch(() => { setError("Failed to load data"); setLoading(false); });
+    Promise.all([
+      fetch("/api/stock-transfers").then(r => r.json()),
+      fetch("/api/warehouses?all=true").then(r => r.json()),
+    ]).then(([stJson, whJson]) => {
+      setData(stJson.data || []);
+      setWarehouses(whJson.data || []);
+      setLoading(false);
+    }).catch(() => { setError("Failed to load data"); setLoading(false); });
   }, []);
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
@@ -52,31 +61,31 @@ export default function StockTransferPage() {
           </div>
           <div className="form-group">
             <label className="form-label">From (Warehouse)</label>
-            <select className="form-select">
-              <option>All Warehouse</option>
-              <option>Gudang Wijaya</option>
-              <option>Gudang PJ Motor</option>
-              <option>Gudang Sparepart</option>
-            </select>
+            <SearchableSelect
+              options={[{ value: "", label: "All Warehouse" }, ...warehouses.map(w => ({ value: w.name, label: w.name }))]}
+              value={filterFrom}
+              onChange={setFilterFrom}
+              placeholder="Cari warehouse..."
+            />
           </div>
           <div className="form-group">
             <label className="form-label">To (Warehouse)</label>
-            <select className="form-select">
-              <option>All Warehouse</option>
-              <option>Gudang Wijaya</option>
-              <option>Gudang PJ Motor</option>
-              <option>Gudang Sparepart</option>
-            </select>
+            <SearchableSelect
+              options={[{ value: "", label: "All Warehouse" }, ...warehouses.map(w => ({ value: w.name, label: w.name }))]}
+              value={filterTo}
+              onChange={setFilterTo}
+              placeholder="Cari warehouse..."
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>DRAFT</option>
-              <option>CONFIRMED</option>
-              <option>APPROVED</option>
-              <option>SENT FROM WAREHOUSE</option>
-              <option>RECEIVED IN DESTINATION</option>
+            <select className="form-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+              <option value="">All Status</option>
+              <option value="DRAFT">DRAFT</option>
+              <option value="CONFIRMED">CONFIRMED</option>
+              <option value="APPROVED">APPROVED</option>
+              <option value="SENT FROM WAREHOUSE">SENT FROM WAREHOUSE</option>
+              <option value="RECEIVED IN DESTINATION">RECEIVED IN DESTINATION</option>
             </select>
           </div>
           <div className="form-group">
@@ -90,24 +99,28 @@ export default function StockTransferPage() {
 
       {/* Table */}
       <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Ref.Code</th>
-              <th>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  Date <ArrowUpDown size={12} style={{ opacity: 0.5 }} />
-                </span>
-              </th>
-              <th>Approved At</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Status</th>
-              <th>User</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((t) => (
+      <table className="data-table">
+      <thead>
+        <tr>
+          <th>Ref.Code</th>
+          <th>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+              Date <ArrowUpDown size={12} style={{ opacity: 0.5 }} />
+            </span>
+          </th>
+          <th>Approved At</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Status</th>
+          <th>User</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data
+          .filter(t => !filterFrom || t.fromWarehouse === filterFrom)
+          .filter(t => !filterTo || t.toStore === filterTo)
+          .filter(t => !filterStatus || t.status === filterStatus)
+          .map((t) => (
               <tr key={t.id}>
                 <td
                   className="font-medium cursor-pointer"

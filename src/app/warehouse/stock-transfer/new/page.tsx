@@ -23,7 +23,7 @@ export default function NewStockTransferPage() {
   useEffect(() => {
     Promise.all([
       fetch("/api/spareparts?limit=200").then(r => r.json()),
-      fetch("/api/warehouses?limit=100").then(r => r.json()),
+      fetch("/api/warehouses?all=true").then(r => r.json()),
     ]).then(([spJson, whJson]) => {
       setSpareparts(spJson.data?.items || spJson.data || []);
       setWarehouses(whJson.data || []);
