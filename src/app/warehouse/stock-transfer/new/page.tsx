@@ -13,7 +13,7 @@ export default function NewStockTransferPage() {
   const router = useRouter();
   const [spareparts, setSpareparts] = useState<Sparepart[]>([]);
   const [loadingParts, setLoadingParts] = useState(true);
-  const [stores, setStores] = useState<{id: string; name: string}[]>([]);
+  const [warehouses, setWarehouses] = useState<{id: string; name: string}[]>([]);
   const [fromWarehouse, setFromWarehouse] = useState("");
   const [toStore, setToStore] = useState("");
   const [items, setItems] = useState<TransferRow[]>([{ sparepartId: "", qty: 1 }]);
@@ -23,10 +23,10 @@ export default function NewStockTransferPage() {
   useEffect(() => {
     Promise.all([
       fetch("/api/spareparts?limit=200").then(r => r.json()),
-      fetch("/api/stores?limit=100").then(r => r.json()),
-    ]).then(([spJson, stJson]) => {
+      fetch("/api/warehouses?limit=100").then(r => r.json()),
+    ]).then(([spJson, whJson]) => {
       setSpareparts(spJson.data?.items || spJson.data || []);
-      setStores(stJson.data || []);
+      setWarehouses(whJson.data || []);
       setLoadingParts(false);
     }).catch(() => setLoadingParts(false));
   }, []);
@@ -114,7 +114,7 @@ export default function NewStockTransferPage() {
           <div className="form-group">
             <label className="form-label">From (Warehouse)</label>
             <SearchableSelect
-              options={stores.map(s => ({ value: s.name, label: s.name }))}
+              options={warehouses.map(w => ({ value: w.name, label: w.name }))}
               value={fromWarehouse}
               onChange={setFromWarehouse}
               placeholder="Ketik nama gudang..."
@@ -123,7 +123,7 @@ export default function NewStockTransferPage() {
           <div className="form-group">
             <label className="form-label">To (Store)</label>
             <SearchableSelect
-              options={stores.map(s => ({ value: s.name, label: s.name }))}
+              options={warehouses.map(w => ({ value: w.name, label: w.name }))}
               value={toStore}
               onChange={setToStore}
               placeholder="Ketik nama toko..."
