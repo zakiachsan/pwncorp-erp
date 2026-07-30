@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, Download } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = {
@@ -21,14 +22,17 @@ export default function StockOrdersPage() {
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [data, setData] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<{id: string; name: string}[]>([]);
+  const [filterWarehouse, setFilterWarehouse] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/stock-orders?page=1&limit=200")
-      .then((r) => r.json())
-      .then((json) => {
-        const rows = (json.data || []).map((so: any) => ({
+    Promise.all([
+      fetch("/api/stock-orders?page=1&limit=200").then(r => r.json()),
+      fetch("/api/warehouses?all=true").then(r => r.json()),
+    ]).then(([soJson, whJson]) => {
+        const rows = (soJson.data || []).map((so: any) => ({
           stockOrder: so.orderNo,
           refNo: so.refNo || "-",
           date: so.date || "-",
@@ -45,6 +49,7 @@ export default function StockOrdersPage() {
           itemCount: so._count?.items || 0,
         }));
         setData(rows);
+        setWarehouses(whJson.data || []);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load stock orders"); setLoading(false); });
@@ -145,10 +150,12 @@ export default function StockOrdersPage() {
           </div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>
-            <select className="form-select">
-              <option>All Warehouses</option>
-              <option>Gudang Wijaya</option>
-            </select>
+            <SearchableSelect
+              options={[{ value: "", label: "All Warehouses" }, ...warehouses.map(w => ({ value: w.name, label: w.name }))]}
+              value={filterWarehouse}
+              onChange={setFilterWarehouse}
+              placeholder="Cari warehouse..."
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Status</label>

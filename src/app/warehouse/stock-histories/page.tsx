@@ -4,8 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Search, Star, ArrowUpDown, X } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
-
-const warehouseOptions = ["Gudang Wijaya", "Wijaya Motor - WH Main", "Wijaya Motor - WH Parts"];
+import SearchableSelect from "@/components/ui/SearchableSelect";
 const typeOptions = ["Purchase Delivery", "Stock Transfer", "Stock Opname", "Stock Order"];
 
 const fmtDate = (d: string) => {
@@ -28,14 +27,19 @@ export default function StockHistoriesPage() {
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
   const [data, setData] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<{id: string; name: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/stock-histories")
-      .then((r) => r.json())
-      .then((j) => { setData(j.data || []); setLoading(false); })
-      .catch(() => { setError("Failed to load stock histories"); setLoading(false); });
+    Promise.all([
+      fetch("/api/stock-histories").then(r => r.json()),
+      fetch("/api/warehouses?all=true").then(r => r.json()),
+    ]).then(([shJson, whJson]) => {
+      setData(shJson.data || []);
+      setWarehouses(whJson.data || []);
+      setLoading(false);
+    }).catch(() => { setError("Failed to load stock histories"); setLoading(false); });
   }, []);
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
@@ -68,10 +72,12 @@ export default function StockHistoriesPage() {
           <div className="form-group"><label className="form-label">Product Name</label><input type="text" className="form-input" placeholder="Product name..." /></div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>
-            <select className="form-select" value={warehouseFilter} onChange={(e) => setWarehouseFilter(e.target.value)}>
-              <option value="">All Warehouse</option>
-              {warehouseOptions.map((w) => (<option key={w} value={w}>{w}</option>))}
-            </select>
+            <SearchableSelect
+              options={[{ value: "", label: "All Warehouse" }, ...warehouses.map(w => ({ value: w.name, label: w.name }))]}
+              value={warehouseFilter}
+              onChange={setWarehouseFilter}
+              placeholder="Cari warehouse..."
+            />
           </div>
           <div className="form-group"><label className="form-label">Created By</label><input type="text" className="form-input" placeholder="Created by..." /></div>
           <div className="form-group"><label className="form-label">Tanggal</label><DateRangePicker from={dateFrom} to={dateTo} onChange={(from, to) => { setDateFrom(from); setDateTo(to); }} /></div>

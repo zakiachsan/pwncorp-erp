@@ -4,20 +4,28 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { CheckCircle, Star, ArrowUpDown, Search } from "lucide-react";
 import DateRangePicker from "@/components/shared/DateRangePicker";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 
 export default function StockOpnamePage() {
   const router = useRouter();
   const [data, setData] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState<Date>(new Date());
   const [dateTo, setDateTo] = useState<Date>(new Date());
+  const [filterWarehouse, setFilterWarehouse] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   useEffect(() => {
-    fetch("/api/stock-opnames")
-      .then((r) => r.json())
-      .then((json) => { setData(json.data || []); setLoading(false); })
-      .catch(() => { setError("Failed to load data"); setLoading(false); });
+    Promise.all([
+      fetch("/api/stock-opnames").then(r => r.json()),
+      fetch("/api/warehouses?all=true").then(r => r.json()),
+    ]).then(([soJson, whJson]) => {
+      setData(soJson.data || []);
+      setWarehouses(whJson.data || []);
+      setLoading(false);
+    }).catch(() => { setError("Failed to load data"); setLoading(false); });
   }, []);
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
@@ -46,20 +54,20 @@ export default function StockOpnamePage() {
           </div>
           <div className="form-group">
             <label className="form-label">Warehouse</label>
-            <select className="form-select">
-              <option>All Warehouse</option>
-              <option>Gudang Wijaya</option>
-              <option>Gudang PJ Motor</option>
-              <option>Gudang Sparepart</option>
-            </select>
+            <SearchableSelect
+              options={[{ value: "", label: "All Warehouse" }, ...warehouses.map(w => ({ value: w.name, label: w.name }))]}
+              value={filterWarehouse}
+              onChange={setFilterWarehouse}
+              placeholder="Cari warehouse..."
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Status</label>
-            <select className="form-select">
-              <option>All Status</option>
-              <option>DRAFT</option>
-              <option>COMPLETED</option>
-              <option>APPROVED</option>
+            <select className="form-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+              <option value="">All Status</option>
+              <option value="DRAFT">DRAFT</option>
+              <option value="COMPLETED">COMPLETED</option>
+              <option value="APPROVED">APPROVED</option>
             </select>
           </div>
           <div className="form-group">
@@ -89,7 +97,10 @@ export default function StockOpnamePage() {
             </tr>
           </thead>
           <tbody>
-            {data.map((s) => (
+            {data
+              .filter(s => !filterWarehouse || s.warehouse === filterWarehouse)
+              .filter(s => !filterStatus || s.status === filterStatus)
+              .map((s) => (
               <tr key={s.id}>
                 <td className="font-medium cursor-pointer" style={{ color: "var(--color-brand)" }}
                   onClick={() => router.push(`/warehouse/stock-opname/${s.refCode}`)}>

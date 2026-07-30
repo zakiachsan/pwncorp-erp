@@ -26,7 +26,7 @@ export default function NewStockOpnamePage() {
   useEffect(() => {
     Promise.all([
       fetch("/api/spareparts?limit=500").then(r => r.json()),
-      fetch("/api/warehouses?limit=100").then(r => r.json()),
+      fetch("/api/warehouses?all=true").then(r => r.json()),
     ]).then(([sp, wh]) => {
       setSpareparts(sp.data?.items || sp.data || []);
       setWarehouses(wh.data || []);
