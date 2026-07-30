@@ -13,7 +13,7 @@ export default function PurchaseDeliveryDetailPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.refCode as string[];
-  const refCode = refCodeArray ? refCodeArray.join("/") : "";
+  const refCode = refCodeArray ? decodeURIComponent(refCodeArray.join("/")) : "";
   const [delivery, setDelivery] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

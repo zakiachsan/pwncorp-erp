@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 
 export default function NewStockReturnPage() {
   const router = useRouter();
   const [spareparts, setSpareparts] = useState<any[]>([]);
   const [workOrders, setWorkOrders] = useState<any[]>([]);
+  const [stores, setStores] = useState<{id: string; name: string}[]>([]);
   const [form, setForm] = useState({ woId: "", warehouse: "", reason: "" });
   const [items, setItems] = useState([{ sparepartId: "", qty: 1 }]);
   const [saving, setSaving] = useState(false);
@@ -18,9 +20,11 @@ export default function NewStockReturnPage() {
     Promise.all([
       fetch("/api/spareparts?limit=200").then((r) => r.json()),
       fetch("/api/work-orders?limit=50").then((r) => r.json()),
-    ]).then(([spJson, woJson]) => {
+      fetch("/api/stores?limit=100").then((r) => r.json()),
+    ]).then(([spJson, woJson, stJson]) => {
       setSpareparts(spJson.data || []);
       setWorkOrders(woJson.data || []);
+      setStores(stJson.data || []);
     }).catch(() => {});
   }, []);
 
@@ -70,7 +74,7 @@ export default function NewStockReturnPage() {
           </div>
           <div>
             <label className="form-label">Warehouse</label>
-            <input className="form-input" value={form.warehouse} onChange={(e) => setForm({ ...form, warehouse: e.target.value })} placeholder="Gudang Utama" />
+            <SearchableSelect options={stores.map(s => ({ value: s.name, label: s.name }))} value={form.warehouse} onChange={(v) => setForm({ ...form, warehouse: v })} placeholder="Ketik nama gudang..." />
           </div>
           <div className="sm:col-span-2">
             <label className="form-label">Reason</label>

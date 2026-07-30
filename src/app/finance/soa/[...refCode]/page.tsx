@@ -130,7 +130,7 @@ export default function SOADetailPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.refCode as string[];
-  const refCode = refCodeArray ? refCodeArray.join("/") : "";
+  const refCode = refCodeArray ? decodeURIComponent(refCodeArray.join("/")) : "";
   const [soaData, setSoaData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [printMode, setPrintMode] = useState(false);

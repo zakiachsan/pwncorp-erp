@@ -18,7 +18,7 @@ export default function StockTransferDetailPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.refCode as string[];
-  const refCode = refCodeArray ? refCodeArray.join("/") : "";
+  const refCode = refCodeArray ? decodeURIComponent(refCodeArray.join("/")) : "";
   const [transfer, setTransfer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

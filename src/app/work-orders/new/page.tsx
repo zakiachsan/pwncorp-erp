@@ -64,16 +64,19 @@ export default function NewWorkOrderPage() {
     } catch { setError("Gagal membuat WO"); setSaving(false); }
   };
 
-  const toggleSparepart = (serviceIdx: number, sparepartId: string) => {
+  const addSparepart = (serviceIdx: number, sparepartId: string) => {
+    if (!sparepartId) return;
     setServiceSpareparts(prev => {
       const current = prev[serviceIdx] || [];
-      if (current.includes(sparepartId)) {
-        // Deselect if already selected
-        return { ...prev, [serviceIdx]: [] };
-      } else {
-        // Replace with new selection (single select only)
-        return { ...prev, [serviceIdx]: [sparepartId] };
-      }
+      if (current.includes(sparepartId)) return prev;
+      return { ...prev, [serviceIdx]: [...current, sparepartId] };
+    });
+  };
+
+  const removeSparepart = (serviceIdx: number, sparepartId: string) => {
+    setServiceSpareparts(prev => {
+      const current = prev[serviceIdx] || [];
+      return { ...prev, [serviceIdx]: current.filter((id: string) => id !== sparepartId) };
     });
   };
 
@@ -185,18 +188,26 @@ export default function NewWorkOrderPage() {
                         </select>
                       </td>
                       <td>
-                        <select className="form-select w-full" value={(serviceSpareparts[i] || [])[0] || ""} onChange={e => {
-                          const val = e.target.value;
-                          setServiceSpareparts(prev => ({ ...prev, [i]: val ? [val] : [] }));
-                        }}>
-                          <option value="">-- Pilih Sparepart --</option>
+                        {/* Selected spareparts as tags */}
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 4 }}>
+                          {(serviceSpareparts[i] || []).map((spId: string) => {
+                            const sp = spareparts.find((s: any) => (s.sparepartId || s.sparepart?.id) === spId);
+                            const name = sp?.sparepart?.name || sp?.name || spId;
+                            return (
+                              <span key={spId} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 6px", background: "#e8f0fe", color: "#0176d3", borderRadius: 4, fontSize: 11, fontWeight: 500 }}>
+                                {name}
+                                <span onClick={() => removeSparepart(i, spId)} style={{ cursor: "pointer", fontWeight: 700, lineHeight: 1 }}>&times;</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                        {/* Add sparepart dropdown */}
+                        <select className="form-select w-full" value="" onChange={e => { addSparepart(i, e.target.value); e.target.value = ""; }}>
+                          <option value="">+ Tambah Sparepart</option>
                           {spareparts.filter((sp: any) => {
                             const spId = sp.sparepartId || sp.sparepart?.id;
-                            // Check if this sparepart is selected in ANY other row
-                            return !Object.entries(serviceSpareparts).some(([idx, selected]) => {
-                              if (parseInt(idx) === i) return false; // skip current row
-                              return selected.includes(spId);
-                            });
+                            // Exclude spareparts selected in ANY row (including current)
+                            return !Object.values(serviceSpareparts).flat().includes(spId);
                           }).map((sp: any) => {
                             const spId = sp.sparepartId || sp.sparepart?.id;
                             const spName = sp.sparepart?.name || sp.name || "-";

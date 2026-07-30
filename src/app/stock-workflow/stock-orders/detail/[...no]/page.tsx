@@ -18,7 +18,7 @@ export default function StockOrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.no as string[];
-  const refCode = refCodeArray ? (Array.isArray(refCodeArray) ? refCodeArray.join("/") : refCodeArray) : "";
+  const refCode = refCodeArray ? (Array.isArray(refCodeArray) ? decodeURIComponent(refCodeArray.join("/")) : refCodeArray) : "";
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

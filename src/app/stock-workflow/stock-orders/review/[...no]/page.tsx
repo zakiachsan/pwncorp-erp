@@ -11,7 +11,7 @@ export default function ReviewStockOrderPage() {
   const router = useRouter();
   const params = useParams();
   const refCodeArray = params.no as string[];
-  const refCode = refCodeArray ? (Array.isArray(refCodeArray) ? refCodeArray.join("/") : refCodeArray) : "";
+  const refCode = refCodeArray ? (Array.isArray(refCodeArray) ? decodeURIComponent(refCodeArray.join("/")) : refCodeArray) : "";
   const [order, setOrder] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

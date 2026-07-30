@@ -33,7 +33,7 @@ export default function PurchaseOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const refCodeArray = Array.isArray(params.refCode) ? params.refCode : [params.refCode as string];
-  const refCode = refCodeArray.join("/");
+  const refCode = decodeURIComponent(refCodeArray.join("/"));
   const [activeTab, setActiveTab] = useState<"details" | "deliveries" | "downPayments">("details");
   const [po, setPo] = useState<any>(null);
   const [loading, setLoading] = useState(true);

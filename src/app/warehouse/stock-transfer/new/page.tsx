@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowUpDown, Save, Plus, Trash2, AlertTriangle } from "lucide-react";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 import FormattedNumberInput from "@/components/ui/FormattedNumberInput";
 
 type Sparepart = { id: string; sku: string; code?: string | null; name: string; stockQty: number; unit?: string };
@@ -12,6 +13,7 @@ export default function NewStockTransferPage() {
   const router = useRouter();
   const [spareparts, setSpareparts] = useState<Sparepart[]>([]);
   const [loadingParts, setLoadingParts] = useState(true);
+  const [stores, setStores] = useState<{id: string; name: string}[]>([]);
   const [fromWarehouse, setFromWarehouse] = useState("");
   const [toStore, setToStore] = useState("");
   const [items, setItems] = useState<TransferRow[]>([{ sparepartId: "", qty: 1 }]);
@@ -19,13 +21,14 @@ export default function NewStockTransferPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    fetch("/api/spareparts?limit=200")
-      .then((r) => r.json())
-      .then((j) => {
-        setSpareparts(j.data?.items || j.data || []);
-        setLoadingParts(false);
-      })
-      .catch(() => setLoadingParts(false));
+    Promise.all([
+      fetch("/api/spareparts?limit=200").then(r => r.json()),
+      fetch("/api/stores?limit=100").then(r => r.json()),
+    ]).then(([spJson, stJson]) => {
+      setSpareparts(spJson.data?.items || spJson.data || []);
+      setStores(stJson.data || []);
+      setLoadingParts(false);
+    }).catch(() => setLoadingParts(false));
   }, []);
 
   const addItem = () => setItems([...items, { sparepartId: "", qty: 1 }]);
@@ -110,22 +113,20 @@ export default function NewStockTransferPage() {
           </div>
           <div className="form-group">
             <label className="form-label">From (Warehouse)</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="e.g. Gudang Wijaya"
+            <SearchableSelect
+              options={stores.map(s => ({ value: s.name, label: s.name }))}
               value={fromWarehouse}
-              onChange={(e) => setFromWarehouse(e.target.value)}
+              onChange={setFromWarehouse}
+              placeholder="Ketik nama gudang..."
             />
           </div>
           <div className="form-group">
             <label className="form-label">To (Store)</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="e.g. Toko Wijaya"
+            <SearchableSelect
+              options={stores.map(s => ({ value: s.name, label: s.name }))}
               value={toStore}
-              onChange={(e) => setToStore(e.target.value)}
+              onChange={setToStore}
+              placeholder="Ketik nama toko..."
             />
           </div>
           <div className="form-group">
