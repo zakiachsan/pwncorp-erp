@@ -945,8 +945,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "package",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "package.json"
     },
     {
@@ -956,8 +956,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "package_name",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "name"
     },
     {
@@ -967,8 +967,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "package_version",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "version"
     },
     {
@@ -978,8 +978,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "package_private",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "private"
     },
     {
@@ -989,8 +989,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "package_scripts",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "scripts"
     },
     {
@@ -1000,8 +1000,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "package_scripts_dev",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "dev"
     },
     {
@@ -1011,8 +1011,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "package_scripts_build",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "build"
     },
     {
@@ -1022,8 +1022,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "package_scripts_start",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "start"
     },
     {
@@ -1033,8 +1033,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "package_scripts_lint",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 160,
+      "community_name": "service-packages/route.ts",
       "norm_label": "lint"
     },
     {
@@ -1077,8 +1077,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "package_dependencies_prisma_client",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 236,
+      "community_name": "@prisma/client",
       "norm_label": "@prisma/client"
     },
     {
@@ -1088,8 +1088,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "prisma_client",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 236,
+      "community_name": "@prisma/client",
       "norm_label": "@prisma/client"
     },
     {
@@ -1099,8 +1099,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "package_dependencies_radix_ui_react_slot",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 237,
+      "community_name": "@radix-ui/react-slot",
       "norm_label": "@radix-ui/react-slot"
     },
     {
@@ -1110,8 +1110,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "radix_ui_react_slot",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 237,
+      "community_name": "@radix-ui/react-slot",
       "norm_label": "@radix-ui/react-slot"
     },
     {
@@ -1209,8 +1209,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "package_dependencies_next",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 233,
+      "community_name": "next",
       "norm_label": "next"
     },
     {
@@ -1220,8 +1220,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "next",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 233,
+      "community_name": "next",
       "norm_label": "next"
     },
     {
@@ -1231,8 +1231,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "package_dependencies_next_auth",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 234,
+      "community_name": "next-auth",
       "norm_label": "next-auth"
     },
     {
@@ -1242,8 +1242,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "next_auth",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 234,
+      "community_name": "next-auth",
       "norm_label": "next-auth"
     },
     {
@@ -1319,8 +1319,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "package_dependencies_react_dom",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 238,
+      "community_name": "react-dom",
       "norm_label": "react-dom"
     },
     {
@@ -1330,8 +1330,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "react_dom",
-      "community": 4,
-      "community_name": "dependencies",
+      "community": 238,
+      "community_name": "react-dom",
       "norm_label": "react-dom"
     },
     {
@@ -1396,8 +1396,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "package_devdependencies_opennextjs_cloudflare",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 235,
+      "community_name": "@opennextjs/cloudflare",
       "norm_label": "@opennextjs/cloudflare"
     },
     {
@@ -1407,8 +1407,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "opennextjs_cloudflare",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 235,
+      "community_name": "@opennextjs/cloudflare",
       "norm_label": "@opennextjs/cloudflare"
     },
     {
@@ -1440,8 +1440,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "package_devdependencies_types_node",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 239,
+      "community_name": "@types/node",
       "norm_label": "@types/node"
     },
     {
@@ -1451,8 +1451,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "types_node",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 239,
+      "community_name": "@types/node",
       "norm_label": "@types/node"
     },
     {
@@ -1550,8 +1550,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_config_next",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 232,
+      "community_name": "eslint-config-next",
       "norm_label": "eslint-config-next"
     },
     {
@@ -1561,8 +1561,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "eslint_config_next",
-      "community": 2,
-      "community_name": "devDependencies",
+      "community": 232,
+      "community_name": "eslint-config-next",
       "norm_label": "eslint-config-next"
     },
     {
@@ -1696,6 +1696,534 @@
       "community": 215,
       "community_name": "prisma.config.ts",
       "norm_label": "prisma.config.ts"
+    },
+    {
+      "label": "migration.sql",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "migration.sql"
+    },
+    {
+      "label": "\"Role\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_role",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"role\""
+    },
+    {
+      "label": "\"users\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_users",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"users\""
+    },
+    {
+      "label": "\"stores\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_stores",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"stores\""
+    },
+    {
+      "label": "\"customers\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_customers",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"customers\""
+    },
+    {
+      "label": "\"vehicles\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_vehicles",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"vehicles\""
+    },
+    {
+      "label": "\"suppliers\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_suppliers",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"suppliers\""
+    },
+    {
+      "label": "\"spareparts\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_spareparts",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"spareparts\""
+    },
+    {
+      "label": "\"services\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_services",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"services\""
+    },
+    {
+      "label": "\"service_packages\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L126",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_service_packages",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"service_packages\""
+    },
+    {
+      "label": "\"service_orders\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L142",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_service_orders",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"service_orders\""
+    },
+    {
+      "label": "\"so_spareparts\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L159",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_so_spareparts",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"so_spareparts\""
+    },
+    {
+      "label": "\"so_services\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L171",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_so_services",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"so_services\""
+    },
+    {
+      "label": "\"work_orders\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L183",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_work_orders",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"work_orders\""
+    },
+    {
+      "label": "\"wo_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L198",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_wo_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"wo_items\""
+    },
+    {
+      "label": "\"invoices\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L212",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_invoices",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"invoices\""
+    },
+    {
+      "label": "\"invoice_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L230",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_invoice_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"invoice_items\""
+    },
+    {
+      "label": "\"payments\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L243",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_payments",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"payments\""
+    },
+    {
+      "label": "\"purchase_requests\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L257",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_purchase_requests",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"purchase_requests\""
+    },
+    {
+      "label": "\"pr_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L271",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_pr_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"pr_items\""
+    },
+    {
+      "label": "\"purchase_orders\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L283",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_purchase_orders",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"purchase_orders\""
+    },
+    {
+      "label": "\"po_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L301",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_po_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"po_items\""
+    },
+    {
+      "label": "\"purchase_deliveries\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L313",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_purchase_deliveries",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"purchase_deliveries\""
+    },
+    {
+      "label": "\"delivery_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L326",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_delivery_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"delivery_items\""
+    },
+    {
+      "label": "\"purchase_invoices\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L337",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_purchase_invoices",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"purchase_invoices\""
+    },
+    {
+      "label": "\"purchase_returns\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L351",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_purchase_returns",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"purchase_returns\""
+    },
+    {
+      "label": "\"stock_orders\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L366",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_stock_orders",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"stock_orders\""
+    },
+    {
+      "label": "\"stock_order_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L380",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_stock_order_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"stock_order_items\""
+    },
+    {
+      "label": "\"stock_transfers\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L390",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_stock_transfers",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"stock_transfers\""
+    },
+    {
+      "label": "\"transfer_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L404",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_transfer_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"transfer_items\""
+    },
+    {
+      "label": "\"stock_opnames\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L414",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_stock_opnames",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"stock_opnames\""
+    },
+    {
+      "label": "\"opname_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L427",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_opname_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"opname_items\""
+    },
+    {
+      "label": "\"stock_histories\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L440",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_stock_histories",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"stock_histories\""
+    },
+    {
+      "label": "\"coa\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L457",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_coa",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"coa\""
+    },
+    {
+      "label": "\"journal_entries\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L471",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_journal_entries",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"journal_entries\""
+    },
+    {
+      "label": "\"journal_details\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L488",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_journal_details",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"journal_details\""
+    },
+    {
+      "label": "\"accounts_receivable\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L500",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_accounts_receivable",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"accounts_receivable\""
+    },
+    {
+      "label": "\"accounts_payable\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L514",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_accounts_payable",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"accounts_payable\""
+    },
+    {
+      "label": "\"bank_accounts\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L528",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_bank_accounts",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"bank_accounts\""
+    },
+    {
+      "label": "\"receipts\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L543",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_receipts",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"receipts\""
+    },
+    {
+      "label": "\"transfers\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L559",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_transfers",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"transfers\""
+    },
+    {
+      "label": "\"bank_reconciliations\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L573",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_bank_reconciliations",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"bank_reconciliations\""
+    },
+    {
+      "label": "\"reconciliation_items\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L585",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_reconciliation_items",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"reconciliation_items\""
+    },
+    {
+      "label": "\"petty_cash\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L597",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_petty_cash",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"petty_cash\""
+    },
+    {
+      "label": "\"payment_requests\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L611",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_payment_requests",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"payment_requests\""
+    },
+    {
+      "label": "\"projects\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L628",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_projects",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"projects\""
+    },
+    {
+      "label": "\"project_expenses\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L643",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_project_expenses",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"project_expenses\""
+    },
+    {
+      "label": "\"activity_logs\"",
+      "file_type": "code",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L656",
+      "_origin": "ast",
+      "id": "prisma_migrations_0001_init_migration_activity_logs",
+      "community": 143,
+      "community_name": "service-orders/page.tsx",
+      "norm_label": "\"activity_logs\""
     },
     {
       "label": "seed.ts",
@@ -2793,8 +3321,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_accounts_receivable_id_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "accounts-receivable/[id]/route.ts"
     },
     {
@@ -2804,8 +3332,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_accounts_receivable_id_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -2815,8 +3343,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_app_api_accounts_receivable_id_route_put",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -2870,8 +3398,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_id_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "bank-accounts/[id]/route.ts"
     },
     {
@@ -2881,8 +3409,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_id_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -2892,8 +3420,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_id_route_put",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "put"
     },
     {
@@ -2903,8 +3431,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 175,
+      "community_name": "stock-orders/new/page.tsx",
       "norm_label": "bank-accounts/route.ts"
     },
     {
@@ -2914,8 +3442,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 175,
+      "community_name": "stock-orders/new/page.tsx",
       "norm_label": "get"
     },
     {
@@ -2925,8 +3453,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_route_post",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 175,
+      "community_name": "stock-orders/new/page.tsx",
       "norm_label": "post"
     },
     {
@@ -3128,10 +3656,21 @@
       "norm_label": "invoices/[id]/route.ts"
     },
     {
-      "label": "GET",
+      "label": "VALID_TRANSITIONS",
       "file_type": "code",
       "source_file": "src/app/api/invoices/[id]/route.ts",
       "source_location": "L5",
+      "_origin": "ast",
+      "id": "src_app_api_invoices_id_route_valid_transitions",
+      "community": 116,
+      "community_name": "invoices/[id]/route.ts",
+      "norm_label": "valid_transitions"
+    },
+    {
+      "label": "GET",
+      "file_type": "code",
+      "source_file": "src/app/api/invoices/[id]/route.ts",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "src_app_api_invoices_id_route_get",
       "community": 116,
@@ -3142,7 +3681,7 @@
       "label": "PUT",
       "file_type": "code",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L33",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "src_app_api_invoices_id_route_put",
       "community": 116,
@@ -3153,7 +3692,7 @@
       "label": "DELETE",
       "file_type": "code",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L53",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "src_app_api_invoices_id_route_delete",
       "community": 116,
@@ -3200,8 +3739,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_journal_id_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "journal/[id]/route.ts"
     },
     {
@@ -3211,8 +3750,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_journal_id_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -3222,8 +3761,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_app_api_journal_id_route_put",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -3233,8 +3772,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_journal_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "journal/route.ts"
     },
     {
@@ -3244,8 +3783,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_journal_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -3255,8 +3794,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_app_api_journal_route_post",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "post"
     },
     {
@@ -3530,8 +4069,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_purchase_invoices_id_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "purchase-invoices/[id]/route.ts"
     },
     {
@@ -3541,8 +4080,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_purchase_invoices_id_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -3552,8 +4091,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_app_api_purchase_invoices_id_route_put",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "put"
     },
     {
@@ -3662,8 +4201,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_purchase_requests_id_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "purchase-requests/[id]/route.ts"
     },
     {
@@ -3673,8 +4212,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_purchase_requests_id_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -3684,8 +4223,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_purchase_requests_id_route_put",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "put"
     },
     {
@@ -3761,8 +4300,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_purchase_returns_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "purchase-returns/route.ts"
     },
     {
@@ -3772,8 +4311,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_purchase_returns_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -3783,8 +4322,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_app_api_purchase_returns_route_post",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "post"
     },
     {
@@ -3904,8 +4443,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reports_service_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "service/route.ts"
     },
     {
@@ -3915,8 +4454,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_reports_service_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4047,8 +4586,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_service_packages_id_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 164,
+      "community_name": "vehicles/route.ts",
       "norm_label": "service-packages/[id]/route.ts"
     },
     {
@@ -4058,8 +4597,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_service_packages_id_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 164,
+      "community_name": "vehicles/route.ts",
       "norm_label": "get"
     },
     {
@@ -4069,8 +4608,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_app_api_service_packages_id_route_put",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 164,
+      "community_name": "vehicles/route.ts",
       "norm_label": "put"
     },
     {
@@ -4080,8 +4619,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_app_api_service_packages_id_route_delete",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 164,
+      "community_name": "vehicles/route.ts",
       "norm_label": "delete"
     },
     {
@@ -4091,8 +4630,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_service_packages_route",
-      "community": 160,
-      "community_name": "service-packages/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "service-packages/route.ts"
     },
     {
@@ -4102,8 +4641,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_service_packages_route_get",
-      "community": 160,
-      "community_name": "service-packages/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -4113,8 +4652,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_app_api_service_packages_route_post",
-      "community": 160,
-      "community_name": "service-packages/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "post"
     },
     {
@@ -4168,8 +4707,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_services_route",
-      "community": 161,
-      "community_name": "services/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "services/route.ts"
     },
     {
@@ -4179,8 +4718,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_services_route_get",
-      "community": 161,
-      "community_name": "services/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4190,8 +4729,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_app_api_services_route_post",
-      "community": 161,
-      "community_name": "services/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "post"
     },
     {
@@ -4366,8 +4905,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_orders_id_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 184,
+      "community_name": "stock-outgoing/new/page.tsx",
       "norm_label": "stock-orders/[id]/route.ts"
     },
     {
@@ -4377,8 +4916,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_orders_id_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 184,
+      "community_name": "stock-outgoing/new/page.tsx",
       "norm_label": "get"
     },
     {
@@ -4388,8 +4927,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_app_api_stock_orders_id_route_put",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 184,
+      "community_name": "stock-outgoing/new/page.tsx",
       "norm_label": "put"
     },
     {
@@ -4432,8 +4971,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_id_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "stock-outgoings/[id]/route.ts"
     },
     {
@@ -4443,8 +4982,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_id_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -4454,8 +4993,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_id_route_put",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -4465,8 +5004,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_route",
-      "community": 219,
-      "community_name": "stock-outgoings/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "stock-outgoings/route.ts"
     },
     {
@@ -4476,8 +5015,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_route_get",
-      "community": 219,
-      "community_name": "stock-outgoings/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4487,8 +5026,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_route_post",
-      "community": 219,
-      "community_name": "stock-outgoings/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "post"
     },
     {
@@ -4498,8 +5037,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_returns_id_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 219,
+      "community_name": "stock-outgoings/route.ts",
       "norm_label": "stock-returns/[id]/route.ts"
     },
     {
@@ -4509,8 +5048,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_returns_id_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 219,
+      "community_name": "stock-outgoings/route.ts",
       "norm_label": "get"
     },
     {
@@ -4520,8 +5059,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_app_api_stock_returns_id_route_put",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 219,
+      "community_name": "stock-outgoings/route.ts",
       "norm_label": "put"
     },
     {
@@ -4652,8 +5191,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route",
-      "community": 165,
-      "community_name": "suppliers/[id]/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "suppliers/[id]/route.ts"
     },
     {
@@ -4663,8 +5202,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route_get",
-      "community": 165,
-      "community_name": "suppliers/[id]/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4674,8 +5213,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route_put",
-      "community": 165,
-      "community_name": "suppliers/[id]/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "put"
     },
     {
@@ -4685,8 +5224,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route_delete",
-      "community": 165,
-      "community_name": "suppliers/[id]/route.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "delete"
     },
     {
@@ -4927,8 +5466,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_vehicles_route",
-      "community": 164,
-      "community_name": "vehicles/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "vehicles/route.ts"
     },
     {
@@ -4938,8 +5477,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_vehicles_route_get",
-      "community": 164,
-      "community_name": "vehicles/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -4949,8 +5488,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_app_api_vehicles_route_post",
-      "community": 164,
-      "community_name": "vehicles/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "post"
     },
     {
@@ -4960,8 +5499,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_vendor_quotes_id_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "vendor-quotes/[id]/route.ts"
     },
     {
@@ -4971,8 +5510,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_vendor_quotes_id_route_put",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -5056,7 +5595,7 @@
       "label": "POST",
       "file_type": "code",
       "source_file": "src/app/api/warehouses/route.ts",
-      "source_location": "L21",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "src_app_api_warehouses_route_post",
       "community": 9,
@@ -5625,7 +6164,7 @@
       "norm_label": "coadetailpage()"
     },
     {
-      "label": "TODO: No dedicated API for account transaction history yet. Using hardcoded\u2026",
+      "label": "TODO: No dedicated API for account transaction history yet. Using hardcoded data",
       "file_type": "rationale",
       "source_file": "src/app/finance/coa/[code]/page.tsx",
       "source_location": "L34",
@@ -5633,7 +6172,7 @@
       "id": "src_app_finance_coa_code_page_rationale_34",
       "community": 123,
       "community_name": "coa/[code]/page.tsx",
-      "norm_label": "todo: no dedicated api for account transaction history yet. using hardcoded..."
+      "norm_label": "todo: no dedicated api for account transaction history yet. using hardcoded data"
     },
     {
       "label": "coa/create/page.tsx",
@@ -6486,7 +7025,7 @@
       "label": "InfoRow()",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L428",
+      "source_location": "L465",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_inforow",
       "community": 44,
@@ -6497,7 +7036,7 @@
       "label": "StatusBadge()",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L440",
+      "source_location": "L477",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_statusbadge",
       "community": 44,
@@ -6508,7 +7047,7 @@
       "label": "S",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L454",
+      "source_location": "L491",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_s",
       "community": 44,
@@ -8744,8 +9283,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_finance_reports_page",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "reports/page.tsx"
     },
     {
@@ -8755,8 +9294,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_app_finance_reports_page_categoryid",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "categoryid"
     },
     {
@@ -8766,8 +9305,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_app_finance_reports_page_reportitem",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "reportitem"
     },
     {
@@ -8777,8 +9316,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_app_finance_reports_page_categories",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "categories"
     },
     {
@@ -8788,8 +9327,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_app_finance_reports_page_reportsbycategory",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "reportsbycategory"
     },
     {
@@ -8799,8 +9338,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_app_finance_reports_page_categorycardcolors",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "categorycardcolors"
     },
     {
@@ -8810,8 +9349,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_app_finance_reports_page_reportspage",
-      "community": 16,
-      "community_name": "app/dashboard/page.tsx",
+      "community": 161,
+      "community_name": "services/route.ts",
       "norm_label": "reportspage()"
     },
     {
@@ -9277,7 +9816,7 @@
       "norm_label": "pt"
     },
     {
-      "label": "TODO: No dedicated API for SOA detail yet. Attempting to build from\u2026",
+      "label": "TODO: No dedicated API for SOA detail yet. Attempting to build from /api/account",
       "file_type": "rationale",
       "source_file": "src/app/finance/soa/[...refCode]/page.tsx",
       "source_location": "L7",
@@ -9285,7 +9824,7 @@
       "id": "src_app_finance_soa_refcode_page_rationale_7",
       "community": 21,
       "community_name": "soa/[...refCode]/page.tsx",
-      "norm_label": "todo: no dedicated api for soa detail yet. attempting to build from..."
+      "norm_label": "todo: no dedicated api for soa detail yet. attempting to build from /api/account"
     },
     {
       "label": "soa/page.tsx",
@@ -9332,7 +9871,7 @@
       "norm_label": "s"
     },
     {
-      "label": "TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-\u2026",
+      "label": "TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-recei",
       "file_type": "rationale",
       "source_file": "src/app/finance/soa/page.tsx",
       "source_location": "L6",
@@ -9340,7 +9879,7 @@
       "id": "src_app_finance_soa_page_rationale_6",
       "community": 99,
       "community_name": "soa/page.tsx",
-      "norm_label": "todo: no dedicated api for soa yet. attempting to build from /api/accounts-..."
+      "norm_label": "todo: no dedicated api for soa yet. attempting to build from /api/accounts-recei"
     },
     {
       "label": "transfers/[no]/page.tsx",
@@ -10691,8 +11230,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_master_data_sparepart_new_page",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 229,
+      "community_name": "sparepart/new/page.tsx",
       "norm_label": "sparepart/new/page.tsx"
     },
     {
@@ -10702,8 +11241,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_master_data_sparepart_new_page_emptyform",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 229,
+      "community_name": "sparepart/new/page.tsx",
       "norm_label": "emptyform"
     },
     {
@@ -10713,8 +11252,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_master_data_sparepart_new_page_newproductpage",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 229,
+      "community_name": "sparepart/new/page.tsx",
       "norm_label": "newproductpage()"
     },
     {
@@ -13056,8 +13595,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_service_orders_page",
-      "community": 143,
-      "community_name": "service-orders/page.tsx",
+      "community": 16,
+      "community_name": "app/dashboard/page.tsx",
       "norm_label": "service-orders/page.tsx"
     },
     {
@@ -13067,8 +13606,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_service_orders_page_serviceorder",
-      "community": 143,
-      "community_name": "service-orders/page.tsx",
+      "community": 16,
+      "community_name": "app/dashboard/page.tsx",
       "norm_label": "serviceorder"
     },
     {
@@ -13078,8 +13617,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_app_service_orders_page_statuspill",
-      "community": 143,
-      "community_name": "service-orders/page.tsx",
+      "community": 16,
+      "community_name": "app/dashboard/page.tsx",
       "norm_label": "statuspill()"
     },
     {
@@ -13089,8 +13628,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_app_service_orders_page_fmt",
-      "community": 143,
-      "community_name": "service-orders/page.tsx",
+      "community": 16,
+      "community_name": "app/dashboard/page.tsx",
       "norm_label": "fmt()"
     },
     {
@@ -13100,8 +13639,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_app_service_orders_page_fmtdate",
-      "community": 143,
-      "community_name": "service-orders/page.tsx",
+      "community": 16,
+      "community_name": "app/dashboard/page.tsx",
       "norm_label": "fmtdate()"
     },
     {
@@ -13111,8 +13650,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_app_service_orders_page_serviceorderspage",
-      "community": 143,
-      "community_name": "service-orders/page.tsx",
+      "community": 16,
+      "community_name": "app/dashboard/page.tsx",
       "norm_label": "serviceorderspage()"
     },
     {
@@ -13430,8 +13969,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_new_page",
-      "community": 175,
-      "community_name": "stock-orders/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "stock-orders/new/page.tsx"
     },
     {
@@ -13441,8 +13980,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_new_page_fmt",
-      "community": 175,
-      "community_name": "stock-orders/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "fmt()"
     },
     {
@@ -13452,8 +13991,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_new_page_newstockorderpage",
-      "community": 175,
-      "community_name": "stock-orders/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "newstockorderpage()"
     },
     {
@@ -13471,7 +14010,7 @@
       "label": "statusPill()",
       "file_type": "code",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_page_statuspill",
       "community": 111,
@@ -13482,7 +14021,7 @@
       "label": "StockOrdersPage()",
       "file_type": "code",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_page_stockorderspage",
       "community": 111,
@@ -13493,7 +14032,7 @@
       "label": "PackageIcon()",
       "file_type": "code",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L252",
+      "source_location": "L259",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_page_packageicon",
       "community": 111,
@@ -13504,7 +14043,7 @@
       "label": "FilterIcon()",
       "file_type": "code",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L263",
+      "source_location": "L270",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_page_filtericon",
       "community": 111,
@@ -13518,8 +14057,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_review_no_page",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 230,
+      "community_name": "review/[...no]/page.tsx",
       "norm_label": "review/[...no]/page.tsx"
     },
     {
@@ -13529,8 +14068,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_review_no_page_fmt",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 230,
+      "community_name": "review/[...no]/page.tsx",
       "norm_label": "fmt()"
     },
     {
@@ -13540,8 +14079,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_orders_review_no_page_reviewstockorderpage",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 230,
+      "community_name": "review/[...no]/page.tsx",
       "norm_label": "reviewstockorderpage()"
     },
     {
@@ -13551,8 +14090,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_returns_new_page",
-      "community": 149,
-      "community_name": "stock-transfer/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "stock-returns/new/page.tsx"
     },
     {
@@ -13562,8 +14101,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_stock_workflow_stock_returns_new_page_newstockreturnpage",
-      "community": 149,
-      "community_name": "stock-transfer/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "newstockreturnpage()"
     },
     {
@@ -13677,7 +14216,7 @@
       "norm_label": "anggaranpage()"
     },
     {
-      "label": "TODO: Replace hardcoded data with API call when /api/anggaran endpoint is\u2026",
+      "label": "TODO: Replace hardcoded data with API call when /api/anggaran endpoint is availa",
       "file_type": "rationale",
       "source_file": "src/app/warehouse/anggaran/page.tsx",
       "source_location": "L3",
@@ -13685,7 +14224,7 @@
       "id": "src_app_warehouse_anggaran_page_rationale_3",
       "community": 42,
       "community_name": "anggaran/page.tsx",
-      "norm_label": "todo: replace hardcoded data with api call when /api/anggaran endpoint is..."
+      "norm_label": "todo: replace hardcoded data with api call when /api/anggaran endpoint is availa"
     },
     {
       "label": "warehouse/layout.tsx",
@@ -13837,8 +14376,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_warehouse_purchase_deliveries_new_page",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 231,
+      "community_name": "purchase-deliveries/new/page.tsx",
       "norm_label": "purchase-deliveries/new/page.tsx"
     },
     {
@@ -13848,8 +14387,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_warehouse_purchase_deliveries_new_page_deliveryitemrow",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 231,
+      "community_name": "purchase-deliveries/new/page.tsx",
       "norm_label": "deliveryitemrow"
     },
     {
@@ -13859,8 +14398,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_app_warehouse_purchase_deliveries_new_page_newpurchasedeliverypage",
-      "community": 176,
-      "community_name": "FormattedNumberInput.tsx",
+      "community": 231,
+      "community_name": "purchase-deliveries/new/page.tsx",
       "norm_label": "newpurchasedeliverypage()"
     },
     {
@@ -14557,21 +15096,10 @@
       "norm_label": "stock-histories/page.tsx"
     },
     {
-      "label": "warehouseOptions",
-      "file_type": "code",
-      "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L8",
-      "_origin": "ast",
-      "id": "src_app_warehouse_stock_histories_page_warehouseoptions",
-      "community": 86,
-      "community_name": "stock-histories/page.tsx",
-      "norm_label": "warehouseoptions"
-    },
-    {
       "label": "typeOptions",
       "file_type": "code",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_histories_page_typeoptions",
       "community": 86,
@@ -14582,7 +15110,7 @@
       "label": "fmtDate()",
       "file_type": "code",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L11",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_histories_page_fmtdate",
       "community": 86,
@@ -14593,7 +15121,7 @@
       "label": "handleTypeClick()",
       "file_type": "code",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L16",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_histories_page_handletypeclick",
       "community": 86,
@@ -14604,7 +15132,7 @@
       "label": "StockHistoriesPage()",
       "file_type": "code",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L24",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_histories_page_stockhistoriespage",
       "community": 86,
@@ -14739,19 +15267,19 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_opname_page",
-      "community": 19,
-      "community_name": "DateRangePicker.tsx",
+      "community": 149,
+      "community_name": "stock-transfer/new/page.tsx",
       "norm_label": "warehouse/stock-opname/page.tsx"
     },
     {
       "label": "StockOpnamePage()",
       "file_type": "code",
       "source_file": "src/app/warehouse/stock-opname/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_opname_page_stockopnamepage",
-      "community": 19,
-      "community_name": "DateRangePicker.tsx",
+      "community": 149,
+      "community_name": "stock-transfer/new/page.tsx",
       "norm_label": "stockopnamepage()"
     },
     {
@@ -14838,8 +15366,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_outgoing_new_page",
-      "community": 184,
-      "community_name": "stock-outgoing/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "stock-outgoing/new/page.tsx"
     },
     {
@@ -14849,8 +15377,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_outgoing_new_page_formatidr",
-      "community": 184,
-      "community_name": "stock-outgoing/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "formatidr()"
     },
     {
@@ -14860,8 +15388,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_outgoing_new_page_newstockoutgoingpage",
-      "community": 184,
-      "community_name": "stock-outgoing/new/page.tsx",
+      "community": 176,
+      "community_name": "FormattedNumberInput.tsx",
       "norm_label": "newstockoutgoingpage()"
     },
     {
@@ -14970,8 +15498,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_transfer_new_page",
-      "community": 149,
-      "community_name": "stock-transfer/new/page.tsx",
+      "community": 165,
+      "community_name": "suppliers/[id]/route.ts",
       "norm_label": "stock-transfer/new/page.tsx"
     },
     {
@@ -14981,8 +15509,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_transfer_new_page_sparepart",
-      "community": 149,
-      "community_name": "stock-transfer/new/page.tsx",
+      "community": 165,
+      "community_name": "suppliers/[id]/route.ts",
       "norm_label": "sparepart"
     },
     {
@@ -14992,8 +15520,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_transfer_new_page_transferrow",
-      "community": 149,
-      "community_name": "stock-transfer/new/page.tsx",
+      "community": 165,
+      "community_name": "suppliers/[id]/route.ts",
       "norm_label": "transferrow"
     },
     {
@@ -15003,8 +15531,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_transfer_new_page_newstocktransferpage",
-      "community": 149,
-      "community_name": "stock-transfer/new/page.tsx",
+      "community": 165,
+      "community_name": "suppliers/[id]/route.ts",
       "norm_label": "newstocktransferpage()"
     },
     {
@@ -15014,19 +15542,19 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_transfer_page",
-      "community": 19,
-      "community_name": "DateRangePicker.tsx",
+      "community": 149,
+      "community_name": "stock-transfer/new/page.tsx",
       "norm_label": "stock-transfer/page.tsx"
     },
     {
       "label": "StockTransferPage()",
       "file_type": "code",
       "source_file": "src/app/warehouse/stock-transfer/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "src_app_warehouse_stock_transfer_page_stocktransferpage",
-      "community": 19,
-      "community_name": "DateRangePicker.tsx",
+      "community": 149,
+      "community_name": "stock-transfer/new/page.tsx",
       "norm_label": "stocktransferpage()"
     },
     {
@@ -20777,6 +21305,1392 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L514",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_accounts_payable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L500",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_accounts_receivable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L656",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_activity_logs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L528",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_bank_accounts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L573",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_bank_reconciliations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L457",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_coa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L326",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_delivery_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L230",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_invoice_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L212",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_invoices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L488",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_journal_details",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L471",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_journal_entries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L427",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_opname_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L611",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_payment_requests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L243",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_payments",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L597",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_petty_cash",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L301",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_po_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L271",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_pr_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L643",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_project_expenses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L628",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_projects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L313",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_purchase_deliveries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L337",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_purchase_invoices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L283",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_purchase_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L257",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_purchase_requests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L351",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_purchase_returns",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L543",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_receipts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L585",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_reconciliation_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_role",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L142",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_service_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_service_packages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_services",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_so_services",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L159",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_so_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L440",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_stock_histories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L414",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_stock_opnames",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L380",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_stock_order_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L366",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_stock_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L390",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_stock_transfers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_suppliers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L404",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_transfer_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L559",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_transfers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_vehicles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L198",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_wo_items",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L183",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration",
+      "target": "prisma_migrations_0001_init_migration_work_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L735",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_users",
+      "target": "prisma_migrations_0001_init_migration_role",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L975",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_activity_logs",
+      "target": "prisma_migrations_0001_init_migration_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L906",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_journal_entries",
+      "target": "prisma_migrations_0001_init_migration_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L939",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_receipts",
+      "target": "prisma_migrations_0001_init_migration_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L771",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_service_orders",
+      "target": "prisma_migrations_0001_init_migration_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L738",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_users",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L792",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_work_orders",
+      "target": "prisma_migrations_0001_init_migration_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L927",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_bank_accounts",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L741",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_customers",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L807",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_invoices",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L900",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_journal_entries",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L960",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_payment_requests",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L957",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_petty_cash",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L966",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_projects",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L840",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_deliveries",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L828",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_orders",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L816",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_requests",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L936",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_receipts",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L774",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_service_orders",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L762",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_service_packages",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L759",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_services",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L753",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_spareparts",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L894",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_histories",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L882",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_opnames",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L864",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_orders",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L873",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_transfers",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L750",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_suppliers",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L747",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_vehicles",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L795",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_work_orders",
+      "target": "prisma_migrations_0001_init_migration_stores",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L918",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_accounts_receivable",
+      "target": "prisma_migrations_0001_init_migration_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L804",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_invoices",
+      "target": "prisma_migrations_0001_init_migration_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L963",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_projects",
+      "target": "prisma_migrations_0001_init_migration_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L765",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_service_orders",
+      "target": "prisma_migrations_0001_init_migration_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L744",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_vehicles",
+      "target": "prisma_migrations_0001_init_migration_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L768",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_service_orders",
+      "target": "prisma_migrations_0001_init_migration_vehicles",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L924",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_accounts_payable",
+      "target": "prisma_migrations_0001_init_migration_suppliers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L852",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_invoices",
+      "target": "prisma_migrations_0001_init_migration_suppliers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L825",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_orders",
+      "target": "prisma_migrations_0001_init_migration_suppliers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L858",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_returns",
+      "target": "prisma_migrations_0001_init_migration_suppliers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L756",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_spareparts",
+      "target": "prisma_migrations_0001_init_migration_suppliers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L846",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_delivery_items",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L888",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_opname_items",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L834",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_po_items",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L822",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_pr_items",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L780",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_so_spareparts",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L891",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_histories",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L870",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_order_items",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L879",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_transfer_items",
+      "target": "prisma_migrations_0001_init_migration_spareparts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L786",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_so_services",
+      "target": "prisma_migrations_0001_init_migration_services",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L783",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_so_services",
+      "target": "prisma_migrations_0001_init_migration_service_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L777",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_so_spareparts",
+      "target": "prisma_migrations_0001_init_migration_service_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L789",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_work_orders",
+      "target": "prisma_migrations_0001_init_migration_service_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L801",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_invoices",
+      "target": "prisma_migrations_0001_init_migration_work_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L861",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_orders",
+      "target": "prisma_migrations_0001_init_migration_work_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L798",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_wo_items",
+      "target": "prisma_migrations_0001_init_migration_work_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L915",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_accounts_receivable",
+      "target": "prisma_migrations_0001_init_migration_invoices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L810",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_invoice_items",
+      "target": "prisma_migrations_0001_init_migration_invoices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L813",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_payments",
+      "target": "prisma_migrations_0001_init_migration_invoices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L819",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_pr_items",
+      "target": "prisma_migrations_0001_init_migration_purchase_requests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L831",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_po_items",
+      "target": "prisma_migrations_0001_init_migration_purchase_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L837",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_deliveries",
+      "target": "prisma_migrations_0001_init_migration_purchase_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L849",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_invoices",
+      "target": "prisma_migrations_0001_init_migration_purchase_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L855",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_purchase_returns",
+      "target": "prisma_migrations_0001_init_migration_purchase_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L843",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_delivery_items",
+      "target": "prisma_migrations_0001_init_migration_purchase_deliveries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L921",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_accounts_payable",
+      "target": "prisma_migrations_0001_init_migration_purchase_invoices",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L867",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_stock_order_items",
+      "target": "prisma_migrations_0001_init_migration_stock_orders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L876",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_transfer_items",
+      "target": "prisma_migrations_0001_init_migration_stock_transfers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L885",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_opname_items",
+      "target": "prisma_migrations_0001_init_migration_stock_opnames",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L930",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_bank_accounts",
+      "target": "prisma_migrations_0001_init_migration_coa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L897",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_coa",
+      "target": "prisma_migrations_0001_init_migration_coa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L912",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_journal_details",
+      "target": "prisma_migrations_0001_init_migration_coa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L909",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_journal_details",
+      "target": "prisma_migrations_0001_init_migration_journal_entries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L972",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_project_expenses",
+      "target": "prisma_migrations_0001_init_migration_journal_entries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L954",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_reconciliation_items",
+      "target": "prisma_migrations_0001_init_migration_journal_entries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L948",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_bank_reconciliations",
+      "target": "prisma_migrations_0001_init_migration_bank_accounts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L933",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_receipts",
+      "target": "prisma_migrations_0001_init_migration_bank_accounts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L945",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_transfers",
+      "target": "prisma_migrations_0001_init_migration_bank_accounts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L951",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_reconciliation_items",
+      "target": "prisma_migrations_0001_init_migration_bank_reconciliations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma/migrations/0001_init/migration.sql",
+      "source_location": "L969",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "prisma_migrations_0001_init_migration_project_expenses",
+      "target": "prisma_migrations_0001_init_migration_projects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "prisma/seed.ts",
       "source_location": "L16",
       "weight": 1.0,
@@ -22316,7 +24230,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L53",
+      "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_invoices_id_route",
@@ -22327,7 +24241,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L5",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_invoices_id_route",
@@ -22338,11 +24252,22 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L33",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_invoices_id_route",
       "target": "src_app_api_invoices_id_route_put",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/invoices/[id]/route.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_invoices_id_route",
+      "target": "src_app_api_invoices_id_route_valid_transitions",
       "confidence_score": 1.0
     },
     {
@@ -26591,7 +28516,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/warehouses/route.ts",
-      "source_location": "L21",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_warehouses_route",
@@ -27989,18 +29914,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/finance/invoices/purchase/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_finance_invoices_purchase_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -28264,7 +30177,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L428",
+      "source_location": "L465",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -28275,7 +30188,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L454",
+      "source_location": "L491",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -28297,7 +30210,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L440",
+      "source_location": "L477",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -28353,7 +30266,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L255",
+      "source_location": "L292",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -28365,7 +30278,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L179",
+      "source_location": "L216",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -28377,7 +30290,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L177",
+      "source_location": "L214",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -28389,7 +30302,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L140",
+      "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -28903,18 +30816,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/finance/payment-processing/history/page.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_finance_payment_processing_history_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -29195,18 +31096,6 @@
       "_origin": "ast",
       "source": "src_app_finance_petty_cash_page",
       "target": "src_components_shared_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/finance/petty-cash/page.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_finance_petty_cash_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
       "confidence_score": 1.0
     },
     {
@@ -30755,18 +32644,6 @@
       "source": "src_app_finance_reports_page",
       "target": "src_app_finance_reports_page_reportspage",
       "confidence_score": 1.0
-    },
-    {
-      "relation": "indirect_call",
-      "context": "collection",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/app/finance/reports/page.tsx",
-      "source_location": "L28",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_finance_reports_page",
-      "target": "src_app_service_orders_page_clipboardlist"
     },
     {
       "relation": "contains",
@@ -33088,18 +34965,6 @@
       "_origin": "ast",
       "source": "src_app_master_data_sparepart_sku_page",
       "target": "src_components_shared_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/master-data/sparepart/[sku]/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_master_data_sparepart_sku_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
       "confidence_score": 1.0
     },
     {
@@ -36198,18 +38063,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/service-orders/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_service_orders_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -36815,7 +38668,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L263",
+      "source_location": "L270",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_orders_page",
@@ -36826,7 +38679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L252",
+      "source_location": "L259",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_orders_page",
@@ -36837,7 +38690,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_orders_page",
@@ -36848,7 +38701,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_orders_page",
@@ -36868,15 +38721,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
+      "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_orders_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
+      "target": "src_components_ui_searchableselect",
       "confidence_score": 1.0
     },
     {
@@ -36884,7 +38737,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/stock-workflow/stock-orders/page.tsx",
-      "source_location": "L239",
+      "source_location": "L246",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_orders_page_stockorderspage",
@@ -36982,18 +38835,6 @@
       "_origin": "ast",
       "source": "src_app_stock_workflow_stock_returns_new_page",
       "target": "src_components_ui_searchableselect",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/stock-workflow/stock-returns/new/page.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_stock_workflow_stock_returns_new_page",
-      "target": "src_components_ui_searchableselect_searchableselect",
       "confidence_score": 1.0
     },
     {
@@ -37372,18 +39213,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/purchase-deliveries/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_purchase_deliveries_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/purchase-invoices/[...docNumber]/page.tsx",
@@ -37518,18 +39347,6 @@
       "_origin": "ast",
       "source": "src_app_warehouse_purchase_invoices_page",
       "target": "src_components_shared_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/purchase-invoices/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_purchase_invoices_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
       "confidence_score": 1.0
     },
     {
@@ -37797,18 +39614,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/purchase-orders/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_purchase_orders_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -38000,18 +39805,6 @@
       "_origin": "ast",
       "source": "src_app_warehouse_purchase_request_page",
       "target": "src_components_shared_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/purchase-request/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_purchase_request_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
       "confidence_score": 1.0
     },
     {
@@ -38231,18 +40024,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/purchase-returns/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_purchase_returns_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -38348,7 +40129,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L11",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page",
@@ -38359,7 +40140,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L16",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page",
@@ -38370,7 +40151,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L24",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page",
@@ -38381,22 +40162,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_stock_histories_page",
-      "target": "src_app_warehouse_stock_histories_page_typeoptions",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/stock-histories/page.tsx",
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page",
-      "target": "src_app_warehouse_stock_histories_page_warehouseoptions",
+      "target": "src_app_warehouse_stock_histories_page_typeoptions",
       "confidence_score": 1.0
     },
     {
@@ -38412,15 +40182,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
+      "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
+      "target": "src_components_ui_searchableselect",
       "confidence_score": 1.0
     },
     {
@@ -38428,7 +40198,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L101",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page_stockhistoriespage",
@@ -38440,7 +40210,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-histories/page.tsx",
-      "source_location": "L103",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_histories_page_stockhistoriespage",
@@ -38610,7 +40380,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-opname/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_opname_page",
@@ -38630,15 +40400,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
+      "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-opname/page.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_opname_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
+      "target": "src_components_ui_searchableselect",
       "confidence_score": 1.0
     },
     {
@@ -38948,22 +40718,10 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/app/warehouse/stock-transfer/new/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app_warehouse_stock_transfer_new_page",
-      "target": "src_components_ui_searchableselect_searchableselect",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-transfer/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_transfer_page",
@@ -38983,15 +40741,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
+      "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/app/warehouse/stock-transfer/page.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_warehouse_stock_transfer_page",
-      "target": "src_components_shared_daterangepicker_daterangepicker",
+      "target": "src_components_ui_searchableselect",
       "confidence_score": 1.0
     },
     {
@@ -39542,18 +41300,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_layout_appshell",
-      "target": "src_components_layout_header_header",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -39563,18 +41309,6 @@
       "_origin": "ast",
       "source": "src_components_layout_appshell",
       "target": "src_components_layout_sidebar",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/layout/AppShell.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_layout_appshell",
-      "target": "src_components_layout_sidebar_sidebar",
       "confidence_score": 1.0
     },
     {
@@ -42129,5 +43863,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b9bef554b72fdea3b0cd21ca7929f8e7941deefa"
+  "built_at_commit": "f860ace4a26d10e183cd5390be8f6146f61f84bd"
 }

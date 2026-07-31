@@ -227,5 +227,16 @@
   "225": "revert-wo.js",
   "226": "setup-db.js",
   "227": "invoices/detail/[...no]/page.tsx",
-  "228": "deploy.py"
+  "228": "deploy.py",
+  "229": "sparepart/new/page.tsx",
+  "230": "review/[...no]/page.tsx",
+  "231": "purchase-deliveries/new/page.tsx",
+  "232": "eslint-config-next",
+  "233": "next",
+  "234": "next-auth",
+  "235": "@opennextjs/cloudflare",
+  "236": "@prisma/client",
+  "237": "@radix-ui/react-slot",
+  "238": "react-dom",
+  "239": "@types/node"
 }

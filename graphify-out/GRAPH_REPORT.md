@@ -1,16 +1,16 @@
 # Graph Report - pwncorp  (2026-07-31)
 
 ## Corpus Check
-- 313 files · ~276,988 words
+- 313 files · ~277,271 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1681 nodes · 2230 edges · 240 communities (159 shown, 81 thin omitted)
+- 1683 nodes · 2232 edges · 240 communities (159 shown, 81 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 20 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f860ace4`
+- Built from commit: `34b041fd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -777,7 +777,7 @@ Cohesion: 0.83
 Nodes (3): fmt(), fmtDate(), PrintReceiptPage()
 
 ## Knowledge Gaps
-- **653 isolated node(s):** `{ Client }`, `bcrypt`, `nextConfig`, `name`, `version` (+648 more)
+- **654 isolated node(s):** `{ Client }`, `bcrypt`, `nextConfig`, `name`, `version` (+649 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **81 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -791,7 +791,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `getCurrentUser()` connect `getCurrentUser` to `numbering.ts`, `prisma.ts`, `withAuth`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `{ Client }`, `bcrypt`, `nextConfig` to the rest of the system?**
-  _653 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _654 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `generate_reports.py` be split into smaller, more focused modules?**
   _Cohesion score 0.11282051282051282 - nodes in this community are weakly interconnected._
 - **Should `numbering.ts` be split into smaller, more focused modules?**
