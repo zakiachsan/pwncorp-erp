@@ -22,13 +22,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 
 interface NavItem {
   label: string;
   icon: React.ReactNode;
   href?: string;
   children?: { label: string; href: string }[];
+  permission?: string;
 }
 
 /* ─── Operasional Nav ─── */
@@ -36,7 +38,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
   {
     title: "Overview",
     items: [
-      { label: "Dashboard", icon: <LayoutDashboard size={18} />, href: "/dashboard" },
+      { label: "Dashboard", icon: <LayoutDashboard size={18} />, href: "/dashboard", permission: "dashboard" },
     ],
   },
   {
@@ -45,6 +47,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
       {
         label: "Project",
         icon: <Briefcase size={18} />,
+        permission: "projects",
         children: [
           { label: "Projects", href: "/project" },
           { label: "Anggaran", href: "/warehouse/anggaran" },
@@ -54,20 +57,24 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         label: "Service Orders",
         icon: <ClipboardList size={18} />,
         href: "/service-orders",
+        permission: "service-orders",
       },
       {
         label: "Work Orders",
         icon: <Wrench size={18} />,
         href: "/work-orders",
+        permission: "work-orders",
       },
       {
         label: "Service Invoices",
         icon: <FileText size={18} />,
         href: "/finance/invoices/service",
+        permission: "service-invoices",
       },
       {
         label: "Stock Workflow",
         icon: <Package size={18} />,
+        permission: "stock-workflow",
         children: [
           { label: "Stock Orders", href: "/stock-workflow/stock-orders" },
           { label: "Stock Returns", href: "/stock-workflow/stock-returns" },
@@ -77,6 +84,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
       {
         label: "Warehouse",
         icon: <Package size={18} />,
+        permission: "warehouse",
         children: [
           { label: "Purchase Request", href: "/warehouse/purchase-request" },
           { label: "Pembanding", href: "/warehouse/pembanding" },
@@ -100,36 +108,43 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
         label: "Spareparts",
         icon: <Package size={18} />,
         href: "/master-data/sparepart",
+        permission: "spareparts",
       },
       {
         label: "Customers",
         icon: <Users size={18} />,
         href: "/master-data/customers",
+        permission: "customers",
       },
       {
         label: "Vehicles",
         icon: <Package size={18} />,
         href: "/master-data/vehicles",
+        permission: "vehicles",
       },
       {
         label: "Suppliers",
         icon: <Database size={18} />,
         href: "/master-data/suppliers",
+        permission: "suppliers",
       },
       {
         label: "Services",
         icon: <Wrench size={18} />,
         href: "/master-data/services",
+        permission: "services",
       },
       {
         label: "Package Services",
         icon: <Package size={18} />,
         href: "/service-packages",
+        permission: "package-services",
       },
       {
         label: "Users",
         icon: <Users size={18} />,
         href: "/master-data/users",
+        permission: "users",
       },
     ],
   },
@@ -139,6 +154,7 @@ const operasionalGroups: { title: string; items: NavItem[] }[] = [
       {
         label: "Service Orders",
         icon: <ClipboardList size={18} />,
+        permission: "reports",
         children: [
           { label: "Summary Service Orders", href: "/reports/summary-service-orders" },
           { label: "Detailed Service Orders", href: "/reports/detailed-service-orders" },
@@ -200,6 +216,7 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
         label: "Dashboard Finance",
         icon: <LayoutDashboard size={18} />,
         href: "/finance/dashboard",
+        permission: "dashboard",
       },
     ],
   },
@@ -254,6 +271,7 @@ const financeGroups: { title: string; items: NavItem[] }[] = [
       {
         label: "Finance Reports",
         icon: <PieChart size={18} />,
+        permission: "account-payables",
         children: [
           { label: "Account Payables", href: "/finance/reports/ap" },
           { label: "Account Receivables", href: "/finance/reports/ar" },
@@ -461,7 +479,27 @@ export default function Sidebar({ mobileOpen = false, setMobileOpen = () => {} }
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const activeTab: "operasional" | "finance" = pathname.startsWith("/finance") ? "finance" : "operasional";
 
-  const navGroups = activeTab === "operasional" ? operasionalGroups : financeGroups;
+  const { data: session } = useSession();
+  const permissions: string[] = (session?.user as any)?.permissions || [];
+  const isAdmin = permissions.length === 0; // no permissions = full access (Owner/Admin)
+
+  const navGroups = useMemo(() => {
+    const source = activeTab === "operasional" ? operasionalGroups : financeGroups;
+    if (isAdmin) return source;
+    return source
+      .map((group) => ({
+        ...group,
+        items: group.items
+          .filter((item) => !item.permission || permissions.includes(item.permission))
+          .map((item) => ({
+            ...item,
+            children: item.children?.filter(
+              () => !item.permission || permissions.includes(item.permission)
+            ),
+          })),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [activeTab, permissions, isAdmin]);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups((prev) => ({ ...prev, [label]: !prev[label] }));

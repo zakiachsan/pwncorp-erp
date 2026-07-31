@@ -8,9 +8,10 @@ datasource db {
 
 // ─── AUTH ───
 model Role {
-  id    String @id @default(cuid())
-  name  String @unique
-  users User[]
+  id          String @id @default(cuid())
+  name        String @unique
+  permissions String @default("[]") // JSON array: ["dashboard","service-orders","work-orders","warehouse","account-payables",...]
+  users       User[]
 }
 
 model User {

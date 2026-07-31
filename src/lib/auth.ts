@@ -29,6 +29,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           email: user.email,
           role: user.role.name,
+          permissions: JSON.parse((user.role as any).permissions || "[]"),
           storeId: user.storeId,
           storeName: user.store?.name,
         };
@@ -43,6 +44,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
+        token.permissions = (user as any).permissions;
         token.storeId = (user as any).storeId;
         token.storeName = (user as any).storeName;
       }
@@ -52,6 +54,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.sub;
         (session.user as any).role = token.role;
+        (session.user as any).permissions = token.permissions;
         (session.user as any).storeId = token.storeId;
         (session.user as any).storeName = token.storeName;
       }
