@@ -4,6 +4,39 @@
   "graph": {},
   "nodes": [
     {
+      "label": ".eslintrc.json",
+      "file_type": "code",
+      "source_file": ".eslintrc.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "eslintrc",
+      "community": 121,
+      "community_name": "users/route.ts",
+      "norm_label": ".eslintrc.json"
+    },
+    {
+      "label": "extends",
+      "file_type": "code",
+      "source_file": ".eslintrc.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "eslintrc_extends",
+      "community": 121,
+      "community_name": "users/route.ts",
+      "norm_label": "extends"
+    },
+    {
+      "label": "next/core-web-vitals",
+      "file_type": "concept",
+      "source_file": ".eslintrc.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ref_next_core_web_vitals",
+      "community": 121,
+      "community_name": "users/route.ts",
+      "norm_label": "next/core-web-vitals"
+    },
+    {
       "label": "check-pw.js",
       "file_type": "code",
       "source_file": "check-pw.js",
@@ -3321,8 +3354,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_accounts_receivable_id_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "accounts-receivable/[id]/route.ts"
     },
     {
@@ -3332,8 +3365,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_accounts_receivable_id_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -3343,8 +3376,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_app_api_accounts_receivable_id_route_put",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "put"
     },
     {
@@ -3398,8 +3431,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_id_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "bank-accounts/[id]/route.ts"
     },
     {
@@ -3409,8 +3442,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_id_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -3420,8 +3453,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_bank_accounts_id_route_put",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -3464,8 +3497,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_coa_id_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "coa/[id]/route.ts"
     },
     {
@@ -3475,8 +3508,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_coa_id_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -3486,8 +3519,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_coa_id_route_put",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -3497,8 +3530,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_coa_route",
-      "community": 201,
-      "community_name": "coa/route.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "coa/route.ts"
     },
     {
@@ -3508,8 +3541,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_coa_route_get",
-      "community": 201,
-      "community_name": "coa/route.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -3519,8 +3552,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_app_api_coa_route_post",
-      "community": 201,
-      "community_name": "coa/route.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "post"
     },
     {
@@ -3574,8 +3607,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_customers_route",
-      "community": 150,
-      "community_name": "customers/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "customers/route.ts"
     },
     {
@@ -3585,8 +3618,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_customers_route_get",
-      "community": 150,
-      "community_name": "customers/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -3596,8 +3629,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_app_api_customers_route_post",
-      "community": 150,
-      "community_name": "customers/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "post"
     },
     {
@@ -3629,8 +3662,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_finance_dashboard_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "finance/dashboard/route.ts"
     },
     {
@@ -3640,9 +3673,53 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_finance_dashboard_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
+    },
+    {
+      "label": "inspection-mappings/route.ts",
+      "file_type": "code",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_app_api_inspection_mappings_route",
+      "community": 10,
+      "community_name": "withAuth",
+      "norm_label": "inspection-mappings/route.ts"
+    },
+    {
+      "label": "GET",
+      "file_type": "code",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "src_app_api_inspection_mappings_route_get",
+      "community": 10,
+      "community_name": "withAuth",
+      "norm_label": "get"
+    },
+    {
+      "label": "POST",
+      "file_type": "code",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "src_app_api_inspection_mappings_route_post",
+      "community": 10,
+      "community_name": "withAuth",
+      "norm_label": "post"
+    },
+    {
+      "label": "DELETE",
+      "file_type": "code",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "src_app_api_inspection_mappings_route_delete",
+      "community": 10,
+      "community_name": "withAuth",
+      "norm_label": "delete"
     },
     {
       "label": "invoices/[id]/route.ts",
@@ -3670,7 +3747,7 @@
       "label": "GET",
       "file_type": "code",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L11",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "src_app_api_invoices_id_route_get",
       "community": 116,
@@ -3681,7 +3758,7 @@
       "label": "PUT",
       "file_type": "code",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L39",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "src_app_api_invoices_id_route_put",
       "community": 116,
@@ -3692,7 +3769,7 @@
       "label": "DELETE",
       "file_type": "code",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L69",
+      "source_location": "L196",
       "_origin": "ast",
       "id": "src_app_api_invoices_id_route_delete",
       "community": 116,
@@ -3739,8 +3816,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_journal_id_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "journal/[id]/route.ts"
     },
     {
@@ -3750,8 +3827,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_journal_id_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -3761,8 +3838,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_app_api_journal_id_route_put",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "put"
     },
     {
@@ -3838,8 +3915,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_payment_requests_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "payment-requests/route.ts"
     },
     {
@@ -3849,8 +3926,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_payment_requests_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -3860,8 +3937,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_app_api_payment_requests_route_post",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "post"
     },
     {
@@ -3904,8 +3981,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_petty_cash_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "petty-cash/route.ts"
     },
     {
@@ -3915,8 +3992,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_petty_cash_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -3926,8 +4003,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_app_api_petty_cash_route_post",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "post"
     },
     {
@@ -4069,8 +4146,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_purchase_invoices_id_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "purchase-invoices/[id]/route.ts"
     },
     {
@@ -4080,8 +4157,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_purchase_invoices_id_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4091,8 +4168,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_app_api_purchase_invoices_id_route_put",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "put"
     },
     {
@@ -4300,8 +4377,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_purchase_returns_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "purchase-returns/route.ts"
     },
     {
@@ -4311,8 +4388,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_purchase_returns_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4322,8 +4399,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_app_api_purchase_returns_route_post",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "post"
     },
     {
@@ -4388,8 +4465,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reports_finance_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "finance/route.ts"
     },
     {
@@ -4399,8 +4476,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_reports_finance_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -4410,8 +4487,8 @@
       "source_location": "L334",
       "_origin": "ast",
       "id": "src_app_api_reports_finance_route_sumcategory",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "sumcategory()"
     },
     {
@@ -4421,8 +4498,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reports_purchase_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "purchase/route.ts"
     },
     {
@@ -4432,8 +4509,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_reports_purchase_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4443,8 +4520,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reports_service_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "service/route.ts"
     },
     {
@@ -4454,8 +4531,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_reports_service_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -4465,8 +4542,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reports_stock_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "stock/route.ts"
     },
     {
@@ -4476,8 +4553,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_reports_stock_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -4487,8 +4564,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_service_orders_id_changes_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "changes/route.ts"
     },
     {
@@ -4498,8 +4575,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_service_orders_id_changes_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4528,7 +4605,7 @@
       "label": "PUT",
       "file_type": "code",
       "source_file": "src/app/api/service-orders/[id]/route.ts",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "src_app_api_service_orders_id_route_put",
       "community": 117,
@@ -4539,7 +4616,7 @@
       "label": "DELETE",
       "file_type": "code",
       "source_file": "src/app/api/service-orders/[id]/route.ts",
-      "source_location": "L183",
+      "source_location": "L200",
       "_origin": "ast",
       "id": "src_app_api_service_orders_id_route_delete",
       "community": 117,
@@ -4630,8 +4707,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_service_packages_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 150,
+      "community_name": "customers/route.ts",
       "norm_label": "service-packages/route.ts"
     },
     {
@@ -4641,8 +4718,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_service_packages_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 150,
+      "community_name": "customers/route.ts",
       "norm_label": "get"
     },
     {
@@ -4652,8 +4729,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_app_api_service_packages_route_post",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 150,
+      "community_name": "customers/route.ts",
       "norm_label": "post"
     },
     {
@@ -4663,8 +4740,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_services_id_route",
-      "community": 119,
-      "community_name": "services/[id]/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "services/[id]/route.ts"
     },
     {
@@ -4674,8 +4751,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_services_id_route_get",
-      "community": 119,
-      "community_name": "services/[id]/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -4685,8 +4762,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_app_api_services_id_route_put",
-      "community": 119,
-      "community_name": "services/[id]/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "put"
     },
     {
@@ -4696,8 +4773,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_app_api_services_id_route_delete",
-      "community": 119,
-      "community_name": "services/[id]/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "delete"
     },
     {
@@ -4707,8 +4784,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_services_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 201,
+      "community_name": "coa/route.ts",
       "norm_label": "services/route.ts"
     },
     {
@@ -4718,8 +4795,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_services_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 201,
+      "community_name": "coa/route.ts",
       "norm_label": "get"
     },
     {
@@ -4729,8 +4806,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_app_api_services_route_post",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 201,
+      "community_name": "coa/route.ts",
       "norm_label": "post"
     },
     {
@@ -4817,8 +4894,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_histories_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "stock-histories/route.ts"
     },
     {
@@ -4828,8 +4905,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_histories_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -4839,8 +4916,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_opnames_id_route",
-      "community": 218,
-      "community_name": "stock-opnames/[id]/route.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "stock-opnames/[id]/route.ts"
     },
     {
@@ -4850,8 +4927,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_opnames_id_route_get",
-      "community": 218,
-      "community_name": "stock-opnames/[id]/route.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "get"
     },
     {
@@ -4861,8 +4938,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_app_api_stock_opnames_id_route_put",
-      "community": 218,
-      "community_name": "stock-opnames/[id]/route.ts",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "put"
     },
     {
@@ -4971,8 +5048,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_id_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "stock-outgoings/[id]/route.ts"
     },
     {
@@ -4982,8 +5059,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_id_route_get",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "get"
     },
     {
@@ -4993,8 +5070,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_id_route_put",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "put"
     },
     {
@@ -5004,8 +5081,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 218,
+      "community_name": "stock-opnames/[id]/route.ts",
       "norm_label": "stock-outgoings/route.ts"
     },
     {
@@ -5015,8 +5092,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 218,
+      "community_name": "stock-opnames/[id]/route.ts",
       "norm_label": "get"
     },
     {
@@ -5026,8 +5103,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_app_api_stock_outgoings_route_post",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 218,
+      "community_name": "stock-opnames/[id]/route.ts",
       "norm_label": "post"
     },
     {
@@ -5037,8 +5114,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_returns_id_route",
-      "community": 219,
-      "community_name": "stock-outgoings/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "stock-returns/[id]/route.ts"
     },
     {
@@ -5048,8 +5125,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_returns_id_route_get",
-      "community": 219,
-      "community_name": "stock-outgoings/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -5059,8 +5136,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_app_api_stock_returns_id_route_put",
-      "community": 219,
-      "community_name": "stock-outgoings/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "put"
     },
     {
@@ -5136,8 +5213,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_stock_transfers_route",
-      "community": 221,
-      "community_name": "stock-transfers/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "stock-transfers/route.ts"
     },
     {
@@ -5147,8 +5224,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_stock_transfers_route_get",
-      "community": 221,
-      "community_name": "stock-transfers/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "get"
     },
     {
@@ -5158,8 +5235,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_app_api_stock_transfers_route_post",
-      "community": 221,
-      "community_name": "stock-transfers/route.ts",
+      "community": 9,
+      "community_name": "getCurrentUser",
       "norm_label": "post"
     },
     {
@@ -5191,8 +5268,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 119,
+      "community_name": "services/[id]/route.ts",
       "norm_label": "suppliers/[id]/route.ts"
     },
     {
@@ -5202,8 +5279,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route_get",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 119,
+      "community_name": "services/[id]/route.ts",
       "norm_label": "get"
     },
     {
@@ -5213,8 +5290,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route_put",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 119,
+      "community_name": "services/[id]/route.ts",
       "norm_label": "put"
     },
     {
@@ -5224,8 +5301,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_app_api_suppliers_id_route_delete",
-      "community": 12,
-      "community_name": "auth-helpers.ts",
+      "community": 119,
+      "community_name": "services/[id]/route.ts",
       "norm_label": "delete"
     },
     {
@@ -5301,8 +5378,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_upload_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "upload/route.ts"
     },
     {
@@ -5312,8 +5389,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_app_api_upload_route_post",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 8,
+      "community_name": "prisma.ts",
       "norm_label": "post"
     },
     {
@@ -5378,8 +5455,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_users_route",
-      "community": 121,
-      "community_name": "users/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "users/route.ts"
     },
     {
@@ -5389,8 +5466,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_app_api_users_route_userselect",
-      "community": 121,
-      "community_name": "users/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "userselect"
     },
     {
@@ -5400,8 +5477,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_app_api_users_route_get",
-      "community": 121,
-      "community_name": "users/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -5411,8 +5488,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_app_api_users_route_post",
-      "community": 121,
-      "community_name": "users/route.ts",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "post"
     },
     {
@@ -5466,8 +5543,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_vehicles_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 219,
+      "community_name": "stock-outgoings/route.ts",
       "norm_label": "vehicles/route.ts"
     },
     {
@@ -5477,8 +5554,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_vehicles_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 219,
+      "community_name": "stock-outgoings/route.ts",
       "norm_label": "get"
     },
     {
@@ -5488,8 +5565,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_app_api_vehicles_route_post",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 219,
+      "community_name": "stock-outgoings/route.ts",
       "norm_label": "post"
     },
     {
@@ -5499,8 +5576,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_vendor_quotes_id_route",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "vendor-quotes/[id]/route.ts"
     },
     {
@@ -5510,8 +5587,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_vendor_quotes_id_route_put",
-      "community": 8,
-      "community_name": "prisma.ts",
+      "community": 12,
+      "community_name": "auth-helpers.ts",
       "norm_label": "put"
     },
     {
@@ -5576,8 +5653,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_warehouses_route",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "warehouses/route.ts"
     },
     {
@@ -5587,8 +5664,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_warehouses_route_get",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "get"
     },
     {
@@ -5598,8 +5675,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_app_api_warehouses_route_post",
-      "community": 9,
-      "community_name": "getCurrentUser",
+      "community": 10,
+      "community_name": "withAuth",
       "norm_label": "post"
     },
     {
@@ -5609,8 +5686,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_work_orders_id_route",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 221,
+      "community_name": "stock-transfers/route.ts",
       "norm_label": "work-orders/[id]/route.ts"
     },
     {
@@ -5620,19 +5697,19 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_work_orders_id_route_get",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 221,
+      "community_name": "stock-transfers/route.ts",
       "norm_label": "get"
     },
     {
       "label": "PUT",
       "file_type": "code",
       "source_file": "src/app/api/work-orders/[id]/route.ts",
-      "source_location": "L147",
+      "source_location": "L149",
       "_origin": "ast",
       "id": "src_app_api_work_orders_id_route_put",
-      "community": 10,
-      "community_name": "withAuth",
+      "community": 221,
+      "community_name": "stock-transfers/route.ts",
       "norm_label": "put"
     },
     {
@@ -7014,7 +7091,7 @@
       "label": "ServiceInvoiceDetailPage()",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
       "community": 44,
@@ -7025,7 +7102,7 @@
       "label": "InfoRow()",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L465",
+      "source_location": "L529",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_inforow",
       "community": 44,
@@ -7036,7 +7113,7 @@
       "label": "StatusBadge()",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L477",
+      "source_location": "L541",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_statusbadge",
       "community": 44,
@@ -7047,7 +7124,7 @@
       "label": "S",
       "file_type": "code",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L491",
+      "source_location": "L555",
       "_origin": "ast",
       "id": "src_app_finance_invoices_service_no_page_s",
       "community": 44,
@@ -13207,7 +13284,7 @@
       "label": "formatOdometer()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_formatodometer",
       "community": 40,
@@ -13218,7 +13295,7 @@
       "label": "stripDots()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_stripdots",
       "community": 40,
@@ -13229,7 +13306,7 @@
       "label": "fmt()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_fmt",
       "community": 40,
@@ -13240,7 +13317,7 @@
       "label": "ACTION_LABELS",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_action_labels",
       "community": 40,
@@ -13251,7 +13328,7 @@
       "label": "FIELD_LABELS",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_field_labels",
       "community": 40,
@@ -13262,7 +13339,7 @@
       "label": "formatActionLabel()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_formatactionlabel",
       "community": 40,
@@ -13273,7 +13350,7 @@
       "label": "formatChangeDescription()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_formatchangedescription",
       "community": 40,
@@ -13284,7 +13361,7 @@
       "label": "ServiceOrderDetailPage()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L105",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_serviceorderdetailpage",
       "community": 40,
@@ -13295,7 +13372,7 @@
       "label": "F2()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L988",
+      "source_location": "L1026",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_f2",
       "community": 40,
@@ -13306,7 +13383,7 @@
       "label": "ServicesTableEdit()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L998",
+      "source_location": "L1036",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_servicestableedit",
       "community": 40,
@@ -13317,7 +13394,7 @@
       "label": "SparepartTableEdit()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1060",
+      "source_location": "L1118",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_spareparttableedit",
       "community": 40,
@@ -13328,7 +13405,7 @@
       "label": "Modal()",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1125",
+      "source_location": "L1183",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_modal",
       "community": 40,
@@ -13336,10 +13413,21 @@
       "norm_label": "modal()"
     },
     {
+      "label": "MappingsModal()",
+      "file_type": "code",
+      "source_file": "src/app/service-orders/[...no]/page.tsx",
+      "source_location": "L1200",
+      "_origin": "ast",
+      "id": "src_app_service_orders_no_page_mappingsmodal",
+      "community": 40,
+      "community_name": "service-orders/[...no]/page.tsx",
+      "norm_label": "mappingsmodal()"
+    },
+    {
       "label": "S",
       "file_type": "code",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1141",
+      "source_location": "L1287",
       "_origin": "ast",
       "id": "src_app_service_orders_no_page_s",
       "community": 40,
@@ -13537,7 +13625,7 @@
       "label": "FCreatable()",
       "file_type": "code",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L753",
+      "source_location": "L908",
       "_origin": "ast",
       "id": "src_app_service_orders_new_page_fcreatable",
       "community": 18,
@@ -13548,7 +13636,7 @@
       "label": "FInput()",
       "file_type": "code",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L934",
+      "source_location": "L1089",
       "_origin": "ast",
       "id": "src_app_service_orders_new_page_finput",
       "community": 18,
@@ -13559,7 +13647,7 @@
       "label": "FSelect()",
       "file_type": "code",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L953",
+      "source_location": "L1108",
       "_origin": "ast",
       "id": "src_app_service_orders_new_page_fselect",
       "community": 18,
@@ -13570,7 +13658,7 @@
       "label": "SearchableItemSelect()",
       "file_type": "code",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L973",
+      "source_location": "L1128",
       "_origin": "ast",
       "id": "src_app_service_orders_new_page_searchableitemselect",
       "community": 18,
@@ -13578,10 +13666,21 @@
       "norm_label": "searchableitemselect()"
     },
     {
+      "label": "InspectionMappingModal()",
+      "file_type": "code",
+      "source_file": "src/app/service-orders/new/page.tsx",
+      "source_location": "L1165",
+      "_origin": "ast",
+      "id": "src_app_service_orders_new_page_inspectionmappingmodal",
+      "community": 18,
+      "community_name": "service-orders/new/page.tsx",
+      "norm_label": "inspectionmappingmodal()"
+    },
+    {
       "label": "S",
       "file_type": "code",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L1010",
+      "source_location": "L1296",
       "_origin": "ast",
       "id": "src_app_service_orders_new_page_s",
       "community": 18,
@@ -15649,7 +15748,7 @@
       "label": "F()",
       "file_type": "code",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1142",
+      "source_location": "L1167",
       "_origin": "ast",
       "id": "src_app_work_orders_detail_no_page_f",
       "community": 36,
@@ -15660,7 +15759,7 @@
       "label": "F2()",
       "file_type": "code",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1155",
+      "source_location": "L1180",
       "_origin": "ast",
       "id": "src_app_work_orders_detail_no_page_f2",
       "community": 36,
@@ -15671,7 +15770,7 @@
       "label": "S",
       "file_type": "code",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1165",
+      "source_location": "L1190",
       "_origin": "ast",
       "id": "src_app_work_orders_detail_no_page_s",
       "community": 36,
@@ -15682,7 +15781,7 @@
       "label": "StatusBtn()",
       "file_type": "code",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1226",
+      "source_location": "L1251",
       "_origin": "ast",
       "id": "src_app_work_orders_detail_no_page_statusbtn",
       "community": 36,
@@ -15693,7 +15792,7 @@
       "label": "WOServiceTable()",
       "file_type": "code",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1250",
+      "source_location": "L1275",
       "_origin": "ast",
       "id": "src_app_work_orders_detail_no_page_woservicetable",
       "community": 36,
@@ -15704,7 +15803,7 @@
       "label": "WOSparepartTable()",
       "file_type": "code",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1371",
+      "source_location": "L1418",
       "_origin": "ast",
       "id": "src_app_work_orders_detail_no_page_wospareparttable",
       "community": 36,
@@ -18518,6 +18617,29 @@
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".eslintrc.json",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "eslintrc",
+      "target": "eslintrc_extends",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": ".eslintrc.json",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "eslintrc",
+      "target": "ref_next_core_web_vitals",
+      "confidence_score": 1.0
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -24251,8 +24373,89 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_app_api_inspection_mappings_route_delete",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_app_api_inspection_mappings_route_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_app_api_inspection_mappings_route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_lib_auth_helpers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_lib_auth_helpers_getcurrentuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_lib_auth_helpers_withauth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/inspection-mappings/route.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_inspection_mappings_route",
+      "target": "src_lib_prisma",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L69",
+      "source_location": "L196",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_invoices_id_route",
@@ -24263,7 +24466,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L11",
+      "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_invoices_id_route",
@@ -24274,7 +24477,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/invoices/[id]/route.ts",
-      "source_location": "L39",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_invoices_id_route",
@@ -26241,7 +26444,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/service-orders/[id]/route.ts",
-      "source_location": "L183",
+      "source_location": "L200",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_service_orders_id_route",
@@ -26263,7 +26466,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/service-orders/[id]/route.ts",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_service_orders_id_route",
@@ -28608,7 +28811,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/work-orders/[id]/route.ts",
-      "source_location": "L147",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_work_orders_id_route",
@@ -30199,7 +30402,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L465",
+      "source_location": "L529",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -30210,7 +30413,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L491",
+      "source_location": "L555",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -30221,7 +30424,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -30232,7 +30435,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L477",
+      "source_location": "L541",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page",
@@ -30288,7 +30491,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L292",
+      "source_location": "L323",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -30300,7 +30503,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L216",
+      "source_location": "L247",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -30312,7 +30515,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L214",
+      "source_location": "L245",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -30324,7 +30527,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/finance/invoices/service/[...no]/page.tsx",
-      "source_location": "L161",
+      "source_location": "L191",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_finance_invoices_service_no_page_serviceinvoicedetailpage",
@@ -37490,7 +37693,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37501,7 +37704,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L988",
+      "source_location": "L1026",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37512,7 +37715,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37523,7 +37726,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37534,7 +37737,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L45",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37545,7 +37748,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37556,7 +37759,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37567,7 +37770,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1125",
+      "source_location": "L1200",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_service_orders_no_page",
+      "target": "src_app_service_orders_no_page_mappingsmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/service-orders/[...no]/page.tsx",
+      "source_location": "L1183",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37578,7 +37792,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1141",
+      "source_location": "L1287",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37589,7 +37803,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L105",
+      "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37600,7 +37814,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L998",
+      "source_location": "L1036",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37611,7 +37825,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1060",
+      "source_location": "L1118",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37622,7 +37836,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37634,7 +37848,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37646,7 +37860,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page",
@@ -37654,11 +37868,23 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/service-orders/[...no]/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_service_orders_no_page",
+      "target": "src_components_ui_searchableselect",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L958",
+      "source_location": "L996",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page_serviceorderdetailpage",
@@ -37670,7 +37896,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L408",
+      "source_location": "L410",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page_serviceorderdetailpage",
@@ -37682,7 +37908,19 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1035",
+      "source_location": "L827",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_service_orders_no_page_serviceorderdetailpage",
+      "target": "src_app_service_orders_no_page_fmt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/service-orders/[...no]/page.tsx",
+      "source_location": "L1087",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page_servicestableedit",
@@ -37694,7 +37932,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L1100",
+      "source_location": "L1158",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page_spareparttableedit",
@@ -37706,7 +37944,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L842",
+      "source_location": "L870",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page_serviceorderdetailpage",
@@ -37718,7 +37956,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/[...no]/page.tsx",
-      "source_location": "L833",
+      "source_location": "L861",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_no_page_serviceorderdetailpage",
@@ -37808,7 +38046,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L753",
+      "source_location": "L908",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page",
@@ -37819,7 +38057,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L934",
+      "source_location": "L1089",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page",
@@ -37852,11 +38090,22 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L953",
+      "source_location": "L1108",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page",
       "target": "src_app_service_orders_new_page_fselect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/service-orders/new/page.tsx",
+      "source_location": "L1165",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_service_orders_new_page",
+      "target": "src_app_service_orders_new_page_inspectionmappingmodal",
       "confidence_score": 1.0
     },
     {
@@ -37874,7 +38123,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L1010",
+      "source_location": "L1296",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page",
@@ -37885,7 +38134,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L973",
+      "source_location": "L1128",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page",
@@ -37987,7 +38236,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L566",
+      "source_location": "L636",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page_newserviceorderpage",
@@ -37999,7 +38248,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/service-orders/new/page.tsx",
-      "source_location": "L202",
+      "source_location": "L238",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_service_orders_new_page_newserviceorderpage",
@@ -40778,7 +41027,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1142",
+      "source_location": "L1167",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page",
@@ -40789,7 +41038,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1155",
+      "source_location": "L1180",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page",
@@ -40833,7 +41082,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1165",
+      "source_location": "L1190",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page",
@@ -40844,7 +41093,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1226",
+      "source_location": "L1251",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page",
@@ -40899,7 +41148,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1250",
+      "source_location": "L1275",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page",
@@ -40910,7 +41159,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1371",
+      "source_location": "L1418",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page",
@@ -40946,7 +41195,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L677",
+      "source_location": "L681",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_workorderdetailpage",
@@ -40958,7 +41207,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1349",
+      "source_location": "L1395",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_woservicetable",
@@ -40970,7 +41219,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L1412",
+      "source_location": "L1459",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_wospareparttable",
@@ -40982,7 +41231,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L598",
+      "source_location": "L602",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_workorderdetailpage",
@@ -40994,7 +41243,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L194",
+      "source_location": "L198",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_workorderdetailpage",
@@ -41006,7 +41255,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L483",
+      "source_location": "L487",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_workorderdetailpage",
@@ -41018,7 +41267,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/detail/[...no]/page.tsx",
-      "source_location": "L235",
+      "source_location": "L239",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_detail_no_page_workorderdetailpage",
@@ -41087,7 +41336,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/work-orders/new/page.tsx",
-      "source_location": "L182",
+      "source_location": "L221",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_work_orders_new_page_newworkorderpage",
@@ -43907,5 +44156,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "34b041fd53088838d0b33b106ad350b50591352c"
+  "built_at_commit": "f498d60b29d865714d10f18f166b34bdb1c2e598"
 }

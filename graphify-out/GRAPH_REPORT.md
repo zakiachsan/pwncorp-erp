@@ -1,16 +1,16 @@
 # Graph Report - pwncorp  (2026-07-31)
 
 ## Corpus Check
-- 313 files · ~277,271 words
+- 315 files · ~281,577 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1683 nodes · 2232 edges · 240 communities (159 shown, 81 thin omitted)
+- 1692 nodes · 2245 edges · 240 communities (158 shown, 82 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 20 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `34b041fd`
+- Built from commit: `f498d60b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -228,8 +228,8 @@
 - @types/node
 
 ## God Nodes (most connected - your core abstractions)
-1. `withAuth()` - 71 edges
-2. `getCurrentUser()` - 65 edges
+1. `withAuth()` - 72 edges
+2. `getCurrentUser()` - 66 edges
 3. `FormattedNumberInput()` - 33 edges
 4. `"stores"` - 24 edges
 5. `fmt()` - 20 edges
@@ -254,7 +254,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (240 total, 81 thin omitted)
+## Communities (240 total, 82 thin omitted)
 
 ### Community 0 - "generate_reports.py"
 Cohesion: 0.11
@@ -293,20 +293,20 @@ Cohesion: 0.07
 Nodes (15): GET, PUT, GET, PUT, GET, POST, GET, PUT (+7 more)
 
 ### Community 9 - "getCurrentUser"
-Cohesion: 0.08
-Nodes (15): GET, GET, GET, GET, POST, GET, GET, GET (+7 more)
+Cohesion: 0.07
+Nodes (20): GET, GET, POST, GET, GET, PUT, GET, POST (+12 more)
 
 ### Community 10 - "withAuth"
-Cohesion: 0.08
-Nodes (17): GET, PUT, GET, POST, GET, PUT, GET, PUT (+9 more)
+Cohesion: 0.07
+Nodes (18): GET, PUT, DELETE, GET, POST, GET, PUT, GET (+10 more)
 
 ### Community 11 - "expand_data.py"
 Cohesion: 0.21
 Nodes (23): find_data_range(), fmt_rp(), gen_ap_account_payables(), gen_ap_aging(), gen_ap_cheque(), gen_ap_credit(), gen_ap_invoice_payables(), gen_ap_overdue() (+15 more)
 
 ### Community 12 - "auth-helpers.ts"
-Cohesion: 0.10
-Nodes (15): handler, GET, PUT, GET, GET, POST, GET, POST (+7 more)
+Cohesion: 0.09
+Nodes (15): handler, GET, GET, PUT, GET, POST, GET, GET (+7 more)
 
 ### Community 13 - "Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)"
 Cohesion: 0.11
@@ -417,7 +417,7 @@ Cohesion: 0.32
 Nodes (6): DetailedServiceOrdersPage(), fmt(), L, statusPill(), TD, TH
 
 ### Community 40 - "service-orders/[...no]/page.tsx"
-Cohesion: 0.21
+Cohesion: 0.20
 Nodes (11): ACTION_LABELS, FIELD_LABELS, fmt(), formatActionLabel(), formatChangeDescription(), formatOdometer(), S, ServiceOrderDetailPage() (+3 more)
 
 ### Community 41 - "service-packages/[sku]/page.tsx"
@@ -692,10 +692,6 @@ Nodes (3): DELETE, GET, PUT
 Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
 
-### Community 121 - "users/route.ts"
-Cohesion: 0.50
-Nodes (3): GET, POST, userSelect
-
 ### Community 122 - "vehicles/[id]/route.ts"
 Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
@@ -777,21 +773,21 @@ Cohesion: 0.83
 Nodes (3): fmt(), fmtDate(), PrintReceiptPage()
 
 ## Knowledge Gaps
-- **654 isolated node(s):** `{ Client }`, `bcrypt`, `nextConfig`, `name`, `version` (+649 more)
+- **659 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+654 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **81 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **82 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `FormattedNumberInput()` connect `FormattedNumberInput.tsx` to `services/new/page.tsx`, `service-orders/new/page.tsx`, `purchase-orders/new/page.tsx`, `purchase-request/new/page.tsx`, `work-orders/detail/[...no]/page.tsx`, `suppliers/[id]/route.ts`, `service-orders/[...no]/page.tsx`, `inventory/stock-opname/new/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-orders/[...refCode]/page.tsx`, `purchase-deliveries/[...refCode]/page.tsx`, `stock-opname/[...refCode]/page.tsx`, `inventory/[code]/edit/page.tsx`, `inventory/new/page.tsx`, `sparepart/new/page.tsx`, `po/new/page.tsx`, `review/[...no]/page.tsx`, `purchase-deliveries/new/page.tsx`, `warehouse/stock-opname/new/page.tsx`, `invoices/create/page.tsx`, `journal/create/page.tsx`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `withAuth()` connect `withAuth` to `numbering.ts`, `prisma.ts`, `getCurrentUser`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `withAuth()` connect `withAuth` to `numbering.ts`, `prisma.ts`, `getCurrentUser`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `users/[id]/route.ts`, `stock-transfers/[id]/route.ts`, `stock-outgoings/route.ts`, `suppliers/route.ts`, `vendor-quotes/route.ts`, `stock-transfers/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `vehicles/[id]/route.ts`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `getCurrentUser()` connect `getCurrentUser` to `numbering.ts`, `prisma.ts`, `withAuth`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **What connects `{ Client }`, `bcrypt`, `nextConfig` to the rest of the system?**
-  _654 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `getCurrentUser()` connect `getCurrentUser` to `numbering.ts`, `prisma.ts`, `withAuth`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `users/[id]/route.ts`, `stock-transfers/[id]/route.ts`, `stock-outgoings/route.ts`, `suppliers/route.ts`, `vendor-quotes/route.ts`, `stock-transfers/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `vehicles/[id]/route.ts`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **What connects `extends`, `next/core-web-vitals`, `{ Client }` to the rest of the system?**
+  _659 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `generate_reports.py` be split into smaller, more focused modules?**
   _Cohesion score 0.11282051282051282 - nodes in this community are weakly interconnected._
 - **Should `numbering.ts` be split into smaller, more focused modules?**

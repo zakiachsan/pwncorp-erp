@@ -62,12 +62,14 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         disabled={disabled}
         onChange={(e) => { setQuery(e.target.value); setOpen(true); setHighlightIdx(-1); }}
         onFocus={() => { setOpen(true); setQuery(""); setHighlightIdx(-1); }}
+        onBlur={() => { setOpen(false); setQuery(""); setHighlightIdx(-1); }}
         onKeyDown={handleKeyDown}
       />
       {/* Clear button */}
       {value && !disabled && (
         <span
-          onClick={() => { onChange(""); setQuery(""); inputRef.current?.focus(); }}
+          // onMouseDown + preventDefault prevents the input from blurring before click
+          onMouseDown={(e) => { e.preventDefault(); onChange(""); setQuery(""); inputRef.current?.focus(); }}
           style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#999", fontSize: 14, lineHeight: 1 }}
         >×</span>
       )}
@@ -77,7 +79,9 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           {filtered.map((o, idx) => (
             <div
               key={o.value}
-              onClick={() => select(o.value)}
+              // Use onMouseDown (not onClick) so it fires BEFORE the input's onBlur,
+              // which would otherwise close the dropdown and cancel the selection.
+              onMouseDown={(e) => { e.preventDefault(); select(o.value); }}
               onMouseEnter={() => setHighlightIdx(idx)}
               style={{ padding: "6px 10px", cursor: "pointer", fontSize: 13, background: idx === highlightIdx ? "#f0f7ff" : "#fff", borderBottom: idx < filtered.length - 1 ? "1px solid #f0f0f0" : "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}
             >

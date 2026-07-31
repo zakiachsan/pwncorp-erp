@@ -20,10 +20,11 @@ const workflowColor = (s: string) => {
   return map[s] || "#6b7280";
 };
 
-type TabKey = "details" | "docref" | "payments" | "refunds" | "changes";
+type TabKey = "details" | "docref" | "payables" | "payments" | "refunds" | "changes";
 const TABS: { key: TabKey; label: string }[] = [
   { key: "details", label: "Details" },
   { key: "docref", label: "Document Reference" },
+  { key: "payables", label: "Invoice Payables" },
   { key: "payments", label: "Payments" },
   { key: "refunds", label: "Refunds" },
   { key: "changes", label: "Changes" },
@@ -44,6 +45,8 @@ export default function ServiceInvoiceDetailPage() {
   const [arData, setArData] = useState<any>(null);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [changes, setChanges] = useState<any[]>([]);
+  const [payables, setPayables] = useState<any[]>([]);
+  const [payablesLoading, setPayablesLoading] = useState(false);
   const [changesLoading, setChangesLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
 
@@ -111,6 +114,33 @@ export default function ServiceInvoiceDetailPage() {
       .then(r => r.json())
       .then(j => { setChanges(j.data || []); setChangesLoading(false); })
       .catch(() => setChangesLoading(false));
+  };
+
+  const fetchPayables = () => {
+    if (!inv?.id || payables.length > 0) return;
+    setPayablesLoading(true);
+    // Query journal entries that are SubletSundry refType for this invoice
+    fetch(`/api/journal?refType=SubletSundry&limit=50`)
+      .then(r => r.json())
+      .then(async (j) => {
+        const journals = (j.data || []).filter((je: any) =>
+          (je.description || "").includes(inv.invNo)
+        );
+        // Get unique refId (which are IP docNos/cuid)
+        const ipIds = Array.from(new Set(journals.map((je: any) => je.refId)));
+        const ips: any[] = [];
+        for (const id of ipIds) {
+          if (!id) continue;
+          try {
+            const res = await fetch(`/api/purchase-invoices/${id}`);
+            const data = await res.json();
+            if (data.data) ips.push(data.data);
+          } catch (e) { /* ignore */ }
+        }
+        setPayables(ips);
+        setPayablesLoading(false);
+      })
+      .catch(() => setPayablesLoading(false));
   };
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
@@ -195,6 +225,7 @@ export default function ServiceInvoiceDetailPage() {
             setActiveTab(t.key);
             if (t.key === "payments") fetchPayments();
             if (t.key === "changes") fetchChanges();
+            if (t.key === "payables") fetchPayables();
           }} style={{ ...S.tab, ...(activeTab === t.key ? S.tabActive : {}) }}>
             {t.label}
           </button>
@@ -353,6 +384,39 @@ export default function ServiceInvoiceDetailPage() {
               </tr></thead>
               <tbody>
                 <tr><td colSpan={4} style={{ ...S.td, textAlign: "center", padding: 24, color: "#999" }}>No refunds</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {/* ═══════ TAB: INVOICE PAYABLES ═══════ */}
+      {activeTab === "payables" && (
+        <>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#001526", marginBottom: 10 }}>Invoice Payables (Auto-generated from Sublet &amp; Sundry)</h3>
+          <div style={S.tableWrap}>
+            <table style={S.table}>
+              <thead><tr>
+                <th style={{ ...S.th, width: 40 }}>No.</th>
+                <th style={S.th}>IP Number</th>
+                <th style={S.th}>Supplier</th>
+                <th style={S.th}>Status</th>
+                <th style={{ ...S.th, textAlign: "right" }}>Total</th>
+              </tr></thead>
+              <tbody>
+                {payablesLoading ? (
+                  <tr><td colSpan={5} style={{ ...S.td, textAlign: "center", padding: 24 }}>Loading...</td></tr>
+                ) : payables.length === 0 ? (
+                  <tr><td colSpan={5} style={{ ...S.td, textAlign: "center", padding: 24, color: "#999" }}>No invoice payables. Sublet/Sundry items akan otomatis membuat IP saat invoice COMPLETED.</td></tr>
+                ) : payables.map((ip: any, i: number) => (
+                  <tr key={ip.id} style={S.tr}>
+                    <td style={S.td}>{i + 1}</td>
+                    <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/finance/invoices/payables/${ip.id}`)}>{ip.docNo}</td>
+                    <td style={S.td}>{ip.supplier?.companyName || "-"}</td>
+                    <td style={S.td}><StatusBadge status={ip.status} /></td>
+                    <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(ip.total)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

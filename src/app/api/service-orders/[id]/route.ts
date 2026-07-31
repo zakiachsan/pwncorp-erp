@@ -13,11 +13,12 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
       store: { select: { id: true, name: true, code: true } },
       spareparts: { include: { sparepart: true } },
       services: { include: { service: true } },
-      inspectionItems: { orderBy: { sortOrder: "asc" } },
+      inspectionItems: { orderBy: { sortOrder: "asc" }, include: { mappings: true } },
       workOrders: {
         include: {
           mekanik: { select: { id: true, name: true } },
           items: true,
+          invoices: { select: { id: true, invNo: true, status: true, total: true, createdAt: true } },
         },
         orderBy: { createdAt: "desc" },
       },
@@ -34,7 +35,7 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
 
   const existing = await prisma.serviceOrder.findUnique({
     where: { id: params.id },
-    include: { spareparts: true, services: true, inspectionItems: true },
+    include: { spareparts: true, services: true, inspectionItems: { include: { mappings: true } } },
   });
   if (!existing) return NextResponse.json({ error: "Service order not found" }, { status: 404 });
 
@@ -90,7 +91,16 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
         const lineTotal = sv.qty * sv.unitPrice;
         total += lineTotal;
         await prisma.sOService.create({
-          data: { soId: params.id, serviceId: sv.serviceId, qty: sv.qty, unitPrice: sv.unitPrice, total: lineTotal },
+          data: {
+            soId: params.id,
+            serviceId: sv.serviceId,
+            qty: sv.qty,
+            unitPrice: sv.unitPrice,
+            total: lineTotal,
+            itemType: sv.itemType || "Service",
+            supplierId: sv.supplierId || null,
+            cost: sv.cost || 0,
+          },
         });
       }
     }
@@ -108,6 +118,13 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
           feedback: item.feedback || null,
           inspected: item.inspected || false,
           sortOrder: i,
+          mappings: item.mappings && item.mappings.length > 0 ? {
+            create: item.mappings.map((m: any) => ({
+              sourceType: m.sourceType,
+              sourceId: m.sourceId,
+              qty: m.qty || 1,
+            })),
+          } : undefined,
         },
       });
     }
@@ -124,7 +141,7 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
       sa: { select: { id: true, name: true } },
       spareparts: { include: { sparepart: { select: { sku: true, name: true } } } },
       services: { include: { service: { select: { sku: true, name: true } } } },
-      inspectionItems: { orderBy: { sortOrder: "asc" } },
+      inspectionItems: { orderBy: { sortOrder: "asc" }, include: { mappings: true } },
     },
   });
 

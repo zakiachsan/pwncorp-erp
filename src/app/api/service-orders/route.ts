@@ -75,7 +75,15 @@ export const POST = withAuth(async (req: NextRequest) => {
   const svItems = (services || []).map((sv: any) => {
     const lineTotal = sv.qty * sv.unitPrice;
     total += lineTotal;
-    return { serviceId: sv.serviceId, qty: sv.qty, unitPrice: sv.unitPrice, total: lineTotal };
+    return {
+      serviceId: sv.serviceId,
+      qty: sv.qty,
+      unitPrice: sv.unitPrice,
+      total: lineTotal,
+      itemType: sv.itemType || "Service",
+      supplierId: sv.supplierId || null,
+      cost: sv.cost || 0,
+    };
   });
 
   const so = await prisma.serviceOrder.create({
@@ -101,6 +109,13 @@ export const POST = withAuth(async (req: NextRequest) => {
           feedback: item.feedback || null,
           inspected: item.inspected || false,
           sortOrder: i,
+          mappings: item.mappings && item.mappings.length > 0 ? {
+            create: item.mappings.map((m: any) => ({
+              sourceType: m.sourceType,
+              sourceId: m.sourceId,
+              qty: m.qty || 1,
+            })),
+          } : undefined,
         })),
       } : undefined,
     },
@@ -109,8 +124,14 @@ export const POST = withAuth(async (req: NextRequest) => {
       vehicle: { select: { id: true, plateNo: true, brand: true, model: true } },
       sa: { select: { id: true, name: true } },
       spareparts: { include: { sparepart: { select: { id: true, sku: true, name: true } } } },
-      services: { include: { service: { select: { id: true, sku: true, name: true } } } },
-      inspectionItems: { orderBy: { sortOrder: "asc" } },
+      services: { include: {
+        service: { select: { id: true, sku: true, name: true } },
+        supplier: { select: { id: true, companyName: true } },
+      } },
+      inspectionItems: {
+        orderBy: { sortOrder: "asc" },
+        include: { mappings: true },
+      },
     },
   });
 

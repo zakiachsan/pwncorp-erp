@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Printer, FileText, CheckCircle, Circle, Wrench, ExternalLink, Plus, X, Edit, Save, Trash2, ChevronDown } from "lucide-react";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 
 const formatOdometer = (v: string) => {
   const raw = v.replace(/[^0-9]/g, "");
@@ -133,9 +134,11 @@ export default function ServiceOrderDetailPage() {
   const [showAddSparepart, setShowAddSparepart] = useState(false);
   const [availableServices, setAvailableServices] = useState<any[]>([]);
   const [availableSpareparts, setAvailableSpareparts] = useState<any[]>([]);
+  const [availablePackages, setAvailablePackages] = useState<any[]>([]);
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
   const [allVehicles, setAllVehicles] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [mappingsModal, setMappingsModal] = useState<{ description: string; mappings: any[] } | null>(null);
 
   // New item forms
   const [newService, setNewService] = useState({ serviceId: "", qty: 1, unitPrice: 0 });
@@ -144,8 +147,6 @@ export default function ServiceOrderDetailPage() {
   // Search state for combobox
   const [svcSearch, setSvcSearch] = useState("");
   const [spSearch, setSpSearch] = useState("");
-  const [svcDropdownOpen, setSvcDropdownOpen] = useState(false);
-  const [spDropdownOpen, setSpDropdownOpen] = useState(false);
 
   // Changes log
   const [changes, setChanges] = useState<any[]>([]);
@@ -178,7 +179,7 @@ export default function ServiceOrderDetailPage() {
               setOrder(d);
               setServices((d.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } })));
               setSpareparts((d.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } })));
-              setInspectionItems((d.inspectionItems || []).map((item: any) => ({ id: item.id, description: item.description || "", feedback: item.feedback || "", inspected: item.inspected || false })));
+              setInspectionItems((d.inspectionItems || []).map((item: any) => ({ id: item.id, description: item.description || "", feedback: item.feedback || "", inspected: item.inspected || false, mappings: item.mappings || [] })));
               setEditFields({
                 complaint: d.complaint || "",
                 customerId: d.customerId || "",
@@ -206,6 +207,7 @@ export default function ServiceOrderDetailPage() {
   useEffect(() => {
     fetch("/api/services?limit=200").then(r => r.json()).then(d => setAvailableServices(d.data || [])).catch(() => {});
     fetch("/api/spareparts?limit=200").then(r => r.json()).then(d => setAvailableSpareparts(d.data || [])).catch(() => {});
+    fetch("/api/service-packages?limit=200").then(r => r.json()).then(d => setAvailablePackages(d.data || [])).catch(() => {});
     fetch("/api/customers?limit=200").then(r => r.json()).then(d => setAllCustomers(d.data || [])).catch(() => {});
     fetch("/api/users?limit=200").then(r => r.json()).then(d => setAllUsers(d.data || d.users || [])).catch(() => {});
   }, []);
@@ -454,6 +456,16 @@ export default function ServiceOrderDetailPage() {
   const hasWO = activeWOs.length > 0;
   const wo = hasWO ? activeWOs[0] : null;
 
+  // Items already used in any WO (for multiple SWO)
+  const usedItemIds = new Set<string>();
+  for (const w of activeWOs) {
+    for (const it of (w.items || [])) usedItemIds.add(it.itemId);
+  }
+  const totalSvcItems = (order.services || []).length + (order.spareparts || []).length;
+  const usedCount = usedItemIds.size;
+  const remainingItems = totalSvcItems - usedCount;
+  const canCreateMoreWO = isApproved && remainingItems > 0;
+
   return (
     <div style={{ padding: "0 12px 24px" }} className="sm:px-6">
       {/* Workflow Bar */}
@@ -480,8 +492,8 @@ export default function ServiceOrderDetailPage() {
             {isDiagnosis && <button onClick={() => setShowCancelConfirm(true)} style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}><X size={14} /> Cancel</button>}
             {isDelivery && <button onClick={() => setShowApproveConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><CheckCircle size={14} /> Approve</button>}
             {isDelivery && <button onClick={() => setShowCancelConfirm(true)} style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "1px solid #ea001e" }}><X size={14} /> Cancel</button>}
-            {isApproved && !hasWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO</button>}
-            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/detail/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO</button>}
+            {isApproved && canCreateMoreWO && <button onClick={() => setShowCreateWOConfirm(true)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><Wrench size={14} /> Create WO {hasWO ? `(${remainingItems} item tersisa)` : ""}</button>}
+            {isApproved && hasWO && <button onClick={() => router.push(`/work-orders/detail/${wo.woNo || wo.documentNumber}`)} style={{ ...S.actionBtn, background: "#0176d3", color: "#fff", border: "1px solid #0176d3" }}><ExternalLink size={14} /> View WO {activeWOs.length > 1 ? `(${activeWOs.length})` : ""}</button>}
             <div style={{ position: "relative" }} ref={printDropdownRef}>
               <button style={S.actionBtn} onClick={() => setPrintDropdownOpen(!printDropdownOpen)}>
                 <Printer size={14} /> Print <ChevronDown size={12} style={{ marginLeft: 2 }} />
@@ -612,13 +624,14 @@ export default function ServiceOrderDetailPage() {
                       <th style={S.th}>Description</th>
                       <th style={S.th}>Feedback</th>
                       <th style={{ ...S.th, width: 80, textAlign: "center" }}>Inspected</th>
+                      <th style={{ ...S.th, width: 120, textAlign: "center" }}>Service Items</th>
                       {inspectionEditMode && <th style={{ ...S.th, width: 40 }}></th>}
                     </tr>
                   </thead>
                   <tbody>
                     {inspectionItems.length > 0 ? (
                       inspectionItems.map((item: any, i: number) => (
-                        <tr key={i}>
+                        <tr key={i} style={{ background: item.mappings?.length > 0 ? "#fffbeb" : "transparent" }}>
                           <td style={S.td}>{i + 1}</td>
                           {inspectionEditMode ? (
                             <>
@@ -635,6 +648,15 @@ export default function ServiceOrderDetailPage() {
                                   {item.inspected ? <CheckCircle size={18} style={{ color: "#2e844a" }} /> : <Circle size={18} style={{ color: "#d8d8d8" }} />}
                                 </button>
                               </td>
+                              <td style={{ ...S.td, textAlign: "center", fontSize: 11 }}>
+                                {item.mappings?.length > 0 ? (
+                                  <span style={{ display: "inline-block", padding: "2px 6px", borderRadius: 3, fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#b45309" }}>
+                                    {item.mappings.length} item{item.mappings.length > 1 ? "s" : ""}
+                                  </span>
+                                ) : (
+                                  <span style={{ color: "#8e8f8e" }}>—</span>
+                                )}
+                              </td>
                               <td style={{ ...S.td, textAlign: "center" }}>
                                 <button onClick={() => removeInspectionItem(i)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ea001e", padding: 2 }}>
                                   <Trash2 size={14} />
@@ -647,6 +669,19 @@ export default function ServiceOrderDetailPage() {
                               <td style={S.td}>{item.feedback || "-"}</td>
                               <td style={{ ...S.td, textAlign: "center" }}>
                                 {item.inspected ? <CheckCircle size={18} style={{ color: "#2e844a" }} /> : <Circle size={18} style={{ color: "#d8d8d8" }} />}
+                              </td>
+                              <td style={{ ...S.td, textAlign: "center", fontSize: 11 }}>
+                                {item.mappings?.length > 0 ? (
+                                  <button
+                                    title={item.mappings.map((m: any) => m.sourceType).join(", ")}
+                                    onClick={() => setMappingsModal({ description: item.description || "", mappings: item.mappings || [] })}
+                                    style={{ display: "inline-block", padding: "2px 8px", borderRadius: 3, fontSize: 10, fontWeight: 700, background: "#fef3c7", color: "#b45309", border: "1px solid #fbbf24", cursor: "pointer" }}
+                                  >
+                                    📋 {item.mappings.length} item{item.mappings.length > 1 ? "s" : ""}
+                                  </button>
+                                ) : (
+                                  <span style={{ color: "#8e8f8e" }}>—</span>
+                                )}
                               </td>
                             </>
                           )}
@@ -669,30 +704,12 @@ export default function ServiceOrderDetailPage() {
                     <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
                       <div style={{ flex: "1 1 200px", position: "relative" }}>
                         <label style={S.formLabel}>Service</label>
-                        <input
-                          type="text"
+                        <SearchableSelect
+                          options={availableServices.map((s: any) => ({ value: s.id, label: `${s.sku} - ${s.name}` }))}
+                          value={newService.serviceId}
+                          onChange={(val) => setNewService(prev => ({ ...prev, serviceId: val }))}
                           placeholder="Cari service..."
-                          value={svcSearch}
-                          onChange={e => { setSvcSearch(e.target.value); setSvcDropdownOpen(true); }}
-                          onFocus={() => setSvcDropdownOpen(true)}
-                          onBlur={() => setTimeout(() => setSvcDropdownOpen(false), 200)}
-                          style={S.formInput}
                         />
-                        {svcDropdownOpen && (
-                          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                            {availableServices
-                              .filter(s => !svcSearch || s.name.toLowerCase().includes(svcSearch.toLowerCase()) || (s.sku || "").toLowerCase().includes(svcSearch.toLowerCase()))
-                              .map(s => (
-                                <div
-                                  key={s.id}
-                                  onClick={() => { setNewService(prev => ({ ...prev, serviceId: s.id })); setSvcSearch(`${s.sku} - ${s.name}`); setSvcDropdownOpen(false); }}
-                                  style={{ padding: "6px 10px", fontSize: 12, cursor: "pointer", background: newService.serviceId === s.id ? "#f0f7ff" : "transparent" }}
-                                  onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
-                                  onMouseLeave={e => e.currentTarget.style.background = newService.serviceId === s.id ? "#f0f7ff" : "transparent"}
-                                >{s.sku} - {s.name}</div>
-                              ))}
-                          </div>
-                        )}
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={S.formLabel}>Qty</label>
@@ -728,30 +745,12 @@ export default function ServiceOrderDetailPage() {
                     <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
                       <div style={{ flex: "1 1 200px", position: "relative" }}>
                         <label style={S.formLabel}>Sparepart</label>
-                        <input
-                          type="text"
+                        <SearchableSelect
+                          options={availableSpareparts.map((s: any) => ({ value: s.id, label: `${s.sku} - ${s.name}` }))}
+                          value={newSparepart.sparepartId}
+                          onChange={(val) => setNewSparepart(prev => ({ ...prev, sparepartId: val }))}
                           placeholder="Cari sparepart..."
-                          value={spSearch}
-                          onChange={e => { setSpSearch(e.target.value); setSpDropdownOpen(true); }}
-                          onFocus={() => setSpDropdownOpen(true)}
-                          onBlur={() => setTimeout(() => setSpDropdownOpen(false), 200)}
-                          style={S.formInput}
                         />
-                        {spDropdownOpen && (
-                          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                            {availableSpareparts
-                              .filter(s => !spSearch || s.name.toLowerCase().includes(spSearch.toLowerCase()) || (s.sku || "").toLowerCase().includes(spSearch.toLowerCase()))
-                              .map(s => (
-                                <div
-                                  key={s.id}
-                                  onClick={() => { setNewSparepart(prev => ({ ...prev, sparepartId: s.id })); setSpSearch(`${s.sku} - ${s.name}`); setSpDropdownOpen(false); }}
-                                  style={{ padding: "6px 10px", fontSize: 12, cursor: "pointer", background: newSparepart.sparepartId === s.id ? "#f0f7ff" : "transparent" }}
-                                  onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
-                                  onMouseLeave={e => e.currentTarget.style.background = newSparepart.sparepartId === s.id ? "#f0f7ff" : "transparent"}
-                                >{s.sku} - {s.name}</div>
-                              ))}
-                          </div>
-                        )}
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={S.formLabel}>Qty</label>
@@ -806,6 +805,35 @@ export default function ServiceOrderDetailPage() {
           )}
           <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Services</div>
           <ServicesTableEdit services={services} totalQty={totalQty} grandTotal={grandTotal} editMode={false} onUpdate={() => {}} onRemove={() => {}} router={router} />
+
+          {/* Service Invoices (SRI) — multiple per SRO */}
+          {(() => {
+            const allInvoices = (order.workOrders || []).flatMap((w: any) => (w.invoices || []).map((inv: any) => ({ ...inv, woNo: w.woNo || w.documentNumber })));
+            if (allInvoices.length === 0) return null;
+            return (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#0176d3", marginBottom: 8, textTransform: "uppercase" }}>Service Invoices</div>
+                <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
+                  <table style={S.table}><thead><tr><th style={S.th}>Document Number</th><th className="hidden sm:table-cell" style={S.th}>WO</th><th style={S.th}>Status</th><th style={{ ...S.th, textAlign: "right" }}>Total</th></tr></thead>
+                    <tbody>
+                      {allInvoices.map((inv: any, idx: number) => {
+                        const invStatus = (inv.status || "").toUpperCase();
+                        const statusBg = invStatus === "COMPLETED" ? "#2e844a" : invStatus === "CANCELLED" ? "#ea001e" : invStatus === "PAID" ? "#0176d3" : "#fe9339";
+                        return (
+                          <tr key={idx} style={S.tr}>
+                            <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => router.push(`/finance/invoices/service/${inv.invNo}`)}>{inv.invNo}</td>
+                            <td className="hidden sm:table-cell" style={S.td}>{inv.woNo}</td>
+                            <td style={S.td}><span style={{ ...S.pill, background: statusBg, color: "#fff" }}>{inv.status}</span></td>
+                            <td style={{ ...S.td, textAlign: "right", fontWeight: 600 }}>{fmt(inv.total || 0)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
         </>
       )}
 
@@ -854,6 +882,16 @@ export default function ServiceOrderDetailPage() {
       )}
 
       {/* Modals */}
+      {mappingsModal && (
+        <MappingsModal
+          description={mappingsModal.description}
+          mappings={mappingsModal.mappings}
+          availableServices={availableServices}
+          availableSpareparts={availableSpareparts}
+          availablePackages={availablePackages}
+          onClose={() => setMappingsModal(null)}
+        />
+      )}
       {showApproveConfirm && <Modal title="Approve Service Order?" message="Status akan berubah dari DELIVERY ke APPROVED." onCancel={() => setShowApproveConfirm(false)} onConfirm={handleApprove} confirmText="Ya, Approve" />}
       {showCancelConfirm && <Modal title="Cancel Service Order?" message="Service Order akan dibatalkan. Tindakan ini tidak dapat diurungkan." onCancel={() => setShowCancelConfirm(false)} onConfirm={handleCancel} confirmText="Ya, Cancel" />}
       {showDeliverConfirm && <Modal title="Diagnosis Service Order?" message="Status akan berubah dari DRAFT ke DIAGNOSIS." onCancel={() => setShowDeliverConfirm(false)} onConfirm={handleDeliver} confirmText="Ya, Diagnosis" />}
@@ -1006,27 +1044,47 @@ function ServicesTableEdit({ services, totalQty, grandTotal, editMode, onUpdate,
       <table style={S.table}>
         <thead><tr>
           <th style={{ ...S.th, width: 36 }}>No.</th>
+          <th style={{ ...S.th, width: 70 }}>Type</th>
           <th style={S.th}>Item</th>
+          <th style={S.th}>Supplier</th>
           <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
+          <th style={{ ...S.th, textAlign: "right" }}>Cost</th>
           <th className="hidden sm:table-cell" style={{ ...S.th, textAlign: "right" }}>Price</th>
           <th style={{ ...S.th, textAlign: "right" }}>Total</th>
           {editMode && <th style={{ ...S.th, width: 40 }}></th>}
         </tr></thead>
         <tbody>
           {services.length === 0 && (
-            <tr><td colSpan={editMode ? 6 : 5} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
+            <tr><td colSpan={editMode ? 9 : 8} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
           )}
           {services.map((svc: any, i: number) => {
             const s = svc.service || {};
+            const showSublet = svc.itemType === "Sublet" || svc.itemType === "Sundry";
             return (
               <tr key={i} style={S.tr}>
                 <td style={S.td}>{i + 1}</td>
+                <td style={S.td}>
+                  {showSublet ? (
+                    <span style={{
+                      display: "inline-block", padding: "2px 6px", borderRadius: 3, fontSize: 10, fontWeight: 700,
+                      background: svc.itemType === "Sublet" ? "#dbeafe" : "#fef3c7",
+                      color: svc.itemType === "Sublet" ? "#0176d3" : "#b45309",
+                      textTransform: "uppercase",
+                    }}>{svc.itemType}</span>
+                  ) : (
+                    <span style={{ fontSize: 10, color: "#8e8f8e" }}>SVC</span>
+                  )}
+                </td>
                 <td style={{ ...S.td, color: "#0176d3", fontWeight: 500, cursor: "pointer" }} onClick={() => !editMode && router.push(`/master-data/services/${s.sku || ""}`)}>{s.sku} - {s.name}</td>
+                <td style={{ ...S.td, fontSize: 12 }}>{svc.supplier?.companyName || "-"}</td>
                 <td style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (
                     <FormattedNumberInput value={svc.qty} onChange={val => onUpdate(i, "qty", Math.max(1, val) || 1)}
                       style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
                   ) : svc.qty}
+                </td>
+                <td style={{ ...S.td, textAlign: "right", color: showSublet ? "#b45309" : "#8e8f8e", fontWeight: showSublet ? 500 : 400 }}>
+                  {showSublet ? fmt(svc.cost || 0) : "-"}
                 </td>
                 <td className="hidden sm:table-cell" style={{ ...S.td, textAlign: "right" }}>
                   {editMode ? (
@@ -1138,6 +1196,94 @@ function Modal({ title, message, onCancel, onConfirm, confirmText }: { title: st
 }
 
 /* ─── Styles ─── */
+/* ─── Mappings Modal ─── */
+function MappingsModal({ description, mappings, onClose, availableServices, availableSpareparts, availablePackages }: {
+  description: string;
+  mappings: { sourceType: string; sourceId: string; qty?: number | null }[];
+  onClose: () => void;
+  availableServices: any[];
+  availableSpareparts: any[];
+  availablePackages: any[];
+}) {
+  const resolveName = (m: any): string => {
+    if (m.sourceType === "Service") {
+      const s = availableServices.find((x: any) => x.id === m.sourceId);
+      return s ? `${s.sku} - ${s.name}` : m.sourceId;
+    }
+    if (m.sourceType === "Sparepart") {
+      const s = availableSpareparts.find((x: any) => x.id === m.sourceId);
+      return s ? `${s.sku} - ${s.name}` : m.sourceId;
+    }
+    if (m.sourceType === "Package") {
+      const p = availablePackages.find((x: any) => x.id === m.sourceId);
+      return p ? `${p.sku} - ${p.name}` : m.sourceId;
+    }
+    return m.sourceId;
+  };
+
+  const sourceColor = (t: string) => {
+    if (t === "Package") return { bg: "#dbeafe", color: "#0176d3" };
+    if (t === "Sparepart") return { bg: "#d1fae5", color: "#047857" };
+    if (t === "Service") return { bg: "#fef3c7", color: "#b45309" };
+    return { bg: "#e5e7eb", color: "#374151" };
+  };
+
+  const byType: Record<string, any[]> = {};
+  for (const m of mappings) {
+    if (!byType[m.sourceType]) byType[m.sourceType] = [];
+    byType[m.sourceType].push(m);
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }} onClick={onClose}>
+      <div style={{ background: "#fff", borderRadius: 12, width: 600, maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 8px 32px rgba(0,0,0,0.16)" }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid #ecebea" }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#001526", margin: 0 }}>
+            Service Items {description ? `— ${description}` : ""}
+          </h3>
+          <div style={{ fontSize: 11, color: "#8e8f8e", marginTop: 4 }}>
+            {mappings.length} item{mappings.length === 1 ? "" : "s"} mapped dari inspection ini
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 20px" }}>
+          {Object.keys(byType).length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "#8e8f8e", fontSize: 12 }}>No mappings</div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr style={{ background: "#f9f9f9" }}>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase", width: 90 }}>Type</th>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" }}>Item</th>
+                  <th style={{ padding: "8px", textAlign: "right", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase", width: 60 }}>Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mappings.map((m, i) => {
+                  const c = sourceColor(m.sourceType);
+                  return (
+                    <tr key={i} style={{ borderTop: "1px solid #f0f0f0" }}>
+                      <td style={{ padding: "8px" }}>
+                        <span style={{ display: "inline-block", padding: "2px 6px", borderRadius: 3, fontSize: 10, fontWeight: 700, background: c.bg, color: c.color, textTransform: "uppercase" }}>
+                          {m.sourceType}
+                        </span>
+                      </td>
+                      <td style={{ padding: "8px", fontWeight: 500 }}>{resolveName(m)}</td>
+                      <td style={{ padding: "8px", textAlign: "right" }}>{m.qty ?? 1}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+        <div style={{ padding: "12px 20px", borderTop: "1px solid #ecebea", display: "flex", justifyContent: "flex-end" }}>
+          <button onClick={onClose} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 500, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" }}>Tutup</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const S: Record<string, React.CSSProperties> = {
   backBtn: { display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13, fontWeight: 500, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" },
   card: { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 16 },

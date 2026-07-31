@@ -94,34 +94,53 @@ export default function NewServiceOrderPage() {
   const [error, setError] = useState<string | null>(null);
 
   // ─── Line Items ───
-  const [serviceItems, setServiceItems] = useState<{ serviceId: string; qty: number; unitPrice: number }[]>([]);
+  type ServiceItem = {
+    serviceId: string;
+    qty: number;
+    unitPrice: number;
+    itemType?: "Service" | "Sublet" | "Sundry";
+    supplierId?: string;
+    cost?: number;
+  };
+  type MappingItem = { sourceType: "Package" | "Sparepart" | "Service" | "Sublet" | "Sundry"; sourceId: string; qty?: number | null };
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
   const [sparepartItems, setSparepartItems] = useState<{ sparepartId: string; qty: number; unitPrice: number }[]>([]);
-  const [inspectionItems, setInspectionItems] = useState<{ description: string; feedback: string; inspected: boolean }[]>([]);
+  const [inspectionItems, setInspectionItems] = useState<{ description: string; feedback: string; inspected: boolean; mappings: { sourceType: string; sourceId: string; qty?: number | null }[] }[]>([]);
+  const [suppliers, setSuppliers] = useState<{ id: string; companyName: string }[]>([]);
+  const [subletTab, setSubletTab] = useState<"Service" | "Sublet & Sundry">("Service");
+  const [servicePackageList, setServicePackageList] = useState<any[]>([]);
+  const [mappingModal, setMappingModal] = useState<{ idx: number } | null>(null);
 
   // ─── Fetch all data on mount ───
   useEffect(() => {
     const fetchAll = async () => {
       try {
         setLoading(true);
-        const [custRes, vehRes, svcRes, spRes, usrRes] = await Promise.all([
+        const [custRes, vehRes, svcRes, spRes, usrRes, supRes, pkgRes] = await Promise.all([
           fetch("/api/customers?limit=100"),
           fetch("/api/vehicles?limit=100"),
           fetch("/api/services?limit=100"),
           fetch("/api/spareparts?limit=100"),
           fetch("/api/users?limit=100"),
+          fetch("/api/suppliers?limit=100"),
+          fetch("/api/service-packages?limit=100"),
         ]);
-        const [custData, vehData, svcData, spData, usrData] = await Promise.all([
+        const [custData, vehData, svcData, spData, usrData, supData, pkgData] = await Promise.all([
           custRes.json(),
           vehRes.json(),
           svcRes.json(),
           spRes.json(),
           usrRes.json(),
+          supRes.json(),
+          pkgRes.json(),
         ]);
         setCustomers(custData.data || []);
         setVehicles(vehData.data || []);
         setServices(svcData.data || []);
         setSpareparts(spData.data || []);
         setUsers(usrData.data || []);
+        setSuppliers((supData.data || []).filter((s: any) => s.isActive !== false));
+        setServicePackageList((pkgData.data || []).filter((p: any) => p.isActive !== false));
       } catch (err) {
         console.error("Failed to fetch data:", err);
         setError("Gagal memuat data dari server");
@@ -191,6 +210,23 @@ export default function NewServiceOrderPage() {
       setSaving(true);
       setError(null);
 
+      // Validate sublet/sundry items
+      for (const sv of serviceItems) {
+        if (!sv.serviceId) continue;
+        if (sv.itemType === "Sublet" || sv.itemType === "Sundry") {
+          if (!sv.supplierId) {
+            setError(`Supplier wajib dipilih untuk item ${sv.itemType}`);
+            setSaving(false);
+            return;
+          }
+          if (!sv.cost || sv.cost <= 0) {
+            setError(`Cost (harga supplier) wajib > 0 untuk item ${sv.itemType}`);
+            setSaving(false);
+            return;
+          }
+        }
+      }
+
       const body = {
         customerId: form.customerId,
         vehicleId: form.vehicleId,
@@ -202,8 +238,20 @@ export default function NewServiceOrderPage() {
         odometer: form.odometer ? stripDots(form.odometer) : null,
         color: form.color || null,
         spareparts: sparepartItems.filter((sp) => sp.sparepartId),
-        services: serviceItems.filter((sv) => sv.serviceId),
-        inspectionItems: inspectionItems.filter((item) => item.description),
+        services: serviceItems.filter((sv) => sv.serviceId).map((sv) => ({
+          serviceId: sv.serviceId,
+          qty: sv.qty,
+          unitPrice: sv.unitPrice,
+          itemType: sv.itemType || "Service",
+          supplierId: sv.supplierId || null,
+          cost: sv.cost || 0,
+        })),
+        inspectionItems: inspectionItems.filter((item) => item.description).map((item) => ({
+          description: item.description,
+          feedback: item.feedback || null,
+          inspected: item.inspected || false,
+          mappings: item.mappings || [],
+        })),
       };
 
       const res = await fetch("/api/service-orders", {
@@ -227,7 +275,10 @@ export default function NewServiceOrderPage() {
 
   // ─── Service items helpers ───
   const addServiceItem = () => {
-    setServiceItems([...serviceItems, { serviceId: "", qty: 1, unitPrice: 0 }]);
+    setServiceItems([...serviceItems, { serviceId: "", qty: 1, unitPrice: 0, itemType: "Service" }]);
+  };
+  const addSubletItem = (type: "Sublet" | "Sundry") => {
+    setServiceItems([...serviceItems, { serviceId: "", qty: 1, unitPrice: 0, itemType: type, supplierId: "", cost: 0 }]);
   };
   const updateServiceItem = (idx: number, field: string, value: any) => {
     setServiceItems((prev) => prev.map((item, i) => {
@@ -265,7 +316,7 @@ export default function NewServiceOrderPage() {
 
   // ─── Inspection items helpers ───
   const addInspectionItem = () => {
-    setInspectionItems([...inspectionItems, { description: "", feedback: "", inspected: false }]);
+    setInspectionItems([...inspectionItems, { description: "", feedback: "", inspected: false, mappings: [] }]);
   };
   const updateInspectionItem = (idx: number, field: string, value: any) => {
     setInspectionItems((prev) => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
@@ -361,6 +412,25 @@ export default function NewServiceOrderPage() {
 
   return (
     <div style={{ padding: "0 24px 24px" }}>
+      {/* Inspection Mapping Modal */}
+      {mappingModal && (
+        <InspectionMappingModal
+          inspectionItem={{
+            description: inspectionItems[mappingModal.idx]?.description || "",
+            mappings: inspectionItems[mappingModal.idx]?.mappings || [],
+          }}
+          services={services}
+          spareparts={spareparts}
+          servicePackages={servicePackageList}
+          suppliers={suppliers}
+          onClose={() => setMappingModal(null)}
+          onSave={(mappings) => {
+            updateInspectionItem(mappingModal.idx, "mappings", mappings);
+            setMappingModal(null);
+          }}
+        />
+      )}
+
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <button onClick={() => router.push("/service-orders")} style={S.backBtn}>
@@ -593,11 +663,12 @@ export default function NewServiceOrderPage() {
           </button>
         </div>
         <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "hidden" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
             <span>No</span>
             <span>Description</span>
             <span>Feedback</span>
             <span style={{ textAlign: "center" }}>Inspected</span>
+            <span style={{ textAlign: "center" }}>Service Items</span>
             <span></span>
           </div>
           {inspectionItems.length === 0 ? (
@@ -605,12 +676,23 @@ export default function NewServiceOrderPage() {
               Belum ada inspection item
             </div>
           ) : inspectionItems.map((item, idx) => (
-            <div key={idx} style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px 40px", gap: 0, padding: "6px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
+            <div key={idx} style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr 80px 120px 40px", gap: 0, padding: "6px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
               <span style={{ fontSize: 12, color: "#444746" }}>{idx + 1}</span>
               <input value={item.description} onChange={e => updateInspectionItem(idx, "description", e.target.value)} placeholder="Deskripsi..." style={{ border: "1px solid #d8d8d8", borderRadius: 4, fontSize: 13, padding: "4px 8px", outline: "none", background: "#fff" }} />
               <input value={item.feedback} onChange={e => updateInspectionItem(idx, "feedback", e.target.value)} placeholder="Feedback..." style={{ border: "1px solid #d8d8d8", borderRadius: 4, fontSize: 13, padding: "4px 8px", outline: "none", background: "#fff" }} />
               <div style={{ textAlign: "center" }}>
                 <input type="checkbox" checked={item.inspected} onChange={e => updateInspectionItem(idx, "inspected", e.target.checked)} style={{ cursor: "pointer" }} />
+              </div>
+              <div style={{ textAlign: "center" }}>
+                {item.mappings && item.mappings.length > 0 ? (
+                  <button onClick={() => setMappingModal({ idx })} style={{ fontSize: 10, fontWeight: 600, color: "#0176d3", background: "#dbeafe", border: "1px solid #0176d3", borderRadius: 4, padding: "3px 8px", cursor: "pointer" }}>
+                    {item.mappings.length} item{item.mappings.length > 1 ? "s" : ""}
+                  </button>
+                ) : (
+                  <button onClick={() => setMappingModal({ idx })} style={{ fontSize: 10, fontWeight: 600, color: "#8e8f8e", background: "#fff", border: "1px dashed #d8d8d8", borderRadius: 4, padding: "3px 8px", cursor: "pointer" }}>
+                    + Add
+                  </button>
+                )}
               </div>
               <button onClick={() => removeInspectionItem(idx)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Trash2 size={14} color="#ea001e" />
@@ -624,40 +706,113 @@ export default function NewServiceOrderPage() {
       <div style={{ marginTop: 24, borderTop: "1px solid #ecebea", paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "#001526" }}>Jasa / Services</div>
-          <button onClick={addServiceItem} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={() => setSubletTab("Service")}
+              style={{
+                ...S.actionBtn, fontSize: 12,
+                background: subletTab === "Service" ? "#0176d3" : "#fff",
+                color: subletTab === "Service" ? "#fff" : "#0176d3",
+                borderColor: "#0176d3",
+              }}
+            >
+              Service
+            </button>
+            <button
+              onClick={() => setSubletTab("Sublet & Sundry")}
+              style={{
+                ...S.actionBtn, fontSize: 12,
+                background: subletTab === "Sublet & Sundry" ? "#0176d3" : "#fff",
+                color: subletTab === "Sublet & Sundry" ? "#fff" : "#0176d3",
+                borderColor: "#0176d3",
+              }}
+            >
+              Sublet &amp; Sundry
+            </button>
+          </div>
+        </div>
+        {subletTab === "Service" ? (
+          <button onClick={addServiceItem} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3", marginBottom: 8 }}>
             <Plus size={14} /> Tambah Jasa
           </button>
-        </div>
+        ) : (
+          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <button onClick={() => addSubletItem("Sublet")} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+              <Plus size={14} /> Tambah Sublet
+            </button>
+            <button onClick={() => addSubletItem("Sundry")} style={{ ...S.actionBtn, fontSize: 12, color: "#0176d3" }}>
+              <Plus size={14} /> Tambah Sundry
+            </button>
+          </div>
+        )}
         {serviceItems.length > 0 && (
           <div style={{ border: "1px solid #d8d8d8", borderRadius: 6, overflow: "visible" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+            <div style={{ display: "grid", gridTemplateColumns: subletTab === "Sublet & Sundry" ? "90px 1.2fr 1fr 70px 110px 110px 110px 40px" : "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", background: "#f9f9f9", fontSize: 11, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const, letterSpacing: "0.04em" }}>
+              {subletTab === "Sublet & Sundry" && <span>Type</span>}
               <span>Service</span>
-              <span style={{ textAlign: "center" }}>Qty</span>
-              <span style={{ textAlign: "right" }}>Harga Satuan</span>
-              <span style={{ textAlign: "right" }}>Total</span>
+              {subletTab === "Sublet & Sundry" && <span>Supplier</span>}
+              {subletTab === "Sublet & Sundry" && <span style={{ textAlign: "center" }}>Qty</span>}
+              {subletTab === "Sublet & Sundry" && <span style={{ textAlign: "right" }}>Cost</span>}
+              <span style={{ textAlign: subletTab === "Sublet & Sundry" ? "right" : "center" }}>{subletTab === "Sublet & Sundry" ? "Price" : "Qty"}</span>
+              <span style={{ textAlign: "right" }}>{subletTab === "Sublet & Sundry" ? "Total" : "Harga Satuan"}</span>
+              <span style={{ textAlign: "right" }}>{subletTab === "Sublet & Sundry" ? "" : "Total"}</span>
               <span></span>
             </div>
             {serviceItems.map((item, idx) => (
-              <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
+              <div key={idx} style={{ display: "grid", gridTemplateColumns: subletTab === "Sublet & Sundry" ? "90px 1.2fr 1fr 70px 110px 110px 110px 40px" : "1fr 80px 120px 120px 40px", gap: 0, padding: "8px 12px", borderTop: "1px solid #ecebea", alignItems: "center" }}>
+                {subletTab === "Sublet & Sundry" && (
+                  <span style={{ fontSize: 11, fontWeight: 700, color: item.itemType === "Sublet" ? "#0176d3" : "#f59e0b", textTransform: "uppercase" }}>
+                    {item.itemType || "Sublet"}
+                  </span>
+                )}
                 <SearchableItemSelect
                   items={services.map((s) => ({ id: s.id, label: `${s.name} (${s.sku})` }))}
                   value={item.serviceId}
                   onChange={(id) => updateServiceItem(idx, "serviceId", id)}
                   placeholder="Cari jasa..."
                 />
+                {subletTab === "Sublet & Sundry" && (
+                  <select
+                    value={item.supplierId || ""}
+                    onChange={(e) => updateServiceItem(idx, "supplierId", e.target.value)}
+                    style={{ padding: "6px 8px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", background: "#fff" }}
+                  >
+                    <option value="">Pilih supplier...</option>
+                    {suppliers.map((s) => (
+                      <option key={s.id} value={s.id}>{s.companyName}</option>
+                    ))}
+                  </select>
+                )}
+                {subletTab === "Sublet & Sundry" && (
+                  <FormattedNumberInput
+                    value={item.qty}
+                    onChange={(val) => updateServiceItem(idx, "qty", Math.max(1, val) || 1)}
+                    style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "center" }}
+                  />
+                )}
+                {subletTab === "Sublet & Sundry" && (
+                  <FormattedNumberInput
+                    value={item.cost || 0}
+                    onChange={(val) => updateServiceItem(idx, "cost", val)}
+                    style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "right" }}
+                  />
+                )}
                 <FormattedNumberInput
-                  value={item.qty}
-                  onChange={(val) => updateServiceItem(idx, "qty", Math.max(1, val) || 1)}
-                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "center" }}
-                />
-                <FormattedNumberInput
-                  value={item.unitPrice}
+                  value={subletTab === "Sublet & Sundry" ? item.unitPrice : item.unitPrice}
                   onChange={(val) => updateServiceItem(idx, "unitPrice", val)}
-                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: "right" }}
+                  style={{ padding: "6px 8px", fontSize: 13, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none", textAlign: subletTab === "Sublet & Sundry" ? "right" : "center" }}
                 />
-                <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600 }}>
-                  {(item.qty * item.unitPrice).toLocaleString("id-ID")}
-                </div>
+                {subletTab === "Sublet & Sundry" && (
+                  <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600, color: "#001526" }}>
+                    {(item.qty * item.unitPrice).toLocaleString("id-ID")}
+                  </div>
+                )}
+                {subletTab !== "Sublet & Sundry" && (
+                  <div style={{ textAlign: "right", fontSize: 13, fontWeight: 600 }}>
+                    {(item.qty * item.unitPrice).toLocaleString("id-ID")}
+                  </div>
+                )}
+                {subletTab === "Sublet & Sundry" && <div></div>}
                 <button onClick={() => removeServiceItem(idx)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Trash2 size={14} style={{ color: "#dc2626" }} />
                 </button>
@@ -673,7 +828,7 @@ export default function NewServiceOrderPage() {
         )}
         {serviceItems.length === 0 && (
           <div style={{ padding: "24px", textAlign: "center", color: "#8e8f8e", fontSize: 13, background: "#fafafa", borderRadius: 6, border: "1px dashed #d8d8d8" }}>
-            Belum ada jasa ditambahkan. Klik "Tambah Jasa" untuk menambahkan.
+            Belum ada jasa ditambahkan. Klik &quot;Tambah Jasa&quot; untuk menambahkan.
           </div>
         )}
       </div>
@@ -1002,6 +1157,137 @@ function SearchableItemSelect({ items, value, onChange, placeholder }: {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Inspection Mapping Modal ─── */
+function InspectionMappingModal({
+  inspectionItem,
+  onClose,
+  onSave,
+  services,
+  spareparts,
+  servicePackages,
+  suppliers,
+}: {
+  inspectionItem: { description: string; mappings: { sourceType: string; sourceId: string; qty?: number | null }[] };
+  onClose: () => void;
+  onSave: (mappings: { sourceType: string; sourceId: string; qty: number | null }[]) => void;
+  services: { id: string; sku: string; name: string }[];
+  spareparts: { id: string; sku: string; name: string }[];
+  servicePackages: { id: string; sku: string; name: string; price?: number }[];
+  suppliers: { id: string; companyName: string }[];
+}) {
+  const [tab, setTab] = useState<"Package" | "Sparepart" | "Service" | "Sublet & Sundry">("Package");
+  const [search, setSearch] = useState("");
+  const [mappings, setMappings] = useState<{ sourceType: string; sourceId: string; qty: number | null }[]>(
+    (inspectionItem.mappings || []).map((m: any) => ({ sourceType: m.sourceType, sourceId: m.sourceId, qty: m.qty ?? 1 }))
+  );
+
+  const items = (
+    tab === "Package" ? servicePackages :
+    tab === "Sparepart" ? spareparts :
+    tab === "Service" ? services :
+    [] // Sublet & Sundry uses services + filter by itemType from SO services
+  ).filter((i: any) => !search || i.name?.toLowerCase().includes(search.toLowerCase()) || i.sku?.toLowerCase().includes(search.toLowerCase()));
+
+  const isMapped = (sourceType: string, sourceId: string) =>
+    mappings.some(m => m.sourceType === sourceType && m.sourceId === sourceId);
+
+  const toggleMapping = (sourceType: string, sourceId: string) => {
+    setMappings(prev => {
+      const exists = prev.find(m => m.sourceType === sourceType && m.sourceId === sourceId);
+      if (exists) return prev.filter(m => !(m.sourceType === sourceType && m.sourceId === sourceId));
+      return [...prev, { sourceType, sourceId, qty: 1 as number | null }];
+    });
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+      <div style={{ background: "#fff", borderRadius: 8, width: 700, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid #ecebea" }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#001526", margin: 0 }}>
+            Inspection Service Items {inspectionItem.description ? `— ${inspectionItem.description}` : ""}
+          </h3>
+          <div style={{ fontSize: 11, color: "#8e8f8e", marginTop: 4 }}>
+            Pilih item yang akan digunakan untuk proses service. Quantity (Qty) dapat diisi di tab Sparepart / Service setelah mapping disimpan.
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: "1px solid #ecebea", padding: "0 20px" }}>
+          {(["Package", "Sparepart", "Service", "Sublet & Sundry"] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              padding: "10px 16px", fontSize: 12, fontWeight: tab === t ? 700 : 400,
+              color: tab === t ? "#0176d3" : "#444746",
+              background: "transparent", border: "none", cursor: "pointer",
+              borderBottom: tab === t ? "2px solid #0176d3" : "2px solid transparent",
+            }}>{t}</button>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div style={{ padding: "12px 20px", borderBottom: "1px solid #ecebea" }}>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={`Search ${tab} SKU or Name...`}
+            style={{ width: "100%", padding: "8px 12px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, outline: "none" }}
+          />
+        </div>
+
+        {/* Table */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 20px" }}>
+          {tab === "Sublet & Sundry" ? (
+            <div style={{ padding: 24, textAlign: "center", color: "#8e8f8e", fontSize: 12 }}>
+              Sublet & Sundry dapat ditambahkan sebagai item Service di tab Sublet/Sundry pada section Service di bawah. Mapping di sini akan otomatis ter-replicate ke Sublet/Sundry saat menggunakan service dengan itemType Sublet atau Sundry.
+            </div>
+          ) : items.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "#8e8f8e", fontSize: 12 }}>
+              No {tab.toLowerCase()} items available
+            </div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr style={{ background: "#f9f9f9" }}>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase", width: 40 }}>No</th>
+                  <th style={{ padding: "8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" }}>{tab}</th>
+                  <th style={{ padding: "8px", textAlign: "right", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" }}>Price</th>
+                  <th style={{ padding: "8px", textAlign: "center", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase", width: 60 }}>Select</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it: any, i: number) => (
+                  <tr key={it.id} style={{ borderTop: "1px solid #f0f0f0" }}>
+                    <td style={{ padding: "8px" }}>{i + 1}</td>
+                    <td style={{ padding: "8px" }}>
+                      <div style={{ fontWeight: 500 }}>{it.name}</div>
+                      <div style={{ fontSize: 10, color: "#8e8f8e" }}>{it.sku}</div>
+                    </td>
+                    <td style={{ padding: "8px", textAlign: "right" }}>{it.standardPrice || it.price || it.sellPrice || 0}</td>
+                    <td style={{ padding: "8px", textAlign: "center" }}>
+                      <input type="checkbox" checked={isMapped(tab, it.id)} onChange={() => toggleMapping(tab, it.id)} style={{ cursor: "pointer", width: 16, height: 16 }} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding: "12px 20px", borderTop: "1px solid #ecebea", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 11, color: "#8e8f8e" }}>
+            {mappings.length} item{mappings.length === 1 ? "" : "s"} mapped
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={onClose} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 500, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer" }}>Batal</button>
+            <button onClick={() => onSave(mappings)} style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, color: "#fff", background: "#0176d3", border: "none", borderRadius: 6, cursor: "pointer" }}>Simpan Mapping</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

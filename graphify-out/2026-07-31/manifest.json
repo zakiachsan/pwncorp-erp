@@ -1255,8 +1255,8 @@
     "semantic_hash": ""
   },
   "src/components/layout/Sidebar.tsx": {
-    "mtime": 1785452498.8774817,
-    "ast_hash": "d0a298735412971615b3c992d101b0f7",
+    "mtime": 1785465695.8695025,
+    "ast_hash": "88eca14c19056df29b98a251cafb63b1",
     "semantic_hash": ""
   },
   "src/components/shared/DateRangePicker.tsx": {
@@ -1275,8 +1275,8 @@
     "semantic_hash": ""
   },
   "src/lib/auth.ts": {
-    "mtime": 1784529867.7085197,
-    "ast_hash": "0cf311b9192a9daff7d68e90778bb2c3",
+    "mtime": 1785465768.9571593,
+    "ast_hash": "f154253d9b7cc1cc51f857d292b9c1d5",
     "semantic_hash": ""
   },
   "src/lib/journal.ts": {
@@ -1300,8 +1300,8 @@
     "semantic_hash": ""
   },
   "src/middleware.ts": {
-    "mtime": 1785131282.47574,
-    "ast_hash": "27836d08a558b5e10f1a57547ef58048",
+    "mtime": 1785465870.847321,
+    "ast_hash": "b571461e18972d2b20db9f6972530b95",
     "semantic_hash": ""
   },
   "tailwind.config.js": {

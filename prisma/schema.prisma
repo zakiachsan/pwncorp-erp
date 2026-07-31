@@ -135,6 +135,8 @@ model Supplier {
   purchaseReturns  PurchaseReturn[]
   accountsPayable  AccountPayable[]
   vendorQuotes     VendorQuote[]
+  soServices       SOService[]
+  woItems          WOItem[]
   @@map("suppliers")
 }
 
@@ -253,7 +255,22 @@ model InspectionItem {
   sortOrder   Int           @default(0) @map("sort_order")
   createdAt   DateTime      @default(now()) @map("created_at")
 
+  mappings InspectionItemMapping[]
+
   @@map("inspection_items")
+}
+
+model InspectionItemMapping {
+  id               String         @id @default(cuid())
+  inspectionItemId String         @map("inspection_item_id")
+  sourceType       String         @map("source_type") // Package | Sparepart | Service | Sublet | Sundry
+  sourceId         String         @map("source_id")
+  qty              Int            @default(1)
+  createdAt        DateTime       @default(now()) @map("created_at")
+
+  inspectionItem InspectionItem @relation(fields: [inspectionItemId], references: [id], onDelete: Cascade)
+
+  @@map("inspection_item_mappings")
 }
 
 model SOSparepart {
@@ -278,6 +295,12 @@ model SOService {
   qty       Int         @default(1)
   unitPrice Float       @default(0) @map("unit_price")
   total     Float       @default(0)
+
+  // Sublet & Sundry
+  itemType   String    @default("Service") @map("item_type") // Service | Sublet | Sundry
+  supplierId String?   @map("supplier_id")
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  cost       Float     @default(0) // harga pokok supplier (wajib > 0 kalau Sublet/Sundry)
 
   @@map("so_services")
 }
@@ -311,7 +334,7 @@ model WOItem {
   id            String    @id @default(cuid())
   woId          String    @map("wo_id")
   wo            WorkOrder @relation(fields: [woId], references: [id])
-  itemType      String    @map("item_type") // sparepart / service
+  itemType      String    @map("item_type") // sparepart / service / sublet / sundry
   itemId        String    @map("item_id")
   itemName      String    @map("item_name")
   qty           Int       @default(1)
@@ -319,6 +342,11 @@ model WOItem {
   total         Float     @default(0)
   assignedTo    String?   @map("assigned_to")
   estimatedTime String?   @map("estimated_time")
+
+  // Sublet & Sundry
+  supplierId String?   @map("supplier_id")
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  cost       Float     @default(0)
 
   @@map("wo_items")
 }

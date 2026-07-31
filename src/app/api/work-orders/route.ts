@@ -41,7 +41,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { soId, mekanikId, targetDate, targetTime, customerWaiting, serviceMekaniks, serviceSpareparts } = body;
+  const { soId, mekanikId, targetDate, targetTime, customerWaiting, serviceMekaniks, serviceSpareparts, serviceIds, sparepartIds } = body;
 
   if (!soId) return NextResponse.json({ error: "soId is required" }, { status: 400 });
 
@@ -55,72 +55,69 @@ export const POST = withAuth(async (req: NextRequest) => {
     return NextResponse.json({ error: "Service order must be Approved before creating work order" }, { status: 400 });
   }
 
-  // Check if active (non-cancelled) WO already exists for this SO
-  const existingWO = await prisma.workOrder.findFirst({ 
-    where: { soId, status: { not: "Cancelled" } } 
-  });
-  if (existingWO) {
-    return NextResponse.json({ error: "Work order already exists for this service order" }, { status: 409 });
-  }
-
   const woNo = await generateWONumber(user.storeId);
 
-  // Copy items from SO to WO
+  // Copy items from SO to WO — only items selected in the form (serviceIds / sparepartIds)
   const items: any[] = [];
-
-  // First pass: collect service-linked sparepart IDs to avoid duplicates
-  const allLinkedSparepartIds = new Set<string>();
-  let scanIdx = 0;
-  for (const sv of so.services) {
-    (serviceSpareparts?.[scanIdx] || []).forEach((id: string) => allLinkedSparepartIds.add(id));
-    scanIdx++;
-  }
-
-  // Add SO spareparts only if NOT already linked to a service
-  for (const sp of so.spareparts) {
-    if (!allLinkedSparepartIds.has(sp.sparepartId)) {
-      const sparepart = await prisma.sparepart.findUnique({ where: { id: sp.sparepartId } });
-      items.push({
-        itemType: "sparepart",
-        itemId: sp.sparepartId,
-        itemName: sparepart?.name || "Sparepart",
-        qty: sp.qty,
-        unitPrice: sp.unitPrice,
-        total: sp.total,
-      });
-    }
-  }
+  const selectedServiceIds = new Set<string>(serviceIds || []);
+  const selectedSparepartIds = new Set<string>(sparepartIds || []);
 
   let serviceIdx = 0;
   for (const sv of so.services) {
+    // Skip services that were removed from the form (not in selectedServiceIds)
+    if (serviceIds && serviceIds.length > 0 && !selectedServiceIds.has(sv.serviceId)) {
+      serviceIdx++;
+      continue;
+    }
     const service = await prisma.service.findUnique({ where: { id: sv.serviceId } });
-    const assignedTo = serviceMekaniks?.[serviceIdx] || null;
+    const isSublet = sv.itemType === "Sublet" || sv.itemType === "Sundry";
+    const assignedTo = isSublet ? null : (serviceMekaniks?.[serviceIdx] || null);
     items.push({
-      itemType: "service",
+      itemType: (sv.itemType || "Service").toLowerCase(), // service | sublet | sundry
       itemId: sv.serviceId,
       itemName: service?.name || "Service",
       qty: sv.qty,
       unitPrice: sv.unitPrice,
       total: sv.total,
       assignedTo,
+      supplierId: sv.supplierId || null,
+      cost: sv.cost || 0,
     });
-    // Add spareparts linked to this service
-    const linkedSparepartIds = serviceSpareparts?.[serviceIdx] || [];
-    for (const spId of linkedSparepartIds) {
-      const sparepart = await prisma.sparepart.findUnique({ where: { id: spId } });
-      if (sparepart) {
-        items.push({
-          itemType: "sparepart",
-          itemId: spId,
-          itemName: sparepart.name,
-          qty: 1,
-          unitPrice: sparepart.sellPrice || 0,
-          total: sparepart.sellPrice || 0,
-          assignedTo,
-        });
+    // Add spareparts linked to this service (only for non-sublet/sundry)
+    if (!isSublet) {
+      const linkedSparepartIds = serviceSpareparts?.[serviceIdx] || [];
+      for (const spId of linkedSparepartIds) {
+        const sparepart = await prisma.sparepart.findUnique({ where: { id: spId } });
+        if (sparepart) {
+          items.push({
+            itemType: "sparepart",
+            itemId: spId,
+            itemName: sparepart.name,
+            qty: 1,
+            unitPrice: sparepart.sellPrice || 0,
+            total: sparepart.sellPrice || 0,
+            assignedTo,
+          });
+        }
       }
     }
     serviceIdx++;
+  }
+
+  // Add SO spareparts that are NOT linked to any service AND selected in the form
+  for (const sp of so.spareparts) {
+    if (sparepartIds && sparepartIds.length > 0 && !selectedSparepartIds.has(sp.sparepartId)) continue;
+    // Skip if already added as service-linked sparepart
+    if (items.some(it => it.itemType === "sparepart" && it.itemId === sp.sparepartId)) continue;
+    const sparepart = await prisma.sparepart.findUnique({ where: { id: sp.sparepartId } });
+    items.push({
+      itemType: "sparepart",
+      itemId: sp.sparepartId,
+      itemName: sparepart?.name || "Sparepart",
+      qty: sp.qty,
+      unitPrice: sp.unitPrice,
+      total: sp.total,
+    });
   }
 
   const wo = await prisma.workOrder.create({

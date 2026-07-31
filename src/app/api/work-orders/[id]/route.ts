@@ -17,7 +17,7 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
         },
       },
       mekanik: { select: { id: true, name: true } },
-      items: true,
+      items: { include: { supplier: { select: { id: true, companyName: true } } } },
       invoices: { include: { payments: true } },
       stockOrders: { include: { items: { include: { sparepart: { select: { sku: true, name: true, stockQty: true } } } } } },
       photos: { orderBy: { createdAt: "desc" } },
@@ -36,12 +36,14 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
         const service = await prisma.service.findUnique({ where: { id: sv.serviceId } });
         newItems.push({
           woId: wo.id,
-          itemType: "service",
+          itemType: (sv.itemType || "Service").toLowerCase(), // service | sublet | sundry
           itemId: sv.serviceId,
           itemName: service?.name || "Service",
           qty: sv.qty,
           unitPrice: sv.unitPrice,
           total: sv.total,
+          supplierId: sv.supplierId || null,
+          cost: sv.cost || 0,
         });
       }
     }
@@ -65,13 +67,13 @@ export const GET = withAuth(async (req: NextRequest, { params }: { params: { id:
     // Insert new items to DB
     if (newItems.length > 0) {
       await prisma.wOItem.createMany({ data: newItems });
-      // Refresh wo.items
-      wo.items = await prisma.wOItem.findMany({ where: { woId: wo.id } });
+      // Refresh wo.items with supplier
+      wo.items = await prisma.wOItem.findMany({ where: { woId: wo.id }, include: { supplier: { select: { id: true, companyName: true } } } });
     }
   }
 
   // Enrich items with sparepart/service details and resolve assignedTo names
-  const assignedToIds = Array.from(new Set((wo.items || []).map(i => i.assignedTo).filter(Boolean)));
+  const assignedToIds = Array.from(new Set(((wo.items as any[]) || []).map((i: any) => i.assignedTo).filter((v: any) => typeof v === "string")));
   const userMap: Record<string, string> = {};
   if (assignedToIds.length > 0) {
     const users = await prisma.user.findMany({

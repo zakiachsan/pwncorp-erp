@@ -105,10 +105,11 @@ export default function WorkOrderDetailPage() {
             // Map API fields
         const items = w.items || [];
         const services = items
-          .filter((it: any) => it.itemType === "service" || it.itemType === "SERVICE")
+          .filter((it: any) => ["service", "sublet", "sundry"].includes((it.itemType || "").toLowerCase()))
           .map((it: any, i: number) => ({
             itemId: it.itemId || "",
             item: it.name || it.itemName || it.description || "-",
+            type: it.itemType || "service",
             description: it.description || it.itemName || "-",
             quantity: it.qty || it.quantity || 1,
             priceExTax: it.price || it.unitPrice || 0,
@@ -116,6 +117,9 @@ export default function WorkOrderDetailPage() {
             subtotal: (it.qty || 1) * (it.price || 0),
             total: it.total || (it.qty || 1) * (it.price || 0),
             assignedTo: it.assignedToName || it.assignedTo || w.mekanik?.name || "-",
+            supplierId: it.supplierId || null,
+            supplierName: it.supplier?.companyName || null,
+            cost: it.cost || 0,
             status: it.status || "Waiting",
             estimatedTime: it.estimatedTime || "-",
             linkedSpareparts: it.linkedSpareparts || [],
@@ -285,7 +289,7 @@ export default function WorkOrderDetailPage() {
             const w = refreshData.data;
             const items = w.items || [];
             const services = items
-              .filter((it: any) => it.itemType === "service")
+              .filter((it: any) => ["service", "sublet", "sundry"].includes((it.itemType || "").toLowerCase()))
               .map((it: any) => ({
                 item: it.itemName || "-",
                 description: it.description || it.itemName || "-",
@@ -1071,21 +1075,42 @@ export default function WorkOrderDetailPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead><tr style={{ background: "#f3f3f3" }}>
                   <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>No</th>
+                  <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>Type</th>
                   <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>Item</th>
+                  <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>Supplier</th>
                   <th style={{ padding: "6px 8px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>Description</th>
                   <th style={{ padding: "6px 8px", textAlign: "right", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>Qty</th>
                   <th style={{ padding: "6px 8px", textAlign: "right", fontSize: 10, fontWeight: 600, color: "#444746", textTransform: "uppercase" as const }}>Total</th>
                 </tr></thead>
                 <tbody>
-                  {wo.services.map((svc: any, i: number) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                      <td style={{ padding: "6px 8px" }}>{i + 1}</td>
-                      <td style={{ padding: "6px 8px", fontWeight: 500 }}>{svc.item}</td>
-                      <td style={{ padding: "6px 8px" }}>{svc.description}</td>
-                      <td style={{ padding: "6px 8px", textAlign: "right" }}>{svc.quantity}</td>
-                      <td style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
-                    </tr>
-                  ))}
+                  {wo.services.map((svc: any, i: number) => {
+                    const svcType = (svc.type || svc.itemType || "service").toLowerCase();
+                    const isSublet = svcType === "sublet" || svcType === "sundry";
+                    return (
+                      <tr key={i} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                        <td style={{ padding: "6px 8px" }}>{i + 1}</td>
+                        <td style={{ padding: "6px 8px" }}>
+                          {isSublet ? (
+                            <span style={{
+                              display: "inline-block", padding: "2px 6px", borderRadius: 3, fontSize: 9, fontWeight: 700,
+                              background: svcType === "sublet" ? "#dbeafe" : "#fef3c7",
+                              color: svcType === "sublet" ? "#0176d3" : "#b45309",
+                              textTransform: "uppercase",
+                            }}>{svcType}</span>
+                          ) : (
+                            <span style={{ fontSize: 9, color: "#8e8f8e", fontWeight: 600 }}>SVC</span>
+                          )}
+                        </td>
+                        <td style={{ padding: "6px 8px", fontWeight: 500 }}>{svc.item}</td>
+                        <td style={{ padding: "6px 8px", fontSize: 11, color: "#444746" }}>
+                          {isSublet ? (svc.supplierName || svc.supplier?.companyName || "-") : "—"}
+                        </td>
+                        <td style={{ padding: "6px 8px" }}>{svc.description}</td>
+                        <td style={{ padding: "6px 8px", textAlign: "right" }}>{svc.quantity}</td>
+                        <td style={{ padding: "6px 8px", textAlign: "right", fontWeight: 600 }}>{fmt(svc.total)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
                 <tfoot><tr style={{ background: "#f3f3f3" }}>
                   <td colSpan={4} style={{ padding: "6px 8px" }}></td>
@@ -1258,17 +1283,18 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
   onCompleteService?: (idx: number) => void;
 }) {
   const showProgressCols = woStatus === "IN PROGRESS" && !editMode;
-  const colCount = showProgressCols ? 10 : 9;
+  const colCount = showProgressCols ? 11 : 10;
   return (
     <div className="overflow-x-auto rounded-lg border border-[#ecebea] bg-white">
       <table style={S.table}>
         <thead>
           <tr>
             <th style={{ ...S.th, width: 36 }}>No.</th>
+            <th style={S.th}>Type</th>
             <th style={S.th}>Item</th>
             <th className="hidden sm:table-cell" style={S.th}>Description</th>
             <th style={{ ...S.th, textAlign: "right" }}>Qty</th>
-            <th className="hidden md:table-cell" style={S.th}>Assigned To</th>
+            <th className="hidden md:table-cell" style={S.th}>Assigned To / Supplier</th>
             <th className="hidden lg:table-cell" style={S.th}>Spareparts</th>
             <th className="hidden md:table-cell" style={S.th}>Est. Time</th>
             {showProgressCols ? (
@@ -1287,26 +1313,46 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
           {services.length === 0 && (
             <tr><td colSpan={colCount} style={{ ...S.td, textAlign: "center", color: "#8e8f8e", padding: 24 }}>Belum ada service</td></tr>
           )}
-          {services.map((svc: any, i: number) => (
-            <tr key={i} style={S.tr}>
-              <td style={S.td}>{i + 1}</td>
-              <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
-              <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
-              <td style={{ ...S.td, textAlign: "right" }}>
-                {editMode ? (
-                  <FormattedNumberInput value={svc.quantity} onChange={val => onUpdate(i, "quantity", Math.max(1, val) || 1)}
-                                      style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
-                ) : svc.quantity}
-              </td>
-              <td className="hidden md:table-cell" style={S.td}>
-                {editMode ? (
-                  <select value={svc.assignedTo && svc.assignedTo !== "-" ? svc.assignedTo : ""} onChange={e => onUpdate(i, "assignedTo", e.target.value)}
-                    style={{ width: "100%", padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, background: "#fff" }}>
-                    <option value="">-- Pilih --</option>
-                    {allMekanik.map((m: any) => <option key={m.id} value={m.name}>{m.name}</option>)}
-                  </select>
-                ) : svc.assignedTo}
-              </td>
+          {services.map((svc: any, i: number) => {
+            const svcType = (svc.type || svc.itemType || "service").toLowerCase();
+            const isSublet = svcType === "sublet" || svcType === "sundry";
+            return (
+              <tr key={i} style={S.tr}>
+                <td style={S.td}>{i + 1}</td>
+                <td style={S.td}>
+                  {isSublet ? (
+                    <span style={{
+                      display: "inline-block", padding: "2px 6px", borderRadius: 3, fontSize: 10, fontWeight: 700,
+                      background: svcType === "sublet" ? "#dbeafe" : "#fef3c7",
+                      color: svcType === "sublet" ? "#0176d3" : "#b45309",
+                      textTransform: "uppercase",
+                    }}>{svcType}</span>
+                  ) : (
+                    <span style={{ fontSize: 10, color: "#8e8f8e", fontWeight: 600 }}>SVC</span>
+                  )}
+                </td>
+                <td style={{ ...S.td, color: "#0176d3", fontWeight: 500 }}>{svc.item}</td>
+                <td className="hidden sm:table-cell" style={S.td}>{svc.description}</td>
+                <td style={{ ...S.td, textAlign: "right" }}>
+                  {editMode ? (
+                    <FormattedNumberInput value={svc.quantity} onChange={val => onUpdate(i, "quantity", Math.max(1, val) || 1)}
+                                        style={{ width: 80, padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, textAlign: "right" }} />
+                  ) : svc.quantity}
+                </td>
+                <td className="hidden md:table-cell" style={S.td}>
+                  {isSublet ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      <span style={{ fontSize: 10, color: "#8e8f8e", textTransform: "uppercase" }}>Dikerjakan oleh:</span>
+                      <span style={{ fontSize: 12, fontWeight: 600 }}>{svc.supplierName || svc.supplier?.companyName || "-"}</span>
+                    </div>
+                  ) : editMode ? (
+                    <select value={svc.assignedTo && svc.assignedTo !== "-" ? svc.assignedTo : ""} onChange={e => onUpdate(i, "assignedTo", e.target.value)}
+                      style={{ width: "100%", padding: "3px 6px", fontSize: 12, border: "1px solid #d8d8d8", borderRadius: 4, background: "#fff" }}>
+                      <option value="">-- Pilih --</option>
+                      {allMekanik.map((m: any) => <option key={m.id} value={m.name}>{m.name}</option>)}
+                    </select>
+                  ) : svc.assignedTo}
+                </td>
               <td className="hidden lg:table-cell" style={{ ...S.td, fontSize: 11 }}>
                 {svc.linkedSpareparts?.length > 0 ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -1353,11 +1399,12 @@ function WOServiceTable({ services, editMode, onUpdate, onRemove, totalCost, all
                 </td>
               )}
             </tr>
-          ))}
+            );
+          })}
         </tbody>
         <tfoot>
           <tr style={{ background: "#f3f3f3", fontWeight: 600 }}>
-            <td colSpan={showProgressCols ? 8 : 7} style={S.td}></td>
+            <td colSpan={showProgressCols ? 9 : 8} style={S.td}></td>
             <td style={{ ...S.td, textAlign: "right", fontWeight: 700 }}>{fmt(totalCost)}</td>
             {editMode && <td style={S.td}></td>}
           </tr>
