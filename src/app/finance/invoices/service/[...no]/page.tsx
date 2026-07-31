@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Printer, FileText, ChevronRight, ChevronDown, Plus, X } from "lucide-react";
+import { ArrowLeft, Printer, FileText, ChevronRight, ChevronDown, Plus, X, Send, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const fmt = (n: number) => (n || 0).toLocaleString("id-ID");
@@ -14,9 +14,9 @@ const fmtDateTime = (d: string | null | undefined) => {
   return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 };
 
-const WORKFLOW_STEPS = ["DRAFT", "DIAGNOSIS", "DELIVERY", "APPROVED", "COMPLETED"];
+const WORKFLOW_STEPS = ["DRAFT", "COMPLETED"];
 const workflowColor = (s: string) => {
-  const map: Record<string, string> = { DRAFT: "#6b7280", DIAGNOSIS: "#f59e0b", DELIVERY: "#0176d3", APPROVED: "#0176d3", COMPLETED: "#2e844a", CANCELLED: "#ea001e" };
+  const map: Record<string, string> = { DRAFT: "#6b7280", COMPLETED: "#2e844a", CANCELLED: "#ea001e" };
   return map[s] || "#6b7280";
 };
 
@@ -45,6 +45,28 @@ export default function ServiceInvoiceDetailPage() {
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [changes, setChanges] = useState<any[]>([]);
   const [changesLoading, setChangesLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState("");
+
+  const handleWorkflowAction = async (newStatus: string) => {
+    if (!inv?.id) return;
+    if (!confirm(`Change status to ${newStatus}?`)) return;
+    setActionLoading(newStatus);
+    try {
+      const res = await fetch(`/api/invoices/${inv.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        alert(j.error || "Failed to update status");
+        return;
+      }
+      setInv((prev: any) => ({ ...prev, status: newStatus }));
+    } finally {
+      setActionLoading("");
+    }
+  };
 
   useEffect(() => {
     if (!invoiceNo) { setLoading(false); setError("No invoice number"); return; }
@@ -123,7 +145,6 @@ export default function ServiceInvoiceDetailPage() {
         <div style={{ display: "flex", gap: 8 }}>
           <button style={S.actionBtn}><Printer size={14} /> Print <ChevronDown size={12} /></button>
           <button style={S.actionBtn}><FileText size={14} /> Tax Invoice</button>
-          <button style={{ ...S.actionBtn, color: "#ea001e" }}><X size={14} /> Cancel</button>
         </div>
       </div>
 
@@ -149,6 +170,22 @@ export default function ServiceInvoiceDetailPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* Workflow Actions */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {status === "DRAFT" && (
+          <>
+            <button onClick={() => handleWorkflowAction("COMPLETED")} disabled={actionLoading === "COMPLETED"}
+              style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "none", opacity: actionLoading ? 0.6 : 1 }}>
+              <CheckCircle size={14} /> {actionLoading === "COMPLETED" ? "Processing..." : "Complete"}
+            </button>
+            <button onClick={() => handleWorkflowAction("CANCELLED")} disabled={actionLoading === "CANCELLED"}
+              style={{ ...S.actionBtn, background: "#ea001e", color: "#fff", border: "none", opacity: actionLoading ? 0.6 : 1 }}>
+              <X size={14} /> {actionLoading === "CANCELLED" ? "Cancelling..." : "Cancel"}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Tab Bar */}
@@ -439,9 +476,9 @@ function InfoRow({ label, value, bold, link, onClick }: { label: string; value: 
 
 function StatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, string> = {
-    DRAFT: "#6b7280", DIAGNOSIS: "#f59e0b", DELIVERY: "#0176d3",
-    APPROVED: "#0176d3", COMPLETED: "#2e844a", CANCELLED: "#ea001e",
+    DRAFT: "#6b7280", COMPLETED: "#2e844a", CANCELLED: "#ea001e",
     Draft: "#6b7280", Approved: "#0176d3", Cancelled: "#ea001e", Delivered: "#2e844a",
+    InProgress: "#f59e0b", Completed: "#2e844a",
   };
   const color = colorMap[status] || "#6b7280";
   return (

@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { withAuth, getCurrentUser } from "@/lib/auth-helpers";
 
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  DRAFT: ["COMPLETED", "CANCELLED"],
+  COMPLETED: [],
+  CANCELLED: [],
+};
+
 export const GET = withAuth(async (req: NextRequest, { params }: { params: { id: string } }) => {
   const invoice = await prisma.invoice.findUnique({
     where: { id: params.id },
@@ -37,6 +43,16 @@ export const PUT = withAuth(async (req: NextRequest, { params }: { params: { id:
   const existing = await prisma.invoice.findUnique({ where: { id: params.id } });
   if (!existing) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
+  // Validate workflow transition
+  if (status !== undefined && status !== existing.status) {
+    const allowed = VALID_TRANSITIONS[existing.status] || [];
+    if (!allowed.includes(status)) {
+      return NextResponse.json({
+        error: `Cannot change status from ${existing.status} to ${status}. Allowed: ${allowed.join(", ") || "none"}`,
+      }, { status: 400 });
+    }
+  }
+
   const updateData: any = {};
   if (status !== undefined) updateData.status = status;
   if (dueDate !== undefined) updateData.dueDate = new Date(dueDate);
@@ -54,10 +70,10 @@ export const DELETE = withAuth(async (req: NextRequest, { params }: { params: { 
   const existing = await prisma.invoice.findUnique({ where: { id: params.id } });
   if (!existing) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-  if (existing.status !== "UNPAID") {
-    return NextResponse.json({ error: "Only UNPAID invoices can be cancelled" }, { status: 400 });
+  if (existing.status !== "DRAFT") {
+    return NextResponse.json({ error: "Only DRAFT invoices can be deleted" }, { status: 400 });
   }
 
-  await prisma.invoice.update({ where: { id: params.id }, data: { status: "UNPAID" } });
+  await prisma.invoice.delete({ where: { id: params.id } });
   return NextResponse.json({ data: { success: true } });
 });

@@ -1,16 +1,16 @@
-# Graph Report - pwncorp  (2026-07-31)
+# Graph Report - pwncorp-erp-fresh  (2026-07-30)
 
 ## Corpus Check
-- 313 files · ~276,988 words
+- 313 files · ~276,582 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1681 nodes · 2230 edges · 240 communities (159 shown, 81 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 20 edges (avg confidence: 0.52)
+- 1633 nodes · 2119 edges · 229 communities (157 shown, 72 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f860ace4`
+- Built from commit: `b9bef554`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -216,24 +216,14 @@
 - test-pg.js
 - revert-wo.js
 - setup-db.js
-- sparepart/new/page.tsx
-- purchase-deliveries/new/page.tsx
-- eslint-config-next
-- next
-- next-auth
-- @opennextjs/cloudflare
-- @prisma/client
-- @radix-ui/react-slot
-- react-dom
-- @types/node
 
 ## God Nodes (most connected - your core abstractions)
 1. `withAuth()` - 71 edges
 2. `getCurrentUser()` - 65 edges
 3. `FormattedNumberInput()` - 33 edges
-4. `"stores"` - 24 edges
-5. `fmt()` - 20 edges
-6. `fmt_rp()` - 19 edges
+4. `fmt()` - 20 edges
+5. `fmt_rp()` - 19 edges
+6. `DateRangePicker()` - 18 edges
 7. `make_date()` - 17 edges
 8. `compilerOptions` - 15 edges
 9. `parseCsv()` - 14 edges
@@ -254,7 +244,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (240 total, 81 thin omitted)
+## Communities (229 total, 72 thin omitted)
 
 ### Community 0 - "generate_reports.py"
 Cohesion: 0.11
@@ -265,16 +255,16 @@ Cohesion: 0.08
 Nodes (27): GET, POST, GET, POST, GET, POST, GET, POST (+19 more)
 
 ### Community 2 - "devDependencies"
-Cohesion: 0.10
-Nodes (21): autoprefixer, eslint, devDependencies, autoprefixer, eslint, postcss, tailwindcss, tsx (+13 more)
+Cohesion: 0.06
+Nodes (35): autoprefixer, eslint, eslint-config-next, @opennextjs/cloudflare, devDependencies, autoprefixer, eslint, eslint-config-next (+27 more)
 
 ### Community 3 - "AppShell.tsx"
-Cohesion: 0.08
-Nodes (6): AppShell(), financeGroups, NavItem, operasionalGroups, S, SidebarProps
+Cohesion: 0.09
+Nodes (8): AppShell(), Header(), financeGroups, NavItem, operasionalGroups, S, Sidebar(), SidebarProps
 
 ### Community 4 - "dependencies"
-Cohesion: 0.10
-Nodes (21): bcryptjs, class-variance-authority, clsx, lucide-react, dependencies, bcryptjs, class-variance-authority, clsx (+13 more)
+Cohesion: 0.06
+Nodes (31): bcryptjs, class-variance-authority, clsx, lucide-react, next, next-auth, dependencies, bcryptjs (+23 more)
 
 ### Community 5 - "PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)"
 Cohesion: 0.07
@@ -290,15 +280,15 @@ Nodes (25): dom, dom.iterable, esnext, next-env.d.ts, .next/types/**/*.ts, node_
 
 ### Community 8 - "prisma.ts"
 Cohesion: 0.07
-Nodes (15): GET, PUT, GET, PUT, GET, POST, GET, PUT (+7 more)
+Nodes (15): GET, POST, GET, PUT, GET, PUT, GET, PUT (+7 more)
 
 ### Community 9 - "getCurrentUser"
 Cohesion: 0.08
-Nodes (15): GET, GET, GET, GET, POST, GET, GET, GET (+7 more)
+Nodes (15): GET, GET, GET, GET, PUT, GET, GET, GET (+7 more)
 
 ### Community 10 - "withAuth"
 Cohesion: 0.08
-Nodes (17): GET, PUT, GET, POST, GET, PUT, GET, PUT (+9 more)
+Nodes (16): GET, PUT, GET, PUT, GET, POST, GET, DELETE (+8 more)
 
 ### Community 11 - "expand_data.py"
 Cohesion: 0.21
@@ -306,7 +296,7 @@ Nodes (23): find_data_range(), fmt_rp(), gen_ap_account_payables(), gen_ap_aging
 
 ### Community 12 - "auth-helpers.ts"
 Cohesion: 0.10
-Nodes (15): handler, GET, PUT, GET, GET, POST, GET, POST (+7 more)
+Nodes (14): GET, PUT, handler, GET, POST, GET, POST, GET (+6 more)
 
 ### Community 13 - "Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)"
 Cohesion: 0.11
@@ -321,8 +311,8 @@ Cohesion: 0.12
 Nodes (15): 3-Column Info Cards (Detail Pages), Brand, Compact Field (F2), Component Patterns, CSS Utility Classes (globals.css), Form, Layout, Modals (+7 more)
 
 ### Community 16 - "app/dashboard/page.tsx"
-Cohesion: 0.20
-Nodes (12): DashboardData, DashboardPage(), fmt(), fmtDate(), fmtFull(), statusPill(), ClipboardList(), fmt() (+4 more)
+Cohesion: 0.16
+Nodes (12): DashboardData, DashboardPage(), fmt(), fmtDate(), fmtFull(), statusPill(), categories, categoryCardColors (+4 more)
 
 ### Community 17 - "reports/ar/page.tsx"
 Cohesion: 0.18
@@ -333,7 +323,7 @@ Cohesion: 0.12
 Nodes (12): brandModels, Customer, emptyForm, formatOdometer(), NewServiceOrderPage(), S, Service, Sparepart (+4 more)
 
 ### Community 19 - "DateRangePicker.tsx"
-Cohesion: 0.24
+Cohesion: 0.19
 Nodes (8): DateRangePicker(), DateRangePickerProps, DAYS, fmtDate(), isSameDay(), MONTHS, MONTHS_LONG, PRESETS
 
 ### Community 20 - "request-payment/page.tsx"
@@ -342,7 +332,7 @@ Nodes (9): divisiList, emptyForm, fmt(), FormData, kategoriList, PaymentRequest,
 
 ### Community 21 - "soa/[...refCode]/page.tsx"
 Cohesion: 0.18
-Nodes (10): fmtRp(), hardcodedSoaData, invoiceStatusColor(), PrintView(), PS, PT, TODO: No dedicated API for SOA detail yet. Attempting to build from /api/account, S (+2 more)
+Nodes (10): fmtRp(), hardcodedSoaData, invoiceStatusColor(), PrintView(), PS, PT, TODO: No dedicated API for SOA detail yet. Attempting to build from…, S (+2 more)
 
 ### Community 22 - "Implementation Plan"
 Cohesion: 0.11
@@ -426,7 +416,7 @@ Nodes (6): fmt(), fmtDate(), PackageServiceDetailPage(), SS, tdStyle, thStyle
 
 ### Community 42 - "anggaran/page.tsx"
 Cohesion: 0.32
-Nodes (7): AnggaranPage(), AnggaranSWO, fmt(), fmtShort(), initialData, projects, TODO: Replace hardcoded data with API call when /api/anggaran endpoint is availa
+Nodes (7): AnggaranPage(), AnggaranSWO, fmt(), fmtShort(), initialData, projects, TODO: Replace hardcoded data with API call when /api/anggaran endpoint is…
 
 ### Community 43 - "receivables/[id]/page.tsx"
 Cohesion: 0.27
@@ -593,8 +583,8 @@ Cohesion: 0.40
 Nodes (4): fmt(), PurchaseRequestDetailPage(), S, workflowSteps
 
 ### Community 86 - "stock-histories/page.tsx"
-Cohesion: 0.60
-Nodes (4): fmtDate(), handleTypeClick(), StockHistoriesPage(), typeOptions
+Cohesion: 0.47
+Nodes (5): fmtDate(), handleTypeClick(), StockHistoriesPage(), typeOptions, warehouseOptions
 
 ### Community 88 - "work-orders/page.tsx"
 Cohesion: 0.47
@@ -638,7 +628,7 @@ Nodes (3): CashFlowPage(), fmt(), fmtDate()
 
 ### Community 99 - "soa/page.tsx"
 Cohesion: 0.50
-Nodes (4): TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-recei, S, SOAPage(), statusColor()
+Nodes (4): TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-…, S, SOAPage(), statusColor()
 
 ### Community 100 - "transfers/page.tsx"
 Cohesion: 0.60
@@ -673,8 +663,8 @@ Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
 
 ### Community 116 - "invoices/[id]/route.ts"
-Cohesion: 0.40
-Nodes (4): DELETE, GET, PUT, VALID_TRANSITIONS
+Cohesion: 0.50
+Nodes (3): DELETE, GET, PUT
 
 ### Community 117 - "invoices/route.ts"
 Cohesion: 0.13
@@ -729,8 +719,8 @@ Cohesion: 0.33
 Nodes (4): adapter, pool, prisma, u
 
 ### Community 143 - "service-orders/page.tsx"
-Cohesion: 0.11
-Nodes (47): "accounts_payable", "accounts_receivable", "activity_logs", "bank_accounts", "bank_reconciliations", "coa", "customers", "delivery_items" (+39 more)
+Cohesion: 0.53
+Nodes (5): fmt(), fmtDate(), ServiceOrder, ServiceOrdersPage(), statusPill()
 
 ### Community 144 - "summary-purchase-deliveries/page.tsx"
 Cohesion: 0.83
@@ -752,15 +742,11 @@ Nodes (3): formatIDR(), PurchaseOrdersPage(), statusPill()
 Cohesion: 0.67
 Nodes (3): formatIDR(), ItemRow, NewPurchaseRequestPage()
 
-### Community 160 - "service-packages/route.ts"
-Cohesion: 0.22
-Nodes (8): name, private, scripts, build, dev, lint, start, version
+### Community 149 - "stock-transfer/new/page.tsx"
+Cohesion: 0.24
+Nodes (5): Sparepart, TransferRow, Option, SearchableSelect(), SearchableSelectProps
 
-### Community 161 - "services/route.ts"
-Cohesion: 0.29
-Nodes (5): categories, categoryCardColors, CategoryId, ReportItem, reportsByCategory
-
-### Community 164 - "vehicles/route.ts"
+### Community 165 - "suppliers/[id]/route.ts"
 Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
 
@@ -769,8 +755,8 @@ Cohesion: 0.83
 Nodes (3): fmt(), fmtDate(), PrintDeliveryNotePage()
 
 ### Community 176 - "FormattedNumberInput.tsx"
-Cohesion: 0.11
-Nodes (6): fmt(), NewStockOrderPage(), formatIDR(), NewStockOutgoingPage(), FormattedNumberInput(), FormattedNumberInputProps
+Cohesion: 0.10
+Nodes (4): emptyForm, DeliveryItemRow, FormattedNumberInput(), FormattedNumberInputProps
 
 ### Community 179 - "receipt/[...no]/page.tsx"
 Cohesion: 0.83
@@ -779,16 +765,16 @@ Nodes (3): fmt(), fmtDate(), PrintReceiptPage()
 ## Knowledge Gaps
 - **653 isolated node(s):** `{ Client }`, `bcrypt`, `nextConfig`, `name`, `version` (+648 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **81 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **72 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FormattedNumberInput()` connect `FormattedNumberInput.tsx` to `services/new/page.tsx`, `service-orders/new/page.tsx`, `purchase-orders/new/page.tsx`, `purchase-request/new/page.tsx`, `work-orders/detail/[...no]/page.tsx`, `suppliers/[id]/route.ts`, `service-orders/[...no]/page.tsx`, `inventory/stock-opname/new/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-orders/[...refCode]/page.tsx`, `purchase-deliveries/[...refCode]/page.tsx`, `stock-opname/[...refCode]/page.tsx`, `inventory/[code]/edit/page.tsx`, `inventory/new/page.tsx`, `sparepart/new/page.tsx`, `po/new/page.tsx`, `review/[...no]/page.tsx`, `purchase-deliveries/new/page.tsx`, `warehouse/stock-opname/new/page.tsx`, `invoices/create/page.tsx`, `journal/create/page.tsx`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `withAuth()` connect `withAuth` to `numbering.ts`, `prisma.ts`, `getCurrentUser`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
+- **Why does `withAuth()` connect `withAuth` to `numbering.ts`, `prisma.ts`, `getCurrentUser`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `service-packages/route.ts`, `services/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `suppliers/[id]/route.ts`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `getCurrentUser()` connect `getCurrentUser` to `numbering.ts`, `prisma.ts`, `withAuth`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `stock-orders/new/page.tsx`, `stock-outgoing/new/page.tsx`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
+- **Why does `getCurrentUser()` connect `getCurrentUser` to `numbering.ts`, `prisma.ts`, `withAuth`, `auth-helpers.ts`, `customers/route.ts`, `payment-requests/[id]/route.ts`, `purchase-returns/[id]/route.ts`, `service-packages/route.ts`, `services/route.ts`, `stock-opnames/route.ts`, `vehicles/route.ts`, `suppliers/[id]/route.ts`, `coa/route.ts`, `purchase-deliveries/[id]/route.ts`, `purchase-invoices/route.ts`, `purchase-orders/[id]/route.ts`, `spareparts/route.ts`, `stock-opnames/[id]/route.ts`, `stock-outgoings/route.ts`, `stock-transfers/[id]/route.ts`, `stock-transfers/route.ts`, `suppliers/route.ts`, `users/[id]/route.ts`, `vendor-quotes/route.ts`, `customers/[id]/route.ts`, `invoices/[id]/route.ts`, `invoices/route.ts`, `services/[id]/route.ts`, `spareparts/[id]/route.ts`, `users/route.ts`, `vehicles/[id]/route.ts`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `FormattedNumberInput()` connect `FormattedNumberInput.tsx` to `services/new/page.tsx`, `service-orders/new/page.tsx`, `purchase-orders/new/page.tsx`, `purchase-request/new/page.tsx`, `stock-transfer/new/page.tsx`, `work-orders/detail/[...no]/page.tsx`, `service-orders/[...no]/page.tsx`, `stock-orders/new/page.tsx`, `inventory/stock-opname/new/page.tsx`, `purchase-returns/new/page.tsx`, `stock-outgoing/new/page.tsx`, `purchase-orders/[...refCode]/page.tsx`, `purchase-deliveries/[...refCode]/page.tsx`, `stock-opname/[...refCode]/page.tsx`, `inventory/[code]/edit/page.tsx`, `inventory/new/page.tsx`, `po/new/page.tsx`, `warehouse/stock-opname/new/page.tsx`, `invoices/create/page.tsx`, `journal/create/page.tsx`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `{ Client }`, `bcrypt`, `nextConfig` to the rest of the system?**
   _653 weakly-connected nodes found - possible documentation gaps or missing edges._
@@ -797,4 +783,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `numbering.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.08253968253968254 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._

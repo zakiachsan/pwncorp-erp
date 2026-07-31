@@ -331,7 +331,7 @@ model Invoice {
   customer    Customer @relation(fields: [customerId], references: [id])
   storeId     String   @map("store_id")
   store       Store    @relation(fields: [storeId], references: [id])
-  status      String   @default("UNPAID") // UNPAID / PARTIAL / PAID
+  status      String   @default("DRAFT") // DRAFT / UNPAID / PARTIAL / PAID
   total       Float    @default(0)
   amountPaid  Float    @default(0) @map("amount_paid")
   amountDue   Float    @default(0) @map("amount_due")
