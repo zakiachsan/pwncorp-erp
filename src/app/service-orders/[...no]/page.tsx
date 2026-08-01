@@ -457,13 +457,28 @@ export default function ServiceOrderDetailPage() {
   const wo = hasWO ? activeWOs[0] : null;
 
   // Items already used in any WO (for multiple SWO)
-  const usedItemIds = new Set<string>();
+  // Count per itemId: SO may have N rows of the same item, WOs may use M of them.
+  // remaining = Σ max(0, soCount(itemId) - woUsedCount(itemId))
+  const woUsedCountMap = new Map<string, number>();
   for (const w of activeWOs) {
-    for (const it of (w.items || [])) usedItemIds.add(it.itemId);
+    for (const it of (w.items || [])) {
+      const id = it.itemId;
+      woUsedCountMap.set(id, (woUsedCountMap.get(id) || 0) + 1);
+    }
   }
-  const totalSvcItems = (order.services || []).length + (order.spareparts || []).length;
-  const usedCount = usedItemIds.size;
-  const remainingItems = totalSvcItems - usedCount;
+  const soItemCountMap = new Map<string, number>();
+  for (const sv of (order.services || [])) {
+    const id = sv.serviceId;
+    soItemCountMap.set(id, (soItemCountMap.get(id) || 0) + 1);
+  }
+  for (const sp of (order.spareparts || [])) {
+    const id = sp.sparepartId;
+    soItemCountMap.set(id, (soItemCountMap.get(id) || 0) + 1);
+  }
+  let remainingItems = 0;
+  soItemCountMap.forEach((soCount, id) => {
+    remainingItems += Math.max(0, soCount - (woUsedCountMap.get(id) || 0));
+  });
   const canCreateMoreWO = isApproved && remainingItems > 0;
 
   return (
