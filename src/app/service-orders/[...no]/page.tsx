@@ -1268,7 +1268,7 @@ function MappingsModal({ description, mappings, onClose, availableServices, avai
                         </span>
                       </td>
                       <td style={{ padding: "8px", fontWeight: 500 }}>{resolveName(m)}</td>
-                      <td style={{ padding: "8px", textAlign: "right" }}>{m.qty ?? 1}</td>
+                      <td style={{ padding: "8px", textAlign: "right" }}>{m.qty ?? 0}</td>
                     </tr>
                   );
                 })}
