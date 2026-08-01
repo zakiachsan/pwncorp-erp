@@ -609,7 +609,7 @@ export default function ServiceOrderDetailPage() {
                 ) : (
                   <>
                     <button onClick={addInspectionItem} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
-                    <button onClick={() => { setInspectionEditMode(false); setInspectionItems((order.inspectionItems || []).map((item: any) => ({ id: item.id, description: item.description || "", feedback: item.feedback || "", inspected: item.inspected || false }))); }} style={S.actionBtn}>Batal</button>
+                    <button onClick={() => setInspectionEditMode(false)} style={S.actionBtn}>Batal</button>
                     <button onClick={async () => { await saveInspectionItems(); setInspectionEditMode(false); }} disabled={inspectionSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
                       <Save size={13} /> {inspectionSaving ? "Saving..." : "Simpan"}
                     </button>
