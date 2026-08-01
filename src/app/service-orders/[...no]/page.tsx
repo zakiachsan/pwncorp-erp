@@ -591,7 +591,7 @@ export default function ServiceOrderDetailPage() {
                 ) : (
                   <>
                     <button onClick={() => { svcLineTab === "services" ? (setShowAddService(true), setSvcSearch("")) : (setShowAddSparepart(true), setSpSearch("")); }} style={{ ...S.actionBtn, color: "#0176d3", border: "1px dashed #0176d3", background: "#f0f7ff" }}><Plus size={13} /> Tambah</button>
-                    <button onClick={() => { setEditMode(false); setServices((order.services || []).map((s: any) => ({ ...s, serviceId: s.serviceId || s.service?.id, service: s.service || { sku: "", name: "" } }))); setSpareparts((order.spareparts || []).map((s: any) => ({ ...s, sparepartId: s.sparepartId || s.sparepart?.id, sparepart: s.sparepart || { sku: "", name: "" } }))); }} style={S.actionBtn}>Batal</button>
+                    <button onClick={() => setEditMode(false)} style={S.actionBtn}>Batal</button>
                     <button onClick={handleSaveEdits} disabled={editSaving} style={{ ...S.actionBtn, background: "#2e844a", color: "#fff", border: "1px solid #2e844a" }}>
                       <Save size={13} /> {editSaving ? "Menyimpan..." : "Simpan"}
                     </button>
