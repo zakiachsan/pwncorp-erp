@@ -428,10 +428,10 @@ export default function NewServiceOrderPage() {
             updateInspectionItem(mappingModal.idx, "mappings", mappings);
             // Auto-populate the matching items into the main service/sparepart
             // sections so the user doesn't have to add them again by hand.
-            // qty is normalized to >= 1 so it never lands as 0 in the
-            // main sections (which would silently zero the total).
+            // qty defaults to 0 so the user is forced to fill in the
+            // quantity themselves (no silent defaults that hide the
+            // step from the workflow).
             for (const m of mappings) {
-              const safeQty = typeof m.qty === "number" && m.qty > 0 ? m.qty : 1;
               if (m.sourceType === "Service") {
                 setServiceItems((prev) => {
                   if (prev.some((it) => it.serviceId === m.sourceId)) return prev;
@@ -440,7 +440,7 @@ export default function NewServiceOrderPage() {
                     ...prev,
                     {
                       serviceId: m.sourceId,
-                      qty: safeQty,
+                      qty: 0,
                       unitPrice: svc?.standardPrice || svc?.price || 0,
                       itemType: "Service",
                     },
@@ -454,7 +454,7 @@ export default function NewServiceOrderPage() {
                     ...prev,
                     {
                       sparepartId: m.sourceId,
-                      qty: safeQty,
+                      qty: 0,
                       unitPrice: sp?.sellPrice || 0,
                     },
                   ];
