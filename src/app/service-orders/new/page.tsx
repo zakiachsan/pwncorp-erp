@@ -1234,7 +1234,7 @@ function InspectionMappingModal({
     setMappings(prev => {
       const exists = prev.find(m => m.sourceType === sourceType && m.sourceId === sourceId);
       if (exists) return prev.filter(m => !(m.sourceType === sourceType && m.sourceId === sourceId));
-      return [...prev, { sourceType, sourceId, qty: 1 as number | null }];
+      return [...prev, { sourceType, sourceId, qty: 0 as number | null }];
     });
   };
 
