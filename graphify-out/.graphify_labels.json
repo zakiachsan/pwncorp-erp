@@ -238,5 +238,7 @@
   "236": "@prisma/client",
   "237": "@radix-ui/react-slot",
   "238": "react-dom",
-  "239": "@types/node"
+  "239": "@types/node",
+  "240": "sort_data.py",
+  "241": "tailwind.config.js"
 }
