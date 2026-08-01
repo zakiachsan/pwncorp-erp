@@ -348,6 +348,11 @@ model WOItem {
   supplier   Supplier? @relation(fields: [supplierId], references: [id])
   cost       Float     @default(0)
 
+  // Per-item progress (services) — persisted in DB so it survives refresh
+  progress    String    @default("pending") // pending | in_progress | completed
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
   @@map("wo_items")
 }
 

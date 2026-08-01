@@ -1,10 +1,8 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateTable
 CREATE TABLE "Role" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "permissions" TEXT NOT NULL DEFAULT '[]',
 
     CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
 );
@@ -147,12 +145,43 @@ CREATE TABLE "service_orders" (
     "sa_id" TEXT NOT NULL,
     "store_id" TEXT NOT NULL,
     "complaint" TEXT,
+    "salesperson" TEXT,
+    "booking_source" TEXT,
+    "reference_number" TEXT,
+    "plan_service_time" TEXT,
+    "odometer" TEXT,
+    "color" TEXT,
     "status" TEXT NOT NULL DEFAULT 'Draft',
     "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "service_orders_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inspection_items" (
+    "id" TEXT NOT NULL,
+    "so_id" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "feedback" TEXT,
+    "inspected" BOOLEAN NOT NULL DEFAULT false,
+    "sort_order" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inspection_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "inspection_item_mappings" (
+    "id" TEXT NOT NULL,
+    "inspection_item_id" TEXT NOT NULL,
+    "source_type" TEXT NOT NULL,
+    "source_id" TEXT NOT NULL,
+    "qty" INTEGER NOT NULL DEFAULT 1,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "inspection_item_mappings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -175,6 +204,9 @@ CREATE TABLE "so_services" (
     "qty" INTEGER NOT NULL DEFAULT 1,
     "unit_price" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "item_type" TEXT NOT NULL DEFAULT 'Service',
+    "supplier_id" TEXT,
+    "cost" DOUBLE PRECISION NOT NULL DEFAULT 0,
 
     CONSTRAINT "so_services_pkey" PRIMARY KEY ("id")
 );
@@ -189,6 +221,8 @@ CREATE TABLE "work_orders" (
     "status" TEXT NOT NULL DEFAULT 'Draft',
     "start_date" TIMESTAMP(3),
     "target_date" TIMESTAMP(3),
+    "target_time" TEXT,
+    "customer_waiting" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "work_orders_pkey" PRIMARY KEY ("id")
@@ -204,6 +238,10 @@ CREATE TABLE "wo_items" (
     "qty" INTEGER NOT NULL DEFAULT 1,
     "unit_price" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "assigned_to" TEXT,
+    "estimated_time" TEXT,
+    "supplier_id" TEXT,
+    "cost" DOUBLE PRECISION NOT NULL DEFAULT 0,
 
     CONSTRAINT "wo_items_pkey" PRIMARY KEY ("id")
 );
@@ -215,7 +253,7 @@ CREATE TABLE "invoices" (
     "wo_id" TEXT NOT NULL,
     "customer_id" TEXT NOT NULL,
     "store_id" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'UNPAID',
+    "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "amount_paid" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "amount_due" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -268,6 +306,31 @@ CREATE TABLE "purchase_requests" (
 );
 
 -- CreateTable
+CREATE TABLE "vendor_quotes" (
+    "id" TEXT NOT NULL,
+    "pr_id" TEXT NOT NULL,
+    "supplier_id" TEXT NOT NULL,
+    "store_id" TEXT NOT NULL,
+    "total_price" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "lead_time" INTEGER NOT NULL DEFAULT 0,
+    "notes" TEXT,
+    "is_selected" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "vendor_quotes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "vendor_quote_items" (
+    "id" TEXT NOT NULL,
+    "quote_id" TEXT NOT NULL,
+    "sparepart_id" TEXT NOT NULL,
+    "unit_price" DOUBLE PRECISION NOT NULL DEFAULT 0,
+
+    CONSTRAINT "vendor_quote_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "pr_items" (
     "id" TEXT NOT NULL,
     "pr_id" TEXT NOT NULL,
@@ -298,6 +361,30 @@ CREATE TABLE "purchase_orders" (
 );
 
 -- CreateTable
+CREATE TABLE "warehouses" (
+    "id" TEXT NOT NULL,
+    "store_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "code" TEXT,
+    "address" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "warehouses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "warehouse_stocks" (
+    "id" TEXT NOT NULL,
+    "warehouse_id" TEXT NOT NULL,
+    "sparepart_id" TEXT NOT NULL,
+    "qty" INTEGER NOT NULL DEFAULT 0,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "warehouse_stocks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "po_items" (
     "id" TEXT NOT NULL,
     "po_id" TEXT NOT NULL,
@@ -315,6 +402,7 @@ CREATE TABLE "purchase_deliveries" (
     "delivery_no" TEXT NOT NULL,
     "po_id" TEXT NOT NULL,
     "store_id" TEXT NOT NULL,
+    "notes" TEXT,
     "received_at" TIMESTAMP(3),
     "status" TEXT NOT NULL DEFAULT 'Draft',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -353,6 +441,8 @@ CREATE TABLE "purchase_returns" (
     "doc_no" TEXT NOT NULL,
     "po_id" TEXT NOT NULL,
     "supplier_id" TEXT NOT NULL,
+    "return_type" TEXT NOT NULL DEFAULT 'Return',
+    "warehouse" TEXT,
     "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "status" TEXT NOT NULL DEFAULT 'Draft',
     "reason" TEXT,
@@ -360,6 +450,18 @@ CREATE TABLE "purchase_returns" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "purchase_returns_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "return_items" (
+    "id" TEXT NOT NULL,
+    "return_id" TEXT NOT NULL,
+    "sparepart_id" TEXT NOT NULL,
+    "qty" INTEGER NOT NULL DEFAULT 1,
+    "unit_price" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
+
+    CONSTRAINT "return_items_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -382,8 +484,34 @@ CREATE TABLE "stock_order_items" (
     "stock_order_id" TEXT NOT NULL,
     "sparepart_id" TEXT NOT NULL,
     "qty" INTEGER NOT NULL DEFAULT 1,
+    "sent_qty" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "stock_order_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stock_returns" (
+    "id" TEXT NOT NULL,
+    "return_no" TEXT NOT NULL,
+    "wo_id" TEXT,
+    "store_id" TEXT NOT NULL,
+    "warehouse" TEXT,
+    "reason" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'Draft',
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "stock_returns_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stock_return_items" (
+    "id" TEXT NOT NULL,
+    "stock_return_id" TEXT NOT NULL,
+    "sparepart_id" TEXT NOT NULL,
+    "qty" INTEGER NOT NULL DEFAULT 1,
+
+    CONSTRAINT "stock_return_items_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -416,6 +544,7 @@ CREATE TABLE "stock_opnames" (
     "ref_code" TEXT NOT NULL,
     "store_id" TEXT NOT NULL,
     "warehouse" TEXT,
+    "description" TEXT,
     "status" TEXT NOT NULL DEFAULT 'Draft',
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -434,6 +563,32 @@ CREATE TABLE "opname_items" (
     "reason" TEXT,
 
     CONSTRAINT "opname_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stock_outgoings" (
+    "id" TEXT NOT NULL,
+    "doc_no" TEXT NOT NULL,
+    "store_id" TEXT NOT NULL,
+    "warehouse" TEXT,
+    "notes" TEXT,
+    "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "status" TEXT NOT NULL DEFAULT 'Draft',
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "stock_outgoings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "stock_outgoing_items" (
+    "id" TEXT NOT NULL,
+    "outgoing_id" TEXT NOT NULL,
+    "sparepart_id" TEXT NOT NULL,
+    "qty" INTEGER NOT NULL DEFAULT 1,
+    "unit_price" DOUBLE PRECISION NOT NULL DEFAULT 0,
+
+    CONSTRAINT "stock_outgoing_items_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -504,8 +659,15 @@ CREATE TABLE "accounts_receivable" (
     "amount" DOUBLE PRECISION NOT NULL,
     "balance" DOUBLE PRECISION NOT NULL,
     "due_date" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'OPEN',
+    "status" TEXT NOT NULL DEFAULT 'DRAFT',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "approved_at" TIMESTAMP(3),
+    "sent_at" TIMESTAMP(3),
+    "paid_at" TIMESTAMP(3),
+    "approved_by_id" TEXT,
+    "sent_by_id" TEXT,
+    "notes" TEXT,
+    "source" TEXT NOT NULL DEFAULT 'System',
 
     CONSTRAINT "accounts_receivable_pkey" PRIMARY KEY ("id")
 );
@@ -602,6 +764,7 @@ CREATE TABLE "petty_cash" (
     "type" TEXT NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
     "balance" DOUBLE PRECISION NOT NULL,
+    "category" TEXT DEFAULT 'Lain-lain',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "petty_cash_pkey" PRIMARY KEY ("id")
@@ -627,6 +790,7 @@ CREATE TABLE "payment_requests" (
 -- CreateTable
 CREATE TABLE "projects" (
     "id" TEXT NOT NULL,
+    "project_no" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "customer_id" TEXT NOT NULL,
     "store_id" TEXT NOT NULL,
@@ -665,6 +829,18 @@ CREATE TABLE "activity_logs" (
     CONSTRAINT "activity_logs_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "photos" (
+    "id" TEXT NOT NULL,
+    "wo_id" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "description" TEXT,
+    "uploaded_by" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "photos_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
 
@@ -699,6 +875,9 @@ CREATE UNIQUE INDEX "purchase_requests_pr_no_key" ON "purchase_requests"("pr_no"
 CREATE UNIQUE INDEX "purchase_orders_po_no_key" ON "purchase_orders"("po_no");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "warehouse_stocks_warehouse_id_sparepart_id_key" ON "warehouse_stocks"("warehouse_id", "sparepart_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "purchase_deliveries_delivery_no_key" ON "purchase_deliveries"("delivery_no");
 
 -- CreateIndex
@@ -711,10 +890,16 @@ CREATE UNIQUE INDEX "purchase_returns_doc_no_key" ON "purchase_returns"("doc_no"
 CREATE UNIQUE INDEX "stock_orders_order_no_key" ON "stock_orders"("order_no");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "stock_returns_return_no_key" ON "stock_returns"("return_no");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "stock_transfers_transfer_no_key" ON "stock_transfers"("transfer_no");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "stock_opnames_ref_code_key" ON "stock_opnames"("ref_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "stock_outgoings_doc_no_key" ON "stock_outgoings"("doc_no");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "coa_code_key" ON "coa"("code");
@@ -730,6 +915,9 @@ CREATE UNIQUE INDEX "transfers_transfer_no_key" ON "transfers"("transfer_no");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payment_requests_pr_no_key" ON "payment_requests"("pr_no");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "projects_project_no_key" ON "projects"("project_no");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -774,6 +962,12 @@ ALTER TABLE "service_orders" ADD CONSTRAINT "service_orders_sa_id_fkey" FOREIGN 
 ALTER TABLE "service_orders" ADD CONSTRAINT "service_orders_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "inspection_items" ADD CONSTRAINT "inspection_items_so_id_fkey" FOREIGN KEY ("so_id") REFERENCES "service_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "inspection_item_mappings" ADD CONSTRAINT "inspection_item_mappings_inspection_item_id_fkey" FOREIGN KEY ("inspection_item_id") REFERENCES "inspection_items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "so_spareparts" ADD CONSTRAINT "so_spareparts_so_id_fkey" FOREIGN KEY ("so_id") REFERENCES "service_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -786,6 +980,9 @@ ALTER TABLE "so_services" ADD CONSTRAINT "so_services_so_id_fkey" FOREIGN KEY ("
 ALTER TABLE "so_services" ADD CONSTRAINT "so_services_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "so_services" ADD CONSTRAINT "so_services_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "work_orders" ADD CONSTRAINT "work_orders_so_id_fkey" FOREIGN KEY ("so_id") REFERENCES "service_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -796,6 +993,9 @@ ALTER TABLE "work_orders" ADD CONSTRAINT "work_orders_store_id_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "wo_items" ADD CONSTRAINT "wo_items_wo_id_fkey" FOREIGN KEY ("wo_id") REFERENCES "work_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "wo_items" ADD CONSTRAINT "wo_items_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_wo_id_fkey" FOREIGN KEY ("wo_id") REFERENCES "work_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -816,6 +1016,21 @@ ALTER TABLE "payments" ADD CONSTRAINT "payments_invoice_id_fkey" FOREIGN KEY ("i
 ALTER TABLE "purchase_requests" ADD CONSTRAINT "purchase_requests_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "vendor_quotes" ADD CONSTRAINT "vendor_quotes_pr_id_fkey" FOREIGN KEY ("pr_id") REFERENCES "purchase_requests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vendor_quotes" ADD CONSTRAINT "vendor_quotes_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vendor_quotes" ADD CONSTRAINT "vendor_quotes_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vendor_quote_items" ADD CONSTRAINT "vendor_quote_items_quote_id_fkey" FOREIGN KEY ("quote_id") REFERENCES "vendor_quotes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vendor_quote_items" ADD CONSTRAINT "vendor_quote_items_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "pr_items" ADD CONSTRAINT "pr_items_pr_id_fkey" FOREIGN KEY ("pr_id") REFERENCES "purchase_requests"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -826,6 +1041,15 @@ ALTER TABLE "purchase_orders" ADD CONSTRAINT "purchase_orders_supplier_id_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "purchase_orders" ADD CONSTRAINT "purchase_orders_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "warehouses" ADD CONSTRAINT "warehouses_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "warehouse_stocks" ADD CONSTRAINT "warehouse_stocks_warehouse_id_fkey" FOREIGN KEY ("warehouse_id") REFERENCES "warehouses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "warehouse_stocks" ADD CONSTRAINT "warehouse_stocks_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "po_items" ADD CONSTRAINT "po_items_po_id_fkey" FOREIGN KEY ("po_id") REFERENCES "purchase_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -858,6 +1082,12 @@ ALTER TABLE "purchase_returns" ADD CONSTRAINT "purchase_returns_po_id_fkey" FORE
 ALTER TABLE "purchase_returns" ADD CONSTRAINT "purchase_returns_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "return_items" ADD CONSTRAINT "return_items_return_id_fkey" FOREIGN KEY ("return_id") REFERENCES "purchase_returns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "return_items" ADD CONSTRAINT "return_items_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "stock_orders" ADD CONSTRAINT "stock_orders_wo_id_fkey" FOREIGN KEY ("wo_id") REFERENCES "work_orders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -868,6 +1098,18 @@ ALTER TABLE "stock_order_items" ADD CONSTRAINT "stock_order_items_stock_order_id
 
 -- AddForeignKey
 ALTER TABLE "stock_order_items" ADD CONSTRAINT "stock_order_items_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_returns" ADD CONSTRAINT "stock_returns_wo_id_fkey" FOREIGN KEY ("wo_id") REFERENCES "work_orders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_returns" ADD CONSTRAINT "stock_returns_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_return_items" ADD CONSTRAINT "stock_return_items_stock_return_id_fkey" FOREIGN KEY ("stock_return_id") REFERENCES "stock_returns"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_return_items" ADD CONSTRAINT "stock_return_items_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "stock_transfers" ADD CONSTRAINT "stock_transfers_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -886,6 +1128,15 @@ ALTER TABLE "opname_items" ADD CONSTRAINT "opname_items_opname_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "opname_items" ADD CONSTRAINT "opname_items_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_outgoings" ADD CONSTRAINT "stock_outgoings_store_id_fkey" FOREIGN KEY ("store_id") REFERENCES "stores"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_outgoing_items" ADD CONSTRAINT "stock_outgoing_items_outgoing_id_fkey" FOREIGN KEY ("outgoing_id") REFERENCES "stock_outgoings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "stock_outgoing_items" ADD CONSTRAINT "stock_outgoing_items_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "stock_histories" ADD CONSTRAINT "stock_histories_sparepart_id_fkey" FOREIGN KEY ("sparepart_id") REFERENCES "spareparts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -974,3 +1225,5 @@ ALTER TABLE "project_expenses" ADD CONSTRAINT "project_expenses_journal_id_fkey"
 -- AddForeignKey
 ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
+-- AddForeignKey
+ALTER TABLE "photos" ADD CONSTRAINT "photos_wo_id_fkey" FOREIGN KEY ("wo_id") REFERENCES "work_orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

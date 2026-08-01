@@ -107,6 +107,7 @@ export default function WorkOrderDetailPage() {
         const services = items
           .filter((it: any) => ["service", "sublet", "sundry"].includes((it.itemType || "").toLowerCase()))
           .map((it: any, i: number) => ({
+            id: it.id, // woItem.id — needed for PATCH progress
             itemId: it.itemId || "",
             item: it.name || it.itemName || it.description || "-",
             type: it.itemType || "service",
@@ -121,9 +122,14 @@ export default function WorkOrderDetailPage() {
             supplierName: it.supplier?.companyName || null,
             cost: it.cost || 0,
             status: it.status || "Waiting",
+            progress: it.progress || "pending", // persisted in DB
             estimatedTime: it.estimatedTime || "-",
             linkedSpareparts: it.linkedSpareparts || [],
           }));
+        // Hydrate serviceProgress from DB so it survives refresh
+        const initialProgress: Record<number, string> = {};
+        services.forEach((s: any, i: number) => { initialProgress[i] = s.progress || "pending"; });
+        setServiceProgress(initialProgress);
         const spareparts = items
           .filter((it: any) => it.itemType === "sparepart" || it.itemType === "SPAREPART")
           .map((it: any) => ({
@@ -203,6 +209,38 @@ export default function WorkOrderDetailPage() {
       setAllMekanik((d.data || d.users || []).filter((u: any) => u.role?.name === "Mekanik" || u.role === "Mekanik"));
     }).catch(() => {});
   }, [wo]);
+
+  // Persist service progress to DB (so it survives refresh)
+  const persistServiceProgress = async (idx: number, progress: "pending" | "in_progress" | "completed") => {
+    if (!wo?.id) return;
+    const svc = wo.services?.[idx];
+    if (!svc?.id) {
+      // Fallback: optimistic UI only (item has no id — shouldn't happen for persisted WO items)
+      setServiceProgress(prev => ({ ...prev, [idx]: progress }));
+      return;
+    }
+    // Optimistic update
+    setServiceProgress(prev => ({ ...prev, [idx]: progress }));
+    try {
+      const r = await fetch(`/api/work-orders/${wo.id}/items/${svc.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progress }),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        console.error("Failed to persist progress:", j.error || r.statusText);
+        // Revert optimistic update on error
+        setServiceProgress(prev => ({ ...prev, [idx]: svc.progress || "pending" }));
+      }
+    } catch (e) {
+      console.error("Network error persisting progress:", e);
+      setServiceProgress(prev => ({ ...prev, [idx]: svc.progress || "pending" }));
+    }
+  };
+
+  const handleStartService = (idx: number) => persistServiceProgress(idx, "in_progress");
+  const handleCompleteService = (idx: number) => persistServiceProgress(idx, "completed");
 
   // Auto-transition to WAITING FOR QC when all services are completed
   useEffect(() => {
@@ -644,7 +682,7 @@ export default function WorkOrderDetailPage() {
 
           {svcLineTab === "services" && (
             <div>
-              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} allMekanik={allMekanik} woStatus={wo.status} serviceProgress={serviceProgress} onStartService={(idx) => setServiceProgress(prev => ({ ...prev, [idx]: "in_progress" }))} onCompleteService={(idx) => setServiceProgress(prev => ({ ...prev, [idx]: "completed" }))} />
+              <WOServiceTable services={editMode ? editServices : wo.services} editMode={editMode} onUpdate={updateEditService} onRemove={removeEditService} totalCost={editMode ? editServices.reduce((s: number, x: any) => s + (x.total || 0), 0) : totalServiceCost} allMekanik={allMekanik} woStatus={wo.status} serviceProgress={serviceProgress} onStartService={handleStartService} onCompleteService={handleCompleteService} />
             </div>
           )}
 
