@@ -426,6 +426,38 @@ export default function NewServiceOrderPage() {
           onClose={() => setMappingModal(null)}
           onSave={(mappings) => {
             updateInspectionItem(mappingModal.idx, "mappings", mappings);
+            // Auto-populate the matching items into the main service/sparepart
+            // sections so the user doesn't have to add them again by hand.
+            for (const m of mappings) {
+              if (m.sourceType === "Service") {
+                setServiceItems((prev) => {
+                  if (prev.some((it) => it.serviceId === m.sourceId)) return prev;
+                  const svc = services.find((s) => s.id === m.sourceId);
+                  return [
+                    ...prev,
+                    {
+                      serviceId: m.sourceId,
+                      qty: m.qty ?? 1,
+                      unitPrice: svc?.standardPrice || svc?.price || 0,
+                      itemType: "Service",
+                    },
+                  ];
+                });
+              } else if (m.sourceType === "Sparepart") {
+                setSparepartItems((prev) => {
+                  if (prev.some((it) => it.sparepartId === m.sourceId)) return prev;
+                  const sp = spareparts.find((s) => s.id === m.sourceId);
+                  return [
+                    ...prev,
+                    {
+                      sparepartId: m.sourceId,
+                      qty: m.qty ?? 1,
+                      unitPrice: sp?.sellPrice || 0,
+                    },
+                  ];
+                });
+              }
+            }
             setMappingModal(null);
           }}
         />
@@ -1266,7 +1298,7 @@ function InspectionMappingModal({
                       <div style={{ fontWeight: 500 }}>{it.name}</div>
                       <div style={{ fontSize: 10, color: "#8e8f8e" }}>{it.sku}</div>
                     </td>
-                    <td style={{ padding: "8px", textAlign: "right" }}>{it.standardPrice || it.price || it.sellPrice || 0}</td>
+                    <td style={{ padding: "8px", textAlign: "right" }}>{(it.standardPrice || it.price || it.sellPrice || 0).toLocaleString("id-ID")}</td>
                     <td style={{ padding: "8px", textAlign: "center" }}>
                       <input type="checkbox" checked={isMapped(tab, it.id)} onChange={() => toggleMapping(tab, it.id)} style={{ cursor: "pointer", width: 16, height: 16 }} />
                     </td>
