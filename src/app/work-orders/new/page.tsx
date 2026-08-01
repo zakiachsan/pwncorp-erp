@@ -47,11 +47,13 @@ export default function NewWorkOrderPage() {
     setSaving(true);
     setError("");
     try {
-      // Compute remaining (not removed) item IDs
+      // Compute remaining (not removed AND not used in another active WO) item IDs
       const allServiceIds = (so.services || []).map((sv: any) => sv.serviceId);
       const allSparepartIds = (so.spareparts || []).map((sp: any) => sp.sparepartId);
-      const serviceIds = allServiceIds.filter((id: string) => !removedServiceIds.has(id));
-      const sparepartIds = allSparepartIds.filter((id: string) => !removedSparepartIds.has(id));
+      const serviceIds = allServiceIds
+        .filter((id: string) => !removedServiceIds.has(id) && !usedServiceIds.has(id));
+      const sparepartIds = allSparepartIds
+        .filter((id: string) => !removedSparepartIds.has(id) && !usedSparepartIds.has(id));
 
       const res = await fetch("/api/work-orders", {
         method: "POST",
