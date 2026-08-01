@@ -57,15 +57,21 @@ export const POST = withAuth(async (req: NextRequest) => {
 
   const woNo = await generateWONumber(user.storeId);
 
-  // Copy items from SO to WO — only items selected in the form (serviceIds / sparepartIds)
+  // Copy items from SO to WO — only items selected in the form (serviceIds / sparepartIds).
+  // `serviceIds`/`sparepartIds` from frontend:
+  //   - undefined: backward-compat (copy all)
+  //   - [] (empty array): strict — copy none
+  //   - [...] (non-empty): strict — copy only those in the list
   const items: any[] = [];
   const selectedServiceIds = new Set<string>(serviceIds || []);
   const selectedSparepartIds = new Set<string>(sparepartIds || []);
+  const servicesLocked = Array.isArray(serviceIds);
+  const sparepartsLocked = Array.isArray(sparepartIds);
 
   let serviceIdx = 0;
   for (const sv of so.services) {
     // Skip services that were removed from the form (not in selectedServiceIds)
-    if (serviceIds && serviceIds.length > 0 && !selectedServiceIds.has(sv.serviceId)) {
+    if (servicesLocked && !selectedServiceIds.has(sv.serviceId)) {
       serviceIdx++;
       continue;
     }
@@ -106,7 +112,7 @@ export const POST = withAuth(async (req: NextRequest) => {
 
   // Add SO spareparts that are NOT linked to any service AND selected in the form
   for (const sp of so.spareparts) {
-    if (sparepartIds && sparepartIds.length > 0 && !selectedSparepartIds.has(sp.sparepartId)) continue;
+    if (sparepartsLocked && !selectedSparepartIds.has(sp.sparepartId)) continue;
     // Skip if already added as service-linked sparepart
     if (items.some(it => it.itemType === "sparepart" && it.itemId === sp.sparepartId)) continue;
     const sparepart = await prisma.sparepart.findUnique({ where: { id: sp.sparepartId } });
