@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Verified: "#2e844a", Pending: "#f59e0b", Rejected: "#ea001e", PAID: "#2e844a", PARTIAL: "#f59e0b", UNPAID: "#ea001e" };
@@ -39,7 +40,7 @@ export default function PaymentsPage() {
           Payments
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm"><Download size={14} /> Export</button>
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("payments"))} className="btn btn--sm"><Download size={14} /> Export</button>
           <button className="btn btn--brand btn--sm" onClick={() => router.push("/finance/payments/create")}><Plus size={14} /> Record Payment</button>
         </div>
       </div>

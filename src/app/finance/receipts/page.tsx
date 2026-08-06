@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const formatIDR = (val: number) => `Rp ${(val || 0).toLocaleString("id-ID")}`;
 
@@ -35,7 +36,7 @@ export default function ReceiptsPage() {
           Penerimaan (Receipts)
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm"><Download size={14} /> Export</button>
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("receipts"))} className="btn btn--sm"><Download size={14} /> Export</button>
           <button className="btn btn--brand btn--sm" onClick={() => router.push("/finance/receipts/create")}><Plus size={14} /> New Receipt</button>
         </div>
       </div>

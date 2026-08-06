@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
@@ -61,7 +62,7 @@ export default function AgingARPage() {
           <ClockIcon className="w-6 h-6 text-[--color-brand-secondary]" />
           Aging Report - Accounts Receivable
         </div>
-        <button className="btn btn--sm"><Download size={14} /> Export</button>
+        <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("aging-ar"))} className="btn btn--sm"><Download size={14} /> Export</button>
       </div>
 
       {/* Filter */}

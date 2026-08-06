@@ -1,6 +1,5 @@
 "use client";
 
-// TODO: Replace hardcoded data with API call when /api/anggaran endpoint is available
 import { useEffect, useState } from "react";
 import { Plus, X, BarChart3, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -34,49 +33,76 @@ export default function AnggaranPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/work-orders?limit=100")
+  const fetchData = () => {
+    setLoading(true);
+    fetch("/api/anggaran")
       .then((r) => r.json())
       .then((j) => {
-        const wos = j.data || [];
-        const mapped: AnggaranSWO[] = wos.map((wo: any, i: number) => ({
-          id: `A-${String(i + 1).padStart(3, "0")}`,
-          swoId: wo.woNo || "-",
-          sroId: wo.so?.soNo || "-",
-          customer: wo.so?.customer?.name || "-",
-          kendaraan: wo.so?.vehicle ? `${wo.so.vehicle.brand} ${wo.so.vehicle.model || ""}` : "-",
-          noPol: wo.so?.vehicle?.plateNo || "-",
-          anggaran: wo.items?.reduce((s: number, it: any) => s + (it.total || 0), 0) || 0,
-          realisasi: wo.status === "Completed" ? (wo.items?.reduce((s: number, it: any) => s + (it.total || 0), 0) || 0) : 0,
+        const mapped: AnggaranSWO[] = (j.data || []).map((a: any) => ({
+          id: a.id?.toString() || `A-${Date.now()}`,
+          swoId: a.swoId || "-",
+          sroId: a.sroId || "-",
+          customer: a.customer || "-",
+          kendaraan: a.kendaraan || "-",
+          noPol: a.noPol || "-",
+          anggaran: a.anggaran || 0,
+          realisasi: a.realisasi || 0,
         }));
         setItems(mapped);
         setLoading(false);
       })
       .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const pp = projects.find((p) => p.id === selectedProject);
 
-  const addItem = () => {
+  const addItem = async () => {
     if (!form.swoId || !form.anggaran) return;
-    const newItem: AnggaranSWO = {
-      id: `A-${String(items.length + 1).padStart(3, "0")}`,
-      swoId: form.swoId,
-      sroId: form.sroId,
-      customer: form.customer,
-      kendaraan: form.kendaraan,
-      noPol: form.noPol,
-      anggaran: parseInt(form.anggaran.replace(/[^0-9]/g, "")) || 0,
-      realisasi: parseInt(form.realisasi.replace(/[^0-9]/g, "")) || 0,
-    };
-    setItems((prev) => [...prev, newItem]);
-    setModalOpen(false);
-    setForm({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
+    setSaving(true);
+    try {
+      const res = await fetch("/api/anggaran", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          swoId: form.swoId,
+          sroId: form.sroId,
+          customer: form.customer,
+          kendaraan: form.kendaraan,
+          noPol: form.noPol,
+          anggaran: form.anggaran.replace(/[^0-9]/g, ""),
+          realisasi: form.realisasi.replace(/[^0-9]/g, ""),
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert("Gagal menyimpan: " + (err.error || res.status));
+        return;
+      }
+      setModalOpen(false);
+      setForm({ swoId: "", sroId: "", customer: "", kendaraan: "", noPol: "", anggaran: "", realisasi: "" });
+      fetchData();
+    } catch {
+      alert("Gagal menyimpan. Cek koneksi.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("Hapus data anggaran ini?")) return;
+    try {
+      const res = await fetch(`/api/anggaran/${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) { alert("Gagal hapus: " + res.status); return; }
+      fetchData();
+    } catch {
+      alert("Gagal hapus. Cek koneksi.");
+    }
   };
 
   const totalAnggaran = items.reduce((s, i) => s + i.anggaran, 0);

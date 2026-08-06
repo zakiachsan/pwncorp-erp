@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BarChart3, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const fmtDate = (iso: string) => (iso ? new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-");
@@ -31,7 +32,7 @@ export default function TaxInvoicesPage() {
           <BarChart3 className="w-6 h-6 text-[--color-brand-secondary]" />
           Tax Invoices
         </div>
-        <button className="btn btn--sm"><Download size={14} /> Export</button>
+        <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("tax-invoices"))} className="btn btn--sm"><Download size={14} /> Export</button>
       </div>
 
       <div className="table-wrap">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Filter, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 
 interface ServiceOrder {
@@ -92,7 +93,7 @@ export default function ServiceOrdersPage() {
           Service Orders
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm">
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("service-orders"))} className="btn btn--sm">
             <Download size={14} /> Export
           </button>
           <button

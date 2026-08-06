@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus, Copy, Trash2, Edit3, Check, X, ChevronDown } from "lucide-react";
+import { exportDataToExcel, makeFilename } from "@/lib/excel-utils";
 
 type NormalBalance = "Debit" | "Kredit";
 type KategoriAkun = "Asset" | "Liability" | "Equity" | "Revenue" | "Expense";
@@ -92,6 +93,9 @@ export default function MasterDataPage() {
   /* ─── COA state ─── */
   const [coaData, setCoaData] = useState<COAEntry[]>([]);
   const [coaLoading, setCoaLoading] = useState(true);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const coaDataRef = useRef<COAEntry[]>([]);
+  coaDataRef.current = coaData;
   const [coaError, setCoaError] = useState("");
   const [searchCode, setSearchCode] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -140,9 +144,20 @@ export default function MasterDataPage() {
 
   const updateCOAField = (id: string, field: keyof COAEntry, value: string) => {
     setCoaData((prev) => prev.map((row) => row.id === id ? { ...row, [field]: value } : row));
+    // Debounce PUT ke API
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      const row = coaDataRef.current.find((r) => r.id === id);
+      if (!row || row.id.startsWith("coa-")) return;
+      fetch(`/api/coa/${encodeURIComponent(row.id)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: value }),
+      }).catch(() => {});
+    }, 600);
   };
 
-  const handleCoaAdd = () => {
+  const handleCoaAdd = async () => {
     const maxNum = coaData.reduce((max, r) => {
       const parts = r.code.split("-");
       const last = parts[parts.length - 1];
@@ -150,32 +165,94 @@ export default function MasterDataPage() {
       return n > max ? n : max;
     }, 0);
     const newCode = `1-${maxNum + 1}`;
-    const newEntry: COAEntry = {
-      id: `coa-${Date.now()}`,
-      code: newCode,
-      name: "",
-      normal: "Debit",
-      kategori: "Asset",
-      divisi: "ALL - Semua Divisi",
-      note: "",
-      noRek: "",
-      pemilik: "",
-    };
-    setCoaData((prev) => [...prev, newEntry]);
+    try {
+      const res = await fetch("/api/coa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: newCode,
+          name: "Akun Baru",
+          kategori: "Asset",
+          normalBalance: "Debit",
+          divisi: "ALL - Semua Divisi",
+        }),
+      });
+      if (!res.ok) { alert("Gagal menambah COA: " + res.status); return; }
+      const json = await res.json();
+      const a = json.data;
+      const newEntry: COAEntry = {
+        id: a.id?.toString() || `coa-${Date.now()}`,
+        code: a.code || newCode,
+        name: a.name || "",
+        normal: (a.normalBalance === "Debit" ? "Debit" : "Kredit") as NormalBalance,
+        kategori: (a.kategori || "Asset") as KategoriAkun,
+        divisi: a.divisi || "ALL - Semua Divisi",
+        note: a.note || "",
+        noRek: a.noRek || "",
+        pemilik: a.pemilik || "",
+      };
+      setCoaData((prev) => [...prev, newEntry]);
+      setCoaPage(1);
+    } catch {
+      alert("Gagal menambah COA. Cek koneksi.");
+    }
   };
 
-  const handleCoaCopy = (entry: COAEntry) => {
+  const handleCoaCopy = async (entry: COAEntry) => {
     const maxNum = coaData.reduce((max, r) => {
       const parts = r.code.split("-");
       const last = parts[parts.length - 1];
       const n = parseInt(last) || 0;
       return n > max ? n : max;
     }, 0);
-    setCoaData((prev) => [...prev, { ...entry, id: `coa-${Date.now()}`, code: `1-${maxNum + 1}`, name: entry.name + " (Copy)" }]);
+    const newCode = `1-${maxNum + 1}`;
+    try {
+      const res = await fetch("/api/coa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: newCode,
+          name: entry.name + " (Copy)",
+          kategori: entry.kategori,
+          normalBalance: entry.normal,
+          divisi: entry.divisi,
+          note: entry.note,
+          noRek: entry.noRek,
+          pemilik: entry.pemilik,
+        }),
+      });
+      if (!res.ok) { alert("Gagal copy COA: " + res.status); return; }
+      const json = await res.json();
+      const a = json.data;
+      setCoaData((prev) => [...prev, {
+        id: a.id?.toString() || `coa-${Date.now()}`,
+        code: a.code || newCode,
+        name: a.name || entry.name + " (Copy)",
+        normal: (a.normalBalance === "Debit" ? "Debit" : "Kredit") as NormalBalance,
+        kategori: (a.kategori || "Asset") as KategoriAkun,
+        divisi: a.divisi || "ALL - Semua Divisi",
+        note: a.note || "",
+        noRek: a.noRek || "",
+        pemilik: a.pemilik || "",
+      }]);
+    } catch {
+      alert("Gagal copy COA. Cek koneksi.");
+    }
   };
 
-  const handleCoaDelete = (id: string) => {
-    setCoaData((prev) => prev.filter((r) => r.id !== id));
+  const handleCoaDelete = async (id: string) => {
+    if (id.startsWith("coa-")) {
+      setCoaData((prev) => prev.filter((r) => r.id !== id));
+      return;
+    }
+    if (!confirm("Hapus akun COA ini?")) return;
+    try {
+      const res = await fetch(`/api/coa/${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) { alert("Gagal hapus COA: " + res.status); return; }
+      setCoaData((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      alert("Gagal hapus COA. Cek koneksi.");
+    }
   };
 
   /* Filter & paginate */
@@ -189,13 +266,20 @@ export default function MasterDataPage() {
   const paginatedCOA = filteredCOA.slice((coaPage - 1) * ROWS_PER_PAGE, coaPage * ROWS_PER_PAGE);
 
   const handleCoaDownload = () => {
-    const headers = ["Kode", "Nama Akun", "Normal", "Kategori", "Divisi", "Note", "No. Rek", "Pemilik"];
-    const rows = filteredCOA.map((r) => [r.code, r.name, r.normal, r.kategori, r.divisi, r.note, r.noRek, r.pemilik]);
-    const csv = [headers, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "chart-of-accounts.csv"; a.click();
-    URL.revokeObjectURL(url);
+    exportDataToExcel(
+      filteredCOA,
+      [
+        { key: "code", header: "Kode" },
+        { key: "name", header: "Nama Akun" },
+        { key: "normal", header: "Normal" },
+        { key: "kategori", header: "Kategori" },
+        { key: "divisi", header: "Divisi" },
+        { key: "note", header: "Note" },
+        { key: "noRek", header: "No. Rek" },
+        { key: "pemilik", header: "Pemilik" },
+      ],
+      makeFilename("chart-of-accounts")
+    );
   };
 
   /* ═══════════ Divisi logic ═══════════ */

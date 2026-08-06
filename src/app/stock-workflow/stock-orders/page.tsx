@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 import DateRangePicker from "@/components/shared/DateRangePicker";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 
@@ -97,7 +98,7 @@ export default function StockOrdersPage() {
           Stock Orders
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm">
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("stock-orders"))} className="btn btn--sm">
             <Download size={14} /> Export
           </button>
         </div>

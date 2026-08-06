@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const statusPill = (status: string) => {
   const map: Record<string, string> = { Draft: "#6b7280", Paid: "#2e844a", Unpaid: "#ea001e", Partial: "#f59e0b", Overdue: "#ea001e" };
@@ -38,7 +39,7 @@ export default function InvoicesPage() {
           Invoices
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm"><Download size={14} /> Export</button>
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("invoices"))} className="btn btn--sm"><Download size={14} /> Export</button>
           <button className="btn btn--brand btn--sm"><Plus size={14} /> New Invoice</button>
         </div>
       </div>

@@ -112,7 +112,7 @@ export const POST = withAuth(async (req: NextRequest) => {
         const _yyyy = _now.getFullYear();
         const _dateSuffix = `/${_mm}/${_yyyy}`;
         const _lastJE = await prisma.journalEntry.findFirst({
-          where: { jeNo: { startsWith: 'JU-' }, jeNo: { endsWith: _dateSuffix } },
+          where: { jeNo: { startsWith: 'JU-', endsWith: _dateSuffix } },
           orderBy: { jeNo: 'desc' },
         });
         const _seq = _lastJE ? parseInt(_lastJE.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;

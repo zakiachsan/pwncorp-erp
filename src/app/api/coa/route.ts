@@ -34,7 +34,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 
 export const POST = withAuth(async (req: NextRequest) => {
   const body = await req.json();
-  const { code, name, kategori, normalBalance, parentId, level } = body;
+  const { code, name, kategori, normalBalance, parentId, level, divisi, note, noRek, pemilik } = body;
 
   if (!code || !name || !kategori || !normalBalance) {
     return NextResponse.json({ error: "code, name, kategori, and normalBalance are required" }, { status: 400 });
@@ -44,7 +44,7 @@ export const POST = withAuth(async (req: NextRequest) => {
   if (existing) return NextResponse.json({ error: "COA code already exists" }, { status: 409 });
 
   const coa = await prisma.cOA.create({
-    data: { code, name, kategori, normalBalance, parentId: parentId || null, level: level || 1 },
+    data: { code, name, kategori, normalBalance, parentId: parentId || null, level: level || 1, divisi: divisi || null, note: note || null, noRek: noRek || null, pemilik: pemilik || null },
     include: { children: true },
   });
 

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Plus, Download, ArrowLeftRight } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 interface Transfer {
   no: string;
@@ -28,17 +29,17 @@ export default function TransfersPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/stock-transfers?limit=1000")
+    fetch("/api/transfers?limit=1000")
       .then((r) => r.json())
       .then((j) => {
         if (j.data && j.data.length > 0) {
           const mapped: Transfer[] = j.data.map((t: any) => ({
-            no: t.no || t.refCode || "-",
-            date: t.date || "-",
-            from: t.from || t.sourceWarehouse || "-",
-            to: t.to || t.destWarehouse || "-",
+            no: t.transferNo || t.id?.toString().slice(-8) || "-",
+            date: t.date ? new Date(t.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
+            from: t.fromBankAccount?.bankName || t.fromBankAccount?.accountName || "-",
+            to: t.toBankAccount?.bankName || t.toBankAccount?.accountName || "-",
             amount: t.amount || 0,
-            description: t.description || t.notes || "-",
+            description: t.description || "-",
             status: t.status || "Selesai",
           }));
           setTransfers(mapped);
@@ -64,7 +65,7 @@ export default function TransfersPage() {
           Transfer Bank
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm"><Download size={14} /> Export</button>
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("transfers"))} className="btn btn--sm"><Download size={14} /> Export</button>
           <button className="btn btn--brand btn--sm" onClick={() => router.push("/finance/transfers/create")}><Plus size={14} /> New Transfer</button>
         </div>
       </div>

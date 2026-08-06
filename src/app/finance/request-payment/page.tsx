@@ -33,11 +33,22 @@ interface FormData {
 
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
+const statusLabel = (s: string) => {
+  const m: Record<string, string> = {
+    pending: "Menunggu Approval",
+    approved: "Proses Finance",
+    paid: "Selesai Dibayar",
+    rejected: "Ditolak",
+  };
+  return m[s] || s;
+};
+
 const statusStyle = (s: string) => {
   const m: Record<string, { bg: string; color: string }> = {
     "Menunggu Approval": { bg: "#fff3e0", color: "#e65100" },
     "Proses Finance": { bg: "#e3f2fd", color: "#01579b" },
     "Selesai Dibayar": { bg: "#e8f5e9", color: "#1b5e20" },
+    "Ditolak": { bg: "#fdecea", color: "#ea001e" },
   };
   const st = m[s] || { bg: "#f5f5f5", color: "#666" };
   return { display: "inline-block", padding: "2px 10px", borderRadius: 9999, fontSize: 11, fontWeight: 600, background: st.bg, color: st.color };
@@ -64,6 +75,11 @@ export default function RequestPaymentPage() {
   const [form, setForm] = useState<FormData>(emptyForm);
 
   useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = () => {
+    setLoading(true);
     fetch("/api/payment-requests")
       .then((r) => r.json())
       .then((json) => {
@@ -73,18 +89,18 @@ export default function RequestPaymentPage() {
           diajukanOleh: pr.diajukanOleh || "-",
           keperluan: pr.purpose || "",
           jumlah: pr.amount || 0,
-          status: pr.status || "Menunggu Approval",
-          keterangan: pr.keterangan || "",
+          status: statusLabel(pr.status) || "Menunggu Approval",
+          keterangan: pr.notes || "",
           penerima: pr.penerima || "-",
           divisi: pr.divisi || "-",
           kategori: pr.kategori || "-",
-          tglKebutuhan: pr.tglKebutuhan || "-",
+          tglKebutuhan: pr.tglKebutuhan ? new Date(pr.tglKebutuhan).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
         }));
         setData(mapped);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load payment requests"); setLoading(false); });
-  }, []);
+  };
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -99,6 +115,7 @@ export default function RequestPaymentPage() {
     menunggu: data.filter((d) => d.status === "Menunggu Approval").length,
     proses: data.filter((d) => d.status === "Proses Finance").length,
     selesai: data.filter((d) => d.status === "Selesai Dibayar").length,
+    ditolak: data.filter((d) => d.status === "Ditolak").length,
   };
 
   const generateId = () => {
@@ -123,23 +140,36 @@ export default function RequestPaymentPage() {
 
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
-  const submitRequest = () => {
+  const submitRequest = async () => {
     if (!form.keperluan || !form.nominal) return;
-    const now = new Date();
-    const months = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-    const dateStr = `${now.getDate().toString().padStart(2,"0")} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    const newId = generateId();
-    const newReq: PaymentRequest = {
-      id: newId, tanggal: dateStr, diajukanOleh: "User",
-      keperluan: form.keperluan, jumlah: parseInt(form.nominal.replace(/[^0-9]/g,""))||0,
-      status: "Menunggu Approval", keterangan: form.keperluan,
-      penerima: form.namaPenerima, divisi: form.divisi,
-      kategori: form.kategori, tglKebutuhan: form.tglKebutuhan,
-    };
-    setData((prev) => [newReq, ...prev]);
-    setModalOpen(false);
-    setForm(emptyForm);
-    setStep(0);
+    const nominal = parseInt(form.nominal.replace(/[^0-9]/g, "")) || 0;
+    try {
+      const res = await fetch("/api/payment-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: nominal,
+          purpose: form.keperluan,
+          vendor: form.namaPenerima || null,
+          tglKebutuhan: form.tglKebutuhan || null,
+          divisi: form.divisi || null,
+          kategori: form.kategori || null,
+          penerima: form.namaPenerima || null,
+          notes: [form.ketPenerima, form.namaBank, form.noRekening].filter(Boolean).join(" | ") || null,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert("Gagal menyimpan: " + (err.error || res.status));
+        return;
+      }
+      setModalOpen(false);
+      setForm(emptyForm);
+      setStep(0);
+      fetchData();
+    } catch {
+      alert("Gagal menyimpan request. Cek koneksi.");
+    }
   };
 
   return (
@@ -197,6 +227,7 @@ export default function RequestPaymentPage() {
               <option value="Menunggu Approval">Menunggu Approval</option>
               <option value="Proses Finance">Proses Finance</option>
               <option value="Selesai Dibayar">Selesai Dibayar</option>
+              <option value="Ditolak">Ditolak</option>
             </select>
           </div>
           <div className="form-group">

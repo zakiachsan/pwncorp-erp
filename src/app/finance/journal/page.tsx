@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, Download, ExternalLink } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 
 // Map refType to detail page URL
@@ -70,7 +71,7 @@ export default function JournalPage() {
           Jurnal Umum
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm"><Download size={14} /> Export</button>
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("journal"))} className="btn btn--sm"><Download size={14} /> Export</button>
         </div>
       </div>
 

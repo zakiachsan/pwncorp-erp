@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 import { Search, Download, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
@@ -35,7 +36,7 @@ export default function CashFlowPage() {
           <CashIcon className="w-6 h-6 text-[--color-brand-secondary]" />
           Arus Kas / Cash Flow
         </div>
-        <button className="btn btn--sm"><Download size={14} /> Export</button>
+        <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("cash-flow"))} className="btn btn--sm"><Download size={14} /> Export</button>
       </div>
 
       {/* Summary */}

@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Package, Star, Download, Upload, Search, X } from "lucide-react";
-import { exportToCsv, parseCsv, validateRows, mapRowToApi, makeFilename, downloadTemplate, sparepartColumns } from "@/lib/csv-utils";
+import { validateRows, mapRowToApi, sparepartColumns } from "@/lib/csv-utils";
+import { exportDataToExcel, parseExcelFile, makeFilename, downloadTemplate } from "@/lib/excel-utils";
 
 interface Product {
   id: string;
@@ -59,7 +60,7 @@ export default function ProductsPage() {
       ...p,
       supplierName: p.supplier?.companyName || "",
     }));
-    exportToCsv(exportData, sparepartColumns, makeFilename("sparepart"));
+    exportDataToExcel(exportData, sparepartColumns, makeFilename("sparepart"));
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +68,7 @@ export default function ProductsPage() {
     if (!file) return;
     setImportResult(null);
 
-    const result = await parseCsv(file);
+    const result = await parseExcelFile(file);
     if (result.error) {
       alert("CSV Error: " + result.error);
       if (fileRef.current) fileRef.current.value = "";
@@ -139,7 +140,7 @@ export default function ProductsPage() {
           <button onClick={() => setShowImportModal(true)} className="btn btn--sm">
             <Upload size={14} /> Import
           </button>
-          <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFileSelect} />
+          <input ref={fileRef} type="file" accept=".csv,.xls,.xlsx" style={{ display: "none" }} onChange={handleFileSelect} />
           <button onClick={() => router.push("/master-data/sparepart/new")} className="btn btn--brand btn--sm">
             + Add Sparepart
           </button>

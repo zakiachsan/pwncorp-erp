@@ -28,7 +28,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { amount, purpose, vendor, dueDate, notes } = body;
+  const { amount, purpose, vendor, dueDate, notes, tglKebutuhan, divisi, kategori, penerima } = body;
 
   if (!amount || !purpose) {
     return NextResponse.json({ error: "amount and purpose are required" }, { status: 400 });
@@ -46,6 +46,10 @@ export const POST = withAuth(async (req: NextRequest) => {
       vendor: vendor || null,
       dueDate: dueDate ? new Date(dueDate) : null,
       notes,
+      tglKebutuhan: tglKebutuhan ? new Date(tglKebutuhan) : null,
+      divisi: divisi || null,
+      kategori: kategori || null,
+      penerima: penerima || null,
     },
   });
 

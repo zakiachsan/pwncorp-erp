@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 const PRESETS = [
   { key: "today", label: "Hari Ini", get: () => { const d = new Date(); return [d, d] as [Date, Date]; } },
@@ -120,30 +120,40 @@ export default function DateRangePicker({ from, to, onChange, onApply, label }: 
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", width: "100%" }}>
       <button onClick={() => setOpen(o => !o)}
         style={{
-          display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", fontSize: 13,
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+          width: "100%", height: 36, padding: "0 12px", fontSize: 13,
           border: "1px solid #d8d8d8", borderRadius: 6, background: "#fff", cursor: "pointer",
-          color: "#0176d3", fontWeight: 500,
+          color: "#001526", fontWeight: 500, transition: "border-color 0.15s, box-shadow 0.15s",
         }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0176d3"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#d8d8d8"; }}
+        onFocus={(e) => { e.currentTarget.style.boxShadow = "0 0 0 2px rgba(1,118,211,0.2)"; e.currentTarget.style.borderColor = "#0176d3"; }}
+        onBlur={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#d8d8d8"; }}
       >
-        <Calendar size={14} />
-        {(() => {
-          const preset = PRESETS.find(p => p.key === activePreset);
-          const isThisMonth = from.getMonth() === new Date().getMonth() && from.getFullYear() === new Date().getFullYear();
-          if (activePreset && preset) return preset.label;
-          if (activePreset === "kustom") return `${fmtDate(from)} - ${fmtDate(to)}`;
-          if (isThisMonth) return `Bulan Ini`;
-          return `${MONTHS_LONG[from.getMonth()]} ${from.getFullYear()}`;
-        })()}
-        {label && <span style={{ color: "#8e8f8e", fontWeight: 400, marginLeft: 4 }}>{label}</span>}
+        <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <Calendar size={14} color="#8e8f8e" style={{ flexShrink: 0 }} />
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {(() => {
+              const preset = PRESETS.find(p => p.key === activePreset);
+              const isThisMonth = from.getMonth() === new Date().getMonth() && from.getFullYear() === new Date().getFullYear();
+              if (activePreset && preset) return preset.label;
+              if (activePreset === "kustom") return `${fmtDate(from)} - ${fmtDate(to)}`;
+              if (isThisMonth) return `Bulan Ini`;
+              return `${MONTHS_LONG[from.getMonth()]} ${from.getFullYear()}`;
+            })()}
+          </span>
+        </span>
+        <ChevronDown size={14} color="#8e8f8e" style={{ flexShrink: 0, transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "none" }} />
       </button>
       {open && (
         <>
           <div style={{ position: "fixed", inset: 0, zIndex: 48 }} onClick={handleCancel} />
           <div style={{
-            position: "absolute", top: "calc(100% + 6px)", right: 0, zIndex: 49,
+            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 49,
+            maxWidth: "min(660px, calc(100vw - 24px))",
             background: "#fff", borderRadius: 10, boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
             border: "1px solid #ecebea", display: "flex", overflow: "hidden",
           }}>

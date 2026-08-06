@@ -144,7 +144,7 @@ export default function PettyCashPage() {
 
       {/* Filter */}
       <div className="filter-section">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="form-group">
             <label className="form-label">Rentang Tanggal</label>
             <DateRangePicker from={dateFrom} to={dateTo} onChange={(f, t) => { setDateFrom(f); setDateTo(t); }} />
@@ -158,7 +158,16 @@ export default function PettyCashPage() {
           </div>
           <div className="form-group">
             <label className="form-label">Cari</label>
-            <input type="text" className="form-input" placeholder="ID / Keterangan..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <div style={{ position: "relative" }}>
+              <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#8e8f8e", pointerEvents: "none" }} />
+              <input type="text" className="form-input" placeholder="ID / Keterangan..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 30 }} />
+              {search && (
+                <button onClick={() => setSearch("")} title="Bersihkan pencarian"
+                  style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#8e8f8e", padding: 4, display: "flex", alignItems: "center" }}>
+                  <X size={13} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

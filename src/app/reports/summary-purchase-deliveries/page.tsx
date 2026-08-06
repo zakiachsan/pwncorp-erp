@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Truck, Star, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const fmtDate = (x: string | Date | null) =>
   x ? new Date(x).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "—";
@@ -42,7 +43,7 @@ export default function SummaryPurchaseDeliveriesPage() {
           Summary Purchase Deliveries
           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 ml-1" />
         </div>
-        <button className="btn btn--sm">
+        <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("summary-purchase-deliveries"))} className="btn btn--sm">
           <Download size={14} /> Export
         </button>
       </div>

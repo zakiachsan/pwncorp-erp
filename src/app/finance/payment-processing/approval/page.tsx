@@ -5,6 +5,7 @@ import { Check, X } from "lucide-react";
 
 interface PaymentReq {
   id: string;
+  apiId: string;
   tanggal: string;
   diajukanOleh: string;
   keperluan: string;
@@ -19,12 +20,16 @@ export default function ApprovalDeskPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const [actionLoading, setActionLoading] = useState("");
+
+  const fetchData = () => {
+    setLoading(true);
     fetch("/api/payment-requests?status=pending")
       .then((r) => r.json())
       .then((json) => {
         const mapped = (json.data || []).map((pr: any) => ({
           id: pr.prNo || pr.id?.toString() || "",
+          apiId: pr.id?.toString() || "",
           tanggal: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-",
           diajukanOleh: pr.requestedBy || "User",
           keperluan: pr.purpose || "",
@@ -35,13 +40,35 @@ export default function ApprovalDeskPage() {
         setLoading(false);
       })
       .catch(() => { setError("Failed to load payment requests"); setLoading(false); });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
-  const handleAction = (id: string, action: "approve" | "reject") => {
-    setData((prev) => prev.filter((r) => r.id !== id));
+  const handleAction = async (id: string, action: "approve" | "reject") => {
+    const row = data.find((r) => r.id === id);
+    const apiId = row?.apiId || id;
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/payment-requests/${encodeURIComponent(apiId)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: action === "approve" ? "approved" : "rejected" }),
+      });
+      if (!res.ok) {
+        alert("Gagal update status: " + res.status);
+        return;
+      }
+      fetchData();
+    } catch {
+      alert("Gagal update status. Cek koneksi.");
+    } finally {
+      setActionLoading("");
+    }
   };
 
   return (

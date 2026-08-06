@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Download, Upload, X } from "lucide-react";
-import { exportToCsv, parseCsv, validateRows, mapRowToApi, makeFilename, downloadTemplate, customerColumns } from "@/lib/csv-utils";
+import { validateRows, mapRowToApi, customerColumns } from "@/lib/csv-utils";
+import { exportDataToExcel, parseExcelFile, makeFilename, downloadTemplate } from "@/lib/excel-utils";
 
 interface Customer {
   id: string;
@@ -51,7 +52,7 @@ export default function CustomersPage() {
   const handleSearch = () => { /* trigger via state */ };
 
   const handleExport = () => {
-    exportToCsv(data, customerColumns, makeFilename("customers"));
+    exportDataToExcel(data, customerColumns, makeFilename("customers"));
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +60,7 @@ export default function CustomersPage() {
     if (!file) return;
     setImportResult(null);
 
-    const result = await parseCsv(file);
+    const result = await parseExcelFile(file);
     if (result.error) {
       alert("CSV Error: " + result.error);
       if (fileRef.current) fileRef.current.value = "";
@@ -118,7 +119,7 @@ export default function CustomersPage() {
           <button onClick={() => setShowImportModal(true)} className="btn btn--sm">
             <Upload size={14} /> Import
           </button>
-          <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFileSelect} />
+          <input ref={fileRef} type="file" accept=".csv,.xls,.xlsx" style={{ display: "none" }} onChange={handleFileSelect} />
           <button className="btn btn--brand btn--sm" onClick={() => router.push("/master-data/customers/new")}>
             <Plus size={14} /> Add Customer
           </button>

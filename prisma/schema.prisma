@@ -71,6 +71,7 @@ model Store {
   stockHistories  StockHistory[]
   receipts        Receipt[]
   paymentRequests PaymentRequest[]
+  anggaran        Anggaran[]
 
   @@map("stores")
 }
@@ -354,6 +355,23 @@ model WOItem {
   completedAt DateTime? @map("completed_at")
 
   @@map("wo_items")
+}
+
+// ─── ANGGARAN (warehouse/anggaran) ───
+model Anggaran {
+  id        String   @id @default(cuid())
+  swoId     String   @map("swo_id") // No. SWO (Work Order)
+  sroId     String?  @map("sro_id") // No. SRO (Service Order)
+  customer  String?
+  kendaraan String?
+  noPol     String?  @map("no_pol")
+  anggaran  Float    @default(0)
+  realisasi Float    @default(0)
+  storeId   String   @map("store_id")
+  store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("anggaran")
 }
 
 model Invoice {
@@ -786,6 +804,10 @@ model COA {
   children     COA[]   @relation("COATree")
   level        Int     @default(1)
   isActive     Boolean @default(true) @map("is_active")
+  divisi       String?
+  note         String?
+  noRek        String? @map("no_rek")
+  pemilik      String?
 
   journalDetails JournalDetail[]
   bankAccounts   BankAccount[]
@@ -963,18 +985,22 @@ model PettyCash {
 }
 
 model PaymentRequest {
-  id          String   @id @default(cuid())
-  prNo        String   @unique @map("pr_no")
-  storeId     String   @map("store_id")
-  store       Store    @relation(fields: [storeId], references: [id])
-  requestedBy String   @map("requested_by")
-  amount      Float
-  purpose     String
-  vendor      String?
-  status      String   @default("pending") // pending / approved / rejected / paid
-  dueDate     DateTime? @map("due_date")
-  notes       String?
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(cuid())
+  prNo         String   @unique @map("pr_no")
+  storeId      String   @map("store_id")
+  store        Store    @relation(fields: [storeId], references: [id])
+  requestedBy  String   @map("requested_by")
+  amount       Float
+  purpose      String
+  vendor       String?
+  status       String   @default("pending") // pending / approved / rejected / paid
+  dueDate      DateTime? @map("due_date")
+  notes        String?
+  tglKebutuhan DateTime? @map("tgl_kebutuhan")
+  divisi       String?
+  kategori     String?
+  penerima     String?
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("payment_requests")
 }

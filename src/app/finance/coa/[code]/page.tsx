@@ -3,6 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Edit, Download } from "lucide-react";
+import { exportTableToExcel, makeFilename } from "@/lib/excel-utils";
 
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
 const fmtDate = (iso: string) =>
@@ -82,7 +83,7 @@ export default function COADetailPage() {
           <div className="view-title">Akun {account.code}</div>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn--sm"><Download size={14} /> Export</button>
+          <button onClick={() => exportTableToExcel(document.querySelector(".data-table"), makeFilename("coa-ledger"))} className="btn btn--sm"><Download size={14} /> Export</button>
           <button className="btn btn--brand btn--sm"><Edit size={14} /> Edit</button>
         </div>
       </div>
