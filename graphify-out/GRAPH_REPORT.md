@@ -1,71 +1,80 @@
-# Graph Report - pwncorp  (2026-08-06)
+# Graph Report - pwncorp-erp-fresh  (2026-08-06)
 
 ## Corpus Check
-- 316 files · ~285,441 words
+- 319 files · ~289,908 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1679 nodes · 2291 edges · 240 communities (150 shown, 90 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 20 edges (avg confidence: 0.52)
+- 1644 nodes · 2362 edges · 224 communities (149 shown, 75 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `eb622505`
+- Built from commit: `a433e9f1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
+- stock-histories/page.tsx
+- csv-utils.ts
 - generate_reports.py
 - numbering.ts
-- devDependencies
 - AppShell.tsx
-- dependencies
+- prisma.ts
+- vehicles/[id]/route.ts
 - PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)
+- getCurrentUser
+- FormattedNumberInput.tsx
 - 4. DEVELOPMENT PLAN
 - compilerOptions
-- prisma.ts
-- getCurrentUser
-- withAuth
 - expand_data.py
 - auth-helpers.ts
+- devDependencies
+- dependencies
+- invoices/route.ts
 - Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)
 - coa/page.tsx
-- Component Patterns
-- app/dashboard/page.tsx
-- reports/ar/page.tsx
 - service-orders/new/page.tsx
-- DateRangePicker.tsx
+- Implementation Plan
+- Component Patterns
+- reports/ar/page.tsx
+- service-orders/[...no]/page.tsx
 - request-payment/page.tsx
 - soa/[...refCode]/page.tsx
-- Implementation Plan
+- work-orders/detail/[...no]/page.tsx
 - reports/ap/page.tsx
 - navigation.js
+- service/[...no]/page.tsx
 - service/page.tsx
 - customers/new/page.tsx
+- DateRangePicker.tsx
 - accounting-reports/page.tsx
+- receivables/[id]/page.tsx
 - vehicles/new/page.tsx
 - daily-service-payments/page.tsx
+- package.json
 - PwnCorp ERP — QA Report
+- service-orders/page.tsx
 - rencana-tagihan/page.tsx
 - inventory/[code]/page.tsx
 - purchase-returns/[...docNumber]/page.tsx
 - tree/page.tsx
 - payments/[no]/page.tsx
-- work-orders/detail/[...no]/page.tsx
+- sparepart/[sku]/page.tsx
 - project/[...id]/page.tsx
 - project/page.tsx
 - detailed-service-orders/page.tsx
-- service-orders/[...no]/page.tsx
 - service-packages/[sku]/page.tsx
 - anggaran/page.tsx
-- receivables/[id]/page.tsx
-- service/[...no]/page.tsx
+- SearchableSelect.tsx
+- seed-invoices.ts
+- seed-warehouse.ts
+- seed-warehouse-stock.ts
 - petty-cash/page.tsx
-- sparepart/[sku]/page.tsx
+- inventory/new/page.tsx
 - po/page.tsx
 - inventory/stock-opname/new/page.tsx
 - customers/[id]/page.tsx
-- seed-invoices.ts
 - detailed-service-invoices/page.tsx
 - detailed-service-work-orders/page.tsx
 - service-payment-received/page.tsx
@@ -73,41 +82,48 @@
 - summary-service-invoices/page.tsx
 - summary-service-orders/page.tsx
 - summary-service-work-orders/page.tsx
-- seed-warehouse.ts
+- stock-orders/detail/[...no]/page.tsx
 - purchase-orders/[...refCode]/page.tsx
 - stock-histories/[...id]/page.tsx
 - stock-outgoing/[...refCode]/page.tsx
 - stock-transfer/[...refCode]/page.tsx
+- check-warehouse-stock.ts
+- debug-cbl019.ts
+- debug-wh.ts
+- debug-wo-items.ts
 - purchase/page.tsx
 - finance/page.tsx
-- ap-aging/page.tsx
 - ap-cheque/page.tsx
 - ap-credit/page.tsx
 - ap-overdue/page.tsx
-- ap-overlimit/page.tsx
+- makeFilename
 - ap-payments/page.tsx
-- ap-subledger/page.tsx
-- ar-aging/page.tsx
-- ar-cheque/page.tsx
+- coa/[id]/route.ts
+- service-packages/[id]/route.ts
 - ar-credit/page.tsx
-- ar-overdue/page.tsx
-- ar-overlimit/page.tsx
+- spareparts/[id]/route.ts
+- accounts-receivable/[id]/route.ts
 - ar-payments/page.tsx
+- anggaran/route.ts
 - summary-ar-ap/page.tsx
 - tax-invoices/page.tsx
 - po/[no]/page.tsx
 - users/page.tsx
 - [plate]/edit/page.tsx
+- purchase/[...no]/page.tsx
 - purchase-deliveries/[...refCode]/page.tsx
-- stock-histories/page.tsx
+- purchase-request/[...refCode]/page.tsx
 - stock-opname/[...refCode]/page.tsx
 - work-orders/page.tsx
+- journal.ts
 - seed.ts
+- invoices/[id]/route.ts
 - users/[id]/route.ts
 - finance/ap/page.tsx
 - finance/ar/page.tsx
 - payables/page.tsx
 - receivables/page.tsx
+- coa/[code]/page.tsx
 - approval/page.tsx
 - receipts/page.tsx
 - aging-ap/page.tsx
@@ -115,7 +131,7 @@
 - soa/page.tsx
 - transfers/page.tsx
 - inventory/[code]/edit/page.tsx
-- inventory/new/page.tsx
+- stock-outgoing/new/page.tsx
 - inventory/page.tsx
 - po/new/page.tsx
 - inventory/stock-opname/page.tsx
@@ -126,659 +142,628 @@
 - summary-purchase-returns/page.tsx
 - stock-workflow/stock-orders/page.tsx
 - purchase-invoices/[...docNumber]/page.tsx
+- stock-orders/new/page.tsx
 - warehouse/stock-opname/new/page.tsx
-- api-helpers.ts
-- customers/[id]/route.ts
-- invoices/[id]/route.ts
-- invoices/route.ts
-- seed-warehouse-stock.ts
-- services/[id]/route.ts
-- spareparts/[id]/route.ts
-- users/route.ts
-- vehicles/[id]/route.ts
-- coa/[code]/page.tsx
-- invoices/create/page.tsx
-- invoices/page.tsx
-- journal/create/page.tsx
-- journal/page.tsx
-- history/page.tsx
-- payments/page.tsx
-- aging-ar/page.tsx
-- master-data/page.tsx
-- services/[code]/page.tsx
-- services/new/page.tsx
-- stock-orders/detail/[...no]/page.tsx
-- check-warehouse-stock.ts
-- debug-cbl019.ts
-- suppliers/new/page.tsx
-- debug-wh.ts
-- users/[id]/page.tsx
-- users/new/page.tsx
-- debug-wo-items.ts
-- service-orders/page.tsx
-- summary-purchase-deliveries/page.tsx
-- journal.ts
-- purchase-orders/new/page.tsx
-- purchase-orders/page.tsx
-- purchase-request/new/page.tsx
-- stock-transfer/new/page.tsx
-- customers/route.ts
 - check-pw.js
 - add-spareparts.ts
+- check-journal.ts
 - create-sro-diagnosis.ts
 - list-data.ts
 - reset-wo.ts
 - test-journal.ts
-- service-packages/route.ts
-- services/route.ts
-- stock-opnames/route.ts
 - update-sro.ts
-- vehicles/route.ts
+- withAuth
+- inspection-mappings/route.ts
 - suppliers/[id]/route.ts
-- bank-reconciliation/page.tsx
+- users/route.ts
+- journal/[id]/route.ts
+- invoices/create/page.tsx
+- payment-requests/[id]/route.ts
+- purchase-orders/[id]/route.ts
+- history/page.tsx
+- excel-utils.ts
+- finance/route.ts
+- master-data/page.tsx
+- services/[code]/page.tsx
+- users/[id]/page.tsx
+- services/route.ts
+- purchase-orders/new/page.tsx
+- purchase-orders/page.tsx
+- purchase-request/new/page.tsx
+- stock-orders/[id]/route.ts
+- delivery-note/[...no]/page.tsx
+- receipt/[...no]/page.tsx
+- middleware.ts
+- .eslintrc.json
+- check-data.ts
+- check-journals.ts
+- check-sp.ts
+- test-all-journals.ts
+- test-stock-journal.ts
+- bank-accounts/route.ts
+- coa/route.ts
+- purchase-invoices/route.ts
+- purchase-returns/[id]/route.ts
+- service-packages/route.ts
+- stock-outgoings/route.ts
+- stock-returns/[id]/route.ts
+- stock-transfers/[id]/route.ts
+- stock-transfers/route.ts
+- work-orders/[id]/route.ts
 - finance/dashboard/page.tsx
 - journal/[no]/page.tsx
 - balance-sheet/page.tsx
 - profit-loss/page.tsx
-- delivery-note/[...no]/page.tsx
 - project/new/page.tsx
-- stock-movement/page.tsx
-- stock-position/page.tsx
-- stock-orders/new/page.tsx
-- FormattedNumberInput.tsx
 - stock-returns/page.tsx
 - pembanding/page.tsx
-- receipt/[...no]/page.tsx
-- purchase-invoices/page.tsx
-- purchase-request/page.tsx
 - purchase-returns/new/page.tsx
-- purchase-returns/page.tsx
-- stock-outgoing/new/page.tsx
 - work-orders/new/page.tsx
+- test-pg.js
+- eslint-config-next
+- next
+- next-auth
 - next.config.js
 - next-env.d.ts
-- coa/create/page.tsx
-- execution/page.tsx
-- check-journals.ts
-- receipts/[no]/page.tsx
-- check-sp.ts
-- transfers/[no]/page.tsx
-- test-all-journals.ts
-- test-stock-journal.ts
-- suppliers/[id]/edit/page.tsx
-- app/page.tsx
-- coa/route.ts
-- low-stock/page.tsx
-- estimasi/page.tsx
-- purchase-deliveries/[id]/route.ts
-- app/stock-orders/page.tsx
-- purchase-invoices/route.ts
-- purchase-orders/[id]/route.ts
-- spareparts/route.ts
-- stock-outgoing/page.tsx
-- qc/page.tsx
-- utils.ts
-- middleware.ts
-- open-next.config.ts
-- postcss.config.js
-- prisma.config.ts
-- sort_data.py
-- tailwind.config.js
-- stock-opnames/[id]/route.ts
-- stock-outgoings/route.ts
-- stock-transfers/[id]/route.ts
-- stock-transfers/route.ts
-- test-pg.js
+- @opennextjs/cloudflare
+- @prisma/client
+- @radix-ui/react-slot
+- react-dom
+- @types/node
 - revert-wo.js
+- setup-db.js
+- coa/create/page.tsx
+- receipts/[...no]/page.tsx
+- transfers/[...no]/page.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `withAuth()` - 73 edges
-2. `getCurrentUser()` - 67 edges
-3. `FormattedNumberInput()` - 33 edges
-4. `"stores"` - 28 edges
-5. `fmt()` - 20 edges
-6. `fmt_rp()` - 19 edges
-7. `make_date()` - 17 edges
-8. `"spareparts"` - 16 edges
-9. `compilerOptions` - 15 edges
-10. `parseCsv()` - 14 edges
+1. `makeFilename()` - 79 edges
+2. `withAuth()` - 75 edges
+3. `getCurrentUser()` - 68 edges
+4. `exportTableToExcel()` - 66 edges
+5. `FormattedNumberInput()` - 33 edges
+6. `fmt()` - 20 edges
+7. `fmt_rp()` - 19 edges
+8. `DateRangePicker()` - 18 edges
+9. `make_date()` - 17 edges
+10. `exportDataToExcel()` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `parseExcelFile()` --references--> `xlsx`  [EXTRACTED]
+  src/lib/excel-utils.ts → package.json
+- `writeWorkbook()` --references--> `xlsx`  [EXTRACTED]
+  src/lib/excel-utils.ts → package.json
 - `DashboardPage()` --indirect_call--> `ClipboardList()`  [INFERRED]
   src/app/dashboard/page.tsx → src/app/service-orders/page.tsx
-- `CustomersPage()` --calls--> `downloadTemplate()`  [EXTRACTED]
-  src/app/master-data/customers/page.tsx → src/lib/csv-utils.ts
-- `CustomersPage()` --calls--> `exportToCsv()`  [EXTRACTED]
-  src/app/master-data/customers/page.tsx → src/lib/csv-utils.ts
-- `CustomersPage()` --calls--> `makeFilename()`  [EXTRACTED]
-  src/app/master-data/customers/page.tsx → src/lib/csv-utils.ts
-- `CustomersPage()` --calls--> `mapRowToApi()`  [EXTRACTED]
-  src/app/master-data/customers/page.tsx → src/lib/csv-utils.ts
+- `APPage()` --calls--> `exportTableToExcel()`  [EXTRACTED]
+  src/app/finance/ap/page.tsx → src/lib/excel-utils.ts
+- `APPage()` --calls--> `makeFilename()`  [EXTRACTED]
+  src/app/finance/ap/page.tsx → src/lib/excel-utils.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (240 total, 90 thin omitted)
+## Communities (224 total, 75 thin omitted)
 
-### Community 0 - "generate_reports.py"
-Cohesion: 0.09
-Nodes (59): "accounts_payable", "accounts_receivable", "activity_logs", "bank_accounts", "bank_reconciliations", "coa", "customers", "delivery_items" (+51 more)
-
-### Community 1 - "numbering.ts"
-Cohesion: 0.15
-Nodes (30): Customer, CustomersPage(), Service, ServicesPage(), formatRupiah(), Product, ProductsPage(), Supplier (+22 more)
-
-### Community 2 - "devDependencies"
-Cohesion: 0.11
-Nodes (39): cheque_date(), cheque_no(), cn_doc_ar(), disbursement_date(), doc_num_ap(), doc_num_inv_ap(), doc_num_inv_ir(), doc_num_ir() (+31 more)
-
-### Community 3 - "AppShell.tsx"
-Cohesion: 0.08
-Nodes (27): GET, POST, GET, POST, GET, POST, GET, POST (+19 more)
-
-### Community 4 - "dependencies"
-Cohesion: 0.08
-Nodes (6): AppShell(), financeGroups, NavItem, operasionalGroups, S, SidebarProps
-
-### Community 5 - "PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)"
-Cohesion: 0.07
-Nodes (17): GET, PUT, GET, PUT, GET, PUT, GET, POST (+9 more)
-
-### Community 6 - "4. DEVELOPMENT PLAN"
-Cohesion: 0.07
-Nodes (18): GET, PUT, GET, GET, GET, DELETE, GET, PUT (+10 more)
-
-### Community 7 - "compilerOptions"
-Cohesion: 0.07
-Nodes (26): 10. CATATAN PENTING, 1. STATUS SAAT INI, 2. ARSITEKTUR TEKNIS, 3.1 Master Data Module, 3.2 Operasional Module (Core Flow), 3.3 Inventory & Warehouse Module, 3.4 Finance & Accounting Module, 3.5 Project & Anggaran Module (+18 more)
-
-### Community 8 - "prisma.ts"
-Cohesion: 0.07
-Nodes (18): GET, PUT, GET, PUT, GET, POST, GET, PUT (+10 more)
-
-### Community 9 - "getCurrentUser"
-Cohesion: 0.08
-Nodes (6): S, emptyForm, fmt(), NewStockOrderPage(), FormattedNumberInput(), FormattedNumberInputProps
-
-### Community 10 - "withAuth"
-Cohesion: 0.08
-Nodes (25): 1. SUMMARY PRD, 2. SUMMARY HASIL DISKUSI CLIENT, 3. TEKNOLOGI YANG DISARANKAN, 4. DEVELOPMENT PLAN, 5. RINGKASAN TIMELINE, 6. CATATAN DARI DISKUSI YANG PERLU DIPERHATIKAN, 6 Modul Utama, a. Service Orders (mirip Turboly) (+17 more)
-
-### Community 11 - "expand_data.py"
-Cohesion: 0.08
-Nodes (25): dom, dom.iterable, esnext, next-env.d.ts, .next/types/**/*.ts, node_modules, **/*.ts, **/*.tsx (+17 more)
-
-### Community 12 - "auth-helpers.ts"
-Cohesion: 0.21
-Nodes (23): find_data_range(), fmt_rp(), gen_ap_account_payables(), gen_ap_aging(), gen_ap_cheque(), gen_ap_credit(), gen_ap_invoice_payables(), gen_ap_overdue() (+15 more)
-
-### Community 13 - "Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)"
-Cohesion: 0.09
-Nodes (14): GET, handler, GET, GET, PUT, GET, GET, GET (+6 more)
-
-### Community 14 - "coa/page.tsx"
-Cohesion: 0.10
-Nodes (21): autoprefixer, eslint, devDependencies, autoprefixer, eslint, postcss, tailwindcss, tsx (+13 more)
-
-### Community 15 - "Component Patterns"
-Cohesion: 0.10
-Nodes (21): bcryptjs, class-variance-authority, clsx, lucide-react, dependencies, bcryptjs, class-variance-authority, clsx (+13 more)
-
-### Community 16 - "app/dashboard/page.tsx"
-Cohesion: 0.12
-Nodes (14): GET, POST, GET, POST, DELETE, GET, PUT, GET (+6 more)
-
-### Community 17 - "reports/ar/page.tsx"
-Cohesion: 0.11
-Nodes (18): Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min), Phase 2: New API Routes + Pages (20 pages, ~2-3 hours), Phase 3: Verification, Priority Order, Static Pages → API Integration Plan, Task 1.1: work-orders/[...no]/page.tsx, Task 1.2: products/[...sku]/page.tsx, Task 1.3: inventory/po/[no]/page.tsx (+10 more)
-
-### Community 18 - "service-orders/new/page.tsx"
-Cohesion: 0.11
-Nodes (15): actionBtn, COAEntry, Divisi, divisiOptions, initialDivisi, initialKatPengeluaran, inlineInput, inlineSelect (+7 more)
-
-### Community 19 - "DateRangePicker.tsx"
-Cohesion: 0.12
-Nodes (12): brandModels, Customer, emptyForm, formatOdometer(), NewServiceOrderPage(), S, Service, Sparepart (+4 more)
-
-### Community 20 - "request-payment/page.tsx"
-Cohesion: 0.11
-Nodes (17): Current State, Data Flow (what triggers a log), Files to Create/Modify, Goal, Implementation Plan, No Schema Changes Needed, Service Order Changes Tab — Activity Log, Step 1: Activity Log Helper (+9 more)
-
-### Community 21 - "soa/[...refCode]/page.tsx"
-Cohesion: 0.12
-Nodes (15): 3-Column Info Cards (Detail Pages), Brand, Compact Field (F2), Component Patterns, CSS Utility Classes (globals.css), Form, Layout, Modals (+7 more)
-
-### Community 22 - "Implementation Plan"
-Cohesion: 0.18
-Nodes (12): ARReportsPage(), ColDef, CUSTOMERS, ENTITIES, FilterField, fmtDate(), fmtNum(), num() (+4 more)
-
-### Community 23 - "reports/ap/page.tsx"
-Cohesion: 0.20
-Nodes (11): ACTION_LABELS, FIELD_LABELS, fmt(), formatActionLabel(), formatChangeDescription(), formatOdometer(), S, ServiceOrderDetailPage() (+3 more)
-
-### Community 24 - "navigation.js"
-Cohesion: 0.16
-Nodes (9): divisiList, emptyForm, fmt(), FormData, kategoriList, PaymentRequest, RequestPaymentPage(), statusStyle() (+1 more)
-
-### Community 25 - "service/page.tsx"
-Cohesion: 0.18
-Nodes (10): fmtRp(), hardcodedSoaData, invoiceStatusColor(), PrintView(), PS, PT, TODO: No dedicated API for SOA detail yet. Attempting to build from /api/account, S (+2 more)
-
-### Community 26 - "customers/new/page.tsx"
-Cohesion: 0.22
-Nodes (10): fmt(), fmtDate(), getWorkflowStepIndex(), S, statusColor(), toDateInput(), workflowSteps, WorkOrderDetailPage() (+2 more)
-
-### Community 27 - "accounting-reports/page.tsx"
-Cohesion: 0.22
-Nodes (10): APReportsPage(), ColDef, FilterField, fmtDate(), fmtNum(), num(), pick(), pickName() (+2 more)
-
-### Community 28 - "vehicles/new/page.tsx"
-Cohesion: 0.38
-Nodes (11): closeMobileSidebar(), init(), isMobile(), loadState(), openMobileSidebar(), saveState(), setCollapsed(), switchView() (+3 more)
-
-### Community 29 - "daily-service-payments/page.tsx"
-Cohesion: 0.23
-Nodes (9): fmt(), fmtDate(), fmtDateTime(), S, ServiceInvoiceDetailPage(), TabKey, TABS, WORKFLOW_STEPS (+1 more)
-
-### Community 30 - "PwnCorp ERP — QA Report"
-Cohesion: 0.21
-Nodes (10): ApiInvoice, fmt(), fmtRp(), Invoice, PrintView(), PS, PT, S (+2 more)
-
-### Community 31 - "rencana-tagihan/page.tsx"
-Cohesion: 0.18
-Nodes (4): brandModels, currentYear, vehicleBrands, years
-
-### Community 32 - "inventory/[code]/page.tsx"
-Cohesion: 0.24
-Nodes (8): DateRangePicker(), DateRangePickerProps, DAYS, fmtDate(), isSameDay(), MONTHS, MONTHS_LONG, PRESETS
-
-### Community 33 - "purchase-returns/[...docNumber]/page.tsx"
-Cohesion: 0.20
-Nodes (5): ColDef, ENTITIES, FilterField, TabConfig, TABS
-
-### Community 34 - "tree/page.tsx"
-Cohesion: 0.27
-Nodes (8): fmt(), fmtDate(), InvoiceReceivableDetailPage(), S, TabKey, TABS, WORKFLOW_STEPS, workflowColor()
-
-### Community 35 - "payments/[no]/page.tsx"
-Cohesion: 0.20
-Nodes (4): brandModels, currentYear, vehicleBrands, years
-
-### Community 36 - "work-orders/detail/[...no]/page.tsx"
-Cohesion: 0.22
-Nodes (8): DailyServicePaymentsPage(), fmt(), L, paymentColumns, TD, TD_RIGHT, TH, TH_RIGHT
-
-### Community 37 - "project/[...id]/page.tsx"
-Cohesion: 0.22
-Nodes (8): name, private, scripts, build, dev, lint, start, version
-
-### Community 38 - "project/page.tsx"
-Cohesion: 0.22
-Nodes (8): Bugs Found & Fixed During QA, Executive Summary, Phase 1: API Endpoint Testing (36 endpoints), Phase 2: Frontend Page Testing (Browser), Phase 3: Data Integrity Audit, PwnCorp ERP — QA Report, Summary, Testing Notes
-
-### Community 39 - "detailed-service-orders/page.tsx"
-Cohesion: 0.20
-Nodes (12): DashboardData, DashboardPage(), fmt(), fmtDate(), fmtFull(), statusPill(), ClipboardList(), fmt() (+4 more)
-
-### Community 40 - "service-orders/[...no]/page.tsx"
-Cohesion: 0.25
-Nodes (6): bulanLabels, CustomerBilling, data, fmt(), RencanaTagihanPage(), terminOptions
-
-### Community 41 - "service-packages/[sku]/page.tsx"
-Cohesion: 0.28
-Nodes (6): changeTypeColor, changeTypeLabel, fmt(), fmtDate(), InventoryDetailPage(), S
-
-### Community 42 - "anggaran/page.tsx"
-Cohesion: 0.28
-Nodes (5): fmtDate(), formatIDR(), PurchaseReturnDetailPage(), S, workflowSteps
-
-### Community 43 - "receivables/[id]/page.tsx"
-Cohesion: 0.32
-Nodes (5): AccountNode, AccountTreePage(), collectAllParentCodes(), getLevel1ParentCodes(), TreeNodeProps
-
-### Community 44 - "service/[...no]/page.tsx"
-Cohesion: 0.36
-Nodes (5): fmt(), fmtDate(), PaymentDetailPage(), S, statusColor()
-
-### Community 45 - "petty-cash/page.tsx"
-Cohesion: 0.29
-Nodes (6): fmt(), ProductDetailPage(), S, TabKey, tabLabels, tabList
-
-### Community 46 - "sparepart/[sku]/page.tsx"
-Cohesion: 0.32
-Nodes (6): fmtDate(), fmtRp(), ProjectDetailPage(), S, TabKey, tabList
-
-### Community 47 - "po/page.tsx"
-Cohesion: 0.39
-Nodes (6): fmt(), fmtDate(), fmtShort(), ProjectListPage(), statusMap, statusPill()
-
-### Community 48 - "inventory/stock-opname/new/page.tsx"
-Cohesion: 0.32
-Nodes (6): DetailedServiceOrdersPage(), fmt(), L, statusPill(), TD, TH
-
-### Community 49 - "customers/[id]/page.tsx"
-Cohesion: 0.32
-Nodes (6): fmt(), fmtDate(), PackageServiceDetailPage(), SS, tdStyle, thStyle
-
-### Community 50 - "seed-invoices.ts"
-Cohesion: 0.32
-Nodes (7): AnggaranPage(), AnggaranSWO, fmt(), fmtShort(), initialData, projects, TODO: Replace hardcoded data with API call when /api/anggaran endpoint is availa
-
-### Community 52 - "detailed-service-work-orders/page.tsx"
-Cohesion: 0.38
-Nodes (6): adapter, main(), poNo(), pool, prisma, spi()
-
-### Community 53 - "service-payment-received/page.tsx"
-Cohesion: 0.29
-Nodes (5): adapter, pool, poolConfig, prisma, u
-
-### Community 54 - "service-payment-type-info/page.tsx"
-Cohesion: 0.29
-Nodes (5): adapter, pool, poolConfig, prisma, u
-
-### Community 55 - "summary-service-invoices/page.tsx"
-Cohesion: 0.33
-Nodes (5): CashEntry, COA_CATEGORIES, EntryType, fmt(), PettyCashPage()
-
-### Community 56 - "summary-service-orders/page.tsx"
-Cohesion: 0.29
-Nodes (5): categories, categoryCardColors, CategoryId, ReportItem, reportsByCategory
-
-### Community 57 - "summary-service-work-orders/page.tsx"
-Cohesion: 0.38
-Nodes (5): ApiPO, formatIDR(), PurchaseOrder, PurchaseOrdersPage(), statusPill()
-
-### Community 58 - "seed-warehouse.ts"
-Cohesion: 0.33
-Nodes (5): emptyRow(), NewStockOpnamePage(), OpnameRow, S, Sparepart
-
-### Community 59 - "purchase-orders/[...refCode]/page.tsx"
-Cohesion: 0.29
-Nodes (4): CustomerDetail, TD, TH, VehicleData
-
-### Community 60 - "stock-histories/[...id]/page.tsx"
-Cohesion: 0.33
-Nodes (5): DetailedServiceInvoicesPage(), fmt(), L, TD, TH
-
-### Community 61 - "stock-outgoing/[...refCode]/page.tsx"
-Cohesion: 0.33
-Nodes (5): DetailedServiceWorkOrdersPage(), L, statusPill(), TD, TH
-
-### Community 62 - "stock-transfer/[...refCode]/page.tsx"
-Cohesion: 0.33
-Nodes (5): fmt(), L, ServicePaymentReceivedPage(), TD, TH
-
-### Community 63 - "purchase/page.tsx"
-Cohesion: 0.33
-Nodes (5): fmt(), L, ServicePaymentTypeInfoPage(), TD, TH
-
-### Community 64 - "finance/page.tsx"
-Cohesion: 0.33
-Nodes (5): fmt(), L, SummaryServiceInvoicesPage(), TD, TH
-
-### Community 65 - "ap-aging/page.tsx"
-Cohesion: 0.33
-Nodes (5): fmt(), linkStyle, SummaryServiceOrdersPage(), TD, TH
-
-### Community 66 - "ap-cheque/page.tsx"
-Cohesion: 0.33
-Nodes (5): L, statusPill(), SummaryServiceWorkOrdersPage(), TD, TH
-
-### Community 67 - "ap-credit/page.tsx"
-Cohesion: 0.33
-Nodes (4): fmtDate(), S, StockOrderDetailPage(), workflowSteps
-
-### Community 68 - "ap-overdue/page.tsx"
-Cohesion: 0.48
-Nodes (6): fmtDate(), formatIDR(), getStepIndex(), PurchaseOrderDetailPage(), statusColor(), workflowSteps
-
-### Community 69 - "ap-overlimit/page.tsx"
-Cohesion: 0.38
-Nodes (5): fmt(), fmtDate(), S, StockHistoryDetailPage(), workflowSteps
-
-### Community 70 - "ap-payments/page.tsx"
-Cohesion: 0.38
-Nodes (5): fmtDate(), formatIDR(), S, StockOutgoingDetailPage(), workflowSteps
-
-### Community 71 - "ap-subledger/page.tsx"
-Cohesion: 0.33
-Nodes (4): fmtDate(), S, StockTransferDetailPage(), workflowSteps
-
-### Community 72 - "ar-aging/page.tsx"
-Cohesion: 0.33
-Nodes (4): adapter, pool, prisma, u
-
-### Community 73 - "ar-cheque/page.tsx"
-Cohesion: 0.33
-Nodes (4): adapter, pool, prisma, u
-
-### Community 74 - "ar-credit/page.tsx"
-Cohesion: 0.33
-Nodes (4): adapter, pool, prisma, u
-
-### Community 75 - "ar-overdue/page.tsx"
-Cohesion: 0.33
-Nodes (4): adapter, pool, prisma, u
-
-### Community 76 - "ar-overlimit/page.tsx"
-Cohesion: 0.47
-Nodes (4): fmt(), PurchaseInvoicesPage(), S, statusColor()
-
-### Community 79 - "summary-ar-ap/page.tsx"
-Cohesion: 0.83
-Nodes (3): APChequePage(), fmt(), fmtDate()
-
-### Community 80 - "tax-invoices/page.tsx"
-Cohesion: 0.83
-Nodes (3): APCreditPage(), fmt(), fmtDate()
-
-### Community 81 - "po/[no]/page.tsx"
-Cohesion: 0.83
-Nodes (3): APOverduePage(), fmt(), fmtDate()
-
-### Community 83 - "[plate]/edit/page.tsx"
-Cohesion: 0.83
-Nodes (3): APPaymentsPage(), fmt(), fmtDate()
-
-### Community 86 - "stock-histories/page.tsx"
-Cohesion: 0.83
-Nodes (3): ARChequePage(), fmt(), fmtDate()
-
-### Community 87 - "stock-opname/[...refCode]/page.tsx"
-Cohesion: 0.83
-Nodes (3): ARCreditPage(), fmt(), fmtDate()
-
-### Community 88 - "work-orders/page.tsx"
-Cohesion: 0.83
-Nodes (3): AROverduePage(), fmt(), fmtDate()
-
-### Community 90 - "users/[id]/route.ts"
-Cohesion: 0.83
-Nodes (3): ARPaymentsPage(), fmt(), fmtDate()
-
-### Community 93 - "payables/page.tsx"
-Cohesion: 0.83
-Nodes (3): fmt(), fmtDate(), TaxInvoicesPage()
-
-### Community 94 - "receivables/page.tsx"
-Cohesion: 0.40
-Nodes (4): ApiPODetail, formatIDR(), POData, PODetailPage()
-
-### Community 95 - "approval/page.tsx"
-Cohesion: 0.33
-Nodes (3): allMenus, tabOptions, UserEntry
-
-### Community 96 - "receipts/page.tsx"
-Cohesion: 0.33
-Nodes (4): brandModels, currentYear, vehicleBrands, years
-
-### Community 97 - "aging-ap/page.tsx"
-Cohesion: 0.83
-Nodes (3): fmtDate(), fmtRp(), PurchaseInvoiceDetailPage()
-
-### Community 99 - "soa/page.tsx"
-Cohesion: 0.40
-Nodes (4): fmt(), PurchaseRequestDetailPage(), S, workflowSteps
-
-### Community 101 - "inventory/[code]/edit/page.tsx"
-Cohesion: 0.47
-Nodes (4): fmtDate(), statusPill(), WorkOrder, WorkOrdersPage()
-
-### Community 102 - "inventory/new/page.tsx"
-Cohesion: 0.40
-Nodes (5): COA, createJournalEntry(), CreateJournalParams, generateJENo(), JournalLine
-
-### Community 103 - "inventory/page.tsx"
-Cohesion: 0.40
-Nodes (3): adapter, pool, prisma
-
-### Community 104 - "po/new/page.tsx"
-Cohesion: 0.40
-Nodes (4): DELETE, GET, PUT, VALID_TRANSITIONS
-
-### Community 105 - "inventory/stock-opname/page.tsx"
-Cohesion: 0.40
-Nodes (4): DELETE, GET, PUT, userSelect
-
-### Community 106 - "app/layout.tsx"
-Cohesion: 0.60
-Nodes (3): APPage(), fmt(), statusPill()
-
-### Community 107 - "suppliers/[id]/page.tsx"
-Cohesion: 0.60
-Nodes (3): ARPage(), fmt(), statusPill()
-
-### Community 108 - "[plate]/page.tsx"
-Cohesion: 0.60
-Nodes (4): fmt(), InvoicePayablesPage(), S, statusColor()
-
-### Community 109 - "summary-purchase-orders/page.tsx"
-Cohesion: 0.60
-Nodes (4): fmt(), InvoiceReceivablesPage(), S, statusColor()
-
-### Community 110 - "summary-purchase-returns/page.tsx"
-Cohesion: 0.50
-Nodes (3): fmt(), JournalPage(), SOURCE_MAP
-
-### Community 111 - "stock-workflow/stock-orders/page.tsx"
-Cohesion: 0.50
-Nodes (3): ApprovalDeskPage(), fmt(), PaymentReq
-
-### Community 113 - "warehouse/stock-opname/new/page.tsx"
-Cohesion: 0.50
-Nodes (3): AgingAPPage(), AgingRow, fmt()
-
-### Community 114 - "api-helpers.ts"
-Cohesion: 0.60
-Nodes (3): CashFlowPage(), fmt(), fmtDate()
-
-### Community 115 - "customers/[id]/route.ts"
-Cohesion: 0.50
-Nodes (4): TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-recei, S, SOAPage(), statusColor()
-
-### Community 116 - "invoices/[id]/route.ts"
-Cohesion: 0.60
-Nodes (4): formatIDR(), statusPill(), Transfer, TransfersPage()
-
-### Community 119 - "services/[id]/route.ts"
-Cohesion: 0.50
-Nodes (3): formatRupiah(), InventoryPage(), Sparepart
-
-### Community 120 - "spareparts/[id]/route.ts"
-Cohesion: 0.50
-Nodes (4): formatIDR(), ItemRow, NewPOPage(), VendorQuote
-
-### Community 125 - "invoices/page.tsx"
-Cohesion: 0.70
-Nodes (4): fmt(), fmtDate(), pillClass(), SummaryPurchaseOrdersPage()
-
-### Community 126 - "journal/create/page.tsx"
-Cohesion: 0.70
-Nodes (4): fmt(), fmtDate(), pillClass(), SummaryPurchaseReturnsPage()
-
-### Community 128 - "history/page.tsx"
-Cohesion: 0.60
-Nodes (4): formatIDR(), getStepIndex(), PurchaseInvoiceDetailPage(), workflowSteps
-
-### Community 129 - "payments/page.tsx"
+### Community 0 - "stock-histories/page.tsx"
 Cohesion: 0.60
 Nodes (4): fmtDate(), handleTypeClick(), StockHistoriesPage(), typeOptions
 
-### Community 130 - "aging-ar/page.tsx"
+### Community 1 - "csv-utils.ts"
+Cohesion: 0.11
+Nodes (33): xlsx, Customer, CustomersPage(), Service, ServicesPage(), formatRupiah(), Product, ProductsPage() (+25 more)
+
+### Community 2 - "generate_reports.py"
+Cohesion: 0.11
+Nodes (39): cheque_date(), cheque_no(), cn_doc_ar(), disbursement_date(), doc_num_ap(), doc_num_inv_ap(), doc_num_inv_ir(), doc_num_ir() (+31 more)
+
+### Community 3 - "numbering.ts"
+Cohesion: 0.08
+Nodes (27): GET, POST, GET, POST, GET, POST, GET, POST (+19 more)
+
+### Community 4 - "AppShell.tsx"
+Cohesion: 0.09
+Nodes (8): AppShell(), Header(), financeGroups, NavItem, operasionalGroups, S, Sidebar(), SidebarProps
+
+### Community 5 - "prisma.ts"
+Cohesion: 0.08
+Nodes (14): GET, GET, PUT, GET, GET, GET, PUT, GET (+6 more)
+
+### Community 6 - "vehicles/[id]/route.ts"
+Cohesion: 0.50
+Nodes (3): DELETE, GET, PUT
+
+### Community 7 - "PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)"
+Cohesion: 0.07
+Nodes (26): 10. CATATAN PENTING, 1. STATUS SAAT INI, 2. ARSITEKTUR TEKNIS, 3.1 Master Data Module, 3.2 Operasional Module (Core Flow), 3.3 Inventory & Warehouse Module, 3.4 Finance & Accounting Module, 3.5 Project & Anggaran Module (+18 more)
+
+### Community 8 - "getCurrentUser"
+Cohesion: 0.07
+Nodes (18): GET, POST, GET, GET, POST, GET, POST, GET (+10 more)
+
+### Community 9 - "FormattedNumberInput.tsx"
+Cohesion: 0.09
+Nodes (6): CoaItem, JournalLine, emptyForm, DeliveryItemRow, FormattedNumberInput(), FormattedNumberInputProps
+
+### Community 10 - "4. DEVELOPMENT PLAN"
+Cohesion: 0.08
+Nodes (25): 1. SUMMARY PRD, 2. SUMMARY HASIL DISKUSI CLIENT, 3. TEKNOLOGI YANG DISARANKAN, 4. DEVELOPMENT PLAN, 5. RINGKASAN TIMELINE, 6. CATATAN DARI DISKUSI YANG PERLU DIPERHATIKAN, 6 Modul Utama, a. Service Orders (mirip Turboly) (+17 more)
+
+### Community 11 - "compilerOptions"
+Cohesion: 0.08
+Nodes (25): dom, dom.iterable, esnext, next-env.d.ts, .next/types/**/*.ts, node_modules, **/*.ts, **/*.tsx (+17 more)
+
+### Community 12 - "expand_data.py"
+Cohesion: 0.21
+Nodes (23): find_data_range(), fmt_rp(), gen_ap_account_payables(), gen_ap_aging(), gen_ap_cheque(), gen_ap_credit(), gen_ap_invoice_payables(), gen_ap_overdue() (+15 more)
+
+### Community 13 - "auth-helpers.ts"
+Cohesion: 0.09
+Nodes (16): DELETE, PUT, handler, GET, GET, PUT, GET, POST (+8 more)
+
+### Community 14 - "devDependencies"
+Cohesion: 0.10
+Nodes (21): autoprefixer, eslint, devDependencies, autoprefixer, eslint, postcss, tailwindcss, tsx (+13 more)
+
+### Community 15 - "dependencies"
+Cohesion: 0.10
+Nodes (21): bcryptjs, class-variance-authority, clsx, lucide-react, dependencies, bcryptjs, class-variance-authority, clsx (+13 more)
+
+### Community 16 - "invoices/route.ts"
+Cohesion: 0.12
+Nodes (14): GET, POST, GET, POST, DELETE, GET, PUT, GET (+6 more)
+
+### Community 17 - "Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)"
+Cohesion: 0.11
+Nodes (18): Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min), Phase 2: New API Routes + Pages (20 pages, ~2-3 hours), Phase 3: Verification, Priority Order, Static Pages → API Integration Plan, Task 1.1: work-orders/[...no]/page.tsx, Task 1.2: products/[...sku]/page.tsx, Task 1.3: inventory/po/[no]/page.tsx (+10 more)
+
+### Community 18 - "coa/page.tsx"
+Cohesion: 0.12
+Nodes (15): actionBtn, COAEntry, Divisi, divisiOptions, initialDivisi, initialKatPengeluaran, inlineInput, inlineSelect (+7 more)
+
+### Community 19 - "service-orders/new/page.tsx"
+Cohesion: 0.12
+Nodes (12): brandModels, Customer, emptyForm, formatOdometer(), NewServiceOrderPage(), S, Service, Sparepart (+4 more)
+
+### Community 20 - "Implementation Plan"
+Cohesion: 0.11
+Nodes (17): Current State, Data Flow (what triggers a log), Files to Create/Modify, Goal, Implementation Plan, No Schema Changes Needed, Service Order Changes Tab — Activity Log, Step 1: Activity Log Helper (+9 more)
+
+### Community 21 - "Component Patterns"
+Cohesion: 0.12
+Nodes (15): 3-Column Info Cards (Detail Pages), Brand, Compact Field (F2), Component Patterns, CSS Utility Classes (globals.css), Form, Layout, Modals (+7 more)
+
+### Community 22 - "reports/ar/page.tsx"
+Cohesion: 0.18
+Nodes (12): ARReportsPage(), ColDef, CUSTOMERS, ENTITIES, FilterField, fmtDate(), fmtNum(), num() (+4 more)
+
+### Community 23 - "service-orders/[...no]/page.tsx"
+Cohesion: 0.20
+Nodes (11): ACTION_LABELS, FIELD_LABELS, fmt(), formatActionLabel(), formatChangeDescription(), formatOdometer(), S, ServiceOrderDetailPage() (+3 more)
+
+### Community 24 - "request-payment/page.tsx"
+Cohesion: 0.16
+Nodes (10): divisiList, emptyForm, fmt(), FormData, kategoriList, PaymentRequest, RequestPaymentPage(), statusLabel() (+2 more)
+
+### Community 25 - "soa/[...refCode]/page.tsx"
+Cohesion: 0.18
+Nodes (10): fmtRp(), hardcodedSoaData, invoiceStatusColor(), PrintView(), PS, PT, TODO: No dedicated API for SOA detail yet. Attempting to build from…, S (+2 more)
+
+### Community 26 - "work-orders/detail/[...no]/page.tsx"
+Cohesion: 0.22
+Nodes (10): fmt(), fmtDate(), getWorkflowStepIndex(), S, statusColor(), toDateInput(), workflowSteps, WorkOrderDetailPage() (+2 more)
+
+### Community 27 - "reports/ap/page.tsx"
+Cohesion: 0.22
+Nodes (10): APReportsPage(), ColDef, FilterField, fmtDate(), fmtNum(), num(), pick(), pickName() (+2 more)
+
+### Community 28 - "navigation.js"
+Cohesion: 0.38
+Nodes (11): closeMobileSidebar(), init(), isMobile(), loadState(), openMobileSidebar(), saveState(), setCollapsed(), switchView() (+3 more)
+
+### Community 29 - "service/[...no]/page.tsx"
+Cohesion: 0.23
+Nodes (9): fmt(), fmtDate(), fmtDateTime(), S, ServiceInvoiceDetailPage(), TabKey, TABS, WORKFLOW_STEPS (+1 more)
+
+### Community 30 - "service/page.tsx"
+Cohesion: 0.21
+Nodes (10): ApiInvoice, fmt(), fmtRp(), Invoice, PrintView(), PS, PT, S (+2 more)
+
+### Community 31 - "customers/new/page.tsx"
+Cohesion: 0.18
+Nodes (4): brandModels, currentYear, vehicleBrands, years
+
+### Community 32 - "DateRangePicker.tsx"
+Cohesion: 0.15
+Nodes (14): formatIDR(), PurchaseInvoicesPage(), PurchaseRequestListPage(), statusPill(), fmtDate(), PurchaseReturnsPage(), DateRangePicker(), DateRangePickerProps (+6 more)
+
+### Community 33 - "accounting-reports/page.tsx"
+Cohesion: 0.20
+Nodes (5): ColDef, ENTITIES, FilterField, TabConfig, TABS
+
+### Community 34 - "receivables/[id]/page.tsx"
+Cohesion: 0.27
+Nodes (8): fmt(), fmtDate(), InvoiceReceivableDetailPage(), S, TabKey, TABS, WORKFLOW_STEPS, workflowColor()
+
+### Community 35 - "vehicles/new/page.tsx"
+Cohesion: 0.20
+Nodes (4): brandModels, currentYear, vehicleBrands, years
+
+### Community 36 - "daily-service-payments/page.tsx"
+Cohesion: 0.22
+Nodes (8): DailyServicePaymentsPage(), fmt(), L, paymentColumns, TD, TD_RIGHT, TH, TH_RIGHT
+
+### Community 37 - "package.json"
+Cohesion: 0.22
+Nodes (8): name, private, scripts, build, dev, lint, start, version
+
+### Community 38 - "PwnCorp ERP — QA Report"
+Cohesion: 0.22
+Nodes (8): Bugs Found & Fixed During QA, Executive Summary, Phase 1: API Endpoint Testing (36 endpoints), Phase 2: Frontend Page Testing (Browser), Phase 3: Data Integrity Audit, PwnCorp ERP — QA Report, Summary, Testing Notes
+
+### Community 39 - "service-orders/page.tsx"
+Cohesion: 0.12
+Nodes (17): DashboardData, DashboardPage(), fmt(), fmtDate(), fmtFull(), statusPill(), categories, categoryCardColors (+9 more)
+
+### Community 40 - "rencana-tagihan/page.tsx"
+Cohesion: 0.25
+Nodes (6): bulanLabels, CustomerBilling, data, fmt(), RencanaTagihanPage(), terminOptions
+
+### Community 41 - "inventory/[code]/page.tsx"
+Cohesion: 0.28
+Nodes (6): changeTypeColor, changeTypeLabel, fmt(), fmtDate(), InventoryDetailPage(), S
+
+### Community 42 - "purchase-returns/[...docNumber]/page.tsx"
+Cohesion: 0.28
+Nodes (5): fmtDate(), formatIDR(), PurchaseReturnDetailPage(), S, workflowSteps
+
+### Community 43 - "tree/page.tsx"
+Cohesion: 0.32
+Nodes (5): AccountNode, AccountTreePage(), collectAllParentCodes(), getLevel1ParentCodes(), TreeNodeProps
+
+### Community 44 - "payments/[no]/page.tsx"
+Cohesion: 0.36
+Nodes (5): fmt(), fmtDate(), PaymentDetailPage(), S, statusColor()
+
+### Community 45 - "sparepart/[sku]/page.tsx"
+Cohesion: 0.29
+Nodes (6): fmt(), ProductDetailPage(), S, TabKey, tabLabels, tabList
+
+### Community 46 - "project/[...id]/page.tsx"
+Cohesion: 0.32
+Nodes (6): fmtDate(), fmtRp(), ProjectDetailPage(), S, TabKey, tabList
+
+### Community 47 - "project/page.tsx"
+Cohesion: 0.39
+Nodes (6): fmt(), fmtDate(), fmtShort(), ProjectListPage(), statusMap, statusPill()
+
+### Community 48 - "detailed-service-orders/page.tsx"
+Cohesion: 0.32
+Nodes (6): DetailedServiceOrdersPage(), fmt(), L, statusPill(), TD, TH
+
+### Community 49 - "service-packages/[sku]/page.tsx"
+Cohesion: 0.32
+Nodes (6): fmt(), fmtDate(), PackageServiceDetailPage(), SS, tdStyle, thStyle
+
+### Community 50 - "anggaran/page.tsx"
+Cohesion: 0.38
+Nodes (6): AnggaranPage(), AnggaranSWO, fmt(), fmtShort(), initialData, projects
+
+### Community 51 - "SearchableSelect.tsx"
+Cohesion: 0.19
+Nodes (5): Sparepart, TransferRow, Option, SearchableSelect(), SearchableSelectProps
+
+### Community 52 - "seed-invoices.ts"
+Cohesion: 0.38
+Nodes (6): adapter, main(), poNo(), pool, prisma, spi()
+
+### Community 53 - "seed-warehouse.ts"
+Cohesion: 0.29
+Nodes (5): adapter, pool, poolConfig, prisma, u
+
+### Community 54 - "seed-warehouse-stock.ts"
+Cohesion: 0.29
+Nodes (5): adapter, pool, poolConfig, prisma, u
+
+### Community 55 - "petty-cash/page.tsx"
+Cohesion: 0.33
+Nodes (5): CashEntry, COA_CATEGORIES, EntryType, fmt(), PettyCashPage()
+
+### Community 57 - "po/page.tsx"
+Cohesion: 0.38
+Nodes (5): ApiPO, formatIDR(), PurchaseOrder, PurchaseOrdersPage(), statusPill()
+
+### Community 58 - "inventory/stock-opname/new/page.tsx"
+Cohesion: 0.33
+Nodes (5): emptyRow(), NewStockOpnamePage(), OpnameRow, S, Sparepart
+
+### Community 59 - "customers/[id]/page.tsx"
+Cohesion: 0.29
+Nodes (4): CustomerDetail, TD, TH, VehicleData
+
+### Community 60 - "detailed-service-invoices/page.tsx"
+Cohesion: 0.33
+Nodes (5): DetailedServiceInvoicesPage(), fmt(), L, TD, TH
+
+### Community 61 - "detailed-service-work-orders/page.tsx"
+Cohesion: 0.33
+Nodes (5): DetailedServiceWorkOrdersPage(), L, statusPill(), TD, TH
+
+### Community 62 - "service-payment-received/page.tsx"
+Cohesion: 0.33
+Nodes (5): fmt(), L, ServicePaymentReceivedPage(), TD, TH
+
+### Community 63 - "service-payment-type-info/page.tsx"
+Cohesion: 0.33
+Nodes (5): fmt(), L, ServicePaymentTypeInfoPage(), TD, TH
+
+### Community 64 - "summary-service-invoices/page.tsx"
+Cohesion: 0.33
+Nodes (5): fmt(), L, SummaryServiceInvoicesPage(), TD, TH
+
+### Community 65 - "summary-service-orders/page.tsx"
+Cohesion: 0.33
+Nodes (5): fmt(), linkStyle, SummaryServiceOrdersPage(), TD, TH
+
+### Community 66 - "summary-service-work-orders/page.tsx"
+Cohesion: 0.33
+Nodes (5): L, statusPill(), SummaryServiceWorkOrdersPage(), TD, TH
+
+### Community 67 - "stock-orders/detail/[...no]/page.tsx"
+Cohesion: 0.33
+Nodes (4): fmtDate(), S, StockOrderDetailPage(), workflowSteps
+
+### Community 68 - "purchase-orders/[...refCode]/page.tsx"
+Cohesion: 0.48
+Nodes (6): fmtDate(), formatIDR(), getStepIndex(), PurchaseOrderDetailPage(), statusColor(), workflowSteps
+
+### Community 69 - "stock-histories/[...id]/page.tsx"
+Cohesion: 0.38
+Nodes (5): fmt(), fmtDate(), S, StockHistoryDetailPage(), workflowSteps
+
+### Community 70 - "stock-outgoing/[...refCode]/page.tsx"
+Cohesion: 0.38
+Nodes (5): fmtDate(), formatIDR(), S, StockOutgoingDetailPage(), workflowSteps
+
+### Community 71 - "stock-transfer/[...refCode]/page.tsx"
+Cohesion: 0.33
+Nodes (4): fmtDate(), S, StockTransferDetailPage(), workflowSteps
+
+### Community 72 - "check-warehouse-stock.ts"
+Cohesion: 0.33
+Nodes (4): adapter, pool, prisma, u
+
+### Community 73 - "debug-cbl019.ts"
+Cohesion: 0.33
+Nodes (4): adapter, pool, prisma, u
+
+### Community 74 - "debug-wh.ts"
+Cohesion: 0.33
+Nodes (4): adapter, pool, prisma, u
+
+### Community 75 - "debug-wo-items.ts"
+Cohesion: 0.33
+Nodes (4): adapter, pool, prisma, u
+
+### Community 76 - "purchase/page.tsx"
+Cohesion: 0.47
+Nodes (4): fmt(), PurchaseInvoicesPage(), S, statusColor()
+
+### Community 79 - "ap-cheque/page.tsx"
+Cohesion: 0.83
+Nodes (3): APChequePage(), fmt(), fmtDate()
+
+### Community 80 - "ap-credit/page.tsx"
+Cohesion: 0.83
+Nodes (3): APCreditPage(), fmt(), fmtDate()
+
+### Community 81 - "ap-overdue/page.tsx"
+Cohesion: 0.83
+Nodes (3): APOverduePage(), fmt(), fmtDate()
+
+### Community 82 - "makeFilename"
+Cohesion: 0.09
+Nodes (29): MasterDataPage(), InvoicesPage(), statusPill(), AgingARPage(), fmt(), APOverlimitPage(), fmt(), APSubledgerPage() (+21 more)
+
+### Community 83 - "ap-payments/page.tsx"
+Cohesion: 0.83
+Nodes (3): APPaymentsPage(), fmt(), fmtDate()
+
+### Community 84 - "coa/[id]/route.ts"
+Cohesion: 0.50
+Nodes (3): DELETE, GET, PUT
+
+### Community 86 - "service-packages/[id]/route.ts"
+Cohesion: 0.50
+Nodes (3): DELETE, GET, PUT
+
+### Community 87 - "ar-credit/page.tsx"
+Cohesion: 0.83
+Nodes (3): ARCreditPage(), fmt(), fmtDate()
+
+### Community 88 - "spareparts/[id]/route.ts"
+Cohesion: 0.50
+Nodes (3): DELETE, GET, PUT
+
+### Community 90 - "ar-payments/page.tsx"
+Cohesion: 0.83
+Nodes (3): ARPaymentsPage(), fmt(), fmtDate()
+
+### Community 93 - "tax-invoices/page.tsx"
+Cohesion: 0.83
+Nodes (3): fmt(), fmtDate(), TaxInvoicesPage()
+
+### Community 94 - "po/[no]/page.tsx"
+Cohesion: 0.40
+Nodes (4): ApiPODetail, formatIDR(), POData, PODetailPage()
+
+### Community 95 - "users/page.tsx"
+Cohesion: 0.33
+Nodes (3): allMenus, tabOptions, UserEntry
+
+### Community 96 - "[plate]/edit/page.tsx"
+Cohesion: 0.33
+Nodes (4): brandModels, currentYear, vehicleBrands, years
+
+### Community 97 - "purchase/[...no]/page.tsx"
+Cohesion: 0.83
+Nodes (3): fmtDate(), fmtRp(), PurchaseInvoiceDetailPage()
+
+### Community 99 - "purchase-request/[...refCode]/page.tsx"
+Cohesion: 0.40
+Nodes (4): fmt(), PurchaseRequestDetailPage(), S, workflowSteps
+
+### Community 101 - "work-orders/page.tsx"
+Cohesion: 0.47
+Nodes (4): fmtDate(), statusPill(), WorkOrder, WorkOrdersPage()
+
+### Community 102 - "journal.ts"
+Cohesion: 0.40
+Nodes (5): COA, createJournalEntry(), CreateJournalParams, generateJENo(), JournalLine
+
+### Community 103 - "seed.ts"
+Cohesion: 0.40
+Nodes (3): adapter, pool, prisma
+
+### Community 104 - "invoices/[id]/route.ts"
+Cohesion: 0.40
+Nodes (4): DELETE, GET, PUT, VALID_TRANSITIONS
+
+### Community 105 - "users/[id]/route.ts"
+Cohesion: 0.40
+Nodes (4): DELETE, GET, PUT, userSelect
+
+### Community 106 - "finance/ap/page.tsx"
+Cohesion: 0.60
+Nodes (3): APPage(), fmt(), statusPill()
+
+### Community 107 - "finance/ar/page.tsx"
+Cohesion: 0.60
+Nodes (3): ARPage(), fmt(), statusPill()
+
+### Community 108 - "payables/page.tsx"
+Cohesion: 0.60
+Nodes (4): fmt(), InvoicePayablesPage(), S, statusColor()
+
+### Community 109 - "receivables/page.tsx"
+Cohesion: 0.60
+Nodes (4): fmt(), InvoiceReceivablesPage(), S, statusColor()
+
+### Community 110 - "coa/[code]/page.tsx"
+Cohesion: 0.24
+Nodes (7): COADetailPage(), fmt(), fmtDate(), LedgerRow, fmt(), JournalPage(), SOURCE_MAP
+
+### Community 111 - "approval/page.tsx"
+Cohesion: 0.50
+Nodes (3): ApprovalDeskPage(), fmt(), PaymentReq
+
+### Community 113 - "aging-ap/page.tsx"
+Cohesion: 0.50
+Nodes (3): AgingAPPage(), AgingRow, fmt()
+
+### Community 114 - "cash-flow/page.tsx"
+Cohesion: 0.60
+Nodes (3): CashFlowPage(), fmt(), fmtDate()
+
+### Community 115 - "soa/page.tsx"
+Cohesion: 0.50
+Nodes (4): TODO: No dedicated API for SOA yet. Attempting to build from /api/accounts-…, S, SOAPage(), statusColor()
+
+### Community 116 - "transfers/page.tsx"
+Cohesion: 0.60
+Nodes (4): formatIDR(), statusPill(), Transfer, TransfersPage()
+
+### Community 119 - "inventory/page.tsx"
+Cohesion: 0.50
+Nodes (3): formatRupiah(), InventoryPage(), Sparepart
+
+### Community 120 - "po/new/page.tsx"
+Cohesion: 0.50
+Nodes (4): formatIDR(), ItemRow, NewPOPage(), VendorQuote
+
+### Community 125 - "summary-purchase-orders/page.tsx"
+Cohesion: 0.70
+Nodes (4): fmt(), fmtDate(), pillClass(), SummaryPurchaseOrdersPage()
+
+### Community 126 - "summary-purchase-returns/page.tsx"
+Cohesion: 0.70
+Nodes (4): fmt(), fmtDate(), pillClass(), SummaryPurchaseReturnsPage()
+
+### Community 128 - "purchase-invoices/[...docNumber]/page.tsx"
+Cohesion: 0.60
+Nodes (4): formatIDR(), getStepIndex(), PurchaseInvoiceDetailPage(), workflowSteps
+
+### Community 130 - "warehouse/stock-opname/new/page.tsx"
 Cohesion: 0.50
 Nodes (4): emptyRow(), NewStockOpnamePage(), OpnameRow, Sparepart
 
-### Community 140 - "users/[id]/page.tsx"
-Cohesion: 0.50
-Nodes (3): DELETE, GET, PUT
+### Community 140 - "withAuth"
+Cohesion: 0.07
+Nodes (18): GET, PUT, DELETE, GET, PUT, GET, POST, GET (+10 more)
 
-### Community 141 - "users/new/page.tsx"
+### Community 141 - "inspection-mappings/route.ts"
 Cohesion: 0.50
 Nodes (3): DELETE, GET, POST
 
-### Community 142 - "debug-wo-items.ts"
+### Community 142 - "suppliers/[id]/route.ts"
 Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
 
-### Community 143 - "service-orders/page.tsx"
+### Community 143 - "users/route.ts"
 Cohesion: 0.50
 Nodes (3): GET, POST, userSelect
 
-### Community 144 - "summary-purchase-deliveries/page.tsx"
-Cohesion: 0.60
-Nodes (4): COADetailPage(), fmt(), fmtDate(), LedgerRow
+### Community 149 - "excel-utils.ts"
+Cohesion: 0.15
+Nodes (9): PaymentsPage(), statusPill(), CsvColumn, downloadBlob(), ExportColumn, ExportFormat, ParseResult, SheetData (+1 more)
 
-### Community 157 - "list-data.ts"
-Cohesion: 0.83
-Nodes (3): fmtDate(), pillClass(), SummaryPurchaseDeliveriesPage()
-
-### Community 158 - "reset-wo.ts"
+### Community 158 - "purchase-orders/new/page.tsx"
 Cohesion: 0.67
 Nodes (3): formatIDR(), ItemRow, NewPurchaseOrderPage()
 
-### Community 159 - "test-journal.ts"
+### Community 159 - "purchase-orders/page.tsx"
 Cohesion: 0.83
 Nodes (3): formatIDR(), PurchaseOrdersPage(), statusPill()
 
-### Community 160 - "service-packages/route.ts"
+### Community 160 - "purchase-request/new/page.tsx"
 Cohesion: 0.67
 Nodes (3): formatIDR(), ItemRow, NewPurchaseRequestPage()
 
-### Community 162 - "stock-opnames/route.ts"
+### Community 162 - "delivery-note/[...no]/page.tsx"
 Cohesion: 0.83
 Nodes (3): fmt(), fmtDate(), PrintDeliveryNotePage()
 
-### Community 163 - "update-sro.ts"
+### Community 163 - "receipt/[...no]/page.tsx"
 Cohesion: 0.83
 Nodes (3): fmt(), fmtDate(), PrintReceiptPage()
 
-### Community 224 - "test-pg.js"
+### Community 224 - "receipts/[...no]/page.tsx"
 Cohesion: 0.83
 Nodes (3): fmtDate(), fmtRp(), ReceiptDetailPage()
 
-### Community 225 - "revert-wo.js"
+### Community 225 - "transfers/[...no]/page.tsx"
 Cohesion: 0.83
 Nodes (3): fmtDate(), fmtRp(), TransferDetailPage()
 
 ## Knowledge Gaps
-- **598 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+593 more)
+- **610 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+605 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **90 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **75 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FormattedNumberInput()` connect `getCurrentUser` to `aging-ar/page.tsx`, `journal.ts`, `purchase-orders/page.tsx`, `DateRangePicker.tsx`, `reports/ap/page.tsx`, `payment-requests/[id]/route.ts`, `customers/new/page.tsx`, `reset-wo.ts`, `service-packages/route.ts`, `services/route.ts`, `seed-warehouse.ts`, `ap-overdue/page.tsx`, `low-stock/page.tsx`, `app/stock-orders/page.tsx`, `cash-flow/page.tsx`, `transfers/page.tsx`, `invoices/route.ts`, `seed-warehouse-stock.ts`, `spareparts/[id]/route.ts`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `withAuth()` connect `prisma.ts` to `AppShell.tsx`, `PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)`, `4. DEVELOPMENT PLAN`, `users/[id]/page.tsx`, `Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)`, `users/new/page.tsx`, `debug-wo-items.ts`, `app/dashboard/page.tsx`, `service-orders/page.tsx`, `delivery-note/[...no]/page.tsx`, `project/new/page.tsx`, `stock-movement/page.tsx`, `stock-position/page.tsx`, `stock-orders/new/page.tsx`, `FormattedNumberInput.tsx`, `stock-returns/page.tsx`, `pembanding/page.tsx`, `receipt/[...no]/page.tsx`, `purchase-invoices/page.tsx`, `purchase-request/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-returns/page.tsx`, `stock-outgoing/new/page.tsx`, `work-orders/new/page.tsx`, `next.config.js`, `next-env.d.ts`, `coa/create/page.tsx`, `execution/page.tsx`, `po/new/page.tsx`, `inventory/stock-opname/page.tsx`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `getCurrentUser()` connect `4. DEVELOPMENT PLAN` to `AppShell.tsx`, `PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)`, `prisma.ts`, `users/[id]/page.tsx`, `Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)`, `users/new/page.tsx`, `debug-wo-items.ts`, `app/dashboard/page.tsx`, `service-orders/page.tsx`, `delivery-note/[...no]/page.tsx`, `project/new/page.tsx`, `stock-movement/page.tsx`, `stock-position/page.tsx`, `stock-orders/new/page.tsx`, `FormattedNumberInput.tsx`, `stock-returns/page.tsx`, `pembanding/page.tsx`, `receipt/[...no]/page.tsx`, `purchase-invoices/page.tsx`, `purchase-request/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-returns/page.tsx`, `stock-outgoing/new/page.tsx`, `work-orders/new/page.tsx`, `next.config.js`, `next-env.d.ts`, `coa/create/page.tsx`, `execution/page.tsx`, `po/new/page.tsx`, `inventory/stock-opname/page.tsx`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `csv-utils.ts`, `package.json`, `next`, `next-auth`, `@prisma/client`, `@radix-ui/react-slot`, `react-dom`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `xlsx` connect `csv-utils.ts` to `dependencies`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `FormattedNumberInput()` connect `FormattedNumberInput.tsx` to `stock-orders/new/page.tsx`, `warehouse/stock-opname/new/page.tsx`, `invoices/create/page.tsx`, `service-orders/new/page.tsx`, `service-orders/[...no]/page.tsx`, `services/new/page.tsx`, `work-orders/detail/[...no]/page.tsx`, `purchase-orders/new/page.tsx`, `purchase-request/new/page.tsx`, `SearchableSelect.tsx`, `inventory/new/page.tsx`, `inventory/stock-opname/new/page.tsx`, `purchase-orders/[...refCode]/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-deliveries/[...refCode]/page.tsx`, `stock-opname/[...refCode]/page.tsx`, `inventory/[code]/edit/page.tsx`, `stock-outgoing/new/page.tsx`, `po/new/page.tsx`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **What connects `extends`, `next/core-web-vitals`, `{ Client }` to the rest of the system?**
-  _598 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _610 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `csv-utils.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.10545790934320073 - nodes in this community are weakly interconnected._
 - **Should `generate_reports.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.0903954802259887 - nodes in this community are weakly interconnected._
-- **Should `numbering.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.1475609756097561 - nodes in this community are weakly interconnected._
-- **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11282051282051282 - nodes in this community are weakly interconnected._
+- **Should `numbering.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.08253968253968254 - nodes in this community are weakly interconnected._
