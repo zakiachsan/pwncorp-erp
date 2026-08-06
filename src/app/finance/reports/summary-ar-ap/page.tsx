@@ -1,24 +1,39 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BarChart3 } from "lucide-react";
 
-export default function SummaryARAPPaymentPage() {
-  const router = useRouter();
+const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
+
+export default function SummaryARAPPage() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/reports/finance?report=summary-ar-ap")
+      .then((r) => r.json())
+      .then((j) => { setData(j.data); setLoading(false); })
+      .catch(() => { setError("Gagal memuat data"); setLoading(false); });
+  }, []);
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
     <div>
-      <button onClick={() => router.push("/finance")} style={btnStyle}>
-        <ArrowLeft size={16} /> Finance
-      </button>
-      <div style={cardStyle}>
-        <h1 style={h1Style}>Summary AR/AP Payment</h1>
-        <p style={pStyle}>Halaman ini sedang dalam pengembangan.</p>
+      <div className="view-header">
+        <div className="view-title">
+          <BarChart3 className="w-6 h-6 text-[--color-brand-secondary]" />
+          Summary AR / AP
+        </div>
+      </div>
+      <div className="card-slds">
+        <div className="flex justify-between py-2 border-b border-[--color-border]"><span className="text-sm text-[--color-text-secondary]">AR Outstanding (Piutang)</span><span className="font-medium text-[--color-brand]">{fmt(data.arOutstanding)}</span></div>
+<div className="flex justify-between py-2 border-b border-[--color-border]"><span className="text-sm text-[--color-text-secondary]">Jumlah Dokumen AR</span><span className="font-medium">{data.arCount}</span></div>
+<div className="flex justify-between py-2 border-b border-[--color-border]"><span className="text-sm text-[--color-text-secondary]">AP Outstanding (Hutang)</span><span className="font-medium text-[--color-warning]">{fmt(data.apOutstanding)}</span></div>
+<div className="flex justify-between py-2 border-b border-[--color-border]"><span className="text-sm text-[--color-text-secondary]">Jumlah Dokumen AP</span><span className="font-medium">{data.apCount}</span></div>
       </div>
     </div>
   );
 }
-
-const btnStyle = { display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", fontSize: 13, fontWeight: 500, color: "#444746", background: "#fff", border: "1px solid #d8d8d8", borderRadius: 6, cursor: "pointer", marginBottom: 16 };
-const cardStyle = { background: "#fff", border: "1px solid #ecebea", borderRadius: 8, padding: 20 };
-const h1Style = { fontSize: 18, fontWeight: 700, color: "#001526", margin: 0, marginBottom: 8 };
-const pStyle = { fontSize: 14, color: "#444746" };

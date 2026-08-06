@@ -5,39 +5,74 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Edit, Download } from "lucide-react";
 
 const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
+const fmtDate = (iso: string) =>
+  iso ? new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-";
+
+interface LedgerRow {
+  id: string;
+  date: string;
+  ref: string;
+  description: string;
+  debit: number;
+  credit: number;
+  balance: number;
+}
 
 export default function COADetailPage() {
   const router = useRouter();
   const params = useParams();
-  const code = params.code as string;
+  const code = (params.code as string) || "";
+
   const [account, setAccount] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [rows, setRows] = useState<LedgerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`/api/coa?search=${encodeURIComponent(code)}`)
-      .then((r) => r.json())
-      .then((json) => {
-        const accounts = json.data || [];
-        const found = accounts.find((a: any) => a.code === code);
-        setAccount(found || { code, name: `Akun ${code}` });
+    if (!code) { setError("Kode akun tidak valid"); setLoading(false); return; }
+    (async () => {
+      try {
+        // 1. Cari akun
+        const accRes = await fetch(`/api/coa?search=${encodeURIComponent(code)}&flat=true`);
+        const accJson = await accRes.json();
+        const found = (accJson.data || []).find((a: any) => a.code === code);
+        if (!found) { setError("Akun tidak ditemukan: " + code); setLoading(false); return; }
+        setAccount(found);
+
+        // 2. Histori jurnal untuk akun ini
+        const jRes = await fetch(`/api/journal?coaId=${found.id}&limit=100`);
+        const jJson = await jRes.json();
+        const normalDebit = (found.normalBalance || "Debit") === "Debit";
+        let running = 0;
+        const mapped: LedgerRow[] = (jJson.data || []).map((je: any) => {
+          const detail = (je.details || []).find((d: any) => d.coaId === found.id) || { debit: 0, credit: 0 };
+          const debit = detail.debit || 0;
+          const credit = detail.credit || 0;
+          running += normalDebit ? debit - credit : credit - debit;
+          return {
+            id: je.id,
+            date: je.date,
+            ref: je.jeNo || "-",
+            description: detail.description || je.description || "-",
+            debit,
+            credit,
+            balance: running,
+          };
+        });
+        setRows(mapped);
         setLoading(false);
-      })
-      .catch(() => { setError("Failed to load account"); setLoading(false); });
+      } catch {
+        setError("Gagal memuat data");
+        setLoading(false);
+      }
+    })();
   }, [code]);
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  if (!account) return <div className="p-8 text-center">Akun tidak ditemukan: {code}</div>;
 
-  // TODO: No dedicated API for account transaction history yet. Using hardcoded data.
-  const mockTransactions = [
-    { date: "26 Jun 2026", ref: "INV-001", description: "Pembayaran Invoice INV-001", debit: 2500000, credit: 0 },
-    { date: "25 Jun 2026", ref: "INV-003", description: "Pembayaran Invoice INV-003", debit: 2600000, credit: 0 },
-    { date: "24 Jun 2026", ref: "WO-004", description: "Pembayaran sparepart WO-004", debit: 0, credit: 1500000 },
-    { date: "23 Jun 2026", ref: "INV-004", description: "Pembayaran Invoice INV-004", debit: 950000, credit: 0 },
-  ];
+  const saldo = rows.length > 0 ? rows[rows.length - 1].balance : 0;
 
   return (
     <div>
@@ -63,7 +98,7 @@ export default function COADetailPage() {
         </div>
         <div className="card-slds">
           <div className="text-sm text-[--color-text-secondary]">Saldo Saat Ini</div>
-          <div className="text-lg font-bold text-[--color-brand]">Rp 15.250.000</div>
+          <div className="text-lg font-bold text-[--color-brand]">{fmt(saldo)}</div>
         </div>
       </div>
 
@@ -82,22 +117,19 @@ export default function COADetailPage() {
               </tr>
             </thead>
             <tbody>
-              {mockTransactions.map((t, i) => {
-                let runningBalance = 0;
-                for (let j = 0; j <= i; j++) {
-                  runningBalance += mockTransactions[j].debit - mockTransactions[j].credit;
-                }
-                return (
-                  <tr key={i} className="hover:bg-[#f8f8f8]">
-                    <td className="text-[--color-text-secondary]">{t.date}</td>
-                    <td className="font-medium text-[--color-brand]">{t.ref}</td>
-                    <td>{t.description}</td>
-                    <td className="text-right font-medium">{t.debit > 0 ? `Rp ${(t.debit || 0).toLocaleString("id-ID")}` : "-"}</td>
-                    <td className="text-right font-medium">{t.credit > 0 ? `Rp ${(t.credit || 0).toLocaleString("id-ID")}` : "-"}</td>
-                    <td className="text-right font-medium">Rp {runningBalance.toLocaleString("id-ID")}</td>
-                  </tr>
-                );
-              })}
+              {rows.map((t) => (
+                <tr key={t.id} className="hover:bg-[#f8f8f8]">
+                  <td className="text-[--color-text-secondary]">{fmtDate(t.date)}</td>
+                  <td className="font-medium text-[--color-brand]">{t.ref}</td>
+                  <td>{t.description}</td>
+                  <td className="text-right font-medium">{t.debit > 0 ? fmt(t.debit) : "-"}</td>
+                  <td className="text-right font-medium">{t.credit > 0 ? fmt(t.credit) : "-"}</td>
+                  <td className="text-right font-medium">{fmt(t.balance)}</td>
+                </tr>
+              ))}
+              {rows.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-8 text-[--color-text-secondary]">Belum ada transaksi</td></tr>
+              )}
             </tbody>
           </table>
         </div>

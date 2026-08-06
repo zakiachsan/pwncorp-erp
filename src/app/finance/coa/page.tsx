@@ -37,16 +37,6 @@ const normalOptions: NormalBalance[] = ["Debit", "Kredit"];
 const kategoriOptions: KategoriAkun[] = ["Asset", "Liability", "Equity", "Revenue", "Expense"];
 const divisiOptions = ["ALL - Semua Divisi", "Service & Perbaikan", "Sparepart & Gudang", "Keuangan & Akuntansi", "Administrasi & CS", "Marketing & Penjualan", "HR & GA"];
 
-const initialCOA: COAEntry[] = [
-  { id: "coa-1", code: "1-100", name: "Kas Tunai / Kas Kecil", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Uang fisik berupa kas tunai dan kas kecil operasional", noRek: "", pemilik: "" },
-  { id: "coa-2", code: "1-101", name: "Bank BCA", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Saldo uang rill di rekening Bank BCA", noRek: "", pemilik: "" },
-  { id: "coa-3", code: "1-102", name: "Bank Mandiri", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Saldo uang rill di rekening Bank Mandiri", noRek: "", pemilik: "" },
-  { id: "coa-4", code: "1-103", name: "Bank BRI", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Saldo uang rill di rekening Bank BRI", noRek: "", pemilik: "" },
-  { id: "coa-5", code: "1-110", name: "Piutang Usaha", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Uang perusahaan yang masih harus ditagih dari customer", noRek: "", pemilik: "" },
-  { id: "coa-6", code: "1-1101", name: "Saldo / Piutang Shopeepay", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Saldo penjualan melalui Shopeepay", noRek: "", pemilik: "" },
-  { id: "coa-7", code: "1-1102", name: "Saldo / Piutang TikTok", normal: "Debit", kategori: "Asset", divisi: "ALL - Semua Divisi", note: "Saldo penjualan melalui TikTok Shop", noRek: "", pemilik: "" },
-];
-
 const initialDivisi: Divisi[] = [
   { id: "D-001", code: "SVC", name: "Service & Perbaikan", fokus: "Perbaikan kendaraan, service berkala, diagnosa mesin" },
   { id: "D-002", code: "SPR", name: "Sparepart & Gudang", fokus: "Pengelolaan stok sparepart, pembelian, inventaris" },

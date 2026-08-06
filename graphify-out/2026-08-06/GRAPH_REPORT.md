@@ -1,16 +1,16 @@
-# Graph Report - pwncorp  (2026-08-06)
+# Graph Report - pwncorp  (2026-08-01)
 
 ## Corpus Check
-- 316 files · ~285,441 words
+- 315 files · ~283,245 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1679 nodes · 2291 edges · 240 communities (150 shown, 90 thin omitted)
+- 1706 nodes · 2286 edges · 242 communities (158 shown, 84 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 20 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `eb622505`
+- Built from commit: `1a95a06d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -93,12 +93,14 @@
 - ar-overdue/page.tsx
 - ar-overlimit/page.tsx
 - ar-payments/page.tsx
+- ar-subledger/page.tsx
 - summary-ar-ap/page.tsx
 - tax-invoices/page.tsx
 - po/[no]/page.tsx
 - users/page.tsx
 - [plate]/edit/page.tsx
 - purchase-deliveries/[...refCode]/page.tsx
+- purchase-request/[...refCode]/page.tsx
 - stock-histories/page.tsx
 - stock-opname/[...refCode]/page.tsx
 - work-orders/page.tsx
@@ -201,8 +203,7 @@
 - execution/page.tsx
 - check-journals.ts
 - receipts/[no]/page.tsx
-- check-sp.ts
-- transfers/[no]/page.tsx
+- customers/[id]/edit/page.tsx
 - test-all-journals.ts
 - test-stock-journal.ts
 - suppliers/[id]/edit/page.tsx
@@ -227,9 +228,6 @@
 - stock-opnames/[id]/route.ts
 - stock-outgoings/route.ts
 - stock-transfers/[id]/route.ts
-- stock-transfers/route.ts
-- test-pg.js
-- revert-wo.js
 
 ## God Nodes (most connected - your core abstractions)
 1. `withAuth()` - 73 edges
@@ -258,7 +256,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (240 total, 90 thin omitted)
+## Communities (242 total, 84 thin omitted)
 
 ### Community 0 - "generate_reports.py"
 Cohesion: 0.09
@@ -282,7 +280,7 @@ Nodes (6): AppShell(), financeGroups, NavItem, operasionalGroups, S, SidebarProp
 
 ### Community 5 - "PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)"
 Cohesion: 0.07
-Nodes (17): GET, PUT, GET, PUT, GET, PUT, GET, POST (+9 more)
+Nodes (17): GET, PUT, GET, PUT, GET, PUT, GET, PUT (+9 more)
 
 ### Community 6 - "4. DEVELOPMENT PLAN"
 Cohesion: 0.07
@@ -297,8 +295,8 @@ Cohesion: 0.07
 Nodes (18): GET, PUT, GET, PUT, GET, POST, GET, PUT (+10 more)
 
 ### Community 9 - "getCurrentUser"
-Cohesion: 0.08
-Nodes (6): S, emptyForm, fmt(), NewStockOrderPage(), FormattedNumberInput(), FormattedNumberInputProps
+Cohesion: 0.11
+Nodes (6): fmt(), NewStockOrderPage(), formatIDR(), NewStockOutgoingPage(), FormattedNumberInput(), FormattedNumberInputProps
 
 ### Community 10 - "withAuth"
 Cohesion: 0.08
@@ -334,7 +332,7 @@ Nodes (18): Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min), Ph
 
 ### Community 18 - "service-orders/new/page.tsx"
 Cohesion: 0.11
-Nodes (15): actionBtn, COAEntry, Divisi, divisiOptions, initialDivisi, initialKatPengeluaran, inlineInput, inlineSelect (+7 more)
+Nodes (16): actionBtn, COAEntry, Divisi, divisiOptions, initialCOA, initialDivisi, initialKatPengeluaran, inlineInput (+8 more)
 
 ### Community 19 - "DateRangePicker.tsx"
 Cohesion: 0.12
@@ -417,8 +415,8 @@ Cohesion: 0.22
 Nodes (8): Bugs Found & Fixed During QA, Executive Summary, Phase 1: API Endpoint Testing (36 endpoints), Phase 2: Frontend Page Testing (Browser), Phase 3: Data Integrity Audit, PwnCorp ERP — QA Report, Summary, Testing Notes
 
 ### Community 39 - "detailed-service-orders/page.tsx"
-Cohesion: 0.20
-Nodes (12): DashboardData, DashboardPage(), fmt(), fmtDate(), fmtFull(), statusPill(), ClipboardList(), fmt() (+4 more)
+Cohesion: 0.33
+Nodes (7): DashboardData, DashboardPage(), fmt(), fmtDate(), fmtFull(), statusPill(), ClipboardList()
 
 ### Community 40 - "service-orders/[...no]/page.tsx"
 Cohesion: 0.25
@@ -564,41 +562,69 @@ Nodes (4): adapter, pool, prisma, u
 Cohesion: 0.47
 Nodes (4): fmt(), PurchaseInvoicesPage(), S, statusColor()
 
+### Community 78 - "ar-subledger/page.tsx"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
 ### Community 79 - "summary-ar-ap/page.tsx"
-Cohesion: 0.83
-Nodes (3): APChequePage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 80 - "tax-invoices/page.tsx"
-Cohesion: 0.83
-Nodes (3): APCreditPage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 81 - "po/[no]/page.tsx"
-Cohesion: 0.83
-Nodes (3): APOverduePage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
+### Community 82 - "users/page.tsx"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 83 - "[plate]/edit/page.tsx"
-Cohesion: 0.83
-Nodes (3): APPaymentsPage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
+### Community 84 - "purchase-deliveries/[...refCode]/page.tsx"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
+### Community 85 - "purchase-request/[...refCode]/page.tsx"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 86 - "stock-histories/page.tsx"
-Cohesion: 0.83
-Nodes (3): ARChequePage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 87 - "stock-opname/[...refCode]/page.tsx"
-Cohesion: 0.83
-Nodes (3): ARCreditPage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 88 - "work-orders/page.tsx"
-Cohesion: 0.83
-Nodes (3): AROverduePage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
+### Community 89 - "seed.ts"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 90 - "users/[id]/route.ts"
-Cohesion: 0.83
-Nodes (3): ARPaymentsPage(), fmt(), fmtDate()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
+### Community 91 - "finance/ap/page.tsx"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
+
+### Community 92 - "finance/ar/page.tsx"
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 93 - "payables/page.tsx"
-Cohesion: 0.83
-Nodes (3): fmt(), fmtDate(), TaxInvoicesPage()
+Cohesion: 0.33
+Nodes (4): btnStyle, cardStyle, h1Style, pStyle
 
 ### Community 94 - "receivables/page.tsx"
 Cohesion: 0.40
@@ -613,8 +639,8 @@ Cohesion: 0.33
 Nodes (4): brandModels, currentYear, vehicleBrands, years
 
 ### Community 97 - "aging-ap/page.tsx"
-Cohesion: 0.83
-Nodes (3): fmtDate(), fmtRp(), PurchaseInvoiceDetailPage()
+Cohesion: 0.53
+Nodes (5): fmt(), fmtDate(), ServiceOrder, ServiceOrdersPage(), statusPill()
 
 ### Community 99 - "soa/page.tsx"
 Cohesion: 0.40
@@ -724,10 +750,6 @@ Nodes (3): DELETE, GET, PUT
 Cohesion: 0.50
 Nodes (3): GET, POST, userSelect
 
-### Community 144 - "summary-purchase-deliveries/page.tsx"
-Cohesion: 0.60
-Nodes (4): COADetailPage(), fmt(), fmtDate(), LedgerRow
-
 ### Community 157 - "list-data.ts"
 Cohesion: 0.83
 Nodes (3): fmtDate(), pillClass(), SummaryPurchaseDeliveriesPage()
@@ -752,30 +774,22 @@ Nodes (3): fmt(), fmtDate(), PrintDeliveryNotePage()
 Cohesion: 0.83
 Nodes (3): fmt(), fmtDate(), PrintReceiptPage()
 
-### Community 224 - "test-pg.js"
-Cohesion: 0.83
-Nodes (3): fmtDate(), fmtRp(), ReceiptDetailPage()
-
-### Community 225 - "revert-wo.js"
-Cohesion: 0.83
-Nodes (3): fmtDate(), fmtRp(), TransferDetailPage()
-
 ## Knowledge Gaps
-- **598 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+593 more)
+- **660 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+655 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **90 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **84 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FormattedNumberInput()` connect `getCurrentUser` to `aging-ar/page.tsx`, `journal.ts`, `purchase-orders/page.tsx`, `DateRangePicker.tsx`, `reports/ap/page.tsx`, `payment-requests/[id]/route.ts`, `customers/new/page.tsx`, `reset-wo.ts`, `service-packages/route.ts`, `services/route.ts`, `seed-warehouse.ts`, `ap-overdue/page.tsx`, `low-stock/page.tsx`, `app/stock-orders/page.tsx`, `cash-flow/page.tsx`, `transfers/page.tsx`, `invoices/route.ts`, `seed-warehouse-stock.ts`, `spareparts/[id]/route.ts`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `withAuth()` connect `prisma.ts` to `AppShell.tsx`, `PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)`, `4. DEVELOPMENT PLAN`, `users/[id]/page.tsx`, `Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)`, `users/new/page.tsx`, `debug-wo-items.ts`, `app/dashboard/page.tsx`, `service-orders/page.tsx`, `delivery-note/[...no]/page.tsx`, `project/new/page.tsx`, `stock-movement/page.tsx`, `stock-position/page.tsx`, `stock-orders/new/page.tsx`, `FormattedNumberInput.tsx`, `stock-returns/page.tsx`, `pembanding/page.tsx`, `receipt/[...no]/page.tsx`, `purchase-invoices/page.tsx`, `purchase-request/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-returns/page.tsx`, `stock-outgoing/new/page.tsx`, `work-orders/new/page.tsx`, `next.config.js`, `next-env.d.ts`, `coa/create/page.tsx`, `execution/page.tsx`, `po/new/page.tsx`, `inventory/stock-opname/page.tsx`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `FormattedNumberInput()` connect `getCurrentUser` to `aging-ar/page.tsx`, `journal.ts`, `purchase-orders/page.tsx`, `DateRangePicker.tsx`, `reports/ap/page.tsx`, `payment-requests/[id]/route.ts`, `customers/new/page.tsx`, `reset-wo.ts`, `service-packages/route.ts`, `services/route.ts`, `seed-warehouse.ts`, `customers/[id]/edit/page.tsx`, `ap-overdue/page.tsx`, `users/[id]/edit/page.tsx`, `low-stock/page.tsx`, `app/stock-orders/page.tsx`, `cash-flow/page.tsx`, `transfers/page.tsx`, `invoices/route.ts`, `seed-warehouse-stock.ts`, `spareparts/[id]/route.ts`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Why does `getCurrentUser()` connect `4. DEVELOPMENT PLAN` to `AppShell.tsx`, `PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)`, `prisma.ts`, `users/[id]/page.tsx`, `Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)`, `users/new/page.tsx`, `debug-wo-items.ts`, `app/dashboard/page.tsx`, `service-orders/page.tsx`, `delivery-note/[...no]/page.tsx`, `project/new/page.tsx`, `stock-movement/page.tsx`, `stock-position/page.tsx`, `stock-orders/new/page.tsx`, `FormattedNumberInput.tsx`, `stock-returns/page.tsx`, `pembanding/page.tsx`, `receipt/[...no]/page.tsx`, `purchase-invoices/page.tsx`, `purchase-request/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-returns/page.tsx`, `stock-outgoing/new/page.tsx`, `work-orders/new/page.tsx`, `next.config.js`, `next-env.d.ts`, `coa/create/page.tsx`, `execution/page.tsx`, `po/new/page.tsx`, `inventory/stock-opname/page.tsx`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `withAuth()` connect `prisma.ts` to `AppShell.tsx`, `PwnCorp ERP — Rencana Integrasi End-to-End (DB + Backend)`, `4. DEVELOPMENT PLAN`, `users/[id]/page.tsx`, `Phase 1: Detail Pages — Wire Existing APIs (13 pages, ~30 min)`, `users/new/page.tsx`, `debug-wo-items.ts`, `app/dashboard/page.tsx`, `service-orders/page.tsx`, `delivery-note/[...no]/page.tsx`, `project/new/page.tsx`, `stock-movement/page.tsx`, `stock-position/page.tsx`, `stock-orders/new/page.tsx`, `FormattedNumberInput.tsx`, `stock-returns/page.tsx`, `pembanding/page.tsx`, `receipt/[...no]/page.tsx`, `purchase-invoices/page.tsx`, `purchase-request/page.tsx`, `purchase-returns/new/page.tsx`, `purchase-returns/page.tsx`, `stock-outgoing/new/page.tsx`, `work-orders/new/page.tsx`, `next.config.js`, `next-env.d.ts`, `coa/create/page.tsx`, `execution/page.tsx`, `po/new/page.tsx`, `inventory/stock-opname/page.tsx`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `extends`, `next/core-web-vitals`, `{ Client }` to the rest of the system?**
-  _598 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _660 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `generate_reports.py` be split into smaller, more focused modules?**
   _Cohesion score 0.0903954802259887 - nodes in this community are weakly interconnected._
 - **Should `numbering.ts` be split into smaller, more focused modules?**

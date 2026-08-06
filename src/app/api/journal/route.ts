@@ -10,6 +10,7 @@ export const GET = withAuth(async (req: NextRequest) => {
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status");
   const refType = searchParams.get("refType");
+  const coaId = searchParams.get("coaId");
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
 
@@ -22,6 +23,7 @@ export const GET = withAuth(async (req: NextRequest) => {
   }
   if (status) where.status = status;
   if (refType) where.refType = refType;
+  if (coaId) where.details = { some: { coaId } };
   if (dateFrom || dateTo) {
     where.date = {};
     if (dateFrom) where.date.gte = new Date(dateFrom);
@@ -34,7 +36,7 @@ export const GET = withAuth(async (req: NextRequest) => {
       include: {
         createdBy: { select: { id: true, name: true } },
         details: {
-          select: { debit: true, credit: true },
+          select: { debit: true, credit: true, coaId: true, description: true },
         },
       },
       orderBy: { date: "desc" },
@@ -77,7 +79,7 @@ export const POST = withAuth(async (req: NextRequest) => {
   const dateSuffix = `/${mm}/${yyyy}`;
   const prefix = `JU-`;
   const lastJE = await prisma.journalEntry.findFirst({
-    where: { jeNo: { startsWith: prefix }, jeNo: { endsWith: dateSuffix } },
+    where: { jeNo: { startsWith: prefix, endsWith: dateSuffix } },
     orderBy: { jeNo: 'desc' },
   });
   const seq = lastJE ? parseInt(lastJE.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;

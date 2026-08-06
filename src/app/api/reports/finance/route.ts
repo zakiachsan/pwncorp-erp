@@ -326,6 +326,77 @@ export const GET = withAuth(async (req: NextRequest) => {
       return NextResponse.json({ data: { items: invoices } });
     }
 
+    case "profit-loss": {
+      // Laba rugi sederhana dari jurnal: Pendapatan - Beban
+      const accounts = await prisma.cOA.findMany({
+        where: { isActive: true },
+        include: {
+          journalDetails: {
+            where: { je: { storeId: user.storeId, ...(Object.keys(dateFilter).length ? { date: dateFilter } : {}) } },
+            select: { debit: true, credit: true },
+          },
+        },
+      });
+      const revenue = sumCategory(accounts, "Revenue");
+      const expense = sumCategory(accounts, "Expense");
+      return NextResponse.json({ data: { revenue, expense, netProfit: revenue - expense } });
+    }
+
+    case "summary-ar-ap": {
+      const [ar, ap] = await Promise.all([
+        prisma.accountReceivable.aggregate({
+          where: { invoice: { storeId: user.storeId }, status: { not: "PAID" } },
+          _sum: { balance: true },
+          _count: true,
+        }),
+        prisma.accountPayable.aggregate({
+          where: { purchaseInvoice: { po: { storeId: user.storeId } }, status: { not: "PAID" } },
+          _sum: { balance: true },
+          _count: true,
+        }),
+      ]);
+      return NextResponse.json({
+        data: {
+          arOutstanding: ar._sum.balance || 0,
+          arCount: ar._count,
+          apOutstanding: ap._sum.balance || 0,
+          apCount: ap._count,
+        },
+      });
+    }
+
+    case "tax-invoices": {
+      // Sistem belum memodelkan nomor pajak per invoice; tampilkan daftar invoice
+      const invoices = await prisma.invoice.findMany({
+        where: { storeId: user.storeId },
+        include: { customer: { select: { name: true } } },
+        orderBy: { invoiceDate: "desc" },
+        take: 100,
+      });
+      return NextResponse.json({ data: { items: invoices } });
+    }
+
+    case "ap-payments": {
+      // Riwayat pelunasan hutang = purchase invoice berstatus PAID
+      const paid = await prisma.purchaseInvoice.findMany({
+        where: { po: { storeId: user.storeId }, status: "PAID" },
+        include: { supplier: { select: { companyName: true } }, po: { select: { poNo: true } } },
+        orderBy: { date: "desc" },
+        take: 100,
+      });
+      return NextResponse.json({ data: { items: paid } });
+    }
+
+    case "ar-payments": {
+      const payments = await prisma.payment.findMany({
+        where: { invoice: { storeId: user.storeId } },
+        include: { invoice: { select: { invNo: true, customer: { select: { name: true } } } } },
+        orderBy: { paymentDate: "desc" },
+        take: 100,
+      });
+      return NextResponse.json({ data: { items: payments } });
+    }
+
     default:
       return NextResponse.json({ error: "Unknown report type" }, { status: 400 });
   }

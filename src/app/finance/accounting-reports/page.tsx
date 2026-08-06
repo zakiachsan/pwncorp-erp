@@ -193,21 +193,113 @@ export default function AccountingReportsPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(1);
   const [apiData, setApiData] = useState<any>(null);
+  const [apiPL, setApiPL] = useState<any>(null);
   const [apiLoading, setApiLoading] = useState(false);
+  const [tabData, setTabData] = useState<Record<string, any[]>>({});
+  const [tabLoading, setTabLoading] = useState(false);
 
-  // Fetch finance summary from API
+  // Fetch finance summary + profit-loss dari API
   useEffect(() => {
     setApiLoading(true);
-    fetch("/api/reports/finance?report=summary")
-      .then((r) => r.json())
-      .then((j) => { setApiData(j.data); setApiLoading(false); })
+    Promise.all([
+      fetch("/api/reports/finance?report=summary").then((r) => r.json()),
+      fetch("/api/reports/finance?report=profit-loss").then((r) => r.json()),
+    ])
+      .then(([sum, pl]) => { setApiData(sum.data); setApiPL(pl.data); setApiLoading(false); })
       .catch(() => { setApiLoading(false); });
   }, []);
 
+  // Fetch per-tab data
+  useEffect(() => {
+    const cfg = TABS[activeTab];
+    if (!cfg || cfg.id === "fixed-asset-list") return; // fixed asset belum dimodelkan
+    setTabLoading(true);
+    (async () => {
+      try {
+        if (cfg.id === "account-transactions" || cfg.id === "journal-transactions") {
+          const j = await fetch("/api/journal?limit=200").then((r) => r.json());
+          const fmtDate = (iso: string) => (iso ? new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-");
+          const fmtNum = (n: number) => (n || 0).toLocaleString("id-ID");
+          const rows = (j.data || []).map((je: any) => {
+            const totalDebit = je.totalDebit || 0;
+            const totalCredit = je.totalCredit || 0;
+            if (cfg.id === "account-transactions") {
+              return {
+                date: fmtDate(je.date),
+                entity: "-",
+                journal: je.jeNo,
+                status: je.status,
+                refCode: je.refType || "-",
+                notes: je.description,
+                debit: fmtNum(totalDebit),
+                credit: fmtNum(totalCredit),
+                balance: fmtNum(totalDebit - totalCredit),
+              };
+            }
+            return {
+              journalDate: fmtDate(je.date),
+              refCode: je.refType || "-",
+              journal: je.jeNo,
+              source: je.refType || "-",
+              notes: je.description,
+              debit: fmtNum(totalDebit),
+              credit: fmtNum(totalCredit),
+              status: je.status,
+            };
+          });
+          setTabData((p) => ({ ...p, [cfg.id]: rows }));
+        } else {
+          // trial-balance / profit-loss / balance-sheet → grouping per akun
+          const [j, c] = await Promise.all([
+            fetch("/api/journal?limit=500").then((r) => r.json()),
+            fetch("/api/coa?flat=true").then((r) => r.json()),
+          ]);
+          const coaMap: Map<string, any> = new Map((c.data || []).map((x: any) => [x.id, x]));
+          const sums = new Map<string, { debit: number; credit: number }>();
+          for (const je of j.data || []) {
+            for (const d of je.details || []) {
+              if (!d.coaId) continue;
+              const s = sums.get(d.coaId) || { debit: 0, credit: 0 };
+              s.debit += d.debit || 0;
+              s.credit += d.credit || 0;
+              sums.set(d.coaId, s);
+            }
+          }
+          const rows = Array.from(sums.entries()).map(([coaId, s]) => {
+            const acc: any = coaMap.get(coaId) || { code: "-", name: "-", kategori: "-", normalBalance: "Debit" };
+            const balance = acc.normalBalance === "Kredit" ? s.credit - s.debit : s.debit - s.credit;
+            return {
+              code: acc.code,
+              accountName: acc.name,
+              parent: acc.kategori,
+              debit: (s.debit || 0).toLocaleString("id-ID"),
+              credit: (s.credit || 0).toLocaleString("id-ID"),
+              currentPeriod: (balance || 0).toLocaleString("id-ID"),
+              previousPeriod: "-",
+              change: "-",
+              changePercent: "-",
+            };
+          }).sort((a, b) => (a.code < b.code ? -1 : 1));
+          if (cfg.id === "trial-balance") {
+            setTabData((p) => ({ ...p, "trial-balance": rows }));
+          } else if (cfg.id === "profit-loss") {
+            setTabData((p) => ({ ...p, "profit-loss": rows.filter((r: any) => r.parent === "Revenue" || r.parent === "Expense") }));
+          } else if (cfg.id === "balance-sheet") {
+            setTabData((p) => ({ ...p, "balance-sheet": rows.filter((r: any) => ["Asset", "Liability", "Equity"].includes(r.parent)) }));
+          }
+        }
+      } catch {
+        /* biarkan tab kosong */
+      }
+      setTabLoading(false);
+    })();
+  }, [activeTab]);
+
   const cfg = TABS[activeTab];
   const PER_PAGE = 20;
-  const totalPages = Math.ceil(cfg.data.length / PER_PAGE);
-  const pagedData = cfg.data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const displayData = tabData[cfg.id] || cfg.data;
+  const totalPages = Math.ceil(displayData.length / PER_PAGE);
+  const pagedData = displayData.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -318,11 +410,13 @@ export default function AccountingReportsPage() {
       </div>
 
       {/* ── Per-tab summary cards ── */}
-      <PerTabSummary tabId={cfg.id} data={cfg.data} apiData={apiData} />
+      <PerTabSummary tabId={cfg.id} data={displayData} apiData={apiData} apiPL={apiPL} />
 
       {/* ── data table ── */}
       <div style={{ margin: "0 24px 24px", overflowX: "auto" }}>
-        {cfg.data.length === 0 ? (
+        {tabLoading ? (
+          <div style={{ padding: "40px 0", textAlign: "center", fontSize: 14, color: "#444746", background: "#f9f9f9", borderRadius: 8, border: "1px solid #ecebea" }}>Loading...</div>
+        ) : displayData.length === 0 ? (
           <div style={{ padding: "40px 0", textAlign: "center", fontSize: 14, color: "#444746", background: "#f9f9f9", borderRadius: 8, border: "1px solid #ecebea" }}>
             No data available
           </div>
@@ -408,16 +502,16 @@ export default function AccountingReportsPage() {
 }
 
 /* ─── Per-tab summary cards ─── */
-function PerTabSummary({ tabId, data, apiData }: { tabId: string; data: Record<string, any>[]; apiData?: any }) {
+function PerTabSummary({ tabId, data, apiData, apiPL }: { tabId: string; data: Record<string, any>[]; apiData?: any; apiPL?: any }) {
   const fmt = (n: number) => "Rp " + (n || 0).toLocaleString("id-ID");
   const parseNum = (v: any) => parseInt((v || "0").toString().replace(/[^0-9-]/g, "")) || 0;
 
   if (tabId === "profit-loss") {
-    // Use API data if available for summary cards
-    const pendapatan = apiData ? (apiData.totalIncome || 0) : data.filter((d: any) => d.category === "Revenue").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
-    const hpp = data.filter((d: any) => d.category === "HPP").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
-    const beban = apiData ? (apiData.totalExpense || 0) : data.filter((d: any) => d.category === "Expense").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
-    const labaBersih = pendapatan - hpp - beban;
+    // Pakai API profit-loss (accrual dari jurnal); fallback hitung dari rows
+    const pendapatan = apiPL ? (apiPL.revenue || 0) : data.filter((d: any) => d.parent === "Revenue").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const hpp = 0; // tidak ada kategori HPP terpisah di COA
+    const beban = apiPL ? (apiPL.expense || 0) : data.filter((d: any) => d.parent === "Expense").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const labaBersih = apiPL ? (apiPL.netProfit ?? (pendapatan - beban)) : pendapatan - hpp - beban;
     const cards = [
       { label: "Total Pendapatan", value: fmt(pendapatan), color: "#2e844a" },
       { label: "HPP (Modal Barang)", value: fmt(hpp), color: "#ea001e" },
@@ -428,13 +522,16 @@ function PerTabSummary({ tabId, data, apiData }: { tabId: string; data: Record<s
   }
 
   if (tabId === "balance-sheet") {
-    const totalAset = data.filter((d: any) => ["Kas & Bank","Piutang","Persediaan","Fixed Asset"].includes(d.parent)).reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
-    const totalUtang = data.filter((d: any) => ["Utang","Utang Jangka Panjang"].includes(d.parent)).reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
-    const totalModal = data.filter((d: any) => d.parent === "Modal").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const totalAset = data.filter((d: any) => d.parent === "Asset").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const totalUtang = data.filter((d: any) => d.parent === "Liability").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    const ekuitasModal = data.filter((d: any) => d.parent === "Equity").reduce((s: number, d: any) => s + parseNum(d.currentPeriod), 0);
+    // Laba ditahan = Pendapatan - Beban (dari API profit-loss)
+    const labaDitahan = apiPL ? (apiPL.netProfit ?? 0) : 0;
+    const totalModal = ekuitasModal + labaDitahan;
     const cards = [
-      { label: "Total Aset", value: fmt(totalAset), color: "#0176d3" },
+      { label: "Total Aset", value: fmt(Math.abs(totalAset)), color: "#0176d3" },
       { label: "Total Liabilitas", value: fmt(Math.abs(totalUtang)), color: "#ea001e" },
-      { label: "Total Ekuitas", value: fmt(totalModal), color: "#2e844a" },
+      { label: "Total Ekuitas", value: fmt(Math.abs(totalModal)), color: "#2e844a" },
       { label: "Data Entries", value: String(data.length), color: "#444746" },
     ];
     return <CardRow cards={cards} />;

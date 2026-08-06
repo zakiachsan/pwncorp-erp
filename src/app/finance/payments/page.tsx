@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Download } from "lucide-react";
 
 const statusPill = (status: string) => {
-  const map: Record<string, string> = { Verified: "#2e844a", Pending: "#f59e0b", Rejected: "#ea001e" };
+  const map: Record<string, string> = { Verified: "#2e844a", Pending: "#f59e0b", Rejected: "#ea001e", PAID: "#2e844a", PARTIAL: "#f59e0b", UNPAID: "#ea001e" };
   return map[status] || "#6b7280";
 };
 
@@ -88,13 +88,13 @@ export default function PaymentsPage() {
           <tbody>
             {payments.map((p: any) => (
               <tr key={p.id} className="cursor-pointer hover:bg-[#f0f7ff] transition-colors" onClick={() => router.push(`/finance/payments/${p.paymentNo || p.id}`)}>
-                <td className="font-medium text-[--color-brand]">{p.paymentNo}</td>
+                <td className="font-medium text-[--color-brand]">{p.paymentNo || p.id?.slice(-8) || "-"}</td>
                 <td className="text-[--color-text-secondary]">{p.invoice?.invNo || p.invoiceId || "-"}</td>
-                <td>{p.customer?.name || "-"}</td>
+                <td>{p.invoice?.customer?.name || "-"}</td>
                 <td className="text-right font-medium">Rp {(p.amount || 0).toLocaleString("id-ID")}</td>
-                <td>{p.method}</td>
-                <td className="text-[--color-text-secondary]">{p.date ? new Date(p.date).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
-                <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(p.status), color: "#fff" }}>{p.status}</span></td>
+                <td>{p.paymentMethod || "-"}</td>
+                <td className="text-[--color-text-secondary]">{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</td>
+                <td><span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 9999, fontSize: 10, fontWeight: 600, background: statusPill(p.invoice?.status), color: "#fff" }}>{p.invoice?.status || "-"}</span></td>
               </tr>
             ))}
           </tbody>

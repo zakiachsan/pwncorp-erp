@@ -35,7 +35,7 @@ export const GET = withAuth(async (req: NextRequest) => {
     prisma.payment.findMany({
       where,
       include: {
-        invoice: { select: { invNo: true, customer: { select: { name: true } } } },
+        invoice: { select: { invNo: true, status: true, customer: { select: { name: true } } } },
       },
       orderBy: { paymentDate: "desc" },
       skip: (page - 1) * limit,
@@ -124,7 +124,7 @@ export const POST = withAuth(async (req: NextRequest) => {
         const _yyyy = _now.getFullYear();
         const _dateSuffix = `/${_mm}/${_yyyy}`;
         const _lastJE = await prisma.journalEntry.findFirst({
-          where: { jeNo: { startsWith: 'JU-' }, jeNo: { endsWith: _dateSuffix } },
+          where: { jeNo: { startsWith: 'JU-', endsWith: _dateSuffix } },
           orderBy: { jeNo: 'desc' },
         });
         const _seq = _lastJE ? parseInt(_lastJE.jeNo.split('-')[1]?.split('/')[0] || '0') + 1 : 1;
