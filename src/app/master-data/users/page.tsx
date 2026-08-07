@@ -150,7 +150,6 @@ export default function UsersPage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Nama</th>
                   <th>Email</th>
                   <th>Role</th>
@@ -164,12 +163,11 @@ export default function UsersPage() {
               <tbody>
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="text-center py-8 text-[--color-text-secondary]">No users found</td>
+                    <td colSpan={8} className="text-center py-8 text-[--color-text-secondary]">No users found</td>
                   </tr>
                 )}
                 {users.map((u) => (
                   <tr key={u.id}>
-                    <td className="font-medium" style={{ color: "var(--color-brand)" }}>{u.id}</td>
                     <td className="font-medium">{u.name}</td>
                     <td className="text-[--color-text-secondary]" style={{ fontSize: 12 }}>{u.email}</td>
                     <td><span className="pill bg-[--color-brand] text-white">{u.role}</span></td>
