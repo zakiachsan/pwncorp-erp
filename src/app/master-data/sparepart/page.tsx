@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Package, Star, Download, Upload, Search, X } from "lucide-react";
 import { validateRows, mapRowToApi, sparepartColumns } from "@/lib/csv-utils";
 import { exportDataToExcel, parseExcelFile, makeFilename, downloadTemplate } from "@/lib/excel-utils";
+import Pagination from "@/components/ui/Pagination";
 
 interface Product {
   id: string;
@@ -34,6 +35,17 @@ export default function ProductsPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchSku, setSearchSku] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchCode, setSearchCode] = useState("");
+  const [searchBrand, setSearchBrand] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
+  const [brandOptions, setBrandOptions] = useState<string[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+  const PAGE_SIZE = 50;
   const [importState, setImportState] = useState<{
     open: boolean;
     preview: Record<string, string>[];
@@ -42,17 +54,50 @@ export default function ProductsPage() {
     skipped: { row: number; reason: string }[];
   }>({ open: false, preview: [], total: 0, valid: [], skipped: [] });
 
-  useEffect(() => {
-    fetch("/api/spareparts?limit=50")
+  const loadProducts = (p: number) => {
+    setLoading(true);
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE), page: String(p) });
+    if (searchSku.trim()) params.set("search", searchSku.trim());
+    if (searchName.trim()) params.set("searchName", searchName.trim());
+    if (searchCode.trim()) params.set("searchCode", searchCode.trim());
+    if (searchBrand) params.set("brand", searchBrand);
+    if (searchCategory) params.set("category", searchCategory);
+    fetch(`/api/spareparts?${params.toString()}`)
       .then((r) => r.json())
       .then((json) => {
         setProducts(json.data || []);
+        setTotal(json.pagination?.total ?? 0);
+        setTotalPages(json.pagination?.totalPages ?? 1);
+        setPage(json.pagination?.page ?? p);
         setLoading(false);
       })
       .catch(() => {
         setError("Gagal memuat data");
         setLoading(false);
       });
+  };
+
+  // Load brand/category options sekali untuk dropdown filter
+  useEffect(() => {
+    fetch("/api/spareparts?limit=1")
+      .then((r) => r.json())
+      .then((json) => {
+        setTotal(json.pagination?.total ?? 0);
+        setTotalPages(json.pagination?.totalPages ?? 1);
+      })
+      .catch(() => {});
+    fetch("/api/spareparts/filters")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.brands) setBrandOptions(json.brands);
+        if (json.categories) setCategoryOptions(json.categories);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadProducts(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleExport = () => {
@@ -112,10 +157,7 @@ export default function ProductsPage() {
     setImportResult({ success, failed, skipped: importState.skipped.length });
 
     // Refresh data
-    fetch("/api/spareparts?limit=50")
-      .then((r) => r.json())
-      .then((json) => setProducts(json.data || []))
-      .catch(() => {});
+    loadProducts(page);
   };
 
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -174,36 +216,57 @@ export default function ProductsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="form-group">
             <label className="form-label">SKU</label>
-            <input type="text" className="form-input" placeholder="Search SKU..." />
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Search SKU..."
+              value={searchSku}
+              onChange={(e) => setSearchSku(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && loadProducts(1)}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Name</label>
-            <input type="text" className="form-input" placeholder="Product name..." />
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Product name..."
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && loadProducts(1)}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Product Code</label>
-            <input type="text" className="form-input" placeholder="Product code..." />
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Product code..."
+              value={searchCode}
+              onChange={(e) => setSearchCode(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && loadProducts(1)}
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Product Brand</label>
-            <select className="form-select">
-              <option>All Brands</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Product Type</label>
-            <select className="form-select">
-              <option>All Types</option>
+            <select className="form-select" value={searchBrand} onChange={(e) => setSearchBrand(e.target.value)}>
+              <option value="">All Brands</option>
+              {brandOptions.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
             </select>
           </div>
           <div className="form-group">
             <label className="form-label">Category</label>
-            <select className="form-select">
-              <option>All Categories</option>
+            <select className="form-select" value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)}>
+              <option value="">All Categories</option>
+              {categoryOptions.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
           </div>
           <div className="form-group flex items-end">
-            <button className="btn btn--brand btn--sm w-full">
+            <button className="btn btn--brand btn--sm w-full" onClick={() => loadProducts(1)}>
               <Search size={14} /> Search
             </button>
           </div>
@@ -213,32 +276,49 @@ export default function ProductsPage() {
       {loading ? (
         <div className="p-8 text-center">Loading...</div>
       ) : (
-        <div className="table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>NAME</th>
-                <th>BRAND</th>
-                <th>CATEGORY</th>
-                <th>STOCK</th>
-                <th>PRICE</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id} className="cursor-pointer" onClick={() => router.push(`/master-data/sparepart/${product.sku}`)}>
-                  <td>{product.sku}</td>
-                  <td>{product.name}</td>
-                  <td>{product.brand}</td>
-                  <td>{product.category || product.type || "-"}</td>
-                  <td>{product.stockQty}</td>
-                  <td>{formatRupiah(product.sellPrice)}</td>
+        <>
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>NAME</th>
+                  <th>BRAND</th>
+                  <th>CATEGORY</th>
+                  <th>STOCK</th>
+                  <th>PRICE</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product.id} className="cursor-pointer" onClick={() => router.push(`/master-data/sparepart/${product.sku}`)}>
+                    <td>{product.sku}</td>
+                    <td>{product.name}</td>
+                    <td>{product.brand}</td>
+                    <td>{product.category || product.type || "-"}</td>
+                    <td>{product.stockQty}</td>
+                    <td>{formatRupiah(product.sellPrice)}</td>
+                  </tr>
+                ))}
+                {products.length === 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#888" }}>
+                      Tidak ada data
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={PAGE_SIZE}
+            onPageChange={loadProducts}
+            label="produk"
+          />
+        </>
       )}
 
       {/* Import Preview Modal */}

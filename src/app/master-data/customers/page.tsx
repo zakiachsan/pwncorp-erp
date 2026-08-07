@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Search, Download, Upload, X } from "lucide-react";
 import { validateRows, mapRowToApi, customerColumns } from "@/lib/csv-utils";
 import { exportDataToExcel, parseExcelFile, makeFilename, downloadTemplate } from "@/lib/excel-utils";
+import Pagination from "@/components/ui/Pagination";
 
 interface Customer {
   id: string;
@@ -34,20 +35,24 @@ export default function CustomersPage() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const PAGE_SIZE = 20;
 
-  const fetchData = () => {
+  const fetchData = (p = 1) => {
     setLoading(true);
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ page: String(p), limit: String(PAGE_SIZE) });
     if (typeFilter !== "All") params.set("type", typeFilter);
     if (search) params.set("search", search);
     const qs = params.toString();
     fetch(`/api/customers${qs ? "?" + qs : ""}`)
       .then((r) => r.json())
-      .then((json) => { setData(json.data || []); setLoading(false); })
+      .then((json) => { setData(json.data || []); setTotal(json.pagination?.total ?? 0); setTotalPages(json.pagination?.totalPages ?? 1); setPage(json.pagination?.page ?? p); setLoading(false); })
       .catch(() => { setError("Failed to load customers"); setLoading(false); });
   };
 
-  useEffect(() => { fetchData(); }, [typeFilter, search]);
+  useEffect(() => { fetchData(1); }, [typeFilter, search]);
 
   const handleSearch = () => { /* trigger via state */ };
 
@@ -190,6 +195,14 @@ export default function CustomersPage() {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={PAGE_SIZE}
+            onPageChange={fetchData}
+            label="customer"
+          />
         </div>
       )}
 

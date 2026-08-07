@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Search, Download, Upload, X } from "lucide-react";
 import { validateRows, mapRowToApi, serviceColumns } from "@/lib/csv-utils";
 import { exportDataToExcel, parseExcelFile, makeFilename, downloadTemplate } from "@/lib/excel-utils";
+import Pagination from "@/components/ui/Pagination";
 
 interface Service {
   id: string;
@@ -34,20 +35,23 @@ export default function ServicesPage() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchData = () => {
+  const fetchData = (p = 1) => {
     setLoading(true);
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ page: String(p), limit: "20" });
     if (categoryFilter !== "All") params.set("category", categoryFilter);
     if (search) params.set("search", search);
     const qs = params.toString();
     fetch(`/api/services${qs ? "?" + qs : ""}`)
       .then((r) => r.json())
-      .then((json) => { setData(json.data || []); setLoading(false); })
+      .then((json) => { setData(json.data || []); setTotal(json.pagination?.total ?? 0); setTotalPages(json.pagination?.totalPages ?? 1); setPage(json.pagination?.page ?? p); setLoading(false); })
       .catch(() => { setError("Failed to load services"); setLoading(false); });
   };
 
-  useEffect(() => { fetchData(); }, [categoryFilter, search]);
+  useEffect(() => { fetchData(1); }, [categoryFilter, search]);
 
   const formatPrice = (price: number) => {
     return "Rp " + (price || 0).toLocaleString("id-ID");
@@ -188,6 +192,14 @@ export default function ServicesPage() {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={20}
+            onPageChange={fetchData}
+            label="service"
+          />
         </div>
       )}
 

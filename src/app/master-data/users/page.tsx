@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Settings } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
 const tabOptions = [
   { key: "operasional", label: "Tab Operasional" },
@@ -76,9 +77,14 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editUser, setEditUser] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const PAGE_SIZE = 20;
 
-  useEffect(() => {
-    fetch("/api/users?page=1&limit=200")
+  const loadUsers = (p = 1) => {
+    setLoading(true);
+    fetch(`/api/users?page=${p}&limit=${PAGE_SIZE}`)
       .then((r) => r.json())
       .then((json) => {
         const apiData = (json.data || []).map((u: any) => ({
@@ -92,10 +98,15 @@ export default function UsersPage() {
           allowedMenus: allMenus.flatMap((s) => s.items.map((i) => i.key)),
         }));
         setUsers(apiData);
+        setTotal(json.pagination?.total ?? 0);
+        setTotalPages(json.pagination?.totalPages ?? 1);
+        setPage(json.pagination?.page ?? p);
         setLoading(false);
       })
       .catch(() => { setError("Failed to load users"); setLoading(false); });
-  }, []);
+  };
+
+  useEffect(() => { loadUsers(1); }, []);
 
   const toggleTab = (userId: string, tab: string) => {
     setUsers((prev) => prev.map((u) => {
@@ -191,6 +202,14 @@ export default function UsersPage() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={PAGE_SIZE}
+            onPageChange={loadUsers}
+            label="user"
+          />
 
           {/* Access Management Panel */}
           {editUser && (() => {

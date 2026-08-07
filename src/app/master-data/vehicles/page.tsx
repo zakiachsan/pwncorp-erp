@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Search, Download, Upload, X } from "lucide-react";
 import { validateRows, mapRowToApi, vehicleColumns } from "@/lib/csv-utils";
 import { exportDataToExcel, parseExcelFile, makeFilename, downloadTemplate } from "@/lib/excel-utils";
+import Pagination from "@/components/ui/Pagination";
 
 interface Vehicle {
   id: string;
@@ -35,20 +36,23 @@ export default function VehiclesPage() {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchData = () => {
+  const fetchData = (p = 1) => {
     setLoading(true);
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ page: String(p), limit: "20" });
     if (brandFilter !== "All") params.set("search", brandFilter);
     if (search) params.set("search", search);
     const qs = params.toString();
     fetch(`/api/vehicles${qs ? "?" + qs : ""}`)
       .then((r) => r.json())
-      .then((json) => { setData(json.data || []); setLoading(false); })
+      .then((json) => { setData(json.data || []); setTotal(json.pagination?.total ?? 0); setTotalPages(json.pagination?.totalPages ?? 1); setPage(json.pagination?.page ?? p); setLoading(false); })
       .catch(() => { setError("Failed to load vehicles"); setLoading(false); });
   };
 
-  useEffect(() => { fetchData(); }, [brandFilter, search]);
+  useEffect(() => { fetchData(1); }, [brandFilter, search]);
 
   const handleClickPlate = (e: React.MouseEvent, plateNo: string) => {
     e.stopPropagation();
@@ -247,6 +251,14 @@ export default function VehiclesPage() {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={20}
+            onPageChange={fetchData}
+            label="kendaraan"
+          />
         </div>
       )}
 

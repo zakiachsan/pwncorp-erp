@@ -8,7 +8,10 @@ export const GET = withAuth(async (req: NextRequest) => {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
   const search = searchParams.get("search") || "";
+  const searchName = searchParams.get("searchName") || "";
+  const searchCode = searchParams.get("searchCode") || "";
   const category = searchParams.get("category");
+  const brand = searchParams.get("brand");
   const supplierId = searchParams.get("supplierId");
   const lowStock = searchParams.get("lowStock");
 
@@ -20,7 +23,18 @@ export const GET = withAuth(async (req: NextRequest) => {
       { code: { contains: search, mode: "insensitive" } },
     ];
   }
+  if (searchName) {
+    const nameCond = { name: { contains: searchName, mode: "insensitive" } };
+    if (where.OR) where.OR.push(nameCond);
+    else where.OR = [nameCond];
+  }
+  if (searchCode) {
+    const codeCond = { code: { contains: searchCode, mode: "insensitive" } };
+    if (where.OR) where.OR.push(codeCond);
+    else where.OR = [codeCond];
+  }
   if (category) where.category = category;
+  if (brand) where.brand = brand;
   if (supplierId) where.supplierId = supplierId;
   if (lowStock === "true") where.stockQty = { lte: prisma.sparepart.fields.minStock };
 
