@@ -266,7 +266,7 @@ export default function ProductsPage() {
             </select>
           </div>
           <div className="form-group flex items-end">
-            <button className="btn btn--brand btn--sm w-full" onClick={() => loadProducts(1)}>
+            <button className="btn btn--brand btn--sm" onClick={() => loadProducts(1)}>
               <Search size={14} /> Search
             </button>
           </div>
