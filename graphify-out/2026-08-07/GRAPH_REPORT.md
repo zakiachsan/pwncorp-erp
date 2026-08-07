@@ -1,7 +1,7 @@
 # Graph Report - pwncorp  (2026-08-07)
 
 ## Corpus Check
-- 321 files · ~288,883 words
+- 321 files · ~288,840 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9c65fcd3`
+- Built from commit: `8217d16c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -286,7 +286,7 @@ Nodes (26): 10. CATATAN PENTING, 1. STATUS SAAT INI, 2. ARSITEKTUR TEKNIS, 3.1 M
 
 ### Community 8 - "getCurrentUser"
 Cohesion: 0.07
-Nodes (18): GET, GET, POST, GET, POST, GET, POST, GET (+10 more)
+Nodes (18): GET, GET, POST, GET, POST, GET, GET, GET (+10 more)
 
 ### Community 9 - "FormattedNumberInput.tsx"
 Cohesion: 0.11
