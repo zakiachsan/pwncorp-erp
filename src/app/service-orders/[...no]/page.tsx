@@ -722,7 +722,10 @@ export default function ServiceOrderDetailPage() {
                         <SearchableSelect
                           options={availableServices.map((s: any) => ({ value: s.id, label: `${s.sku} - ${s.name}` }))}
                           value={newService.serviceId}
-                          onChange={(val) => setNewService(prev => ({ ...prev, serviceId: val }))}
+                          onChange={(val) => {
+                            const svc = availableServices.find((s: any) => s.id === val);
+                            setNewService(prev => ({ ...prev, serviceId: val, unitPrice: svc?.standardPrice || 0 }));
+                          }}
                           placeholder="Cari service..."
                         />
                       </div>
@@ -763,7 +766,10 @@ export default function ServiceOrderDetailPage() {
                         <SearchableSelect
                           options={availableSpareparts.map((s: any) => ({ value: s.id, label: `${s.sku} - ${s.name}` }))}
                           value={newSparepart.sparepartId}
-                          onChange={(val) => setNewSparepart(prev => ({ ...prev, sparepartId: val }))}
+                          onChange={(val) => {
+                            const sp = availableSpareparts.find((s: any) => s.id === val);
+                            setNewSparepart(prev => ({ ...prev, sparepartId: val, unitPrice: sp?.sellPrice || 0 }));
+                          }}
                           placeholder="Cari sparepart..."
                         />
                       </div>
