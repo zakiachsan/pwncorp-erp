@@ -11,6 +11,7 @@ export interface CsvColumn {
 
 export const sparepartColumns: CsvColumn[] = [
   { key: "sku", header: "SKU", required: true },
+  { key: "code", header: "Product Code" },
   { key: "name", header: "Name", required: true },
   { key: "brand", header: "Brand" },
   { key: "category", header: "Category" },

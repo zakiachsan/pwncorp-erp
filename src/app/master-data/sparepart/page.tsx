@@ -282,6 +282,7 @@ export default function ProductsPage() {
               <thead>
                 <tr>
                   <th>SKU</th>
+                  <th>PRODUCT CODE</th>
                   <th>NAME</th>
                   <th>BRAND</th>
                   <th>CATEGORY</th>
@@ -293,6 +294,7 @@ export default function ProductsPage() {
                 {products.map((product) => (
                   <tr key={product.id} className="cursor-pointer" onClick={() => router.push(`/master-data/sparepart/${product.sku}`)}>
                     <td>{product.sku}</td>
+                    <td>{product.code || "-"}</td>
                     <td>{product.name}</td>
                     <td>{product.brand}</td>
                     <td>{product.category || product.type || "-"}</td>
@@ -302,7 +304,7 @@ export default function ProductsPage() {
                 ))}
                 {products.length === 0 && (
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: 24, color: "#888" }}>
+                    <td colSpan={7} style={{ textAlign: "center", padding: 24, color: "#888" }}>
                       Tidak ada data
                     </td>
                   </tr>
