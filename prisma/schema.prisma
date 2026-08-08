@@ -67,6 +67,7 @@ model Store {
   pettyCashes     PettyCash[]
   projects        Project[]
   journalEntries  JournalEntry[]
+  journalTemplates JournalTemplate[]
   warehouses      Warehouse[]
   stockHistories  StockHistory[]
   receipts        Receipt[]
@@ -811,6 +812,7 @@ model COA {
 
   journalDetails JournalDetail[]
   bankAccounts   BankAccount[]
+  journalTemplateItems JournalTemplateItem[]
 
   @@map("coa")
 }
@@ -829,6 +831,8 @@ model JournalEntry {
   createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
   approvedById String? @map("approved_by_id")
   approvedBy   User?   @relation("ApprovedBy", fields: [approvedById], references: [id])
+  attachment  String?  @map("attachment")
+  contact     String?  @map("contact")
   createdAt   DateTime @default(now()) @map("created_at")
 
   details           JournalDetail[]
@@ -849,6 +853,29 @@ model JournalDetail {
   credit     Float        @default(0)
 
   @@map("journal_details")
+}
+
+model JournalTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  storeId   String   @map("store_id")
+  store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  items JournalTemplateItem[]
+
+  @@map("journal_templates")
+}
+
+model JournalTemplateItem {
+  id         String   @id @default(cuid())
+  templateId String   @map("template_id")
+  template   JournalTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  coaId      String   @map("coa_id")
+  coa        COA      @relation(fields: [coaId], references: [id])
+  side       String   @default("debit") // debit | credit
+
+  @@map("journal_template_items")
 }
 
 model AccountReceivable {

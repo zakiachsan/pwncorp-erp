@@ -6,60 +6,76 @@ export const GET = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "20");
+  const limit = parseInt(searchParams.get("limit") || "50");
   const search = searchParams.get("search") || "";
-  const status = searchParams.get("status");
-  const refType = searchParams.get("refType");
-  const coaId = searchParams.get("coaId");
+  const coaId = searchParams.get("coaId") || "all";
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
 
-  const where: any = { storeId: user.storeId };
+  // Filter on journal_detail, joined with journal_entry (for header) and coa
+  const where: any = { je: { storeId: user.storeId } };
+
   if (search) {
     where.OR = [
-      { jeNo: { contains: search, mode: "insensitive" } },
+      { je: { jeNo: { contains: search, mode: "insensitive" } } },
+      { je: { description: { contains: search, mode: "insensitive" } } },
       { description: { contains: search, mode: "insensitive" } },
     ];
   }
-  if (status) where.status = status;
-  if (refType) where.refType = refType;
-  if (coaId) where.details = { some: { coaId } };
+
+  if (coaId && coaId !== "all") where.coaId = coaId;
+
   if (dateFrom || dateTo) {
-    where.date = {};
-    if (dateFrom) where.date.gte = new Date(dateFrom);
-    if (dateTo) where.date.lte = new Date(dateTo);
+    where.je.date = {};
+    if (dateFrom) where.je.date.gte = new Date(dateFrom);
+    if (dateTo) where.je.date.lte = new Date(dateTo);
   }
 
-  const [data, total] = await Promise.all([
-    prisma.journalEntry.findMany({
+  const [details, total, summary] = await Promise.all([
+    prisma.journalDetail.findMany({
       where,
       include: {
-        createdBy: { select: { id: true, name: true } },
-        details: {
-          select: { debit: true, credit: true, coaId: true, description: true },
-        },
+        je: { select: { jeNo: true, date: true, description: true, refType: true, refId: true, status: true } },
+        coa: { select: { id: true, code: true, name: true } },
       },
-      orderBy: { date: "desc" },
+      orderBy: [{ je: { date: "desc" } }, { id: "asc" }],
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prisma.journalEntry.count({ where }),
+    prisma.journalDetail.count({ where }),
+    prisma.journalDetail.aggregate({
+      where,
+      _sum: { debit: true, credit: true },
+    }),
   ]);
 
-  // Calculate totalDebit/totalCredit for each entry
-  const dataWithTotals = data.map((j: any) => ({
-    ...j,
-    totalDebit: j.details.reduce((s: number, d: any) => s + (d.debit || 0), 0),
-    totalCredit: j.details.reduce((s: number, d: any) => s + (d.credit || 0), 0),
+  const data = details.map((d: any) => ({
+    id: d.id,
+    jeNo: d.je.jeNo,
+    date: d.je.date,
+    refType: d.je.refType,
+    refId: d.je.refId,
+    description: d.je.description,
+    detailDescription: d.description,
+    coa: { id: d.coa.id, code: d.coa.code, name: d.coa.name },
+    debit: d.debit,
+    credit: d.credit,
   }));
 
-  return NextResponse.json({ data: dataWithTotals, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  return NextResponse.json({
+    data,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    summary: {
+      totalDebit: summary._sum.debit || 0,
+      totalCredit: summary._sum.credit || 0,
+    },
+  });
 });
 
 export const POST = withAuth(async (req: NextRequest) => {
   const user = (await getCurrentUser()) as any;
   const body = await req.json();
-  const { description, refType, refId, status, details } = body;
+  const { description, refType, refId, status, details, date, contact, attachment } = body;
 
   if (!description || !details || !details.length) {
     return NextResponse.json({ error: "description and details are required" }, { status: 400 });
@@ -73,9 +89,9 @@ export const POST = withAuth(async (req: NextRequest) => {
   }
 
   // Generate JU number: JU-XXX/MM/YYYY
-  const now = new Date();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const yyyy = now.getFullYear();
+  const txnDate = date ? new Date(date) : new Date();
+  const mm = String(txnDate.getMonth() + 1).padStart(2, '0');
+  const yyyy = txnDate.getFullYear();
   const dateSuffix = `/${mm}/${yyyy}`;
   const prefix = `JU-`;
   const lastJE = await prisma.journalEntry.findFirst({
@@ -88,13 +104,15 @@ export const POST = withAuth(async (req: NextRequest) => {
   const je = await prisma.journalEntry.create({
     data: {
       jeNo,
-      date: new Date(),
+      date: txnDate,
       description,
       refType: refType || "manual",
       refId: refId || null,
       storeId: user.storeId,
       status: status || "Draft",
       createdById: user.id,
+      contact: contact || null,
+      attachment: attachment || null,
       details: {
         create: details.map((d: any) => ({
           coaId: d.coaId,
