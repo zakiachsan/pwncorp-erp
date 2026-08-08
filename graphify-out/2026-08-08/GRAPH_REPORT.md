@@ -1,16 +1,16 @@
 # Graph Report - pwncorp-erp-fresh  (2026-08-08)
 
 ## Corpus Check
-- 323 files · ~292,551 words
+- 322 files · ~290,798 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1656 nodes · 2396 edges · 229 communities (149 shown, 80 thin omitted)
+- 1650 nodes · 2381 edges · 226 communities (150 shown, 76 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `dff96fb0`
+- Built from commit: `d4be528a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -93,13 +93,13 @@
 - debug-wo-items.ts
 - purchase/page.tsx
 - finance/page.tsx
-- coa/[code]/page.tsx
+- ap-cheque/page.tsx
 - ap-credit/page.tsx
 - ap-overdue/page.tsx
 - makeFilename
-- spareparts/[id]/route.ts
+- ap-payments/page.tsx
 - coa/[id]/route.ts
-- suppliers/[id]/route.ts
+- service-packages/[id]/route.ts
 - service-orders/page.tsx
 - stock-orders/new/page.tsx
 - accounts-receivable/[id]/route.ts
@@ -117,10 +117,10 @@
 - work-orders/page.tsx
 - journal.ts
 - seed.ts
-- journal/create/page.tsx
+- invoices/[id]/route.ts
 - users/[id]/route.ts
 - finance/ap/page.tsx
-- aging-ar/page.tsx
+- finance/ar/page.tsx
 - payables/page.tsx
 - receivables/page.tsx
 - journal/page.tsx
@@ -139,10 +139,10 @@
 - suppliers/[id]/page.tsx
 - [plate]/page.tsx
 - summary-purchase-orders/page.tsx
-- ar-credit/page.tsx
+- summary-purchase-returns/page.tsx
 - stock-workflow/stock-orders/page.tsx
 - purchase-invoices/[...docNumber]/page.tsx
-- tax-invoices/page.tsx
+- ap-subledger/page.tsx
 - warehouse/stock-opname/new/page.tsx
 - check-pw.js
 - add-spareparts.ts
@@ -157,12 +157,12 @@
 - ar-cheque/page.tsx
 - users/route.ts
 - journal/[id]/route.ts
-- summary-purchase-deliveries/page.tsx
-- journal/route.ts
+- invoices/create/page.tsx
+- payment-requests/[id]/route.ts
 - purchase-orders/[id]/route.ts
 - history/page.tsx
 - excel-utils.ts
-- petty-cash/route.ts
+- finance/route.ts
 - master-data/page.tsx
 - services/[code]/page.tsx
 - users/[id]/page.tsx
@@ -181,20 +181,15 @@
 - test-all-journals.ts
 - test-stock-journal.ts
 - bank-accounts/route.ts
-- purchase-deliveries/[id]/route.ts
-- services/route.ts
-- spareparts/route.ts
+- coa/route.ts
 - customers/route.ts
 - purchase-returns/route.ts
 - stock-opnames/[id]/route.ts
 - purchase-returns/[id]/route.ts
-- stock-opnames/route.ts
-- stock-outgoings/[id]/route.ts
-- warehouses/route.ts
-- work-orders/[id]/route.ts
+- vendor-quotes/route.ts
+- stock-outgoings/route.ts
 - stock-returns/[id]/route.ts
 - stock-transfers/[id]/route.ts
-- sparepart/new/page.tsx
 - purchase-request/page.tsx
 - finance/dashboard/page.tsx
 - journal/[no]/page.tsx
@@ -203,6 +198,7 @@
 - project/new/page.tsx
 - stock-returns/page.tsx
 - pembanding/page.tsx
+- purchase-returns/new/page.tsx
 - work-orders/new/page.tsx
 - test-pg.js
 - eslint-config-next
@@ -223,8 +219,8 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `makeFilename()` - 79 edges
-2. `withAuth()` - 78 edges
-3. `getCurrentUser()` - 70 edges
+2. `withAuth()` - 76 edges
+3. `getCurrentUser()` - 69 edges
 4. `exportTableToExcel()` - 66 edges
 5. `FormattedNumberInput()` - 33 edges
 6. `fmt()` - 20 edges
@@ -234,9 +230,9 @@
 10. `exportDataToExcel()` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `parseExcelFile()` --references--> `xlsx`  [EXTRACTED]
-  src/lib/excel-utils.ts → package.json
 - `writeWorkbook()` --references--> `xlsx`  [EXTRACTED]
+  src/lib/excel-utils.ts → package.json
+- `parseExcelFile()` --references--> `xlsx`  [EXTRACTED]
   src/lib/excel-utils.ts → package.json
 - `DashboardPage()` --indirect_call--> `ClipboardList()`  [INFERRED]
   src/app/dashboard/page.tsx → src/app/service-orders/page.tsx
@@ -248,15 +244,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (229 total, 80 thin omitted)
+## Communities (226 total, 76 thin omitted)
 
 ### Community 0 - "users/page.tsx"
 Cohesion: 0.33
 Nodes (3): allMenus, tabOptions, UserEntry
 
 ### Community 1 - "csv-utils.ts"
-Cohesion: 0.11
-Nodes (33): MasterDataPage(), Customer, CustomersPage(), Service, ServicesPage(), formatRupiah(), Product, ProductsPage() (+25 more)
+Cohesion: 0.10
+Nodes (34): xlsx, Customer, CustomersPage(), Service, ServicesPage(), formatRupiah(), Product, ProductsPage() (+26 more)
 
 ### Community 2 - "generate_reports.py"
 Cohesion: 0.11
@@ -272,7 +268,7 @@ Nodes (8): AppShell(), Header(), financeGroups, NavItem, operasionalGroups, S, S
 
 ### Community 5 - "prisma.ts"
 Cohesion: 0.07
-Nodes (15): GET, GET, PUT, GET, GET, PUT, GET, DELETE (+7 more)
+Nodes (18): DELETE, PUT, GET, POST, GET, PUT, DELETE, GET (+10 more)
 
 ### Community 6 - "vehicles/[id]/route.ts"
 Cohesion: 0.50
@@ -284,11 +280,11 @@ Nodes (26): 10. CATATAN PENTING, 1. STATUS SAAT INI, 2. ARSITEKTUR TEKNIS, 3.1 M
 
 ### Community 8 - "getCurrentUser"
 Cohesion: 0.07
-Nodes (18): DELETE, GET, PUT, VALID_TRANSITIONS, GET, POST, GET, POST (+10 more)
+Nodes (18): GET, GET, POST, GET, POST, GET, GET, GET (+10 more)
 
 ### Community 9 - "FormattedNumberInput.tsx"
 Cohesion: 0.09
-Nodes (7): Customer, InvoiceItem, DeliveryItemRow, formatIDR(), NewPurchaseReturnPage(), FormattedNumberInput(), FormattedNumberInputProps
+Nodes (6): CoaItem, JournalLine, emptyForm, DeliveryItemRow, FormattedNumberInput(), FormattedNumberInputProps
 
 ### Community 10 - "4. DEVELOPMENT PLAN"
 Cohesion: 0.08
@@ -304,7 +300,7 @@ Nodes (23): find_data_range(), fmt_rp(), gen_ap_account_payables(), gen_ap_aging
 
 ### Community 13 - "auth-helpers.ts"
 Cohesion: 0.09
-Nodes (14): handler, GET, POST, GET, GET, GET, POST, GET (+6 more)
+Nodes (16): handler, GET, PUT, GET, POST, GET, GET, PUT (+8 more)
 
 ### Community 14 - "devDependencies"
 Cohesion: 0.10
@@ -554,9 +550,9 @@ Nodes (4): adapter, pool, prisma, u
 Cohesion: 0.47
 Nodes (4): fmt(), PurchaseInvoicesPage(), S, statusColor()
 
-### Community 79 - "coa/[code]/page.tsx"
-Cohesion: 0.60
-Nodes (4): COADetailPage(), fmt(), fmtDate(), LedgerRow
+### Community 79 - "ap-cheque/page.tsx"
+Cohesion: 0.83
+Nodes (3): APChequePage(), fmt(), fmtDate()
 
 ### Community 80 - "ap-credit/page.tsx"
 Cohesion: 0.83
@@ -568,17 +564,17 @@ Nodes (3): APOverduePage(), fmt(), fmtDate()
 
 ### Community 82 - "makeFilename"
 Cohesion: 0.09
-Nodes (30): ARPage(), fmt(), statusPill(), InvoicesPage(), statusPill(), PaymentsPage(), statusPill(), APChequePage() (+22 more)
+Nodes (31): COADetailPage(), fmt(), fmtDate(), LedgerRow, MasterDataPage(), InvoicesPage(), statusPill(), PaymentsPage() (+23 more)
 
-### Community 83 - "spareparts/[id]/route.ts"
-Cohesion: 0.50
-Nodes (3): DELETE, GET, PUT
+### Community 83 - "ap-payments/page.tsx"
+Cohesion: 0.83
+Nodes (3): APPaymentsPage(), fmt(), fmtDate()
 
 ### Community 84 - "coa/[id]/route.ts"
 Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
 
-### Community 86 - "suppliers/[id]/route.ts"
+### Community 86 - "service-packages/[id]/route.ts"
 Cohesion: 0.50
 Nodes (3): DELETE, GET, PUT
 
@@ -626,6 +622,10 @@ Nodes (5): COA, createJournalEntry(), CreateJournalParams, generateJENo(), Journ
 Cohesion: 0.40
 Nodes (3): adapter, pool, prisma
 
+### Community 104 - "invoices/[id]/route.ts"
+Cohesion: 0.40
+Nodes (4): DELETE, GET, PUT, VALID_TRANSITIONS
+
 ### Community 105 - "users/[id]/route.ts"
 Cohesion: 0.40
 Nodes (4): DELETE, GET, PUT, userSelect
@@ -633,6 +633,10 @@ Nodes (4): DELETE, GET, PUT, userSelect
 ### Community 106 - "finance/ap/page.tsx"
 Cohesion: 0.60
 Nodes (3): APPage(), fmt(), statusPill()
+
+### Community 107 - "finance/ar/page.tsx"
+Cohesion: 0.60
+Nodes (3): ARPage(), fmt(), statusPill()
 
 ### Community 108 - "payables/page.tsx"
 Cohesion: 0.60
@@ -643,8 +647,8 @@ Cohesion: 0.60
 Nodes (4): fmt(), InvoiceReceivablesPage(), S, statusColor()
 
 ### Community 110 - "journal/page.tsx"
-Cohesion: 0.47
-Nodes (3): AddJournalModal(), fmt(), JournalPage()
+Cohesion: 0.50
+Nodes (3): fmt(), JournalPage(), SOURCE_MAP
 
 ### Community 111 - "approval/page.tsx"
 Cohesion: 0.50
@@ -678,17 +682,13 @@ Nodes (4): formatIDR(), ItemRow, NewPOPage(), VendorQuote
 Cohesion: 0.70
 Nodes (4): fmt(), fmtDate(), pillClass(), SummaryPurchaseOrdersPage()
 
-### Community 126 - "ar-credit/page.tsx"
-Cohesion: 0.83
-Nodes (3): ARCreditPage(), fmt(), fmtDate()
+### Community 126 - "summary-purchase-returns/page.tsx"
+Cohesion: 0.70
+Nodes (4): fmt(), fmtDate(), pillClass(), SummaryPurchaseReturnsPage()
 
 ### Community 128 - "purchase-invoices/[...docNumber]/page.tsx"
 Cohesion: 0.60
 Nodes (4): formatIDR(), getStepIndex(), PurchaseInvoiceDetailPage(), workflowSteps
-
-### Community 129 - "tax-invoices/page.tsx"
-Cohesion: 0.83
-Nodes (3): fmt(), fmtDate(), TaxInvoicesPage()
 
 ### Community 130 - "warehouse/stock-opname/new/page.tsx"
 Cohesion: 0.50
@@ -696,7 +696,7 @@ Nodes (4): emptyRow(), NewStockOpnamePage(), OpnameRow, Sparepart
 
 ### Community 140 - "withAuth"
 Cohesion: 0.07
-Nodes (18): DELETE, PUT, DELETE, PATCH, GET, PUT, GET, PUT (+10 more)
+Nodes (17): GET, GET, PUT, GET, GET, PUT, GET, PUT (+9 more)
 
 ### Community 141 - "inspection-mappings/route.ts"
 Cohesion: 0.50
@@ -710,13 +710,9 @@ Nodes (3): ARChequePage(), fmt(), fmtDate()
 Cohesion: 0.50
 Nodes (3): GET, POST, userSelect
 
-### Community 145 - "summary-purchase-deliveries/page.tsx"
-Cohesion: 0.83
-Nodes (3): fmtDate(), pillClass(), SummaryPurchaseDeliveriesPage()
-
 ### Community 149 - "excel-utils.ts"
-Cohesion: 0.13
-Nodes (12): xlsx, APSubledgerPage(), fmt(), CsvColumn, downloadBlob(), ExportColumn, ExportFormat, ParseResult (+4 more)
+Cohesion: 0.15
+Nodes (10): ARSubledgerPage(), fmt(), CsvColumn, downloadBlob(), ExportColumn, ExportFormat, ParseResult, SheetData (+2 more)
 
 ### Community 157 - "ar-overdue/page.tsx"
 Cohesion: 0.83
@@ -751,23 +747,23 @@ Cohesion: 0.83
 Nodes (3): fmtDate(), fmtRp(), TransferDetailPage()
 
 ## Knowledge Gaps
-- **615 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+610 more)
+- **612 isolated node(s):** `extends`, `next/core-web-vitals`, `{ Client }`, `bcrypt`, `nextConfig` (+607 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **80 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **76 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `makeFilename()` connect `makeFilename` to `csv-utils.ts`, `tax-invoices/page.tsx`, `ar-cheque/page.tsx`, `summary-purchase-deliveries/page.tsx`, `coa/page.tsx`, `excel-utils.ts`, `ar-overdue/page.tsx`, `coa/[code]/page.tsx`, `ap-credit/page.tsx`, `ap-overdue/page.tsx`, `service-orders/page.tsx`, `ar-payments/page.tsx`, `finance/ap/page.tsx`, `aging-ar/page.tsx`, `journal/page.tsx`, `receipts/page.tsx`, `aging-ap/page.tsx`, `cash-flow/page.tsx`, `transfers/page.tsx`, `summary-purchase-orders/page.tsx`, `ar-credit/page.tsx`, `stock-workflow/stock-orders/page.tsx`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `package.json`, `next`, `next-auth`, `excel-utils.ts`, `@prisma/client`, `@radix-ui/react-slot`, `react-dom`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
-- **Why does `xlsx` connect `excel-utils.ts` to `csv-utils.ts`, `dependencies`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `csv-utils.ts`, `package.json`, `next`, `next-auth`, `@prisma/client`, `@radix-ui/react-slot`, `react-dom`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `xlsx` connect `csv-utils.ts` to `excel-utils.ts`, `dependencies`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `makeFilename()` connect `makeFilename` to `ap-subledger/page.tsx`, `csv-utils.ts`, `ar-cheque/page.tsx`, `coa/page.tsx`, `excel-utils.ts`, `ar-overdue/page.tsx`, `ap-cheque/page.tsx`, `ap-credit/page.tsx`, `ap-overdue/page.tsx`, `ap-payments/page.tsx`, `service-orders/page.tsx`, `ar-payments/page.tsx`, `finance/ap/page.tsx`, `finance/ar/page.tsx`, `journal/page.tsx`, `receipts/page.tsx`, `aging-ap/page.tsx`, `cash-flow/page.tsx`, `transfers/page.tsx`, `summary-purchase-orders/page.tsx`, `summary-purchase-returns/page.tsx`, `stock-workflow/stock-orders/page.tsx`?**
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **What connects `extends`, `next/core-web-vitals`, `{ Client }` to the rest of the system?**
-  _615 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _612 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `csv-utils.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.10815602836879433 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10459183673469388 - nodes in this community are weakly interconnected._
 - **Should `generate_reports.py` be split into smaller, more focused modules?**
   _Cohesion score 0.11282051282051282 - nodes in this community are weakly interconnected._
 - **Should `numbering.ts` be split into smaller, more focused modules?**
